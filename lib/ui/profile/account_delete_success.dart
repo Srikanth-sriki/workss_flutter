@@ -8,15 +8,14 @@ import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../main_screen/main_screen.dart';
 
-class LoginSuccess extends StatefulWidget {
-  const LoginSuccess({super.key});
+class AccountDeleteSuccess extends StatefulWidget {
+  const AccountDeleteSuccess({super.key});
 
   @override
-  State<LoginSuccess> createState() => _LoginSuccessState();
+  State<AccountDeleteSuccess> createState() => _AccountDeleteSuccessState();
 }
 
-class _LoginSuccessState extends State<LoginSuccess>
-    with SingleTickerProviderStateMixin {
+class _AccountDeleteSuccessState extends State<AccountDeleteSuccess> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -64,12 +63,11 @@ class _LoginSuccessState extends State<LoginSuccess>
                   width: SizeConfig.blockWidth * 80,
                   height: SizeConfig.blockWidth * 80,
                   decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(SizeConfig.screenWidth * 40),
+                    borderRadius: BorderRadius.circular(SizeConfig.screenWidth * 40),
                     color: COLORS.primaryOne.withOpacity(0.5),
                   ),
                   child: Image.asset(
-                    'assets/images/login/login_success.png',
+                    'assets/images/profile/account_delete.png',
                     width: SizeConfig.blockWidth * 100,
                     height: SizeConfig.blockHeight * 50,
                   ),
@@ -79,7 +77,7 @@ class _LoginSuccessState extends State<LoginSuccess>
               ScaleTransition(
                 scale: _scaleAnimation,
                 child: Text(
-                  'Congratulations!'.tr(),
+                  'Account Successfully Deleted'.tr(),
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 4.5,
@@ -92,11 +90,11 @@ class _LoginSuccessState extends State<LoginSuccess>
               ScaleTransition(
                 scale: _scaleAnimation,
                 child: Text(
-                  'Your account has been successfully \nCreated.'.tr(),
+                  "Your account has been permanently deleted.\nWe're sorry to see you go.".tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 4,
+                    fontSize: SizeConfig.blockWidth * 3.7,
                     fontWeight: FontWeight.w400,
                     fontFamily: "Poppins",
                   ),
@@ -105,16 +103,14 @@ class _LoginSuccessState extends State<LoginSuccess>
               SizedBox(height: SizeConfig.blockHeight * 4.5),
               const Spacer(),
               Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
                 child: customButton(
-                  text: 'Explore'.tr(),
+                  text: 'CREATE ACCOUNT'.tr(),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              const MainScreen()),
+                          builder: (BuildContext context) => const MainScreen()),
                     );
                   },
                   backgroundColor: COLORS.primary,

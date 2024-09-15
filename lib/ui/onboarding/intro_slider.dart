@@ -117,7 +117,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                     },
                     backgroundColor: COLORS.primary,
                     prefixIconBool: true,
-                    width: SizeConfig.blockWidth * 28,
+                    width: SizeConfig.blockWidth * 32,
                     height: SizeConfig.blockHeight * 7.5,
                     textColor: COLORS.white,
                     prefixIcon: Icons.arrow_forward_outlined,

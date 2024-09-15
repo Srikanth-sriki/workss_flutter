@@ -128,6 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _phoneController,
                   onChanged: _validatePhoneNumber,
                   errorMessage: _errorMessage.tr(),
+                  validator: (value){},
                   hasError: _hasError,
                   buttonVisibleChange: _buttonVisible),
               const Spacer(),
@@ -157,6 +158,7 @@ class PhoneNumberInput extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool buttonVisible;
   final ValueChanged<String> buttonVisibleChange;
+  final String? Function(String?)? validator;
 
   const PhoneNumberInput(
       {super.key,
@@ -165,7 +167,7 @@ class PhoneNumberInput extends StatelessWidget {
       this.errorMessage = '',
       this.hasError = false,
       this.buttonVisible = true,
-      required this.buttonVisibleChange});
+      required this.buttonVisibleChange, required this.validator});
 
   @override
   Widget build(BuildContext context) {

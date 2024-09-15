@@ -44,6 +44,9 @@ dependencies:
   multi_select_flutter: ^4.1.3
   easy_localization: ^3.0.7
   shared_preferences: ^2.3.2
+  touch_ripple_effect: ^2.5.1
+  modal_bottom_sheet: ^3.0.0
+  webview_flutter: ^4.9.0
 
 
 dev_dependencies:
@@ -85,8 +88,31 @@ flutter:
      - assets/images/bottom_tab/profile_select.png
      - assets/images/bottom_tab/reel.png
      - assets/images/bottom_tab/reel_select.png
+     - assets/images/bottom_tab/add_post.png
+     - assets/images/bottom_tab/add_post_select.png
      - assets/images/home/translation.png
      - assets/images/home/filter.png
+     - assets/images/home/home.png
+     - assets/images/home/gender.png
+     - assets/images/home/speak.png
+     - assets/images/home/work.png
+     - assets/images/profile/posted_work.png
+     - assets/images/profile/bookmark.png
+     - assets/images/profile/contact.png
+     - assets/images/profile/like.png
+     - assets/images/profile/question.png
+     - assets/images/profile/share.png
+     - assets/images/profile/settings.png
+     - assets/images/profile/logout.png
+     - assets/images/profile/account_delete.png
+     - assets/images/profile/logout_success.png
+     - assets/images/profile/faq.png
+     - assets/images/profile/prof.png
+     - assets/images/professions/cat1.png
+     - assets/images/professions/cat2.png
+     - assets/images/professions/cat3.png
+
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

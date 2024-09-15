@@ -23,17 +23,18 @@ class Language {
   }
 }
 
-class RegisterForm extends StatefulWidget {
+class EditProfileRegisterForm extends StatefulWidget {
   final String mobileNumber;
   final String userType;
-  const RegisterForm(
+  const EditProfileRegisterForm(
       {super.key, required this.mobileNumber, required this.userType});
 
   @override
-  State<RegisterForm> createState() => _RegisterFormState();
+  State<EditProfileRegisterForm> createState() =>
+      _EditProfileRegisterFormState();
 }
 
-class _RegisterFormState extends State<RegisterForm> {
+class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _enterName = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -94,11 +95,11 @@ class _RegisterFormState extends State<RegisterForm> {
         _selectedCity!.isNotEmpty &&
         _selectedProfession != null &&
         _selectedProfession!.isNotEmpty &&
-        experienceController.text.isNotEmpty &&
+        experienceController.text.isNotEmpty &&ageController.text.isNotEmpty &&
         chargesController.text.isNotEmpty &&
         _selectedGender != null &&
         bioController.text.isNotEmpty &&
-        pinCodeController.text.isNotEmpty && ageController.text.isNotEmpty &&
+        pinCodeController.text.isNotEmpty &&
         selectedLanguage != []) {
       setState(() {
         isSubmitButtonEnabled = true;
@@ -155,10 +156,10 @@ class _RegisterFormState extends State<RegisterForm> {
       },
       child: Scaffold(
         backgroundColor: COLORS.white,
-        appBar: customAppBar(
-          context: context,
-          onSkipPressed: () {},
-        ),
+        appBar: const CustomAppBar(
+            title: 'My Profile',
+            backgroundColor: COLORS.white,
+            titleColors: COLORS.neutralDark),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Container(
@@ -169,9 +170,8 @@ class _RegisterFormState extends State<RegisterForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTitle(),
                       _buildProfilePicture(),
-                      _buildTextField(
+                      buildTextField(
                           label: 'Name',
                           controller: _enterName,
                           hintText: "Enter your name".tr(),
@@ -189,7 +189,7 @@ class _RegisterFormState extends State<RegisterForm> {
                           },
                           title: 'name'.tr()),
                       _buildMobileNumber(),
-                      _buildTextField(
+                      buildTextField(
                           label: 'Email Address',
                           controller: _emailController,
                           hintText: "Enter your email address (Optional)".tr(),
@@ -561,7 +561,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       SizedBox(
                         height: SizeConfig.blockHeight * 2.5,
                       ),
-                      _buildBioTextField(
+                      buildBioTextField(
                           label: 'Bio'.tr(),
                           controller: bioController,
                           hintText: "Write about you and your work".tr(),
@@ -628,34 +628,6 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildTitle() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'create_account'.tr(),
-          style: TextStyle(
-            color: COLORS.neutralDark,
-            fontSize: SizeConfig.blockWidth * 4.25,
-            fontWeight: FontWeight.w500,
-            fontFamily: "Poppins",
-          ),
-        ),
-        SizedBox(height: SizeConfig.blockHeight * 0.5),
-        Text(
-          'reg_sub'.tr(),
-          style: TextStyle(
-            color: COLORS.neutralDarkOne,
-            fontSize: SizeConfig.blockWidth * 3.25,
-            fontWeight: FontWeight.w400,
-            fontFamily: "Poppins",
-          ),
-        ),
-        SizedBox(height: SizeConfig.blockHeight * 3),
-      ],
-    );
-  }
-
   Widget _buildProfilePicture() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -703,33 +675,6 @@ class _RegisterFormState extends State<RegisterForm> {
                 ],
               ),
         SizedBox(height: SizeConfig.blockHeight * 3),
-      ],
-    );
-  }
-
-  Widget _buildTextField(
-      {required String label,
-      required TextEditingController controller,
-      required String hintText,
-      required String? Function(String?) validator,
-      required String? Function(String?) onChanged,
-      required bool error,
-      required String title}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        registerText(text: title),
-        normalTextField(
-          hintText: hintText,
-          controller: controller,
-          inputType: TextInputType.text,
-          onChanged: onChanged,
-          validator: validator,
-          fontWeight: FontWeight.w400,
-          prefix: false,
-          errorMessage: '',
-          hasError: error,
-        ),
       ],
     );
   }
@@ -794,33 +739,6 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
         ),
         SizedBox(height: SizeConfig.blockHeight * 3),
-      ],
-    );
-  }
-
-  Widget _buildBioTextField(
-      {required String label,
-      required TextEditingController controller,
-      required String hintText,
-      required String? Function(String?) validator,
-      required String? Function(String?) onChanged,
-      required bool error,
-      required String title}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        registerText(text: title),
-        normalTextField(
-            hintText: hintText,
-            controller: controller,
-            inputType: TextInputType.text,
-            onChanged: onChanged,
-            validator: validator,
-            fontWeight: FontWeight.w400,
-            prefix: false,
-            errorMessage: '',
-            hasError: error,
-            maxLines: 8),
       ],
     );
   }
