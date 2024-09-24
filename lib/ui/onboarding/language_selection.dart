@@ -154,6 +154,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/local_constant.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/home/home.dart';
 import 'package:works_app/ui/main_screen/main_screen.dart';
@@ -210,6 +211,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       context.setLocale(selectedLocale!);
 
       if(widget.routeType == 'intro'){
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(LocalConstant.initialLanguage, true);
         Navigator.push(
           context,
           MaterialPageRoute(

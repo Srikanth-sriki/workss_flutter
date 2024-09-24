@@ -5,6 +5,7 @@ import 'package:works_app/ui/profile/component.dart';
 
 import '../../components/colors.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../home/component.dart';
 
 class InterestedWorkList extends StatefulWidget {
   const InterestedWorkList({super.key});
@@ -45,6 +46,7 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                 language: 'Kannada, Hindi, English',
                 languageImage: 'assets/images/home/speak.png',
                 onShowInterest: () {},
+                onCardClick: (){},
                 actionRows: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -54,16 +56,56 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                         onPressed: () {},
                         backgroundColor: COLORS.semanticTwo.withOpacity(0.4),
                         showIcon: true,
-                        width: SizeConfig.blockWidth * 62,
-                        height: SizeConfig.blockHeight * 7.5,
-                        textColor: COLORS.white,
+                        width: SizeConfig.blockWidth * 50,
+                        height: SizeConfig.blockHeight * 6.5,
+                        textColor: COLORS.semanticTwo,
                         iconColor: COLORS.semanticTwo,
                         icon: Icons.thumb_up_alt),
-                    IconAction(
-                      icon: Icons.share,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconActionCard(
+                          iconBool: false,
+                          imageUrl: Image.asset(
+                            'assets/images/home/phone.png',
+                            width: SizeConfig.blockWidth * 4.25,
+                            height: SizeConfig.blockHeight * 4.25,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        IconActionCard(
+                          iconBool: false,
+                          imageUrl: Image.asset(
+                            'assets/images/home/share.png',
+                            width: SizeConfig.blockWidth * 5.2,
+                            height: SizeConfig.blockHeight * 5.2,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                // actionRows: Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   crossAxisAlignment: CrossAxisAlignment.center,
+                //   children: [
+                //     customIconButton(
+                //         text: 'INTERESTED',
+                //         onPressed: () {},
+                //         backgroundColor: COLORS.semanticTwo.withOpacity(0.4),
+                //         showIcon: true,
+                //         width: SizeConfig.blockWidth * 62,
+                //         height: SizeConfig.blockHeight * 7.5,
+                //         textColor: COLORS.white,
+                //         iconColor: COLORS.semanticTwo,
+                //         icon: Icons.thumb_up_alt),
+                //     IconAction(
+                //       icon: Icons.share,
+                //     ),
+                //   ],
+                // ),
               )
             ],
           ),

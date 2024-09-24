@@ -1,7 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:works_app/components/local_constant.dart';
 import 'package:works_app/ui/onboarding/phone_number.dart';
+import '../../bloc/login/login_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -100,14 +104,17 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                   ],
                   customButton(
                     text: _currentIndex == 2 ? 'Login'.tr() : 'Next'.tr(),
-                    onPressed: () {
+                    onPressed: () async{
                       if (_currentIndex == 2) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  const LoginScreen()),
-                        );
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool(LocalConstant.intoChecked, true);
+                        Navigator.pop(context);
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => BlocProvider(
+                            create: (context) => LoginBloc(),
+                            child: const LoginScreen(),
+                          ),
+                        ));
                       } else {
                         _pageController.nextPage(
                           duration: const Duration(milliseconds: 400),

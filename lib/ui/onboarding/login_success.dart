@@ -110,6 +110,7 @@ class _LoginSuccessState extends State<LoginSuccess>
                 child: customButton(
                   text: 'Explore'.tr(),
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(

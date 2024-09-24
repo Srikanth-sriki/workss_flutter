@@ -160,7 +160,7 @@ Widget buildDropdown({
             fontWeight: FontWeight.w400,
             fontFamily: "Poppins",
             fontSize: SizeConfig.blockWidth * 3.2,
-            color: COLORS.neutralDark,
+            color: COLORS.neutralDarkOne,
           ),
         ),
         items: filteredItems

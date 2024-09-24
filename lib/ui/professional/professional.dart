@@ -270,7 +270,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                           'Categories'.tr(),
                           style: TextStyle(
                             color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 4,
+                            fontSize: SizeConfig.blockWidth * 3.8,
                             fontWeight: FontWeight.w400,
                             fontFamily: "Poppins",
                           ),
@@ -289,7 +289,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             'See All'.tr(),
                             style: TextStyle(
                               color: COLORS.accent,
-                              fontSize: SizeConfig.blockWidth * 4,
+                              fontSize: SizeConfig.blockWidth * 3.6,
                               fontWeight: FontWeight.w400,
                               fontFamily: "Poppins",
                             ),
@@ -366,7 +366,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                       'Professionals'.tr(),
                       style: TextStyle(
                         color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 4,
+                        fontSize: SizeConfig.blockWidth * 3.8,
                         fontWeight: FontWeight.w400,
                         fontFamily: "Poppins",
                       ),

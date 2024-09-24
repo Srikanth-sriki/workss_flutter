@@ -47,6 +47,14 @@ dependencies:
   touch_ripple_effect: ^2.5.1
   modal_bottom_sheet: ^3.0.0
   webview_flutter: ^4.9.0
+  google_maps_flutter: ^2.9.0
+  url_launcher: ^6.3.0
+  http: ^1.2.2
+  equatable: ^2.0.5
+  flutter_bloc: ^8.1.6
+  geolocator: ^13.0.1
+  uuid: ^4.5.0
+
 
 
 dev_dependencies:
@@ -111,6 +119,10 @@ flutter:
      - assets/images/professions/cat1.png
      - assets/images/professions/cat2.png
      - assets/images/professions/cat3.png
+     - assets/images/home/phone.png
+     - assets/images/home/share.png
+     - assets/images/login/upload.png
+     - assets/images/home/address-share.png
 
 
   #   - images/a_dot_ham.jpeg

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/ui/profile/component.dart';
 
 class ImagePickerComponent extends StatefulWidget {
   final Function(File) onImageSelected;
@@ -21,6 +22,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
 
   void _showPicker(context) {
     showModalBottomSheet(
+      backgroundColor: COLORS.white,
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
@@ -118,13 +120,22 @@ class ImagePickerModal extends StatelessWidget {
 
   void _showPicker(BuildContext context) {
     showModalBottomSheet(
+      backgroundColor: COLORS.white,
       context: context,
+      showDragHandle: true,
       builder: (BuildContext context) {
         return SafeArea(
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.photo_library),
+                dense: true,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 10),
+                leading: Icon(
+                  Icons.photo_library,
+                  color: COLORS.black,
+                  size: SizeConfig.blockWidth * 6,
+                ),
                 title: Text(
                   'Gallery'.tr(),
                   style: TextStyle(
@@ -144,7 +155,14 @@ class ImagePickerModal extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_camera),
+                dense: true,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 10),
+                leading: Icon(
+                  Icons.photo_camera,
+                  color: COLORS.black,
+                  size: SizeConfig.blockWidth * 6,
+                ),
                 title: Text(
                   'Camera'.tr(),
                   style: TextStyle(
@@ -188,6 +206,297 @@ class ImagePickerModal extends StatelessWidget {
           size: SizeConfig.blockWidth * 5.5,
         ),
       ),
+    );
+  }
+}
+
+class MultipleImagePickerComponent extends StatefulWidget {
+  final Function(List<File>) onImagesSelected;
+  final bool error;
+  final Function(int) removeImage;
+
+  const MultipleImagePickerComponent(
+      {super.key,
+      required this.onImagesSelected,
+      required this.error,
+      required this.removeImage});
+
+  @override
+  _MultipleImagePickerComponentState createState() =>
+      _MultipleImagePickerComponentState();
+}
+
+class _MultipleImagePickerComponentState
+    extends State<MultipleImagePickerComponent> {
+  final ImagePicker _picker = ImagePicker();
+  final List<File> _selectedImages = [];
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+      backgroundColor: COLORS.white,
+      context: context,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 10),
+                leading: Icon(
+                  Icons.photo_library,
+                  color: COLORS.black,
+                  size: SizeConfig.blockWidth * 6,
+                ),
+                title: Text(
+                  'Gallery'.tr(),
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                    fontSize: SizeConfig.blockWidth * 4.1,
+                  ),
+                ),
+                onTap: () async {
+                  XFile? image =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null && _selectedImages.length < 3) {
+                    setState(() {
+                      _selectedImages.add(File(image.path));
+                    });
+                    widget.onImagesSelected(_selectedImages);
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 10),
+                leading: Icon(
+                  Icons.photo_camera,
+                  color: COLORS.black,
+                  size: SizeConfig.blockWidth * 6,
+                ),
+                title: Text('Camera'.tr(),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                      fontSize: SizeConfig.blockWidth * 4.1,
+                    )),
+                onTap: () async {
+                  XFile? photo =
+                      await _picker.pickImage(source: ImageSource.camera);
+                  if (photo != null && _selectedImages.length < 3) {
+                    setState(() {
+                      _selectedImages.add(File(photo.path));
+                    });
+                    widget.onImagesSelected(_selectedImages);
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // void _removeImage(int index) {
+  //   setState(() {
+  //     _selectedImages.removeAt(index);
+  //     print(_selectedImages);
+  //     widget.onImagesSelected(_selectedImages);
+  //   });
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        registerText(text: 'Photos'),
+        SizedBox(
+          height: SizeConfig.blockHeight * 0.5,
+        ),
+        _selectedImages.isEmpty
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      _showPicker(context);
+                    },
+                    child: Container(
+                      width: SizeConfig.blockWidth * 100,
+                      height: SizeConfig.blockHeight * 30,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                            color: widget.error
+                                ? COLORS.semantic
+                                : COLORS.neutralDarkTwo,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(SizeConfig.blockWidth * 3))),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Upload your work images\n(max 2 picture)',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                              fontSize: SizeConfig.blockWidth * 3.2,
+                            ),
+                          ),
+                          SizedBox(
+                            height: SizeConfig.blockHeight * 1.5,
+                          ),
+                          Container(
+                            width: SizeConfig.blockWidth * 45,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: SizeConfig.blockWidth * 4,
+                                vertical: SizeConfig.blockHeight * 2),
+                            decoration: BoxDecoration(
+                              color: COLORS.primaryOne.withOpacity(0.15),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(SizeConfig.blockWidth * 3),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/login/upload.png',
+                                  width: SizeConfig.blockWidth * 4,
+                                  height: SizeConfig.blockWidth * 4,
+                                  color: COLORS.primary,
+                                ),
+                                SizedBox(width: SizeConfig.blockWidth),
+                                Text(
+                                  'Upload Picture',
+                                  style: TextStyle(
+                                    color: COLORS.primary,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                    fontSize: SizeConfig.blockWidth * 3.3,
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (widget.error == true) ...[
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: SizeConfig.blockHeight * 0.5,
+                          horizontal: SizeConfig.blockWidth * 2),
+                      child: Text(
+                        'Please upload picture',
+                        style: TextStyle(
+                          color: COLORS.semantic,
+                          fontWeight: FontWeight.w300,
+                          fontFamily: "Poppins",
+                          fontSize: SizeConfig.blockWidth * 3.4,
+                        ),
+                      ),
+                    )
+                  ]
+                ],
+              )
+            : Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: COLORS.neutralDarkTwo,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(SizeConfig.blockWidth * 3))),
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 4,
+                    vertical: SizeConfig.blockHeight * 2.5),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  itemCount: _selectedImages.length < 2
+                      ? _selectedImages.length + 1
+                      : 2,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == _selectedImages.length &&
+                        _selectedImages.length < 2) {
+                      return GestureDetector(
+                        onTap: () => _showPicker(context),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: COLORS.primaryOne.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3),
+                          ),
+                          child: Icon(Icons.add_box_outlined,
+                              size: SizeConfig.blockHeight * 4,
+                              color: COLORS.black),
+                        ),
+                      );
+                    } else {
+                      return Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3),
+                                image: DecorationImage(
+                                    image: FileImage(
+                                      _selectedImages[index],
+                                    ),
+                                    fit: BoxFit.fill)),
+                          ),
+                          Positioned(
+                            right: 0,
+                            child: GestureDetector(
+                              // onTap: () => _removeImage(index),
+                              onTap: () => widget.removeImage(index),
+                              child: Container(
+                                  padding:
+                                      EdgeInsets.all(SizeConfig.blockWidth),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(
+                                            SizeConfig.blockWidth * 3),
+                                        bottomLeft: Radius.circular(
+                                            SizeConfig.blockWidth * 3),
+                                      ),
+                                      color: COLORS.neutralDarkTwo),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: COLORS.black,
+                                    size: SizeConfig.blockWidth * 5,
+                                  )),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                ),
+              ),
+      ],
     );
   }
 }

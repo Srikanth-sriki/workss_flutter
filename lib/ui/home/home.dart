@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/ui/home/component.dart';
+import 'package:works_app/ui/home/work_details.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(
-                height: SizeConfig.blockHeight * 3.5,
+                height: SizeConfig.blockHeight * 2
               ),
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -146,12 +147,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         showMaterialModalBottomSheet(
                           enableDrag: true,
                           expand: false,
-                          isDismissible: true,backgroundColor: COLORS.white,
-
+                          isDismissible: true,
+                          backgroundColor: COLORS.white,
                           context: context,
                           shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
+                                BorderRadius.vertical(top: Radius.circular(SizeConfig.blockWidth*6)),
                           ),
                           builder: (context) => SearchFilterBottomSheet(),
                         );
@@ -202,18 +203,79 @@ class _HomeScreenState extends State<HomeScreen> {
                       textAlign: TextAlign.end,
                     ),
                     WorkCard(
-                        title: 'UI/UX Designer',
-                        location: 'Siddhartha Layout, Mysuru ',
-                        timeAgo: '2d ago',
-                        jobType: 'Home',
-                        experience: 'Freshers',
-                        experienceImage: 'assets/images/home/work.png',
-                        gender: 'Male',
-                        genderImage: 'assets/images/home/gender.png',
-                        jobTypeImage: 'assets/images/home/home.png',
-                        language: 'Kannada, Hindi, English',
-                        languageImage: 'assets/images/home/speak.png',
-                        onShowInterest: () {})
+                      title: 'UI/UX Designer',
+                      location: 'Siddhartha Layout, Mysuru ',
+                      timeAgo: '2d ago',
+                      jobType: 'Home',
+                      experience: 'Freshers',
+                      experienceImage: 'assets/images/home/work.png',
+                      gender: 'Male',
+                      genderImage: 'assets/images/home/gender.png',
+                      jobTypeImage: 'assets/images/home/home.png',
+                      language: 'Kannada, Hindi, English',
+                      languageImage: 'assets/images/home/speak.png',
+                      onShowInterest: () {},
+                      onCardClick: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>  WorkDetailsScreen()
+                          ),
+                        );
+                      },
+                      actionRows: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          customIconButton(
+                              text: 'SHOW INTEREST',
+                              onPressed: () {},
+                              backgroundColor: COLORS.primary,
+                              showIcon: false,
+                              width: SizeConfig.blockWidth * 55,
+                              height: SizeConfig.blockHeight * 6.5,
+                              image: true,
+                              imageChild: Padding(
+                                padding: EdgeInsets.only(
+                                    right: SizeConfig.blockWidth),
+                                child: Image.asset(
+                                  'assets/images/profile/like.png',
+                                  width: SizeConfig.blockWidth *
+                                      5, // Adjust size as needed
+                                  height: SizeConfig.blockHeight * 5,
+                                  fit: BoxFit.contain, color: COLORS.white,
+                                ),
+                              ),
+                              textColor: COLORS.white,
+                              icon: Icons.thumb_up_outlined),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              IconActionCard(
+                                iconBool: false,
+                                imageUrl: Image.asset(
+                                  'assets/images/home/phone.png',
+                                  width: SizeConfig.blockWidth * 4.25,
+                                  height: SizeConfig.blockHeight * 4.25,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              IconActionCard(
+                                iconBool: false,
+                                imageUrl: Image.asset(
+                                  'assets/images/home/share.png',
+                                  width: SizeConfig.blockWidth * 5.2,
+                                  height: SizeConfig.blockHeight * 5.2,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
                   ],
                 ),
               ),

@@ -115,6 +115,7 @@ Widget normalTextField(
     bool hasError = false,
     Widget? suffixIcon,
     bool autofocus = false,
+    void Function()? onTap,
     bool suffix = false}) {
   return TextFormField(
     controller: controller,
@@ -135,6 +136,7 @@ Widget normalTextField(
     cursorColor: COLORS.black,
     cursorErrorColor: COLORS.black,
     maxLines: maxLines,
+    onTap: onTap,
     decoration: textFieldDecoration(
         hint: hintText,
         prefix: prefix,
@@ -165,35 +167,35 @@ InputDecoration textFieldDecoration(
     focusedBorder: OutlineInputBorder(
       borderSide: BorderSide(
         color: hasError ? COLORS.semantic : COLORS.neutralDark,
-        width: 1.5,
+        width: 1,
       ),
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
     ),
     enabledBorder: OutlineInputBorder(
       borderSide: BorderSide(
         color: hasError ? COLORS.semantic : COLORS.neutralDarkTwo,
-        width: 1.5,
+        width: 1,
       ),
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
     ),
     errorBorder: OutlineInputBorder(
       borderSide: BorderSide(
         color: hasError ? COLORS.semantic : COLORS.neutralDarkTwo,
-        width: 1.5,
+        width: 1,
       ),
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderSide: BorderSide(
         color: hasError ? COLORS.semantic : COLORS.neutralDarkTwo,
-        width: 1.5,
+        width: 1,
       ),
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
     ),
     errorText: errorMessage,
     hintText: hint,
     hintStyle: TextStyle(
-      color: COLORS.neutralDark,
+      color: COLORS.neutralDarkOne,
       fontWeight: FontWeight.w400,
       fontFamily: "Poppins",
       fontSize: SizeConfig.blockWidth * 3.2,
@@ -270,6 +272,14 @@ InputDecoration textFieldDecoration(
 //   );
 // }
 
+Widget loadingIndicator() {
+  return SizedBox(
+    height: SizeConfig.blockHeight * 2.8,
+    width: SizeConfig.blockHeight * 2.8,
+    child: CircularProgressIndicator(strokeWidth: SizeConfig.blockWidth*0.5, color: COLORS.white),
+  );
+}
+
 Widget customButton({
   required String text,
   IconData? icon,
@@ -281,34 +291,35 @@ Widget customButton({
   required bool showIcon,
   bool? prefixIconBool = false,
   IconData? prefixIcon,
+  bool loading = false,
 }) {
   return width == null
       ? IntrinsicWidth(
           child: _buildButtonContent(
-            text: text,
-            icon: icon,
-            onPressed: onPressed,
-            height: height,
-            backgroundColor: backgroundColor,
-            textColor: textColor,
-            showIcon: showIcon,
-            prefixIconBool: prefixIconBool,
-            prefixIcon: prefixIcon,
-          ),
+              text: text,
+              icon: icon,
+              onPressed: onPressed,
+              height: height,
+              backgroundColor: backgroundColor,
+              textColor: textColor,
+              showIcon: showIcon,
+              prefixIconBool: prefixIconBool,
+              prefixIcon: prefixIcon,
+              loading: loading),
         )
       : SizedBox(
           width: width,
           child: _buildButtonContent(
-            text: text,
-            icon: icon,
-            onPressed: onPressed,
-            height: height,
-            backgroundColor: backgroundColor,
-            textColor: textColor,
-            showIcon: showIcon,
-            prefixIconBool: prefixIconBool,
-            prefixIcon: prefixIcon,
-          ),
+              text: text,
+              icon: icon,
+              onPressed: onPressed,
+              height: height,
+              backgroundColor: backgroundColor,
+              textColor: textColor,
+              showIcon: showIcon,
+              prefixIconBool: prefixIconBool,
+              prefixIcon: prefixIcon,
+              loading: loading),
         );
 }
 
@@ -321,60 +332,67 @@ Widget _buildButtonContent({
   required Color? textColor,
   required bool showIcon,
   bool? prefixIconBool = false,
+  bool loading = false,
   IconData? prefixIcon,
 }) {
   return SizedBox(
-    // height: height ?? SizeConfig.blockHeight * 6.5,
+    height: height ?? SizeConfig.blockHeight * 6.5,
     child: TouchRippleEffect(
-      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
       rippleColor: Colors.white60,
       child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+        onTap: loading ? null : onPressed, // Disable button when loading
+        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor ?? COLORS.primary,
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
           ),
           padding: EdgeInsets.symmetric(
             vertical: SizeConfig.blockHeight * 2,
             horizontal: SizeConfig.blockWidth * 4,
           ),
-          child: Row(
-            mainAxisAlignment: (prefixIconBool == false && showIcon == false)
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (showIcon && icon != null) ...[
-                Icon(
-                  icon,
-                  color: textColor ?? COLORS.white,
-                  size: SizeConfig.blockWidth * 5,
+          child: loading
+              ? Center(
+                  // Center the loading indicator
+                  child: loadingIndicator(),
+                )
+              : Row(
+                  mainAxisAlignment:
+                      (prefixIconBool == false && showIcon == false)
+                          ? MainAxisAlignment.center
+                          : MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (showIcon && icon != null) ...[
+                      Icon(
+                        icon,
+                        color: textColor ?? COLORS.white,
+                        size: SizeConfig.blockWidth * 5,
+                      ),
+                    ],
+                    Flexible(
+                      child: Text(
+                        text.tr(),
+                        style: TextStyle(
+                          color: textColor ?? COLORS.white,
+                          fontSize: SizeConfig.blockWidth * 3.8,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                        ),
+                        overflow: TextOverflow.clip,
+                        softWrap: true,
+                      ),
+                    ),
+                    if (prefixIconBool! && prefixIcon != null) ...[
+                      Icon(
+                        prefixIcon,
+                        color: textColor ?? COLORS.white,
+                        size: SizeConfig.blockWidth * 5,
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-              Flexible(
-                child: Text(
-                  text.tr(),
-                  style: TextStyle(
-                    color: textColor ?? COLORS.white,
-                    fontSize: SizeConfig.blockWidth * 3.8,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",
-                  ),
-                  overflow: TextOverflow.clip,
-                  softWrap: true,
-                ),
-              ),
-              if (prefixIconBool! && prefixIcon != null) ...[
-                Icon(
-                  prefixIcon,
-                  color: textColor ?? COLORS.white,
-                  size: SizeConfig.blockWidth * 5,
-                ),
-              ],
-            ],
-          ),
         ),
       ),
     ),
@@ -392,20 +410,22 @@ Widget customIconButton(
     Color? iconColor,
     required bool showIcon,
     bool? prefixIconBool = false,
+    bool? image = false,
+    Widget? imageChild,
     IconData? prefixIcon}) {
   return SizedBox(
     width: width ?? double.infinity,
     height: height ?? SizeConfig.blockHeight * 6.5,
     child: TouchRippleEffect(
-      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
       rippleColor: Colors.white60,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
         child: Container(
           decoration: BoxDecoration(
             color: backgroundColor ?? COLORS.primary,
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
           ),
           padding: EdgeInsets.symmetric(
             vertical: SizeConfig.blockHeight * 2,
@@ -423,11 +443,12 @@ Widget customIconButton(
                 ),
                 SizedBox(width: SizeConfig.blockWidth * 2),
               ],
+              if (image == true) ...[imageChild!],
               Text(
                 text.tr(),
                 style: TextStyle(
                   color: textColor ?? COLORS.white,
-                  fontSize: SizeConfig.blockWidth * 3.8,
+                  fontSize: SizeConfig.blockWidth * 3.5,
                   fontWeight: FontWeight.w500,
                   fontFamily: "Poppins",
                 ),
@@ -704,8 +725,8 @@ Widget buildProfessionalCard(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: SizeConfig.blockWidth * 12,
-                  height: SizeConfig.blockWidth * 12,
+                  width: SizeConfig.blockWidth * 10,
+                  height: SizeConfig.blockWidth * 10,
                   decoration: BoxDecoration(
                       border: Border.all(
                           color: COLORS.primary,
@@ -722,7 +743,7 @@ Widget buildProfessionalCard(
                       name,
                       style: TextStyle(
                         color: COLORS.neutralDark,
-                        fontSize: SizeConfig.blockWidth * 4,
+                        fontSize: SizeConfig.blockWidth * 3.8,
                         fontWeight: FontWeight.w500,
                         fontFamily: "Poppins",
                       ),
@@ -734,14 +755,14 @@ Widget buildProfessionalCard(
                         Icon(
                           Icons.location_on_rounded,
                           color: COLORS.accent,
-                          size: SizeConfig.blockWidth * 4,
+                          size: SizeConfig.blockWidth * 3.5,
                         ),
-                        SizedBox(width: SizeConfig.blockWidth * 1.5),
+                        SizedBox(width: SizeConfig.blockWidth * 1),
                         Text(
                           location,
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
-                            fontSize: SizeConfig.blockWidth * 3.3,
+                            fontSize: SizeConfig.blockWidth * 3,
                             fontWeight: FontWeight.w400,
                             fontFamily: "Poppins",
                           ),
@@ -789,7 +810,7 @@ Widget buildProfessionalCard(
                       'Per Session',
                       style: TextStyle(
                         color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 2.8,
+                        fontSize: SizeConfig.blockWidth * 2.5,
                         fontWeight: FontWeight.w400,
                         fontFamily: "Poppins",
                       ),
@@ -798,31 +819,43 @@ Widget buildProfessionalCard(
                 ),
               ],
             ),
-            SizedBox(
-              height: SizeConfig.blockHeight * 1.5,
-            ),
+            SizedBox(height: SizeConfig.blockHeight),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 customButton(
-                  width: SizeConfig.blockWidth * 50,
+                  width: SizeConfig.blockWidth * 55,
                   text: contacted ? 'CONTACTED' : "CONTACT",
                   onPressed: () {},
                   backgroundColor:
                       contacted ? COLORS.semanticTwo : COLORS.primary,
                   showIcon: false,
-                  height: SizeConfig.blockHeight * 8,
                   textColor: COLORS.white,
                 ),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    IconAction(
-                      icon: Icons.bookmark_border,
+                    IconActionCard(
+                      iconBool: false,
+                      imageUrl: Image.asset(
+                        'assets/images/profile/bookmark.png',
+                        width: SizeConfig.blockWidth * 4.25,
+                        height: SizeConfig.blockHeight * 4.25,
+                        fit: BoxFit.contain,
+                        color: COLORS.neutralDarkOne,
+                      ),
                     ),
-                    IconAction(icon: Icons.share_outlined),
+                    IconActionCard(
+                      iconBool: false,
+                      imageUrl: Image.asset(
+                        'assets/images/home/share.png',
+                        width: SizeConfig.blockWidth * 5.2,
+                        height: SizeConfig.blockHeight * 5.2,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ],
                 )
               ],
@@ -912,4 +945,136 @@ Widget buildDynamicRadioSelection({
       ),
     ],
   );
+}
+
+class IconActionCard extends StatelessWidget {
+  final IconData? icon;
+  final bool? iconBool;
+  final Widget? imageUrl;
+  final double? width;
+  final double? height;
+  final void Function()? onTap;
+
+  const IconActionCard(
+      {super.key,
+      this.icon,
+      this.iconBool = true,
+      this.imageUrl,
+      this.width,
+      this.height,
+      this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: width ?? SizeConfig.blockWidth * 11,
+        height: height ?? SizeConfig.blockWidth * 11,
+        margin: EdgeInsets.only(left: SizeConfig.blockWidth * 2),
+        // padding: EdgeInsets.symmetric(
+        //   vertical: SizeConfig.blockWidth * 1.5,
+        //   horizontal: SizeConfig.blockWidth * 3,
+        // ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+          color: COLORS.primaryOne.withOpacity(0.3),
+        ),
+        child: iconBool == true
+            ? Icon(
+                icon,
+                size: SizeConfig.blockWidth * 5.5,
+              )
+            : Center(
+                child: imageUrl,
+              ),
+      ),
+    );
+  }
+}
+
+Widget showInterestButton({
+  required final void Function()? onTapIconOne,
+  required final void Function()? onTapIconTwo,
+  required VoidCallback onShowInterest,
+}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      customIconButton(
+          text: 'SHOW INTEREST',
+          onPressed: onShowInterest,
+          backgroundColor: COLORS.primary,
+          showIcon: false,
+          width: SizeConfig.blockWidth * 55,
+          height: SizeConfig.blockHeight * 6.5,
+          image: true,
+          imageChild: Padding(
+            padding: EdgeInsets.only(right: SizeConfig.blockWidth),
+            child: Image.asset(
+              'assets/images/profile/like.png',
+              width: SizeConfig.blockWidth * 5, // Adjust size as needed
+              height: SizeConfig.blockHeight * 5,
+              fit: BoxFit.contain, color: COLORS.white,
+            ),
+          ),
+          textColor: COLORS.white,
+          icon: Icons.thumb_up_outlined),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IconActionCard(
+            onTap: onTapIconOne,
+            iconBool: false,
+            imageUrl: Image.asset(
+              'assets/images/home/phone.png',
+              width: SizeConfig.blockWidth * 4.25,
+              height: SizeConfig.blockHeight * 4.25,
+              fit: BoxFit.contain,
+            ),
+          ),
+          IconActionCard(
+            onTap: onTapIconTwo,
+            iconBool: false,
+            imageUrl: Image.asset(
+              'assets/images/home/share.png',
+              width: SizeConfig.blockWidth * 5.2,
+              height: SizeConfig.blockHeight * 5.2,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+void showCustomSnackBar({
+  required BuildContext context,
+  required String message,
+  Color backgroundColor = COLORS.semantic,
+  Duration duration = const Duration(seconds: 3),
+  SnackBarAction? action,
+}) {
+  final snackBar = SnackBar(
+    content: Text(
+      message,
+      style: TextStyle(
+        color: COLORS.neutralDark,
+        fontSize: SizeConfig.blockWidth * 3.6,
+        fontWeight: FontWeight.w500,
+        fontFamily: "Poppins",
+      ),
+    ),
+    backgroundColor: backgroundColor,
+    padding: EdgeInsets.symmetric(
+        horizontal: SizeConfig.blockWidth * 8,
+        vertical: SizeConfig.blockHeight * 2.5),
+    duration: duration,
+    action: action,
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

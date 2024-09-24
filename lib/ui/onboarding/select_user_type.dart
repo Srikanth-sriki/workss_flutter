@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/main.dart';
 import 'package:works_app/ui/onboarding/register_form.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -8,9 +11,8 @@ import 'package:easy_localization/easy_localization.dart';
 
 
 class SelectUserType extends StatefulWidget {
-  final String mobileNumber;
 
-  const SelectUserType({super.key, required this.mobileNumber});
+  const SelectUserType({super.key, });
 
   @override
   State<SelectUserType> createState() => _SelectUserTypeState();
@@ -30,12 +32,21 @@ class _SelectUserTypeState extends State<SelectUserType> {
 
   void _buttonHandle() {
     if(selectedUserType != ''){
+
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (BuildContext context) =>  RegisterForm(mobileNumber: widget.mobileNumber ,userType:selectedUserType)
-        ),
+            builder: (context) =>  MultiBlocProvider(providers: [
+              BlocProvider(create: (context) => InitialRegisterBloc(),),
+
+            ], child:  RegisterForm(mobileNumber: Config.phoneNumber ,userType:selectedUserType))),
       );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //       builder: (BuildContext context) =>  RegisterForm(mobileNumber: widget.mobileNumber ,userType:selectedUserType)
+      //   ),
+      // );
     }
 
   }

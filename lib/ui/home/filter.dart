@@ -42,7 +42,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                 'Search & Filter',
                 style: TextStyle(
                   color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 4.8,
+                  fontSize: SizeConfig.blockWidth * 4.5,
                   fontWeight: FontWeight.w500,
                   fontFamily: "Poppins",
                 ),
@@ -58,7 +58,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             ],
           ),
           SizedBox(
-            height: SizeConfig.blockHeight * 2,
+            height: SizeConfig.blockHeight,
           ),
           buildDropdown(
             label: 'profession_type'.tr(),
@@ -117,7 +117,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 customButton(
-                  text: 'back'.tr(),
+                  text: 'CLEAR'.tr(),
                   onPressed: () {
                     setState(() {
                       selectedProfession = null;
@@ -133,7 +133,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                   textColor: COLORS.black,
                 ),
                 customButton(
-                  text: 'submit_button'.tr(),
+                  text: 'FILTER'.tr(),
                   onPressed: () {
                     Navigator.of(context).pop();
                     // if (_formKey.currentState!.validate()) {

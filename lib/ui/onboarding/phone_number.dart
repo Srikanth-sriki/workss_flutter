@@ -1,13 +1,18 @@
-// login_screen.dart
+
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/onboarding/otp_screen.dart';
+
+import '../../bloc/login/login_bloc.dart';
+import '../../bloc/login_otp/login_otp_bloc.dart';
+import '../../components/config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,10 +26,13 @@ class _LoginScreenState extends State<LoginScreen> {
   String _errorMessage = '';
   bool _hasError = false;
   bool buttonVisible = true;
+  late LoginBloc loginBloc;
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
+    loginBloc = BlocProvider.of<LoginBloc>(context);
     Future<void>.delayed(const Duration(milliseconds: 300), _autoFetchNumber);
   }
 
@@ -74,13 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void _onGetOtpPressed() {
     _validatePhoneNumber(_phoneController.text);
     if (!_hasError) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) => OtpScreen(
-                  mobileNumber: _phoneController.text,
-                )),
-      );
+      Config.phoneNumber = _phoneController.text;
+
+      loginBloc.add(LoginWithPhoneNumber(
+          countryCode: '91', phoneNumber: _phoneController.text));
     }
   }
 
@@ -99,51 +104,81 @@ class _LoginScreenState extends State<LoginScreen> {
           context: context,
           onSkipPressed: () {},
         ),
-        body: Padding(
-          padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'mobile_number'.tr(),
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 4.25,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: "Poppins",
-                ),
+        body: BlocListener<LoginBloc, LoginState>(
+          listener: (context, state) {
+            print("The State is : $state");
+            if (state is LoginLoading) {
+              loading = true;
+            } else if (state is LoginFailed) {
+              loading = false;
+              showCustomSnackBar(
+                context: context,
+                message: state.message,
+              );
+            } else if (state is LoginSuccess) {
+              print("LoginSuccess");
+              loading = false;
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BlocProvider(
+                          create: (context) => LoginOtpBloc(),
+                          child: OtpScreen(
+                            mobileNumber: _phoneController.text,
+                            otpToken: state.otpToken,
+                          ))));
+            }
+            setState(() {});
+          },
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'mobile_number'.tr(),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 4.25,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.blockHeight * 0.5),
+                  Text(
+                    'mobile_number_sub'.tr(),
+                    style: TextStyle(
+                      color: COLORS.neutralDarkOne,
+                      fontSize: SizeConfig.blockWidth * 3.25,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                  SizedBox(height: SizeConfig.blockHeight * 4.5),
+                  PhoneNumberInput(
+                      controller: _phoneController,
+                      onChanged: _validatePhoneNumber,
+                      errorMessage: _errorMessage.tr(),
+                      validator: (value) {},
+                      hasError: _hasError,
+                      buttonVisibleChange: _buttonVisible),
+                  const Spacer(),
+                  customButton(
+                    text: 'mobile_number_button'.tr(),
+                    onPressed: _onGetOtpPressed,
+                    backgroundColor: buttonVisible
+                        ? COLORS.primary.withOpacity(0.4)
+                        : COLORS.primary,
+                    showIcon: false,
+                    width: SizeConfig.blockWidth * 100,
+                    height: SizeConfig.blockHeight * 8,
+                    textColor: COLORS.white,
+                    loading: loading
+                  ),
+                ],
               ),
-              SizedBox(height: SizeConfig.blockHeight * 0.5),
-              Text(
-                'mobile_number_sub'.tr(),
-                style: TextStyle(
-                  color: COLORS.neutralDarkOne,
-                  fontSize: SizeConfig.blockWidth * 3.25,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
-                ),
-              ),
-              SizedBox(height: SizeConfig.blockHeight * 4.5),
-              PhoneNumberInput(
-                  controller: _phoneController,
-                  onChanged: _validatePhoneNumber,
-                  errorMessage: _errorMessage.tr(),
-                  validator: (value){},
-                  hasError: _hasError,
-                  buttonVisibleChange: _buttonVisible),
-              const Spacer(),
-              customButton(
-                text: 'mobile_number_button'.tr(),
-                onPressed: _onGetOtpPressed,
-                backgroundColor: buttonVisible
-                    ? COLORS.primary.withOpacity(0.4)
-                    : COLORS.primary,
-                showIcon: false,
-                width: SizeConfig.blockWidth * 100,
-                height: SizeConfig.blockHeight * 8,
-                textColor: COLORS.white,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -167,7 +202,8 @@ class PhoneNumberInput extends StatelessWidget {
       this.errorMessage = '',
       this.hasError = false,
       this.buttonVisible = true,
-      required this.buttonVisibleChange, required this.validator});
+      required this.buttonVisibleChange,
+      required this.validator});
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +260,8 @@ class PhoneNumberInput extends StatelessWidget {
             ),
             errorMessage: errorMessage,
             hasError: hasError,
-            autofocus: true),
+            // autofocus: true
+            ),
       ],
     );
   }
