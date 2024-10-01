@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:works_app/ui/onboarding/register_form.dart';
 import '../components/config.dart';
 import 'package:http_parser/http_parser.dart';
 import '../helper/custom_log.dart';
