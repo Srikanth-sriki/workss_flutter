@@ -537,7 +537,7 @@ class TextFieldWithDropdown extends StatelessWidget {
 
 Widget bottomTabIcon({required String icon}) {
   return Image.asset(icon,
-      width: SizeConfig.blockWidth * 6, height: SizeConfig.blockWidth * 6);
+      width: SizeConfig.blockWidth * 5.5, height: SizeConfig.blockWidth * 5.5);
 }
 
 Widget buildGenderSelection(
@@ -555,7 +555,7 @@ Widget buildGenderSelection(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Radio<String>(
-                value: 'Male',
+                value: 'male',
                 groupValue: groupValue,
                 onChanged: onChanged,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -577,7 +577,7 @@ Widget buildGenderSelection(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Radio<String>(
-                value: 'Female',
+                value: 'female',
                 groupValue: groupValue,
                 onChanged: onChanged,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

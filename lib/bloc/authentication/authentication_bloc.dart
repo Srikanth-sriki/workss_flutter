@@ -52,7 +52,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
         Config.phoneNumber = phoneNumber;
         Config.name = name;
         Config.profileCompleted = profileCompleted;
-
+print(token);
 
 
         if(token.isNotEmpty){

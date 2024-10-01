@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:works_app/global_helper/helper_function.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -42,7 +43,7 @@ class WorkCard extends StatelessWidget {
       onTap: onCardClick,
       child: Container(
         width: SizeConfig.blockWidth * 100,
-        margin: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 1.5),
+        // margin: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 1.5),
         padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
@@ -54,13 +55,16 @@ class WorkCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontSize: SizeConfig.blockWidth * 3.7,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",
+                Padding(
+                  padding:  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*0.5),
+                  child: Text(
+                    capitalizeEachWord(title),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.7,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
                   ),
                 ),
                 Container(
@@ -93,7 +97,7 @@ class WorkCard extends StatelessWidget {
                 ),
                 SizedBox(width: SizeConfig.blockWidth * 1.5),
                 Text(
-                  location,
+                  capitalizeFirstLetter(location),
                   style: TextStyle(
                     color: COLORS.neutralDarkOne,
                     fontSize: SizeConfig.blockWidth * 3.25,
@@ -127,15 +131,17 @@ Widget registerText({required String text, required String image}) {
         vertical: SizeConfig.blockHeight * 0.2,
         horizontal: SizeConfig.blockWidth),
     child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Image.asset(
           image,
-          width: SizeConfig.blockWidth * 3.8,
-          height: SizeConfig.blockWidth * 3.8,
+          width: SizeConfig.blockWidth * 3.4,
+          height: SizeConfig.blockWidth * 3.4,
         ),
         SizedBox(width: SizeConfig.blockWidth * 2),
         Text(
-          text,
+          capitalizeEachWord(text),
           style: TextStyle(
             color: COLORS.neutralDarkOne,
             fontSize: SizeConfig.blockWidth * 3.4,

@@ -18,7 +18,7 @@ class SearchFilterBottomSheet extends StatefulWidget {
 class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
   String? selectedProfession;
   String? selectedCity;
-  String selectedGender = 'Male';
+  String selectedGender = '';
 
   @override
   Widget build(BuildContext context) {
@@ -132,20 +132,36 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                   height: SizeConfig.blockHeight * 8,
                   textColor: COLORS.black,
                 ),
+                // customButton(
+                //   text: 'FILTER'.tr(),
+                //   onPressed: () {
+                //     Navigator.of(context).pop();
+                //     // if (_formKey.currentState!.validate()) {
+                //     //   _submitButton();
+                //     // }
+                //   },
+                //   backgroundColor: COLORS.primary,
+                //   showIcon: false,
+                //   width: SizeConfig.blockWidth * 42,
+                //   height: SizeConfig.blockHeight * 8,
+                //   textColor: COLORS.white,
+                // )
                 customButton(
                   text: 'FILTER'.tr(),
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    // if (_formKey.currentState!.validate()) {
-                    //   _submitButton();
-                    // }
+                    Navigator.of(context).pop({
+                      'selectedProfession': selectedProfession??"",
+                      'selectedCity': selectedCity??"",
+                      'selectedGender': selectedGender??"",
+                    });
                   },
                   backgroundColor: COLORS.primary,
                   showIcon: false,
                   width: SizeConfig.blockWidth * 42,
                   height: SizeConfig.blockHeight * 8,
                   textColor: COLORS.white,
-                )
+                ),
+
               ],
             ),
           ),

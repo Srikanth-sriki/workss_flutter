@@ -95,6 +95,7 @@ Widget buildDropdown({
   required List<String> items,
   required void Function(String?) onChanged,
   required String? Function(String?) validator,
+  String?value,
 }) {
   final TextEditingController textEditingController = TextEditingController();
   List<String> filteredItems = items;
@@ -104,6 +105,7 @@ Widget buildDropdown({
     children: [
       registerText(text: label),
       DropdownButtonFormField2<String>(
+        value: value,
         isDense: true,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(

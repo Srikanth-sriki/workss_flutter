@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/main_screen/main_screen.dart';
 import 'package:works_app/ui/onboarding/intro_slider.dart';
@@ -12,13 +13,12 @@ import 'package:works_app/ui/onboarding/splash_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'bloc/authentication/authentication_bloc.dart';
+import 'bloc/home/home_bloc.dart';
 import 'bloc/login/login_bloc.dart';
 import 'bloc/register_account/initial_register_bloc.dart';
 import 'components/global_handle.dart';
 
-
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
           child: child!,
         );
       },
-      home:SplashScreen(),
+      home: SplashScreen(),
       theme: ThemeData(
         textTheme: Theme.of(context).textTheme.apply(fontSizeFactor: 1.0),
       ),
@@ -84,7 +84,8 @@ class _AuthenticationState extends State<Authentication> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    GlobalBlocClass.authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
+    GlobalBlocClass.authenticationBloc =
+        BlocProvider.of<AuthenticationBloc>(context);
     GlobalBlocClass.authenticationContext = context;
     authenticationBloc = BlocProvider.of<AuthenticationBloc>(context);
   }
@@ -101,8 +102,10 @@ class _AuthenticationState extends State<Authentication> {
           }
           if (state is AuthenticationLoginRequired) {
             print("auth phone ------------");
-            return  MultiBlocProvider(providers: [
-              BlocProvider(create: (context) => LoginBloc(),),
+            return MultiBlocProvider(providers: [
+              BlocProvider(
+                create: (context) => LoginBloc(),
+              ),
             ], child: const LoginScreen());
           }
           if (state is AuthenticationProfileRequired) {
@@ -111,24 +114,33 @@ class _AuthenticationState extends State<Authentication> {
           }
           if (state is AuthenticationHomeScreen) {
             print("auth home ");
-            // return MultiBlocProvider(providers: [
-            //   BlocProvider(create: (context) => HomeBloc()..add(const FetchHomeEvent())),
-            //   BlocProvider(create: (context) => BookMarkBloc()..add(FetchBookMarkEvent(pageNumber: 0))),
-            //   BlocProvider(create: (context) => CartListBloc()..add( const FetchCartList())),
-            //   BlocProvider(create: (context) => AddCartBloc(),),
-            //   BlocProvider(create: (context) => SearchBloc(),),
-            //   BlocProvider(create: (context) => ProfileBloc()..add(const FetchProfileEvent())),
-            //   BlocProvider(create: (context) => AuthenticationBloc(),),
-            //   BlocProvider(create: (context) => FetchSiteDetailsBloc()..add(const FetchSiteDetailEvent())),
-            //   BlocProvider(create: (context) => TermsAndConditionBloc()..add(const FetchTermsAndConditionEvent())),
-            // ], child: const UserDashboard());
-
-            return MainScreen();
+            return MultiBlocProvider(providers: [
+              BlocProvider(
+                  create: (context) => HomeBloc()
+                    ..add(FetchHomeScreenEvent(
+                        page: 1,
+                        pageSize: 20,
+                        profession: '',
+                        keyWord: '',
+                        city: '',
+                        gender: ''))),
+              //   BlocProvider(create: (context) => BookMarkBloc()..add(FetchBookMarkEvent(pageNumber: 0))),
+              //   BlocProvider(create: (context) => CartListBloc()..add( const FetchCartList())),
+              //   BlocProvider(create: (context) => AddCartBloc(),),
+              //   BlocProvider(create: (context) => SearchBloc(),),
+              BlocProvider(
+                  create: (context) =>
+                      ProfileBloc()..add(const FetchProfileEvent())),
+              //   BlocProvider(create: (context) => AuthenticationBloc(),),
+              //   BlocProvider(create: (context) => FetchSiteDetailsBloc()..add(const FetchSiteDetailEvent())),
+              //   BlocProvider(create: (context) => TermsAndConditionBloc()..add(const FetchTermsAndConditionEvent())),
+            ], child: const MainScreen());
           }
-          print('log mobile');
-          return  MultiBlocProvider(providers: [
-           BlocProvider(create: (context) => LoginBloc(),),
-         ], child: const LoginScreen());
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+              create: (context) => LoginBloc(),
+            ),
+          ], child: const LoginScreen());
         });
   }
 }

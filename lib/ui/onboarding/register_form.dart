@@ -148,7 +148,7 @@ class _RegisterFormState extends State<RegisterForm> {
           profile_pic: profilePicture,
           email: _emailController.text,
           user_type:
-              widget.userType == 'jobs' ? 'professional' : 'professionals',
+              widget.userType == 'jobs' ? 'professional' : 'non_professional',
           profession_type: _selectedProfession ?? '',
           pincode: pinCodeController.text,
           city: _selectedCity ?? '',
@@ -173,25 +173,49 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
+  // void _onImagesSelected(List<File> images) {
+  //   setState(() {
+  //     _selectedImages = images;
+  //     if (_selectedImages.length > 1) {
+  //       initialRegisterBloc
+  //           .add(UploadMultipleImageEvent(imagePath: _selectedImages[1]));
+  //     } else {
+  //       initialRegisterBloc
+  //           .add(UploadMultipleImageEvent(imagePath: _selectedImages[0]));
+  //     }
+  //   });
+  // }
+  //
+  // void _removeImage(int index) {
+  //   setState(() {
+  //     _selectedImages.removeAt(index);
+  //     print(_selectedImages);
+  //     workImages.removeAt(index);
+  //     print(workImages);
+  //   });
+  // }
   void _onImagesSelected(List<File> images) {
     setState(() {
       _selectedImages = images;
-      if (_selectedImages.length > 1) {
-        initialRegisterBloc
-            .add(UploadMultipleImageEvent(imagePath: _selectedImages[1]));
-      } else {
-        initialRegisterBloc
-            .add(UploadMultipleImageEvent(imagePath: _selectedImages[0]));
+      if (_selectedImages.isNotEmpty) {
+        initialRegisterBloc.add(
+          UploadMultipleImageEvent(
+              imagePath: _selectedImages.length > 1
+                  ? _selectedImages[1]
+                  : _selectedImages[0]),
+        );
       }
     });
   }
 
   void _removeImage(int index) {
     setState(() {
-      _selectedImages.removeAt(index);
-      print(_selectedImages);
-      workImages.removeAt(index);
-      print(workImages);
+      if (index >= 0 && index < _selectedImages.length) {
+        _selectedImages.removeAt(index);
+        if (index < workImages.length) {
+          workImages.removeAt(index);
+        }
+      }
     });
   }
 
