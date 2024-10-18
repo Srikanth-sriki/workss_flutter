@@ -110,6 +110,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     }
     return await Geolocator.getCurrentPosition();
   }
+
   String? formatChargeType(String? chargeType) {
     switch (chargeType!.toLowerCase()) {
       case 'hours':
@@ -122,7 +123,6 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         return null;
     }
   }
-
 
   @override
   void initState() {
@@ -137,24 +137,43 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     profilePic = widget.profileFetch.profilePic!;
     _enterName.text = widget.profileFetch.name!;
     _emailController.text = widget.profileFetch.email!;
-    experienceController.text = widget.profileFetch.experiencedYears!;
-    chargesController.text = widget.profileFetch.charges!;
-    bioController.text = widget.profileFetch.bio!;
     pinCodeController.text = widget.profileFetch.pincode.toString()!;
-    ageController.text = widget.profileFetch.age.toString()!;
     _selectedCity = widget.profileFetch.city!;
-    _selectedProfession = widget.profileFetch.professionType!;
-    _selectedGender = widget.profileFetch.gender!;
     profilePicture = widget.profileFetch.profilePic!;
     workImages = widget.profileFetch.workImages!;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      List<DropdownItem<Language>> item = items;
-      controller.setItems(item);
-      controller.selectWhere((item) =>
-          widget.profileFetch.knownLanguages!.contains(item.value.name));
-    });
-    selectedLanguage= convertLanguages(widget.profileFetch.knownLanguages!);
-    selectedCharge = formatChargeType(widget.profileFetch.chargeType!);
+    bioController.text =
+        widget.profileFetch.bio!.isEmpty ? "" : widget.profileFetch.bio!;
+    if (widget.profileFetch.userType == 'professional') {
+      experienceController.text = widget.profileFetch.userType == 'professional'
+          ? widget.profileFetch.experiencedYears!
+          : '';
+      chargesController.text = widget.profileFetch.userType == 'professional'
+          ? widget.profileFetch.charges!
+          : "";
+
+      ageController.text = widget.profileFetch.userType == 'professional'
+          ? widget.profileFetch.age.toString()!
+          : '';
+      _selectedProfession = widget.profileFetch.userType == 'professional'
+          ? widget.profileFetch.professionType!
+          : '';
+      _selectedGender = widget.profileFetch.userType == 'professional'
+          ? widget.profileFetch.gender!
+          : '';
+      selectedLanguage = widget.profileFetch.userType == 'professional'
+          ? convertLanguages(widget.profileFetch.knownLanguages!)
+          : [];
+      selectedCharge = widget.profileFetch.userType == 'professional'
+          ? formatChargeType(widget.profileFetch.chargeType!)
+          : '';
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        List<DropdownItem<Language>> item = items;
+        controller.setItems(item);
+        controller.selectWhere((item) =>
+            widget.profileFetch.knownLanguages!.contains(item.value.name));
+      });
+    }
   }
 
   List<Language> convertLanguages(List<String> knownLanguages) {
@@ -165,8 +184,6 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
       );
     });
   }
-
-
 
   void fetchCurrentLocation() async {
     setState(() {
@@ -182,15 +199,15 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     });
   }
 
-  List<DropdownItem<Language>> items = [
+  var items = [
     DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
-    DropdownItem(label: 'Spanish', value: Language(name: 'Spanish', id: 2)),
-    DropdownItem(label: 'French', value: Language(name: 'French', id: 3)),
-    DropdownItem(label: 'German', value: Language(name: 'German', id: 4)),
-    DropdownItem(label: 'Chinese', value: Language(name: 'Chinese', id: 5)),
-    DropdownItem(label: 'Japanese', value: Language(name: 'Japanese', id: 6)),
-    DropdownItem(label: 'Korean', value: Language(name: 'Korean', id: 7)),
-    DropdownItem(label: 'Hindi', value: Language(name: 'Hindi', id: 8)),
+    DropdownItem(label: 'Kannada', value: Language(name: 'Kannada', id: 2)),
+    DropdownItem(label: 'Hindi', value: Language(name: 'Hindi', id: 3)),
+    DropdownItem(label: 'Tamil', value: Language(name: 'Tamil', id: 4)),
+    DropdownItem(label: 'Telugu', value: Language(name: 'Telugu', id: 5)),
+    DropdownItem(label: 'Gujarati', value: Language(name: 'Gujarati', id: 6)),
+    DropdownItem(label: 'Malayalam', value: Language(name: 'Malayalam', id: 7)),
+    DropdownItem(label: 'Marathi', value: Language(name: 'Marathi', id: 8)),
   ];
 
   List<DropdownItem<Language>> convertLanguagesToDropdownItems(
@@ -233,7 +250,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         bio: bioController.text,
         experienced_years: experienceController.text ?? "",
         charges: chargesController.text,
-        charge_type:selectedCharge?.toLowerCase() ?? '',
+        charge_type: selectedCharge?.toLowerCase() ?? '',
         userLongitude: longitude!,
         userLatitude: longitude!,
       ));
@@ -258,9 +275,9 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     setState(() {
       if (index >= 0 && index < _selectedImages.length) {
         _selectedImages.removeAt(index);
-        if (index < workImages.length) {
-          workImages.removeAt(index);
-        }
+      }
+      if (index >= 0 && index < workImages.length) {
+        workImages.removeAt(index);
       }
     });
   }
@@ -682,15 +699,19 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             enabled: true,
                             searchEnabled: false,
                             closeOnBackButton: true,
+                            dropdownDecoration: DropdownDecoration(
+                                maxHeight: SizeConfig.blockHeight * 30,
+                                elevation: SizeConfig.blockWidth * 5,
+                                marginTop: SizeConfig.blockHeight,
+                                backgroundColor: COLORS.white),
                             chipDecoration: ChipDecoration(
-                                backgroundColor:
-                                    COLORS.primary.withOpacity(0.1),
+                                backgroundColor: COLORS.primary.withOpacity(0.05),
                                 wrap: true,
                                 labelStyle: TextStyle(
                                     color: COLORS.primary,
                                     fontWeight: FontWeight.w500,
                                     fontFamily: "Poppins",
-                                    fontSize: SizeConfig.blockWidth * 3.5),
+                                    fontSize: SizeConfig.blockWidth * 3.25),
                                 runSpacing: 8,
                                 spacing: 10,
                                 borderRadius: BorderRadius.circular(
@@ -698,9 +719,16 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                 deleteIcon: Icon(
                                   Icons.clear,
                                   color: COLORS.black,
-                                  size: SizeConfig.blockWidth * 4.5,
+                                  size: SizeConfig.blockWidth * 4,
                                 )),
                             fieldDecoration: FieldDecoration(
+                              animateSuffixIcon: true,
+                              padding: EdgeInsets.only(
+                                top: SizeConfig.blockHeight * 2.2,
+                                bottom: SizeConfig.blockHeight * 2.2,
+                                left: SizeConfig.blockWidth * 4,
+                                right: SizeConfig.blockWidth * 3,
+                              ),
                               suffixIcon: Icon(
                                 Icons.keyboard_arrow_down_outlined,
                                 color: COLORS.accent,
@@ -708,7 +736,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               ),
                               hintText: 'Select Languages'.tr(),
                               hintStyle: TextStyle(
-                                color: COLORS.neutralDark,
+                                color: COLORS.neutralDarkOne,
                                 fontWeight: FontWeight.w400,
                                 fontFamily: "Poppins",
                                 fontSize: SizeConfig.blockWidth * 3.2,
@@ -716,31 +744,34 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               backgroundColor: COLORS.white,
                               showClearIcon: true,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 4),
                                 borderSide: const BorderSide(
                                     color: COLORS.neutralDarkTwo),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 4),
                                 borderSide: const BorderSide(
                                   color: COLORS.neutralDarkTwo,
                                 ),
                               ),
                             ),
-                            dropdownDecoration: DropdownDecoration(
-                                maxHeight: SizeConfig.blockHeight * 50,
-                                elevation: SizeConfig.blockWidth * 5),
                             dropdownItemDecoration: DropdownItemDecoration(
+                              backgroundColor: COLORS.white,
+                              textColor: COLORS.neutralDark,
                               selectedIcon: Icon(
                                 Icons.check,
                                 color: COLORS.accent,
                                 size: SizeConfig.blockWidth * 5,
                               ),
+                              selectedTextColor: COLORS.neutralDark,
+                              disabledTextColor: COLORS.neutralDark,
                               disabledIcon:
-                                  Icon(Icons.lock, color: Colors.grey.shade300),
+                              Icon(Icons.lock, color: Colors.grey.shade300),
                             ),
                             validator: (value) {
-                              if ( selectedLanguage.isEmpty) {
+                              if (selectedLanguage.isEmpty) {
                                 return 'Please select a language'.tr();
                               }
                               return null;
@@ -808,18 +839,18 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                 textColor: COLORS.black,
               ),
               customButton(
-                text: 'submit_button'.tr(),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _submitButton();
-                  }
-                },
-                backgroundColor: COLORS.primary,
-                showIcon: false,
-                width: SizeConfig.blockWidth * 42,
-                height: SizeConfig.blockHeight * 8,
-                textColor: COLORS.white,loading: loading
-              )
+                  text: 'submit_button'.tr(),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _submitButton();
+                    }
+                  },
+                  backgroundColor: COLORS.primary,
+                  showIcon: false,
+                  width: SizeConfig.blockWidth * 42,
+                  height: SizeConfig.blockHeight * 8,
+                  textColor: COLORS.white,
+                  loading: loading)
             ],
           ),
         ),
@@ -895,7 +926,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: COLORS.primary,
-                    width: SizeConfig.blockWidth * 0.5,
+                    width: SizeConfig.blockWidth * 0.25,
                   ),
                   image: DecorationImage(
                     image: NetworkImage(profilePic),

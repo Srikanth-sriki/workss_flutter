@@ -17,9 +17,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<FetchHomeScreenEvent>((event, emit) async {
       await mapHomeScreenEvent(event, emit);
     });
-    on<SaveInterestedWork>((event, emit) async {
-      await mapInterestedPropertyEvent(event, emit);
-    });
+    // on<SaveInterestedWork>((event, emit) async {
+    //   await mapInterestedPropertyEvent(event, emit);
+    // });
   }
 
   Future<void> mapHomeScreenEvent(
@@ -69,28 +69,4 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  Future<void> mapInterestedPropertyEvent(
-      SaveInterestedWork event, Emitter<HomeState> emit) async {
-    try {
-      emit(const WorkInterestedLoading());
-      var response = await homeDao.saveInterested(
-          workID: event.workID, contact: event.contact);
-      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
-      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
-        String message = jsonDecoded["message"];
-        event.onSuccess();
-        emit(WorkInterestedSuccess(message: message));
-      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
-        String message = jsonDecoded["message"];
-        event.onError();
-        emit(WorkInterestedFailed(message: message));
-      } else {
-        String message = jsonDecoded["message"];
-        event.onError();
-        emit(WorkInterestedFailed(message: message));
-      }
-    } catch (error) {
-      emit(FetchHomeScreenFailed(message: "Something went wrong"));
-    }
-  }
 }

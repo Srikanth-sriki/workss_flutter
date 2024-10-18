@@ -1,18 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:works_app/models/faq_model.dart';
+import 'package:works_app/models/fetch_posted_view.dart';
 import 'package:works_app/models/fetch_posted_work.dart';
+import 'package:works_app/models/setting_fetch_model.dart';
 
 import '../../components/config.dart';
 import '../../components/local_constant.dart';
 import '../../dao/profile_dao.dart';
 import '../../helper/custom_log.dart';
 import '../../models/fetch_profile_model.dart';
+import '../../models/professionals_list_model.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -36,13 +41,38 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<EditProfileAccount>((event, emit) async {
       await mapEditRegisterAccountEvent(event, emit);
     });
+    on<FetchPostViewEvent>((event, emit) async {
+      await mapFetchPostedViewWorkEvent(event, emit);
+    });
+    on<DeleteAccount>((event, emit) async {
+      await mapAccountDeleteEvent(event, emit);
+    });
+    on<NotificationSettingEvent>((event, emit) async {
+      await mapNotificationSettingEvent(event, emit);
+    });
+
+    on<FetchFaqEvent>((event, emit) async {
+      await mapFetchFaqEvent(event, emit);
+    });
+
+    on<ContactUsEvent>((event, emit) async {
+      await mapContactUsEvent(event, emit);
+    });
+
+    on<FetchSettingEvent>((event, emit) async {
+      await mapFetchSettingEvent(event, emit);
+    });
+
+    on<FetchSavedProfessionalEvent>((event, emit) async {
+      await mapFetchSavedProfessionalsEvent(event, emit);
+    });
 
   }
+
   Future<void> mapFetchProfileEvent(
       FetchProfileEvent event, Emitter<ProfileState> emit) async {
     try {
       emit(const ProfileLoading());
-
       var response = await profileDao.fetchProfile();
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
@@ -178,11 +208,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-
   Future<void> mapEditRegisterAccountEvent(
       EditProfileAccount event, Emitter<ProfileState> emit) async {
     try {
-
       emit(const ProfileLoading());
       var response = await profileDao.profileAccountEdit(
           name: event.name,
@@ -226,6 +254,184 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } catch (error) {
       customLog("The error of register account is : $error");
       emit(EditProfileFailed(message: "Something Went Wrong"));
+    }
+  }
+
+  Future<void> mapFetchPostedViewWorkEvent(
+      FetchPostViewEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const PostedWorkViewLoading());
+      var response = await profileDao.fetchPostedView(workId: event.workId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        ViewFetchPostedWork viewFetchPostedWork;
+        viewFetchPostedWork = ViewFetchPostedWork.fromJson(jsonDecoded["data"]);
+        emit(FetchPostedViewWorkSuccess(
+            viewFetchPostedWork: viewFetchPostedWork));
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(FetchPostedViewWorkFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(FetchPostedViewWorkFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapAccountDeleteEvent(
+      DeleteAccount event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const PostedWorkViewLoading());
+      var response = await profileDao.accountDelete(reason: event.reason);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(DeleteAccountSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(DeleteAccountFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(DeleteAccountFailed(message: message));
+      }
+    } catch (error) {
+      emit(DeleteAccountFailed(message: "Something went wrong"));
+    }
+  }
+
+  Future<void> mapNotificationSettingEvent(
+      NotificationSettingEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const NotificationSettingLoading());
+      var response = await profileDao.notificationSetting(
+          workPostedInCity: event.workPostedInCity,
+          workViewedIntrestShowed: event.workViewedIntrestShowed,
+          friendRequest: event.friendRequest,
+          newClipsFromFriends: event.newClipsFromFriends,
+          newFriendSuggestions: event.newFriendSuggestions,
+          msgRecevied: event.msgRecevied,
+          cmtOrLikeOnYourPost: event.cmtOrLikeOnYourPost,
+          groupAlert: event.groupAlert);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(NotificationSettingSuccess(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(NotificationSettingFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(NotificationSettingFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapFetchSettingEvent(
+      FetchSettingEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const ProfileLoading());
+      var response = await profileDao.fetchSetting();
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        SettingFetchModelList settingFetchModelList;
+        settingFetchModelList = SettingFetchModelList.fromJson(jsonDecoded["data"]);
+        emit(NotificationFetchSettingSuccess(settingFetchModelList: settingFetchModelList));
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(NotificationFetchSettingFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(NotificationFetchSettingFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapFetchFaqEvent(
+      FetchFaqEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const PostedWorkViewLoading());
+      var response = await profileDao.fetchFaq();
+      customLog(response);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (jsonDecoded['status'] == true) {
+          // Parse the list of FAQs from the "data" field
+          List<FaqModelList> faqList =
+              faqModelListFromJson(jsonDecoded['data']);
+          emit(FetchFaqSuccess(faqList: faqList));
+        } else {
+          String message = jsonDecoded["message"];
+          emit(FetchFaqFailed(message: message));
+        }
+      } else {
+        String message = jsonDecoded["message"];
+        emit(FetchFaqFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is: $error");
+      emit(FetchFaqFailed(message: "Something went wrong"));
+    }
+  }
+
+  Future<void> mapContactUsEvent(
+      ContactUsEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const PostedWorkViewLoading());
+      var response = await profileDao.contactUs(
+          name: event.name,
+          email: event.email,
+          mobile: event.mobile,
+          message: event.message);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(ContactUsSuccess(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(ContactUsFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(ContactUsFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapFetchSavedProfessionalsEvent(
+      FetchSavedProfessionalEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const ProfileLoading());
+      var response = await profileDao.fetchSavedProfessional();
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        List<ProfessionalsPostedWork> professionalsPostedWork = [];
+        for (var i in jsonDecoded["data"]) {
+          professionalsPostedWork.add(ProfessionalsPostedWork.fromJson(i));
+        }
+        emit(FetchSavedProfessionalSuccess(professionalsPostedWork: professionalsPostedWork));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(FetchSavedProfessionalFailed(message: message));
+      } else {
+        emit(FetchSavedProfessionalFailed(message: '"Something Went wrong"'));
+      }
+    } catch (error) {
+      customLog("The error of resend otp is : $error");
+      emit(FetchSavedProfessionalFailed(message: "Something Went wrong"));
     }
   }
 }

@@ -54,6 +54,19 @@ dependencies:
   flutter_bloc: ^8.1.6
   geolocator: ^13.0.1
   uuid: ^4.5.0
+  share_plus: ^10.0.2
+  permission_handler: ^11.3.1
+  flutter_image_compress: ^2.3.0
+  shimmer: ^3.0.0
+  lottie: ^3.1.3
+  firebase_crashlytics: ^4.1.3
+  firebase_analytics: ^11.3.3
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.3
+  get_it: ^8.0.0
+  flutter_local_notifications: ^17.2.3
+  overlay_support: ^2.1.0
+  package_info_plus: ^8.0.3
 
 
 
@@ -98,12 +111,16 @@ flutter:
      - assets/images/bottom_tab/reel_select.png
      - assets/images/bottom_tab/add_post.png
      - assets/images/bottom_tab/add_post_select.png
+     - assets/images/bottom_tab/prop.png
+     - assets/images/bottom_tab/prop_select.png
+     - assets/images/bottom_tab/work.png
+     - assets/images/bottom_tab/work_select.png
      - assets/images/home/translation.png
      - assets/images/home/filter.png
      - assets/images/home/home.png
      - assets/images/home/gender.png
      - assets/images/home/speak.png
-     - assets/images/home/work.png
+     - assets/images/home/work_select.png
      - assets/images/profile/posted_work.png
      - assets/images/profile/bookmark.png
      - assets/images/profile/contact.png
@@ -123,6 +140,12 @@ flutter:
      - assets/images/home/share.png
      - assets/images/login/upload.png
      - assets/images/home/address-share.png
+     - assets/images/home/post_success.png
+     - assets/images/profile/edit.png
+     - assets/images/profile/delete.png
+     - assets/images/home/like.png
+     - assets/images/professions/bookmarked.png
+     - assets/images/lottie/insight_check.json
 
 
   #   - images/a_dot_ham.jpeg

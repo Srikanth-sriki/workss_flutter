@@ -5,6 +5,8 @@ import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:works_app/ui/profile/logout_success.dart';
 
+import '../../../bloc/authentication/authentication_bloc.dart';
+import '../../../components/global_handle.dart';
 import '../../../global_helper/reuse_widget.dart';
 
 class LogoutBottomSheet extends StatefulWidget {
@@ -77,10 +79,12 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
                     // if (_formKey.currentState!.validate()) {
                     //   _submitButton();
                     // }
+                    GlobalBlocClass.authenticationBloc?.add(const AuthenticationLogoutEvent());
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (BuildContext context) => LogoutSuccess()),
+                          builder: (BuildContext context) => const LogoutSuccess()),
                     );
                   },
                   backgroundColor: COLORS.semantic,

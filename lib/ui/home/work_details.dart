@@ -143,7 +143,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                   textColor: COLORS.neutralDark),
               registerTextCard(
                   text: 'Fresher',
-                  image: 'assets/images/home/work.png',
+                  image: 'assets/images/home/work_select.png',
                   color: COLORS.primary,
                   textColor: COLORS.neutralDark),
               registerTextCard(
@@ -327,7 +327,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                 timeAgo: '2d ago',
                 jobType: 'Home',
                 experience: 'Freshers',
-                experienceImage: 'assets/images/home/work.png',
+                experienceImage: 'assets/images/home/work_select.png',
                 gender: 'Male',
                 genderImage: 'assets/images/home/gender.png',
                 jobTypeImage: 'assets/images/home/home.png',

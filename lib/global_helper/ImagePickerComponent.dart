@@ -41,8 +41,8 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                       fontFamily: "Poppins",
                     )),
                 onTap: () async {
-                  XFile? image =
-                      await _picker.pickImage(source: ImageSource.gallery);
+                  XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                  print(image);
                   if (image != null) {
                     widget.onImageSelected(File(image.path));
                   }
@@ -560,16 +560,33 @@ class _MultipleImagePickerComponentState
                     fontSize: SizeConfig.blockWidth * 4.1,
                   ),
                 ),
+                // onTap: () async {
+                //   XFile? image =
+                //       await _picker.pickImage(source: ImageSource.gallery);
+                //   if (image != null && _displayImages.length < 3) {
+                //     setState(() {
+                //       _displayImages.add(image.path);
+                //     });
+                //     _updateSelectedImages();
+                //   }
+                //   Navigator.of(context).pop();
+                // },
                 onTap: () async {
-                  XFile? image =
-                      await _picker.pickImage(source: ImageSource.gallery);
-                  if (image != null && _displayImages.length < 3) {
-                    setState(() {
-                      _displayImages.add(image.path);
-                    });
-                    _updateSelectedImages();
+                  try {
+                    XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                    print(image!.path!);
+                    if (image != null && image.path.isNotEmpty && _displayImages.length < 3) {
+                      setState(() {
+                        _displayImages.add(image.path);
+                      });
+                      _updateSelectedImages();
+                    } else {
+                      print('Invalid image path or selection canceled');
+                    }
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print('Error picking image: $e');
                   }
-                  Navigator.of(context).pop();
                 },
               ),
               ListTile(
@@ -590,16 +607,34 @@ class _MultipleImagePickerComponentState
                     fontSize: SizeConfig.blockWidth * 4.1,
                   ),
                 ),
+                // onTap: () async {
+                //   XFile? photo =
+                //       await _picker.pickImage(source: ImageSource.camera);
+                //   if (photo != null && _displayImages.length < 3) {
+                //     setState(() {
+                //       _displayImages.add(photo.path);
+                //     });
+                //     _updateSelectedImages();
+                //   }
+                //   Navigator.of(context).pop();
+                // },
+
                 onTap: () async {
-                  XFile? photo =
-                      await _picker.pickImage(source: ImageSource.camera);
-                  if (photo != null && _displayImages.length < 3) {
-                    setState(() {
-                      _displayImages.add(photo.path);
-                    });
-                    _updateSelectedImages();
+                  try {
+                    XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+                    print(photo!.path!);
+                    if (photo != null && photo.path.isNotEmpty && _displayImages.length < 3) {
+                      setState(() {
+                        _displayImages.add(photo.path);
+                      });
+                      _updateSelectedImages();
+                    } else {
+                      print('Invalid image path or selection canceled');
+                    }
+                    Navigator.of(context).pop();
+                  } catch (e) {
+                    print('Error picking image: $e');
                   }
-                  Navigator.of(context).pop();
                 },
               ),
             ],
@@ -669,7 +704,7 @@ class _MultipleImagePickerComponentState
       },
       child: Container(
         width: SizeConfig.blockWidth * 100,
-        height: SizeConfig.blockHeight * 30,
+        height: SizeConfig.blockHeight * 26,
         decoration: BoxDecoration(
           border: Border.all(
             color: widget.error ? COLORS.semantic : COLORS.neutralDarkTwo,
@@ -690,7 +725,7 @@ class _MultipleImagePickerComponentState
                 color: COLORS.neutralDark,
                 fontWeight: FontWeight.w400,
                 fontFamily: "Poppins",
-                fontSize: SizeConfig.blockWidth * 3.2,
+                fontSize: SizeConfig.blockWidth * 3,
               ),
             ),
             SizedBox(height: SizeConfig.blockHeight * 1.5),
@@ -703,14 +738,14 @@ class _MultipleImagePickerComponentState
 
   Widget _buildUploadButton() {
     return Container(
-      width: SizeConfig.blockWidth * 45,
+      width: SizeConfig.blockWidth * 40,
       padding: EdgeInsets.symmetric(
           horizontal: SizeConfig.blockWidth * 4,
-          vertical: SizeConfig.blockHeight * 2),
+          vertical: SizeConfig.blockHeight*1.6),
       decoration: BoxDecoration(
         color: COLORS.primaryOne.withOpacity(0.15),
         borderRadius: BorderRadius.all(
-          Radius.circular(SizeConfig.blockWidth * 3),
+          Radius.circular(SizeConfig.blockWidth * 2.8),
         ),
       ),
       child: Row(
@@ -768,11 +803,17 @@ class _MultipleImagePickerComponentState
               child: Container(
                 decoration: BoxDecoration(
                   color: COLORS.primaryOne.withOpacity(0.5),
-                  borderRadius:
-                      BorderRadius.circular(SizeConfig.blockWidth * 3),
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
                 ),
-                child: Icon(Icons.add_box_outlined,
-                    size: SizeConfig.blockHeight * 4, color: COLORS.black),
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/bottom_tab/add_post.png',
+                    width: SizeConfig.blockWidth * 6,
+                    height: SizeConfig.blockWidth * 6,
+                    color: COLORS.black,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
             );
           } else {

@@ -46,9 +46,7 @@ class InitialRegisterFailed extends InitialRegisterState {
 
 class InitialRegisterSuccess extends InitialRegisterState {
   String message;
-
   InitialRegisterSuccess({required this.message});
-
   @override
   List<Object> get props => [];
 }

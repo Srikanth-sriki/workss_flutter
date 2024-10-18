@@ -12,6 +12,8 @@ class Config{
   static String introUploaded = "";
   static String name = "";
   static String userType = "";
+  static String fcmToken = "";
+
 
 
 

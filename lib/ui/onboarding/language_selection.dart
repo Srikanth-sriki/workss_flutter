@@ -220,11 +220,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         );
       }
       else{
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const MainScreen()),
-        );
+        Navigator.pushNamed(context, '/main_screen');
       }
 
     }

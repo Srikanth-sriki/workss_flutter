@@ -58,6 +58,7 @@ class _SelectUserTypeState extends State<SelectUserType> {
       appBar: customAppBar(
         onSkipPressed: () {},
         context: context,
+        skipVisible: true
       ),
       body: Padding(
         padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),

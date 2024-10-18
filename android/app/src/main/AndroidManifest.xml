@@ -1,23 +1,40 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.workss.works_app"
+    >
 
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FLASHLIGHT" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
 
 
     <application
         android:label="works"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -48,6 +65,26 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAH76PzrzUmCDKzbQFI9bqveYlWTlR9kX8"/>
+
+
+<!--        <service-->
+<!--            android:name=".firebase.MyFirebaseMessagingService"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.google.firebase.MESSAGING_EVENT"/>-->
+<!--            </intent-filter>-->
+<!--        </service>-->
+
+<!--        <receiver-->
+<!--            android:exported="true"-->
+<!--            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"-->
+<!--            android:permission="com.google.android.c2dm.permission.SEND">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>-->
+<!--                <category android:name="${applicationId}"/>-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

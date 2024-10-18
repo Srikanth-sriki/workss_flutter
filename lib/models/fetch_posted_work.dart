@@ -24,6 +24,8 @@ class FetchPostedModel {
   DateTime? createdAt;
   DateTime? updatedAt;
   // dynamic deletedAt;
+  List<Work>? workIntrests;
+  List<Work>? workViews;
 
   FetchPostedModel({
     this.id,
@@ -42,6 +44,8 @@ class FetchPostedModel {
     this.isVerified,
     this.createdAt,
     this.updatedAt,
+    this.workIntrests,
+    this.workViews,
     // this.deletedAt,
   });
 
@@ -62,6 +66,8 @@ class FetchPostedModel {
     isVerified: json["is_verified"],
     createdAt: DateTime.parse(json["createdAt"]),
     updatedAt: DateTime.parse(json["updatedAt"]),
+    workIntrests:  json.containsKey("workIntrests") ? json["workIntrests"] == null ? null :  List<Work>.from(json["workIntrests"].map((x) => Work.fromJson(x))) : null,
+    workViews: json.containsKey("workViews") ? json["workViews"] == null ? null :  List<Work>.from(json["workViews"].map((x) => Work.fromJson(x))) : null,
     // deletedAt: json["deletedAt"],
   );
 
@@ -82,6 +88,48 @@ class FetchPostedModel {
     "is_verified": isVerified,
     "createdAt": createdAt!.toIso8601String(),
     "updatedAt": updatedAt!.toIso8601String(),
+    "workIntrests": List<dynamic>.from(workIntrests!.map((x) => x.toJson())),
+    "workViews": List<dynamic>.from(workViews!.map((x) => x.toJson())),
     // "deletedAt": deletedAt,
+  };
+}
+
+class Work {
+  String? id;
+  String? userId;
+  String? workId;
+  bool? isContacted;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  dynamic? deletedAt;
+
+  Work({
+    this.id,
+    this.userId,
+    this.workId,
+    this.isContacted,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+  });
+
+  factory Work.fromJson(Map<String, dynamic> json) => Work(
+    id: json["id"],
+    userId: json["userId"],
+    workId: json["workId"],
+    isContacted: json.containsKey('is_contacted')?json["is_contacted"]:false,
+    createdAt: DateTime.parse(json["createdAt"]),
+    updatedAt: DateTime.parse(json["updatedAt"]),
+    deletedAt: json["deletedAt"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "userId": userId,
+    "workId": workId,
+    "is_contacted": isContacted,
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
+    "deletedAt": deletedAt,
   };
 }

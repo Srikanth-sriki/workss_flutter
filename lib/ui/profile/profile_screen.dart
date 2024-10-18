@@ -13,6 +13,7 @@ import 'package:works_app/ui/profile/edit_profile.dart';
 import 'package:works_app/ui/profile/faq.dart';
 import 'package:works_app/ui/profile/posted_work.dart';
 import 'package:works_app/ui/profile/setting.dart';
+import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_profile_model.dart';
@@ -32,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String phoneNumber = "";
   bool verified = false;
   late ProfileFetch profileFetch;
+  bool interestedWork = false;
 
   @override
   void initState() {
@@ -64,6 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               phoneNumber = state.profileFetch.mobile!;
               profileImage = state.profileFetch.profilePic!;
               userName = state.profileFetch.name!;
+              interestedWork= state.profileFetch.userType =='professional'?true:false;
             });
           } else if (state is FetchProfileFailed) {
             loading = false;
@@ -88,8 +91,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Row(
                         children: [
                           Container(
-                            width: SizeConfig.blockWidth * 16,
-                            height: SizeConfig.blockWidth * 16,
+                            width: SizeConfig.blockWidth * 20,
+                            height: SizeConfig.blockWidth * 20,
                             decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: NetworkImage(profileImage),
@@ -114,14 +117,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   fontFamily: "Poppins",
                                 ),
                               ),
-                              SizedBox(height: SizeConfig.blockHeight * 0.5),
+
                               Row(
                                 children: [
                                   Text(
                                     '+91 ${phoneNumber}',
                                     style: TextStyle(
                                       color: COLORS.primary,
-                                      fontSize: SizeConfig.blockWidth * 3.5,
+                                      fontSize: SizeConfig.blockWidth * 3.8,
                                       fontWeight: FontWeight.w400,
                                       fontFamily: "Poppins",
                                     ),
@@ -238,15 +241,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }),
                     _buildListItem('assets/images/profile/bookmark.png',
                         'Saved Professionals', () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                BookMarkListScreen()),
-                      );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => ProfileBloc()
+                                          ..add(const FetchSavedProfessionalEvent()),
+                                      ),
+                                      BlocProvider(
+                                        create: (context) => ShowInterestedBloc(),
+                                      ),
+                                    ],
+                                    child: const BookMarkListScreen(),
+                                  )));
+
                     }),
-                    _buildListItem(
-                        'assets/images/profile/like.png', 'Interested Works',
+                    if(interestedWork == true)...[
+                      _buildListItem(
+                          'assets/images/profile/like.png', 'Interested Works',
+                              () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ProfileBloc()
+                                            ..add(const FetchInterestedWorkEvent()),
+                                        ),
+                                      ],
+                                      child: InterestedWorkList(),
+                                    )));
+                          }),
+                    ],
+
+                    _buildListItem('assets/images/profile/share.png',
+                        'Share with Friends', () {}),
+                    _buildListItem('assets/images/profile/question.png', 'FAQs',
                         () {
                           Navigator.push(
                               context,
@@ -255,31 +288,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     providers: [
                                       BlocProvider(
                                         create: (context) => ProfileBloc()
-                                          ..add(const FetchInterestedWorkEvent()),
+                                          ..add(const FetchFaqEvent()),
                                       ),
                                     ],
-                                    child: InterestedWorkList(),
+                                    child: FaqScreen(),
                                   )));
-                    }),
-                    _buildListItem('assets/images/profile/share.png',
-                        'Share with Friends', () {}),
-                    _buildListItem('assets/images/profile/question.png', 'FAQs',
-                        () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => FaqScreen()),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //       builder: (BuildContext context) => ()),
+                      // );
                     }),
                     _buildListItem(
                         'assets/images/profile/contact.png', 'Help & Support',
                         () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                ContactUsScreen()),
-                      );
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => ProfileBloc()
+
+                                      ),
+                                    ],
+                                    child: ContactUsScreen(),
+                                  )));
                     }),
                     _buildListItem(
                         'assets/images/profile/settings.png', 'Settings', () {
@@ -301,33 +335,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildListItem(
       String imagePath, String title, void Function()? onTap) {
-    return ListTile(
-      contentPadding:
-          EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 6),
-      leading: Container(
-        width: SizeConfig.blockWidth * 11,
-        height: SizeConfig.blockWidth * 11,
-        padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-        margin: EdgeInsets.only(right: SizeConfig.blockWidth * 1.5),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-            color: COLORS.primaryOne.withOpacity(0.3)),
-        child: Image.asset(
-          imagePath,
-          width: SizeConfig.blockWidth * 5, // Adjust size as needed
-          height: SizeConfig.blockHeight * 5,
-          fit: BoxFit.contain,
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: SizeConfig.blockHeight*3.5,vertical: SizeConfig.blockHeight*1.25),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: SizeConfig.blockWidth * 12,
+              height: SizeConfig.blockWidth * 12,
+              padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
+              margin: EdgeInsets.only(right: SizeConfig.blockWidth * 1,),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                  color: COLORS.primaryOne.withOpacity(0.3)),
+              child: Image.asset(
+                imagePath,
+                width: SizeConfig.blockWidth * 5, // Adjust size as needed
+                height: SizeConfig.blockHeight * 5,
+                fit: BoxFit.contain,
+              ),
+            ),
+            SizedBox(width: SizeConfig.blockWidth*4,),
+            Text(
+              title.tr(),
+              style: TextStyle(
+                  fontSize: SizeConfig.blockWidth * 4,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  color: COLORS.primaryTwo),
+            ),
+            // ListTile(
+            //   contentPadding:
+            //   EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 6),dense: true,
+            //   leading: Container(
+            //     width: SizeConfig.blockWidth * 12,
+            //     height: SizeConfig.blockWidth * 12,
+            //     padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
+            //     margin: EdgeInsets.only(right: SizeConfig.blockWidth * 1,),
+            //     decoration: BoxDecoration(
+            //         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+            //         color: COLORS.primaryOne.withOpacity(0.3)),
+            //     child: Image.asset(
+            //       imagePath,
+            //       width: SizeConfig.blockWidth * 5, // Adjust size as needed
+            //       height: SizeConfig.blockHeight * 5,
+            //       fit: BoxFit.contain,
+            //     ),
+            //   ),
+            //   title: Text(
+            //     title.tr(),
+            //     style: TextStyle(
+            //         fontSize: SizeConfig.blockWidth * 4,
+            //         fontFamily: 'Poppins',
+            //         fontWeight: FontWeight.w500,
+            //         color: COLORS.primaryTwo),
+            //   ),
+            //   onTap: onTap,
+            // )
+          ],
         ),
       ),
-      title: Text(
-        title.tr(),
-        style: TextStyle(
-            fontSize: SizeConfig.blockWidth * 4,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
-            color: COLORS.primaryTwo),
-      ),
-      onTap: onTap,
     );
   }
 }

@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
+import 'package:works_app/components/config.dart';
+import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/ui/home/component.dart';
 import 'package:works_app/ui/home/work_details.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
+import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
@@ -23,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late HomeBloc homeBloc;
+  late ShowInterestedBloc showInterestedBloc;
   late List<HomeFetchModel> homeFetchModel;
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
@@ -34,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
+    showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -74,9 +79,15 @@ class _HomeScreenState extends State<HomeScreen> {
         keyWord: "",
         profession: profession ?? "",
         city: city ?? "",
-        gender: gender??"",
+        gender: gender ?? "",
       ));
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -86,7 +97,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         toolbarHeight: 0,
         backgroundColor: COLORS.white,
-        scrolledUnderElevation: 0,elevation: 0,
+        scrolledUnderElevation: 0,
+        elevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
@@ -117,19 +129,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         content: Text(state.message),
                       ));
                     }
-                    setState(() {
-
-                    });
-
+                    setState(() {});
                   },
                   builder: (context, state) {
-                    if (state is HomeScreenLoading && currentPage == 1) {
-                      return const Center(child: CircularProgressIndicator());
+                    if (state is HomeScreenLoading && currentPage == 1 || state is HomeInitial) {
+                      return  const ShimmerJobCards();
                     } else if (state is FetchHomeScreenSuccess) {
                       return _buildListView();
-                    } else {
-                      return const Center(child: Text('No data available'));
+                    } else if (state is FetchHomeScreenFailed) {
+                      return Container();
                     }
+                    return Container();
                   },
                 ),
               ),
@@ -141,24 +151,48 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildListView() {
+    if (homeFetchModel.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.info_outline, // You can change this to any icon or image
+              size: SizeConfig.blockWidth * 15,
+              color: COLORS.neutralDarkOne,
+            ),
+            SizedBox(height: SizeConfig.blockHeight * 2),
+            Text(
+              'No data available', // Customize the message here
+              style: TextStyle(
+                color: COLORS.neutralDarkOne,
+                fontSize: SizeConfig.blockWidth * 4,
+                fontWeight: FontWeight.w500,
+                fontFamily: "Poppins",
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
       controller: _scrollController,
-      itemCount: homeFetchModel.length + (isFetchingMore ? 1 : 0),shrinkWrap: true,
+      itemCount: homeFetchModel.length + (isFetchingMore ? 1 : 0),
+      shrinkWrap: true,
       itemBuilder: (context, index) {
         if (index < homeFetchModel.length) {
           final work = homeFetchModel[index];
           return Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.blockWidth * 5),
-            margin: EdgeInsets.only(bottom: SizeConfig.blockHeight*1.8
-            ),
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
+            margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 1.8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if(index ==0)...[
+                if (index == 0) ...[
                   Padding(
-                    padding:  EdgeInsets.symmetric(vertical:SizeConfig.blockHeight ),
+                    padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
                     child: Text(
                       'Works'.tr(),
                       style: TextStyle(
@@ -177,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   timeAgo: timeAgo(work.updatedAt!),
                   jobType: work.workPlace ?? '--',
                   experience: work.experienceLevel ?? '--',
-                  experienceImage: 'assets/images/home/work.png',
+                  experienceImage: 'assets/images/home/work_select.png',
                   gender: work.gender ?? '--',
                   genderImage: 'assets/images/home/gender.png',
                   jobTypeImage: 'assets/images/home/home.png',
@@ -188,19 +222,43 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (BuildContext context) => WorkDetailsScreen()),
+                          builder: (BuildContext context) =>
+                              const WorkDetailsScreen()),
                     );
                   },
                   actionRows: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      customIconButton(
-                          text: work.intrestShown!= null?'INTERESTED':'SHOW INTEREST',
+                      Expanded(
+                        child: customIconButton(
+                          text: work.intrestShown != null
+                              ? 'INTERESTED'
+                              : 'SHOW INTEREST',
                           onPressed: () {
-                            homeBloc.add(SaveInterestedWork(workID: work.id!, contact: true, onSuccess: (){}, onError: (){}));
+                        
+                            if(Config.userType =='professional') {
+                              if (work.intrestShown == null) {
+                                showInterestedBloc.add(SaveInterestedWork(
+                                  workID: work.id!,
+                                  contact: true,
+                                  onSuccess: () {
+                                    setState(() {
+                                      work.intrestShown =
+                                          IntrestShown(isContacted: true,);
+                                    });
+                                  },
+                                  onError: () {},
+                                ));
+                              }
+                            }
+                            else {
+                              showInterestBottomSheet(context);
+                            }
                           },
-                          backgroundColor: work.intrestShown!= null?COLORS.semanticTwo.withOpacity(0.15):COLORS.primary,
+                          backgroundColor: work.intrestShown != null
+                              ? COLORS.semanticTwo.withOpacity(0.08)
+                              : COLORS.primary,
                           showIcon: false,
                           width: SizeConfig.blockWidth * 55,
                           height: SizeConfig.blockHeight * 6.5,
@@ -208,28 +266,39 @@ class _HomeScreenState extends State<HomeScreen> {
                           imageChild: Padding(
                             padding: EdgeInsets.only(right: SizeConfig.blockWidth),
                             child: Image.asset(
-                              'assets/images/profile/like.png',
-                              width: SizeConfig.blockWidth *
-                                  5, // Adjust size as needed
+                             work.intrestShown==null? 'assets/images/profile/like.png':'assets/images/home/like.png',
+                              width: SizeConfig.blockWidth * 5,
                               height: SizeConfig.blockHeight * 5,
-                              fit: BoxFit.contain, color: work.intrestShown!= null?COLORS.semanticTwo:COLORS.white,
+                              fit: BoxFit.contain,
+                              color: work.intrestShown != null
+                                  ? COLORS.semanticTwo
+                                  : COLORS.white,
                             ),
                           ),
-                          textColor: work.intrestShown!= null?COLORS.semanticTwo:COLORS.white,
-                          ),
+                          textColor: work.intrestShown != null
+                              ? COLORS.semanticTwo
+                              : COLORS.white,
+                        ),
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          IconActionCard(
-                            iconBool: false,
-                            imageUrl: Image.asset(
-                              'assets/images/home/phone.png',
-                              width: SizeConfig.blockWidth * 4.25,
-                              height: SizeConfig.blockHeight * 4.25,
-                              fit: BoxFit.contain,
+                          if(work.isProfessionalCanCall == true)...[
+                            IconActionCard(
+                              iconBool: false,
+                              imageUrl: Image.asset(
+                                'assets/images/home/phone.png',
+                                width: SizeConfig.blockWidth * 4.25,
+                                height: SizeConfig.blockHeight * 4.25,
+                                fit: BoxFit.contain,
+                              ),
+                              onTap: () {
+                                makePhoneCall(work.user!.mobile!);
+                              },
                             ),
-                          ),
+                          ],
+
                           IconActionCard(
                             iconBool: false,
                             imageUrl: Image.asset(
@@ -238,6 +307,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: SizeConfig.blockHeight * 5.2,
                               fit: BoxFit.contain,
                             ),
+                            onTap: () {
+                              shareJobDetails();
+                            },
                           ),
                         ],
                       ),
@@ -248,13 +320,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         } else if (isFetchingMore) {
-          return const Center(child: CircularProgressIndicator());
+          return  Center(child: SizedBox(
+              height: SizeConfig.blockHeight * 3,
+              width: SizeConfig.blockHeight * 3,
+              child: CircularProgressIndicator(color: COLORS.primary,strokeWidth: SizeConfig.blockWidth*0.8,)));
         } else {
           return const SizedBox.shrink();
         }
       },
     );
   }
+
 
   Widget _buildHeader() {
     return Column(
@@ -373,6 +449,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     expand: false,
                     isDismissible: true,
                     backgroundColor: COLORS.white,
+                    closeProgressThreshold: 0,
+                    duration: const Duration(seconds: 0),
                     context: context,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.vertical(
@@ -385,7 +463,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     String? selectedProfession = result['selectedProfession'];
                     String? selectedCity = result['selectedCity'];
                     String selectedGender = result['selectedGender'];
-                    filterHomeScreenData(selectedProfession, selectedCity, selectedGender,);
+                    filterHomeScreenData(
+                      selectedProfession,
+                      selectedCity,
+                      selectedGender,
+                    );
                   }
                 },
                 child: Container(
@@ -416,11 +498,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 }

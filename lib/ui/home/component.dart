@@ -96,13 +96,17 @@ class WorkCard extends StatelessWidget {
                   size: SizeConfig.blockWidth * 4,
                 ),
                 SizedBox(width: SizeConfig.blockWidth * 1.5),
-                Text(
-                  capitalizeFirstLetter(location),
-                  style: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.25,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
+                SizedBox(
+                  width: SizeConfig.blockWidth*66,
+                  child: Text(
+                    capitalizeFirstLetter(location),
+                    maxLines: 1,overflow: TextOverflow.ellipsis,softWrap: true,
+                    style: TextStyle(
+                      color: COLORS.neutralDarkOne,
+                      fontSize: SizeConfig.blockWidth * 3.1,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
                   ),
                 ),
               ],
@@ -110,7 +114,7 @@ class WorkCard extends StatelessWidget {
             SizedBox(
               height: SizeConfig.blockHeight * 0.5,
             ),
-            registerText(text: jobType, image: jobTypeImage),
+            registerText(text: jobType, image: jobTypeImage,),
             registerText(text: experience, image: experienceImage),
             registerText(text: language, image: languageImage),
             registerText(text: gender, image: genderImage),

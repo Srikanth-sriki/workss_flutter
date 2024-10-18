@@ -2,7 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/main.dart';
+import '../../bloc/authentication/authentication_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -107,10 +109,15 @@ class _AccountDeleteSuccessState extends State<AccountDeleteSuccess> with Single
                 child: customButton(
                   text: 'CREATE ACCOUNT'.tr(),
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (BuildContext context) => const MainScreen()),
+                        builder: (context) => BlocProvider(
+                            create: (context) =>
+                            AuthenticationBloc()..add(const InitializeApp()),
+                            child: const Authentication()),
+                      ),
+                          (Route<dynamic> route) => false,
                     );
                   },
                   backgroundColor: COLORS.primary,

@@ -31,8 +31,7 @@ class LoginOtpBloc extends Bloc<LoginOtpEvent, LoginOtpState> {
       VerifyOtpEvent event, Emitter<LoginOtpState> emit) async {
     try {
       emit(const LoginOtpLoading());
-      var response =
-          await loginDao.verifyOtp(otp: event.otp, otpToken: event.otpToken);
+      var response = await loginDao.verifyOtp(otp: event.otp, otpToken: event.otpToken);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog("The response is : $jsonDecoded");
       customLog("The status Code : ${response.statusCode}");
@@ -40,31 +39,28 @@ class LoginOtpBloc extends Bloc<LoginOtpEvent, LoginOtpState> {
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String accessToken = jsonDecoded["data"]["access_token"];
         String userId = jsonDecoded["data"]["userData"]["id"];
-        bool profileCompleted =
-            jsonDecoded["data"]["userData"]["is_registered"];
+        bool profileCompleted = jsonDecoded["data"]["userData"]["is_registered"];
+        String userType = jsonDecoded["data"]["userData"]["user_type"];
 
-        ///Store the values to Local storage
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString(LocalConstant.accessToken, accessToken);
         await prefs.setString(LocalConstant.userId, userId);
         await prefs.setBool(LocalConstant.profileCompleted, profileCompleted);
+        await prefs.setString(LocalConstant.userType, userType);
 
         ///Update Config
         Config.accessToken = accessToken;
         Config.id = userId;
         Config.profileCompleted = profileCompleted;
+        Config.userType = userType;
 
         print(Config.profileCompleted);
-
-        emit(VerifyOtpSuccess(accessToken: accessToken));
-
-        ///Redirection of Event
-        if (profileCompleted == false) {
-          GlobalBlocClass.authenticationBloc
-              ?.add(const AuthenticationRegisterAccountEvent());
-        } else {
-          GlobalBlocClass.authenticationBloc?.add(const AuthenticationHomeScreenRedirectEvent());
-        }
+        emit(VerifyOtpSuccess(accessToken: accessToken,profileCompleted: profileCompleted));
+        // if (profileCompleted == false) {
+        //   GlobalBlocClass.authenticationBloc?.add(const AuthenticationRegisterAccountEvent());
+        // } else {
+        //   GlobalBlocClass.authenticationBloc?.add(const AuthenticationHomeScreenRedirectEvent());
+        // }
       } else if (jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
         customLog("The failure reason: $message");

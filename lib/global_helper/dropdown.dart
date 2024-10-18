@@ -105,8 +105,9 @@ Widget buildDropdown({
     children: [
       registerText(text: label),
       DropdownButtonFormField2<String>(
+        buttonStyleData: ButtonStyleData(height: SizeConfig.blockHeight*5),
         value: value,
-        isDense: true,
+        isDense: true,menuItemStyleData: MenuItemStyleData(height: SizeConfig.blockHeight*6,),
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(
             vertical: SizeConfig.blockHeight * 1.5,
@@ -139,7 +140,7 @@ Widget buildDropdown({
               color: COLORS.semantic,
               width: 1.5,
             ),
-          ),
+          ),constraints: BoxConstraints(minHeight: SizeConfig.blockHeight*8,maxHeight: SizeConfig.blockHeight*15)
         ),
         dropdownStyleData: DropdownStyleData(
           decoration: BoxDecoration(
@@ -151,7 +152,7 @@ Widget buildDropdown({
         ),
         isExpanded: true,
         style: TextStyle(
-          fontSize: SizeConfig.blockWidth * 3.5,
+          fontSize: SizeConfig.blockWidth * 3,
           color: COLORS.neutralDark,
           fontWeight: FontWeight.w400,
           fontFamily: "Poppins",
@@ -171,7 +172,7 @@ Widget buildDropdown({
           child: Text(
             item,
             style: TextStyle(
-              fontSize: SizeConfig.blockWidth * 3.8,
+              fontSize: SizeConfig.blockWidth * 3.5,
               color: COLORS.neutralDark,
               fontWeight: FontWeight.w400,
               fontFamily: "Poppins",

@@ -1,0 +1,94 @@
+{
+  "project_info": {
+    "project_number": "389975309389",
+    "project_id": "workss-app",
+    "storage_bucket": "workss-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389975309389:android:a6e07ea0a9ec26d3123004",
+        "android_client_info": {
+          "package_name": "com.workss.works_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389975309389-1vfa7hr75n78ijk0q2tlgugf5ps9cd5q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workss.works_app",
+            "certificate_hash": "126831a80adf7039c6f23df652e02a1c6ab3c1b9"
+          }
+        },
+        {
+          "client_id": "389975309389-4qb724s9a727jegkaq203f04u9677c0l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workss.works_app",
+            "certificate_hash": "164d3ea9b295120cec2491567ac9ef224fd8a58e"
+          }
+        },
+        {
+          "client_id": "389975309389-4v2qr7371685trb9ls1g80pclhlnc1cd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workss.works_app",
+            "certificate_hash": "98426590ea782ec0a0fec52ce404bc5785b3c4e6"
+          }
+        },
+        {
+          "client_id": "389975309389-cr8bqsqr8irgom6vvvnl4m7gi501e64l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workss.works_app",
+            "certificate_hash": "4b5e4be2338be972d172de5b547347de795a0bf8"
+          }
+        },
+        {
+          "client_id": "389975309389-dfc76tbi05r3vhulltc47emv57djgr1c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workss.works_app",
+            "certificate_hash": "1809f0644108d2f7f89c11561e0ee4e3a768df7c"
+          }
+        },
+        {
+          "client_id": "389975309389-knri8t8avu2se5lc4n4du6h12af9old2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.workss.works_app",
+            "certificate_hash": "8c96d6d5b1514b8a724fd5a2fbafba9446dd07d9"
+          }
+        },
+        {
+          "client_id": "389975309389-qj5g5q6a11hbcgn4a055ghhhqindj5d3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqK_rQ6jRbUPLjhx1xaLRNbrwoy9byANs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389975309389-qj5g5q6a11hbcgn4a055ghhhqindj5d3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "389975309389-feaj51d12nvsd9uf7kauribf4laca99e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.workss.workssapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

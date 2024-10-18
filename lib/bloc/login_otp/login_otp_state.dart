@@ -27,18 +27,15 @@ class VerifyOtpFailed extends LoginOtpState{
 
 class VerifyOtpSuccess extends LoginOtpState{
   String accessToken;
-
-  VerifyOtpSuccess({required this.accessToken});
-
+  bool profileCompleted;
+  VerifyOtpSuccess({required this.accessToken,required this.profileCompleted});
   @override
-  List<Object> get props => [];
+  List<Object> get props => [accessToken,profileCompleted];
 }
 
 class ResendOtpSuccess extends LoginOtpState{
   String otpToken;
-
   ResendOtpSuccess({required this.otpToken});
-
   @override
   List<Object> get props => [otpToken];
 }

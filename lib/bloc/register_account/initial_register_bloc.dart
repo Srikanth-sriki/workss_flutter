@@ -107,12 +107,14 @@ class InitialRegisterBloc
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-
+        String userType = jsonDecoded["data"]["user_type"];
         bool profileCompleted = true;
 
         Config.profileCompleted = profileCompleted;
+        Config.userType = userType;
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setBool(LocalConstant.profileCompleted, profileCompleted);
+        await prefs.setString(LocalConstant.userType, userType);
         emit(InitialRegisterSuccess(message: message));
       } else if (jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];

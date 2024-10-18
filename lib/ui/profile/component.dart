@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:works_app/global_helper/helper_function.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -166,7 +167,7 @@ Widget registerTextCard(
         SizedBox(width: SizeConfig.blockWidth * 2),
         Flexible(
           child: Text(
-            text,
+            capitalizeEachWord(text),
             style: TextStyle(
               color: textColor,
               fontSize: SizeConfig.blockWidth * textFontSize!,

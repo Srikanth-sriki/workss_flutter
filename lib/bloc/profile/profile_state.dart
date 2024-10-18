@@ -88,6 +88,7 @@ class FetchInterestedWorkSuccess extends ProfileState {
   @override
   List<Object> get props => [fetchPostedModel];
 }
+
 class FetchSavedWorkFailed extends ProfileState {
   String message;
   FetchSavedWorkFailed({required this.message});
@@ -102,4 +103,114 @@ class FetchSavedWorkSuccess extends ProfileState {
   List<Object> get props => [fetchPostedModel];
 }
 
+class PostedWorkViewLoading extends ProfileState {
+  const PostedWorkViewLoading();
+  @override
+  List<Object> get props => [];
+}
 
+class FetchPostedViewWorkFailed extends ProfileState {
+  String message;
+  FetchPostedViewWorkFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class FetchPostedViewWorkSuccess extends ProfileState {
+  ViewFetchPostedWork viewFetchPostedWork = ViewFetchPostedWork();
+  FetchPostedViewWorkSuccess({required this.viewFetchPostedWork});
+  @override
+  List<Object> get props => [ViewFetchPostedWork];
+}
+
+class DeleteAccountFailed extends ProfileState {
+  String message;
+  DeleteAccountFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class DeleteAccountSuccess extends ProfileState {
+  String message;
+  DeleteAccountSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class NotificationSettingLoading extends ProfileState {
+  const NotificationSettingLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class NotificationSettingFailed extends ProfileState {
+  String message;
+  NotificationSettingFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class NotificationSettingSuccess extends ProfileState {
+  String message;
+  NotificationSettingSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class NotificationFetchSettingFailed extends ProfileState {
+  String message;
+  NotificationFetchSettingFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class NotificationFetchSettingSuccess extends ProfileState {
+  SettingFetchModelList settingFetchModelList = SettingFetchModelList();
+  NotificationFetchSettingSuccess({required this.settingFetchModelList});
+  @override
+  List<Object> get props => [settingFetchModelList];
+}
+
+class FetchFaqFailed extends ProfileState {
+  final String message;
+  const FetchFaqFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class FetchFaqSuccess extends ProfileState {
+  final List<FaqModelList> faqList;
+
+  const FetchFaqSuccess({required this.faqList});
+
+  @override
+  List<Object> get props => [faqList];
+}
+
+class ContactUsSuccess extends ProfileState {
+  final String message;
+  const ContactUsSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ContactUsFailed extends ProfileState {
+  final String message;
+  const ContactUsFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class FetchSavedProfessionalSuccess extends ProfileState {
+  List<ProfessionalsPostedWork> professionalsPostedWork = [];
+  FetchSavedProfessionalSuccess({required this.professionalsPostedWork});
+  @override
+  List<Object> get props => [professionalsPostedWork];
+}
+
+class FetchSavedProfessionalFailed extends ProfileState {
+  String message;
+  FetchSavedProfessionalFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

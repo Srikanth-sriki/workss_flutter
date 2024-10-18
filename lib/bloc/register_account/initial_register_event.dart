@@ -30,19 +30,19 @@ class RegisterAccountEvent extends InitialRegisterEvent {
   String profile_pic;
   String user_type;
   String email;
-  String profession_type;
+  dynamic profession_type;
   String pincode;
   String city;
-  List<String> known_languages;
+  dynamic known_languages;
   List<String> workImages;
-  String gender;
-  String bio;
-  String experienced_years;
-  String charges;
-  String charge_type;
+  dynamic gender;
+  dynamic bio;
+  dynamic experienced_years;
+  dynamic charges;
+  dynamic charge_type;
   String userLatitude;
   String userLongitude;
-  String age;
+  dynamic age;
 
   RegisterAccountEvent(
       {required this.name,

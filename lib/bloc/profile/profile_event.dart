@@ -90,3 +90,81 @@ class EditProfileAccount extends ProfileEvent {
         age
       ];
 }
+
+class FetchPostViewEvent extends ProfileEvent {
+  String workId;
+  FetchPostViewEvent({required this.workId});
+  @override
+  List<Object> get props => [];
+}
+
+class DeleteAccount extends ProfileEvent {
+  String reason;
+  VoidCallback onSuccess;
+  VoidCallback onError;
+  DeleteAccount(
+      {required this.onSuccess, required this.onError, required this.reason});
+  @override
+  List<Object> get props => [onSuccess, onError, reason];
+}
+
+class NotificationSettingEvent extends ProfileEvent {
+  bool workPostedInCity;
+  bool workViewedIntrestShowed;
+  bool friendRequest;
+  bool newClipsFromFriends;
+  bool newFriendSuggestions;
+  bool msgRecevied;
+  bool cmtOrLikeOnYourPost;
+  bool groupAlert;
+  NotificationSettingEvent({
+    required this.workPostedInCity,
+    required this.workViewedIntrestShowed,
+    required this.friendRequest,
+    required this.newClipsFromFriends,
+    required this.newFriendSuggestions,
+    required this.msgRecevied,
+    required this.cmtOrLikeOnYourPost,
+    required this.groupAlert,
+  });
+  @override
+  List<Object> get props => [
+        workPostedInCity,
+        workViewedIntrestShowed,
+        friendRequest,
+        newClipsFromFriends,
+        newFriendSuggestions,
+        msgRecevied,
+        cmtOrLikeOnYourPost,
+        groupAlert
+      ];
+}
+
+class FetchSettingEvent extends ProfileEvent {
+  const FetchSettingEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class FetchFaqEvent extends ProfileEvent {
+  const FetchFaqEvent();
+  @override
+  List<Object> get props => [];
+}
+
+
+class ContactUsEvent extends ProfileEvent {
+  String name;
+  String email;
+  String mobile;
+  String message;
+  ContactUsEvent({required this.name,required this.email,required this.mobile,required this.message});
+  @override
+  List<Object> get props => [name,mobile,email,message];
+}
+
+class FetchSavedProfessionalEvent extends ProfileEvent {
+  const FetchSavedProfessionalEvent();
+  @override
+  List<Object> get props => [];
+}
