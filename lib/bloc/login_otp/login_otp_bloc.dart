@@ -31,7 +31,7 @@ class LoginOtpBloc extends Bloc<LoginOtpEvent, LoginOtpState> {
       VerifyOtpEvent event, Emitter<LoginOtpState> emit) async {
     try {
       emit(const LoginOtpLoading());
-      var response = await loginDao.verifyOtp(otp: event.otp, otpToken: event.otpToken);
+      var response = await loginDao.verifyOtp(otp: event.otp, otpToken: event.otpToken,fcmToken: event.fcmToken);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog("The response is : $jsonDecoded");
       customLog("The status Code : ${response.statusCode}");

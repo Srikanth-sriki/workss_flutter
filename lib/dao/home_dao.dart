@@ -203,13 +203,15 @@ class HomeDao {
     return response;
   }
 
-  Future fetchProfessional(  {required int page,
-    required int pageSize,
-    required String keyWord,
-    required String profession,
-    required String city,
-    required String gender}) async {
-    var url = '${Config.url}/user/professional/fetch-professionals?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize';
+  Future fetchProfessional(
+      {required int page,
+      required int pageSize,
+      required String keyWord,
+      required String profession,
+      required String city,
+      required String gender}) async {
+    var url =
+        '${Config.url}/user/professional/fetch-professionals?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -238,9 +240,7 @@ class HomeDao {
     required String professionalId,
   }) async {
     var url = '${Config.url}/user/professional/save';
-    Map<String, dynamic> body = {
-      "professional_id": professionalId
-    };
+    Map<String, dynamic> body = {"professional_id": professionalId};
     final response = await http.post(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -251,4 +251,64 @@ class HomeDao {
     return response;
   }
 
+  Future fetchProfessionalView({required String professionalId}) async {
+    var url =
+        '${Config.url}/user/professional/view-professional?id=$professionalId';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
+  Future fetchWorkView({required String workId}) async {
+    var url =
+        '${Config.url}/user/home/view-work?work_id=$workId';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
+  Future fetchNotificationListView() async {
+    var url = '${Config.url}/user/notification/list';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
+  Future fetchNotificationClearSingle({
+    required String Id,
+  }) async {
+    var url = '${Config.url}/user/notification/clear';
+    Map<String, dynamic> body = {"id": Id};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog("Response Status Code : ${response.body}");
+    return response;
+  }
+
+  Future fetchNotificationClearAll() async {
+    var url = '${Config.url}/user/notification/clear-all';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
 }

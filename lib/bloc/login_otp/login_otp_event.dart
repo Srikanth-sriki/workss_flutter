@@ -10,9 +10,10 @@ abstract class LoginOtpEvent extends Equatable {
 class VerifyOtpEvent extends LoginOtpEvent {
   String otp;
   String otpToken;
-  VerifyOtpEvent({required this.otp, required this.otpToken});
+  String fcmToken;
+  VerifyOtpEvent({required this.otp, required this.otpToken,required this.fcmToken});
   @override
-  List<Object> get props => [otp, otpToken];
+  List<Object> get props => [otp, otpToken,fcmToken];
 }
 
 class ResendOtpEvent extends LoginOtpEvent {

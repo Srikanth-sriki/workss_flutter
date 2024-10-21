@@ -7,8 +7,10 @@ import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/ui/home/component.dart';
+import 'package:works_app/ui/home/notification_list.dart';
 import 'package:works_app/ui/home/work_details.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
+import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
@@ -220,11 +222,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   onShowInterest: () {},
                   onCardClick: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              const WorkDetailsScreen()),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) =>
+                                      HomeBloc()
+                                        ..add(FetchWorkSingleView(workId: work.id!)),
+                                    ),
+                                    BlocProvider(
+                                      create: (context) =>
+                                          ShowInterestedBloc(),
+                                    )
+                                  ],
+                                  child: WorkDetailsScreen(
+                                    id: work.id!,
+                                  ),
+                                )));
                   },
                   actionRows: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -236,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? 'INTERESTED'
                               : 'SHOW INTEREST',
                           onPressed: () {
-                        
+
                             if(Config.userType =='professional') {
                               if (work.intrestShown == null) {
                                 showInterestedBloc.add(SaveInterestedWork(
@@ -385,15 +401,36 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-                    decoration: BoxDecoration(
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                        color: COLORS.primaryOne.withOpacity(0.3)),
-                    child: Icon(
-                      Icons.notifications_none,
-                      size: SizeConfig.blockWidth * 5.5,
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) =>
+                                        NotificationBloc()
+                                          ..add(FetchNotificationList()),
+                                      ),
+
+                                    ],
+                                    child: NotificationListScreen(
+
+                                    ),
+                                  )));
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                      decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                          color: COLORS.primaryOne.withOpacity(0.3)),
+                      child: Icon(
+                        Icons.notifications_none,
+                        size: SizeConfig.blockWidth * 5.5,
+                      ),
                     ),
                   ),
                 ],

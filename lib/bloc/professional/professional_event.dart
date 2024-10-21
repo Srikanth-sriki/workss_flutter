@@ -23,3 +23,13 @@ class ProfessionalListEvent extends ProfessionalEvent {
   @override
   List<Object> get props => [page, pageSize, keyWord, gender, profession, city];
 }
+
+
+class FetchProfessionalView extends ProfessionalEvent {
+  final String professionalId;
+
+  const FetchProfessionalView(this.professionalId);
+
+  @override
+  List<Object> get props => [professionalId];
+}

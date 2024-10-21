@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/ui/post_work/post_work.dart';
 
+import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -21,7 +23,15 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  late ProfessionalBloc professionalBloc;
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
+  }
+
 
   void returnHome() {
     setState(() {
@@ -42,16 +52,26 @@ class _MainScreenState extends State<MainScreen> {
     const ProfileScreen(),
   ];
 
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    if(index == 1){
+      professionalBloc.add(ProfessionalListEvent(
+        page: 1,
+        pageSize: 10,
+        keyWord: "",
+        profession: "",
+        city: "",
+        gender: "",
+      ));
+    }
+
+
   }
 
-  @override
-  void initState() {
-    super.initState();
-  }
+
 
   @override
   Widget build(BuildContext context) {

@@ -7,6 +7,7 @@ import 'package:works_app/dao/home_dao.dart';
 import 'package:works_app/models/professionals_list_model.dart';
 
 import '../../helper/custom_log.dart';
+import '../../models/professional_view_model.dart';
 
 part 'professional_event.dart';
 part 'professional_state.dart';
@@ -17,6 +18,9 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
     homeDao = HomeDao();
     on<ProfessionalListEvent>((event, emit) async {
       await mapProfessionalListScreenEvent(event, emit);
+    });
+    on<FetchProfessionalView>((event, emit) async {
+      await mapFetchProfessionalViewWorkEvent(event, emit);
     });
   }
 
@@ -71,6 +75,29 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
     } catch (error) {
       emit(
           FetchProfessionalListFailed(message: "Something went wrong: $error"));
+    }
+  }
+
+  Future<void> mapFetchProfessionalViewWorkEvent(
+      FetchProfessionalView event, Emitter<ProfessionalState> emit) async {
+    try {
+      emit(const ProfessionalViewLoading());
+      var response = await homeDao.fetchProfessionalView(professionalId: event.professionalId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        ProfessionalViewModel professionalViewModel;
+        professionalViewModel = ProfessionalViewModel.fromJson(jsonDecoded["data"]);
+        emit(ProfessionalViewSuccess(professionalViewModel));
+
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(ProfessionalViewError(message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(const ProfessionalViewError("Something Went wrong"));
     }
   }
 }

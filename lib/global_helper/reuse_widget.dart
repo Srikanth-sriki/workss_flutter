@@ -613,15 +613,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPress;
   final Color? titleColors;
   final bool? borderColor;
+  final List<Widget>? actions; // Add a new parameter for actions
 
-  const CustomAppBar(
-      {super.key,
-      required this.title,
-      this.backgroundColor = COLORS.primaryTwo,
-      this.showLeadingIcon = true,
-      this.onBackPress,
-      this.titleColors = COLORS.white,
-      this.borderColor = false});
+  const CustomAppBar({
+    super.key,
+    required this.title,
+    this.backgroundColor = COLORS.primaryTwo,
+    this.showLeadingIcon = true,
+    this.onBackPress,
+    this.titleColors = COLORS.white,
+    this.borderColor = false,
+    this.actions, // Initialize actions here
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -642,13 +645,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       leading: showLeadingIcon
           ? IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_sharp,
-                color: titleColors,
-                size: SizeConfig.blockWidth * 4.5,
-              ),
-              onPressed: onBackPress ?? () => Navigator.of(context).pop(),
-            )
+        icon: Icon(
+          Icons.arrow_back_ios_new_sharp,
+          color: titleColors,
+          size: SizeConfig.blockWidth * 4.5,
+        ),
+        onPressed: onBackPress ?? () => Navigator.of(context).pop(),
+      )
           : null,
       title: Text(
         title.tr(),
@@ -660,13 +663,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       toolbarHeight: SizeConfig.blockHeight * 20,
+      actions: actions ?? [],
     );
   }
 
   @override
   Size get preferredSize => Size.fromHeight(
-        SizeConfig.blockHeight * 10,
-      );
+    SizeConfig.blockHeight * 10,
+  );
 }
 
 Widget buildBioTextField(
@@ -717,10 +721,10 @@ Widget buildProfessionalCard(
     required String languageImage,
     required bool accountVerified,
     required bool saved,
-      required VoidCallback onTap,
+    required VoidCallback onTap,
     required String image}) {
   return InkWell(
-    onTap:onTap,
+    onTap: onTap,
     child: Stack(
       children: [
         Container(
@@ -1043,42 +1047,54 @@ Widget showInterestButton({
   required final void Function()? onTapIconOne,
   required final void Function()? onTapIconTwo,
   required VoidCallback onShowInterest,
+  required bool canCall,
+  required bool interested,
 }) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      customIconButton(
-          text: 'SHOW INTEREST',
-          onPressed: onShowInterest,
-          backgroundColor: COLORS.primary,
-          showIcon: false,
-          width: SizeConfig.blockWidth * 55,
-          height: SizeConfig.blockHeight * 6.5,
-          image: true,
-          imageChild: Padding(
-            padding: EdgeInsets.only(right: SizeConfig.blockWidth),
-            child: Image.asset(
-              'assets/images/profile/like.png',
-              width: SizeConfig.blockWidth * 5, // Adjust size as needed
-              height: SizeConfig.blockHeight * 5,
-              fit: BoxFit.contain, color: COLORS.white,
+      Expanded(
+        child: customIconButton(
+            text: interested ? 'INTERESTED' : 'SHOW INTEREST',
+            onPressed: onShowInterest,
+            backgroundColor: interested
+                ? COLORS.semanticTwo.withOpacity(0.08)
+                : COLORS.primary,
+            showIcon: false,
+            width: SizeConfig.blockWidth * 55,
+            height: SizeConfig.blockHeight * 6.5,
+            image: true,
+            imageChild: Padding(
+              padding: EdgeInsets.only(right: SizeConfig.blockWidth),
+              child: Image.asset(
+                interested != true
+                    ? 'assets/images/profile/like.png'
+                    : 'assets/images/home/like.png',
+                width: SizeConfig.blockWidth * 5, // Adjust size as needed
+                height: SizeConfig.blockHeight * 5,
+                fit: BoxFit.contain,
+                color: interested ? COLORS.semanticTwo : COLORS.white,
+              ),
             ),
-          ),
-          textColor: COLORS.white,
-          icon: Icons.thumb_up_outlined),
+            textColor: interested ? COLORS.semanticTwo : COLORS.white,
+            icon: Icons.thumb_up_outlined),
+      ),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          IconActionCard(
-            onTap: onTapIconOne,
-            iconBool: false,
-            imageUrl: Image.asset(
-              'assets/images/home/phone.png',
-              width: SizeConfig.blockWidth * 4.25,
-              height: SizeConfig.blockHeight * 4.25,
-              fit: BoxFit.contain,
+          Visibility(
+            visible: canCall,
+            child: IconActionCard(
+              onTap: onTapIconOne,
+              iconBool: false,
+              imageUrl: Image.asset(
+                'assets/images/home/phone.png',
+                width: SizeConfig.blockWidth * 4.25,
+                height: SizeConfig.blockHeight * 4.25,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           IconActionCard(

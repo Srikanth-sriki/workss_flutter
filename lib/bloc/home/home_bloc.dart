@@ -6,6 +6,8 @@ import 'package:meta/meta.dart';
 import 'package:works_app/dao/home_dao.dart';
 import 'package:works_app/helper/custom_log.dart';
 import 'package:works_app/models/home_fetch_model.dart';
+
+import '../../models/work_view_model.dart';
 part 'home_event.dart';
 part 'home_state.dart';
 
@@ -17,9 +19,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<FetchHomeScreenEvent>((event, emit) async {
       await mapHomeScreenEvent(event, emit);
     });
-    // on<SaveInterestedWork>((event, emit) async {
-    //   await mapInterestedPropertyEvent(event, emit);
-    // });
+    on<FetchWorkSingleView>((event, emit) async {
+      await mapFetchWorksViewWorkEvent(event, emit);
+    });
   }
 
   Future<void> mapHomeScreenEvent(
@@ -66,6 +68,29 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     } catch (error) {
       emit(FetchHomeScreenFailed(message: "Something went wrong"));
+    }
+  }
+
+  Future<void> mapFetchWorksViewWorkEvent(
+      FetchWorkSingleView event, Emitter<HomeState> emit) async {
+    try {
+      emit(const FetchWorkViewLoading());
+      var response = await homeDao.fetchWorkView(workId: event.workId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        WorkViewModel workViewModel;
+        workViewModel = WorkViewModel.fromJson(jsonDecoded["data"]);
+        emit(FetchWorkViewSuccess(workViewModel));
+
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(FetchWorkViewError(message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(const FetchWorkViewError("Something Went wrong"));
     }
   }
 

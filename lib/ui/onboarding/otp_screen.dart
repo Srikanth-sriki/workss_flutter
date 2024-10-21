@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:flutter/gestures.dart';
@@ -93,7 +94,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
       } else {
         isOtpValid = true;
         errorMessage = '';
-        loginOtpBloc.add(VerifyOtpEvent(otp: otpCode, otpToken: otpToken));
+        loginOtpBloc.add(VerifyOtpEvent(otp: otpCode, otpToken: otpToken,fcmToken:Config.fcmToken));
       }
     });
   }

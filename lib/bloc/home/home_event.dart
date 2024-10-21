@@ -26,15 +26,11 @@ class FetchHomeScreenEvent extends HomeEvent {
   List<Object> get props => [page, pageSize, keyWord, gender, profession, city];
 }
 
-// class SaveInterestedWork extends HomeEvent {
-//   String workID;
-//   bool contact;
-//   VoidCallback onSuccess;
-//   VoidCallback onError;
-//   SaveInterestedWork({
-//     required this.workID,
-//     required this.contact,required this.onSuccess,required this.onError
-//   });
-//   @override
-//   List<Object> get props => [workID, contact,onSuccess,onError];
-// }
+class FetchWorkSingleView extends HomeEvent {
+  final String workId;
+
+   const FetchWorkSingleView({required this.workId});
+
+  @override
+  List<Object> get props => [workId];
+}

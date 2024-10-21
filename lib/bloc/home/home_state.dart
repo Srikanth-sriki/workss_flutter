@@ -55,3 +55,28 @@ class WorkInterestedLoading extends HomeState {
   @override
   List<Object> get props => [];
 }
+
+class FetchWorkViewLoading extends HomeState {
+  const FetchWorkViewLoading();
+  @override
+  List<Object> get props => [];
+}
+
+
+class FetchWorkViewSuccess extends HomeState {
+  final WorkViewModel workViewModel;
+
+  const FetchWorkViewSuccess(this.workViewModel);
+
+  @override
+  List<Object> get props => [workViewModel];
+}
+
+class FetchWorkViewError extends HomeState {
+  final String message;
+
+  const FetchWorkViewError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

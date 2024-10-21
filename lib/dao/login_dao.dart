@@ -23,9 +23,9 @@ class LoginDao {
     return response;
   }
 
-  Future verifyOtp({required String otp, required String otpToken}) async {
+  Future verifyOtp({required String otp, required String otpToken,required String fcmToken}) async {
     var url = '${Config.url}/user/auth/verify-otp';
-    Map<String, dynamic> body = {"otp_token": otpToken, "otp": otp};
+    Map<String, dynamic> body = {"otp_token": otpToken, "otp": otp,"fcm_token":fcmToken};
 
     final response = await http.post(
       Uri.parse(url),

@@ -34,3 +34,29 @@ class FetchProfessionalListSuccess extends ProfessionalState {
   @override
   List<Object> get props => [professionalsPostedWork,maxPageNumber,maxPageSize];
 }
+
+
+class ProfessionalViewLoading extends ProfessionalState {
+  const ProfessionalViewLoading();
+  @override
+  List<Object> get props => [];
+}
+
+
+class ProfessionalViewSuccess extends ProfessionalState {
+  final ProfessionalViewModel professionalViewModel;
+
+  const ProfessionalViewSuccess(this.professionalViewModel);
+
+  @override
+  List<Object> get props => [professionalViewModel];
+}
+
+class ProfessionalViewError extends ProfessionalState {
+  final String message;
+
+  const ProfessionalViewError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

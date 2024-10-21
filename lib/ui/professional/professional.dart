@@ -9,6 +9,7 @@ import 'package:works_app/models/professionals_list_model.dart';
 import 'package:works_app/ui/home/component.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
 import 'package:works_app/ui/professional/categories.dart';
+import 'package:works_app/ui/professional/professional_view.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
@@ -107,7 +108,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
     super.initState();
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
-
+    _fetchData();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -116,10 +117,16 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         _loadMoreData();
       }
     });
-    _fetchData();
+
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchData();
+  }
   void _fetchData() {
+    print('bhhhhhhhhhhhhh');
     professionalBloc.add(ProfessionalListEvent(
       page: currentPage,
       pageSize: pageSize,
@@ -550,7 +557,30 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                   },
                                   jobType: professionalData.professionType!,
                                   onShare: () {},
-                                  onTap: (){},
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MultiBlocProvider(
+                                                  providers: [
+                                                    BlocProvider(
+                                                      create: (context) =>
+                                                          ProfessionalBloc()
+                                                            ..add(FetchProfessionalView(
+                                                                professionalData
+                                                                    .id!)),
+                                                    ),
+                                                    BlocProvider(
+                                                      create: (context) =>
+                                                          ShowInterestedBloc(),
+                                                    )
+                                                  ],
+                                                  child: ProfessionalViewScreen(
+                                                    id: professionalData.id!,
+                                                  ),
+                                                )));
+                                  },
                                   savedTap: () {
                                     showInterestedBloc.add(ProfessionalSavedUs(
                                       PropId: professionalData.id!,
