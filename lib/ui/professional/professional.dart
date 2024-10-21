@@ -12,6 +12,7 @@ import 'package:works_app/ui/professional/categories.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../home/filter.dart';
@@ -117,7 +118,6 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         _loadMoreData();
       }
     });
-
   }
 
   @override
@@ -125,6 +125,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
     super.didChangeDependencies();
     _fetchData();
   }
+
   void _fetchData() {
     print('bhhhhhhhhhhhhh');
     professionalBloc.add(ProfessionalListEvent(
@@ -174,6 +175,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
       appBar: AppBar(
         toolbarHeight: 0,
         backgroundColor: COLORS.white,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        automaticallyImplyLeading: false,
       ),
       body: BlocListener<ProfessionalBloc, ProfessionalState>(
         listener: (context, state) {
@@ -202,10 +206,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
           setState(() {});
         },
         child: SafeArea(
-          child: SingleChildScrollView(
-              child: Container(
+          child: Container(
             width: SizeConfig.screenWidth,
-            padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 2),
+            padding: EdgeInsets.only(top: SizeConfig.blockHeight * 2),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -376,231 +379,229 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                     color: COLORS.neutralDarkTwo,
                   ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 5,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Categories'.tr(),
-                            style: TextStyle(
-                              color: COLORS.neutralDark,
-                              fontSize: SizeConfig.blockWidth * 3.8,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (BuildContext context) =>
-                                        CategoriesScreen(
-                                            categoriesData: categoriesData)),
-                              );
-                            },
-                            child: Text(
-                              'See All'.tr(),
-                              style: TextStyle(
-                                color: COLORS.accent,
-                                fontSize: SizeConfig.blockWidth * 3.6,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      height: SizeConfig.blockHeight * 20,
-                      child: ListView.builder(
-                          itemCount: categoriesData.length,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 5,
-                              vertical: SizeConfig.blockHeight),
-                          itemBuilder: (context, index) {
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          CategoriesItemScreen(
-                                              categoriesItem:
-                                                  categoriesData[index])),
-                                );
-                              },
-                              child: Container(
-                                padding:
-                                    EdgeInsets.all(SizeConfig.blockWidth * 3),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: SizeConfig.blockWidth * 18,
-                                      height: SizeConfig.blockWidth * 18,
-                                      decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image: AssetImage(
-                                                categoriesData[index]
-                                                    ['images']),
-                                            fit: BoxFit.contain,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                              SizeConfig.blockWidth * 20),
-                                          color: COLORS.primaryOne
-                                              .withOpacity(0.5)),
-                                    ),
-                                    SizedBox(
-                                      height: SizeConfig.blockHeight * 0.5,
-                                    ),
-                                    Text(
-                                      categoriesData[index]['title'],
-                                      style: TextStyle(
-                                        color: COLORS.neutralDark,
-                                        fontSize: SizeConfig.blockWidth * 3,
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: "Poppins",
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 5,
-                      ),
-                      child: Text(
-                        'Professionals'.tr(),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 5,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Categories'.tr(),
                         style: TextStyle(
-                          color: COLORS.neutralDarkOne,
+                          color: COLORS.neutralDark,
                           fontSize: SizeConfig.blockWidth * 3.8,
                           fontWeight: FontWeight.w400,
                           fontFamily: "Poppins",
                         ),
-                        textAlign: TextAlign.end,
                       ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    CategoriesScreen(
+                                        categoriesData: categoriesData)),
+                          );
+                        },
+                        child: Text(
+                          'See All'.tr(),
+                          style: TextStyle(
+                            color: COLORS.accent,
+                            fontSize: SizeConfig.blockWidth * 3.6,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  height: SizeConfig.blockHeight * 20,
+                  child: ListView.builder(
+                      itemCount: categoriesData.length,
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.blockWidth * 5,
+                          vertical: SizeConfig.blockHeight),
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      CategoriesItemScreen(
+                                          categoriesItem:
+                                              categoriesData[index])),
+                            );
+                          },
+                          child: Container(
+                            padding:
+                                EdgeInsets.all(SizeConfig.blockWidth * 3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: SizeConfig.blockWidth * 18,
+                                  height: SizeConfig.blockWidth * 18,
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            categoriesData[index]
+                                                ['images']),
+                                        fit: BoxFit.contain,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.blockWidth * 20),
+                                      color: COLORS.primaryOne
+                                          .withOpacity(0.5)),
+                                ),
+                                SizedBox(
+                                  height: SizeConfig.blockHeight * 0.5,
+                                ),
+                                Text(
+                                  categoriesData[index]['title'],
+                                  style: TextStyle(
+                                    color: COLORS.neutralDark,
+                                    fontSize: SizeConfig.blockWidth * 3,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Poppins",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 5,
+                  ),
+                  child: Text(
+                    'Professionals'.tr(),
+                    style: TextStyle(
+                      color: COLORS.neutralDarkOne,
+                      fontSize: SizeConfig.blockWidth * 3.8,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
                     ),
-                    SizedBox(
-                      height: SizeConfig.blockHeight * 0.5,
-                    ),
-                    if (isProfessionalLoad == true) ...[
-                      SizedBox(
-                          height: SizeConfig.blockHeight * 80,
-                          child: ShimmerJobCards())
-                    ] else ...[
-                      ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: professionalsPostedWork.length!,
-                          itemBuilder: (context, index) {
-                            var professionalData =
-                                professionalsPostedWork![index];
-                            return Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: SizeConfig.blockWidth * 2,
-                                  horizontal: SizeConfig.blockWidth * 4),
-                              child: buildProfessionalCard(
-                                  accountVerified:
-                                      professionalData!.isVerified!,
-                                  image: professionalData!.profilePic!,
-                                  name: professionalData!.name!,
-                                  profession: professionalData.professionType!,
-                                  location: professionalData.city!,
-                                  languages: professionalData.knownLanguages!
-                                      .join(", "),
-                                  gender: professionalData.gender!,
-                                  price: professionalData.charges!,
-                                  paymentType: professionalData.chargeType!,
-                                  contacted:
-                                      professionalData.isContacted != null,
-                                  saved: professionalData.isSaved != null,
-                                  experience:
-                                      professionalData.experiencedYears!,
-                                  experienceImage:
-                                      'assets/images/home/work_select.png',
-                                  genderImage: 'assets/images/home/gender.png',
-                                  jobTypeImage:
-                                      'assets/images/profile/prof.png',
-                                  language: professionalData.knownLanguages!
-                                      .join(", "),
-                                  languageImage: 'assets/images/home/speak.png',
-                                  onShowInterest: () {
-                                    if (professionalData.isContacted == null) {
-                                      showInterestedBloc
-                                          .add(ProfessionalContactUs(
-                                        PropId: professionalData.id!,
-                                        onSuccess: () {
-                                          setState(() {
-                                            professionalData.isContacted =
-                                                IsContacted(id: '');
-                                          });
-                                        },
-                                        onError: () {},
-                                      ));
-                                    }
-                                  },
-                                  jobType: professionalData.professionType!,
-                                  onShare: () {},
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                MultiBlocProvider(
-                                                  providers: [
-                                                    BlocProvider(
-                                                      create: (context) =>
-                                                          ProfessionalBloc()
-                                                            ..add(FetchProfessionalView(
-                                                                professionalData
-                                                                    .id!)),
-                                                    ),
-                                                    BlocProvider(
-                                                      create: (context) =>
-                                                          ShowInterestedBloc(),
-                                                    )
-                                                  ],
-                                                  child: ProfessionalViewScreen(
-                                                    id: professionalData.id!,
-                                                  ),
-                                                )));
-                                  },
-                                  savedTap: () {
-                                    showInterestedBloc.add(ProfessionalSavedUs(
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+                SizedBox(
+                  height: SizeConfig.blockHeight * 0.5,
+                ),
+                if (isProfessionalLoad == true) ...[
+                  const Expanded(
+                      child: ShimmerJobCards())
+                ] else ...[
+                  Expanded(
+                    child: ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        physics: AlwaysScrollableScrollPhysics(),
+                        itemCount: professionalsPostedWork.length!,
+                        itemBuilder: (context, index) {
+                          var professionalData =
+                          professionalsPostedWork![index];
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: SizeConfig.blockWidth * 2,
+                                horizontal: SizeConfig.blockWidth * 4),
+                            child: buildProfessionalCard(
+                                accountVerified:
+                                professionalData!.isVerified!,
+                                image: professionalData!.profilePic!,
+                                name: professionalData!.name!,
+                                profession: professionalData.professionType!,
+                                location: professionalData.city!,
+                                languages: professionalData.knownLanguages!
+                                    .join(", "),
+                                gender: professionalData.gender!,
+                                price: professionalData.charges!,
+                                paymentType: professionalData.chargeType!,
+                                contacted:
+                                professionalData.isContacted != null,
+                                saved: professionalData.isSaved != null,
+                                experience:
+                                professionalData.experiencedYears!,
+                                experienceImage:
+                                'assets/images/home/work_select.png',
+                                genderImage: 'assets/images/home/gender.png',
+                                jobTypeImage:
+                                'assets/images/profile/prof.png',
+                                language: professionalData.knownLanguages!
+                                    .join(", "),
+                                languageImage: 'assets/images/home/speak.png',
+                                onShowInterest: () {
+                                  if (professionalData.isContacted == null) {
+                                    showInterestedBloc
+                                        .add(ProfessionalContactUs(
                                       PropId: professionalData.id!,
                                       onSuccess: () {
                                         setState(() {
-                                          professionalData.isSaved =
+                                          professionalData.isContacted =
                                               IsContacted(id: '');
                                         });
                                       },
                                       onError: () {},
                                     ));
-                                  }),
-                            );
-                          })
-                    ]
-                  ],
-                ),
+                                  }
+                                },
+                                jobType: professionalData.professionType!,
+                                onShare: () {
+                                  shareJobDetails();
+                                },
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              MultiBlocProvider(
+                                                providers: [
+                                                  BlocProvider(
+                                                    create: (context) =>
+                                                    ProfessionalBloc()
+                                                      ..add(FetchProfessionalView(
+                                                          professionalData
+                                                              .id!)),
+                                                  ),
+                                                  BlocProvider(
+                                                    create: (context) =>
+                                                        ShowInterestedBloc(),
+                                                  )
+                                                ],
+                                                child: ProfessionalViewScreen(
+                                                  id: professionalData.id!,
+                                                ),
+                                              )));
+                                },
+                                savedTap: () {
+                                  showInterestedBloc.add(ProfessionalSavedUs(
+                                    PropId: professionalData.id!,
+                                    onSuccess: () {
+                                      setState(() {
+                                        professionalData.isSaved =
+                                            IsContacted(id: '');
+                                      });
+                                    },
+                                    onError: () {},
+                                  ));
+                                }),
+                          );
+                        }),
+                  )
+
+                ],
               ],
             ),
-          )),
+          ),
         ),
       ),
     );

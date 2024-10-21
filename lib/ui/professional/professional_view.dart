@@ -331,7 +331,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                 'Bio',
                                 style: TextStyle(
                                   color: COLORS.neutralDarkOne,
-                                  fontSize: SizeConfig.blockWidth * 3.6,
+                                  fontSize: SizeConfig.blockWidth * 3.4,
                                   fontWeight: FontWeight.w400,
                                   fontFamily: "Poppins",
                                 ),
@@ -354,130 +354,135 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                 ),
                               ),
                             ),
+                            SizedBox(height: SizeConfig.blockHeight),
                             DynamicGridExample(
                               imageUrls: professional.workImages!,
                             ),
                             SizedBox(height: SizeConfig.blockHeight * 2),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  bottom: SizeConfig.blockHeight * 0.5),
-                              child: Text(
-                                'Similar Professionals',
-                                style: TextStyle(
-                                  color: COLORS.neutralDarkOne,
-                                  fontSize: SizeConfig.blockWidth * 3.6,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: "Poppins",
+                            if(similarProfessionals.isNotEmpty)...[
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: SizeConfig.blockHeight * 0.5,top: SizeConfig.blockHeight),
+                                child: Text(
+                                  'Similar Professionals',
+                                  style: TextStyle(
+                                    color: COLORS.neutralDarkOne,
+                                    fontSize: SizeConfig.blockWidth * 3.6,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                  ),
                                 ),
                               ),
-                            ),
-                            ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: similarProfessionals.length!,
-                                itemBuilder: (context, index) {
-                                  var professionalData =
-                                      similarProfessionals![index];
-                                  return Container(
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: SizeConfig.blockWidth * 2,
-                                    ),
-                                    child: buildProfessionalCard(
-                                        accountVerified: professionalData!
-                                            .isVerified!,
-                                        image: professionalData!.profilePic!,
-                                        name: professionalData!.name!,
-                                        profession: professionalData
-                                            .professionType!,
-                                        location: professionalData.city!,
-                                        languages:
-                                            professionalData
-                                                .knownLanguages!
-                                                .join(", "),
-                                        gender: professionalData.gender!,
-                                        price: professionalData.charges!,
-                                        paymentType: professionalData
-                                            .chargeType!,
-                                        contacted:
-                                            professionalData
-                                                    .isContacted !=
-                                                null,
-                                        saved: professionalData.isSaved != null,
-                                        experience: professionalData
-                                            .experiencedYears!,
-                                        experienceImage:
-                                            'assets/images/home/work_select.png',
-                                        genderImage:
-                                            'assets/images/home/gender.png',
-                                        jobTypeImage:
-                                            'assets/images/profile/prof.png',
-                                        language:
-                                            professionalData
-                                                .knownLanguages!
-                                                .join(", "),
-                                        languageImage:
-                                            'assets/images/home/speak.png',
-                                        onShowInterest: () {
-                                          print(professionalData.id);
-                                          if (professionalData.isContacted ==
-                                              null) {
+                              ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: similarProfessionals.length!,
+                                  itemBuilder: (context, index) {
+                                    var professionalData =
+                                    similarProfessionals![index];
+                                    return Container(
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: SizeConfig.blockWidth * 2,
+                                      ),
+                                      child: buildProfessionalCard(
+                                          accountVerified: professionalData!
+                                              .isVerified!,
+                                          image: professionalData!.profilePic!,
+                                          name: professionalData!.name!,
+                                          profession: professionalData
+                                              .professionType!,
+                                          location: professionalData.city!,
+                                          languages:
+                                          professionalData
+                                              .knownLanguages!
+                                              .join(", "),
+                                          gender: professionalData.gender!,
+                                          price: professionalData.charges!,
+                                          paymentType: professionalData
+                                              .chargeType!,
+                                          contacted:
+                                          professionalData
+                                              .isContacted !=
+                                              null,
+                                          saved: professionalData.isSaved != null,
+                                          experience: professionalData
+                                              .experiencedYears!,
+                                          experienceImage:
+                                          'assets/images/home/work_select.png',
+                                          genderImage:
+                                          'assets/images/home/gender.png',
+                                          jobTypeImage:
+                                          'assets/images/profile/prof.png',
+                                          language:
+                                          professionalData
+                                              .knownLanguages!
+                                              .join(", "),
+                                          languageImage:
+                                          'assets/images/home/speak.png',
+                                          onShowInterest: () {
+                                            print(professionalData.id);
+                                            if (professionalData.isContacted ==
+                                                null) {
+                                              showInterestedBloc
+                                                  .add(ProfessionalContactUs(
+                                                PropId: professionalData.id!,
+                                                onSuccess: () {
+                                                  setState(() {
+                                                    professionalData.isContacted =
+                                                        IsContacted(id: '');
+                                                  });
+                                                },
+                                                onError: () {},
+                                              ));
+                                            }
+                                          },
+                                          jobType:
+                                          professionalData.professionType!,
+                                          onShare: () {
+                                            shareJobDetails();
+                                          },
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                              ProfessionalBloc()
+                                                                ..add(FetchProfessionalView(
+                                                                    professionalData
+                                                                        .id!)),
+                                                            ),
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  ShowInterestedBloc(),
+                                                            )
+                                                          ],
+                                                          child:
+                                                          ProfessionalViewScreen(
+                                                            id: professionalData
+                                                                .id!,
+                                                          ),
+                                                        )));
+                                          },
+                                          savedTap: () {
                                             showInterestedBloc
-                                                .add(ProfessionalContactUs(
+                                                .add(ProfessionalSavedUs(
                                               PropId: professionalData.id!,
                                               onSuccess: () {
                                                 setState(() {
-                                                  professionalData.isContacted =
+                                                  professionalData.isSaved =
                                                       IsContacted(id: '');
                                                 });
                                               },
                                               onError: () {},
                                             ));
-                                          }
-                                        },
-                                        jobType:
-                                            professionalData.professionType!,
-                                        onShare: () {},
-                                        onTap: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MultiBlocProvider(
-                                                        providers: [
-                                                          BlocProvider(
-                                                            create: (context) =>
-                                                                ProfessionalBloc()
-                                                                  ..add(FetchProfessionalView(
-                                                                      professionalData
-                                                                          .id!)),
-                                                          ),
-                                                          BlocProvider(
-                                                            create: (context) =>
-                                                                ShowInterestedBloc(),
-                                                          )
-                                                        ],
-                                                        child:
-                                                            ProfessionalViewScreen(
-                                                          id: professionalData
-                                                              .id!,
-                                                        ),
-                                                      )));
-                                        },
-                                        savedTap: () {
-                                          showInterestedBloc
-                                              .add(ProfessionalSavedUs(
-                                            PropId: professionalData.id!,
-                                            onSuccess: () {
-                                              setState(() {
-                                                professionalData.isSaved =
-                                                    IsContacted(id: '');
-                                              });
-                                            },
-                                            onError: () {},
-                                          ));
-                                        }),
-                                  );
-                                })
+                                          }),
+                                    );
+                                  })
+                            ]
                           ],
                         ),
                       ),

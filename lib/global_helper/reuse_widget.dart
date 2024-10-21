@@ -740,7 +740,7 @@ Widget buildProfessionalCard(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     width: SizeConfig.blockWidth * 12,
@@ -759,13 +759,18 @@ Widget buildProfessionalCard(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 3.8,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Poppins",
+                      SizedBox(
+                        width:SizeConfig.blockWidth*60,
+                        child: Text(
+                          name,
+                          style: TextStyle(
+                            color: COLORS.neutralDark,
+                            fontSize: SizeConfig.blockWidth * 3.8,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: "Poppins",
+                            overflow: TextOverflow.ellipsis
+                          ),
+                          maxLines: 1,
                         ),
                       ),
                       Row(
@@ -778,13 +783,18 @@ Widget buildProfessionalCard(
                             size: SizeConfig.blockWidth * 3.5,
                           ),
                           SizedBox(width: SizeConfig.blockWidth * 1),
-                          Text(
-                            location,
-                            style: TextStyle(
-                              color: COLORS.neutralDarkOne,
-                              fontSize: SizeConfig.blockWidth * 3,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
+                          SizedBox(
+                            width:SizeConfig.blockWidth*60,
+                            child: Text(
+                              location,
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 3,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                                  overflow: TextOverflow.ellipsis
+                              ),
+                              maxLines: 1,
                             ),
                           ),
                         ],
@@ -801,7 +811,7 @@ Widget buildProfessionalCard(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   SizedBox(
-                      width: SizeConfig.blockWidth * 55,
+                      width: SizeConfig.blockWidth * 50,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,23 +819,23 @@ Widget buildProfessionalCard(
                           registerTextCard(
                               text: jobType,
                               image: jobTypeImage,
-                              imageSize: 3.5,
-                              textFontSize: 3.2),
+                              imageSize: 3.4,
+                              textFontSize: 3),
                           registerTextCard(
                               text: experience,
                               image: experienceImage,
-                              imageSize: 3.5,
-                              textFontSize: 3.2),
+                              imageSize: 3.4,
+                              textFontSize: 3),
                           registerTextCard(
                               text: language,
                               image: languageImage,
-                              imageSize: 3.5,
-                              textFontSize: 3.2),
+                              imageSize: 3.4,
+                              textFontSize: 3),
                           registerTextCard(
                               text: gender,
                               image: genderImage,
-                              imageSize: 3.5,
-                              textFontSize: 3.2)
+                              imageSize: 3.4,
+                              textFontSize: 3)
                         ],
                       )),
                   Column(
@@ -839,7 +849,7 @@ Widget buildProfessionalCard(
                             fontSize: SizeConfig.blockWidth * 4.2,
                             fontWeight: FontWeight.w600,
                             fontFamily: "Poppins",
-                            height: SizeConfig.blockHeight * 0.2),
+                            height: SizeConfig.blockHeight * 0.2),softWrap: true,
                       ),
                       Text(
                         capitalizeEachWord(paymentType),
@@ -1125,7 +1135,7 @@ void showCustomSnackBar({
       message,
       style: TextStyle(
         color: COLORS.neutralDark,
-        fontSize: SizeConfig.blockWidth * 3.6,
+        fontSize: SizeConfig.blockWidth * 3.25,
         fontWeight: FontWeight.w500,
         fontFamily: "Poppins",
       ),

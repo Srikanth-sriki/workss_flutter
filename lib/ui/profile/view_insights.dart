@@ -8,6 +8,7 @@ import 'package:works_app/global_helper/loading_placeholder/work_insight.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_posted_view.dart';
 import 'component.dart';
@@ -209,7 +210,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                               fontWeight: FontWeight.w400,
                               fontFamily: "Poppins",
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             softWrap: true,
                           ),
@@ -388,8 +389,21 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                   }
                 },
                 jobType: professionalData.user!.professionType!,
-                onShare: () {},
-                savedTap: () {}),
+                onShare: () {
+                  shareJobDetails();
+                },
+                savedTap: () {
+                  showInterestedBloc.add(ProfessionalSavedUs(
+                    PropId: professionalData.id!,
+                    onSuccess: () {
+                      setState(() {
+                        // professionalData.isSaved =
+                        //     IsContacted(id: '');
+                      });
+                    },
+                    onError: () {},
+                  ));
+                }),
           );
         });
   }

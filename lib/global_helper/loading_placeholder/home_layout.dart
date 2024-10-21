@@ -10,7 +10,7 @@ class ShimmerJobCards extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding:  EdgeInsets.symmetric(horizontal:SizeConfig.blockWidth*4, vertical: SizeConfig.blockWidth*4),
+        padding:  EdgeInsets.only(left:SizeConfig.blockWidth*4,right: SizeConfig.blockWidth*4, top: SizeConfig.blockWidth*2),
         child: ListView.builder(
           shrinkWrap: true,
           // physics: NeverScrollableScrollPhysics(),

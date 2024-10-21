@@ -379,165 +379,168 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                     //       borderRadius: BorderRadius.all(
                     //           Radius.circular(SizeConfig.blockWidth * 3))),
                     // ),
-                    DynamicGridExample(
+                    DynamicWorkListImage(
                       imageUrls: singleWork.workImages!,
                     ),
                     SizedBox(height: SizeConfig.blockHeight * 2),
-                    Padding(
-                      padding:
-                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
-                      child: Text(
-                        'Similar works',
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.6,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                    if(similarWorks.isNotEmpty)...[
+                      Padding(
+                        padding:
+                        EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
+                        child: Text(
+                          'Similar works',
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.6,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
                         ),
                       ),
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: similarWorks.length,
-                      itemBuilder: (context, index) {
-                        var work = similarWorks[index]!;
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                            vertical: SizeConfig.blockWidth * 2,
-                          ),
-                          child: WorkCard(
-                            title: work.requiredProfession ?? '--',
-                            location: work.location ?? '--',
-                            timeAgo: timeAgo(work.updatedAt!),
-                            jobType: work.workPlace ?? '--',
-                            experience: work.experienceLevel ?? '--',
-                            experienceImage:
-                                'assets/images/home/work_select.png',
-                            gender: work.gender ?? '--',
-                            genderImage: 'assets/images/home/gender.png',
-                            jobTypeImage: 'assets/images/home/home.png',
-                            language: work.knowLanguage!.join(", ") ?? '--',
-                            languageImage: 'assets/images/home/speak.png',
-                            onShowInterest: () {},
-                            onCardClick: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) => HomeBloc()
-                                                  ..add(FetchWorkSingleView(
-                                                      workId: work.id!)),
-                                              ),
-                                              BlocProvider(
-                                                create: (context) =>
-                                                    ShowInterestedBloc(),
-                                              )
-                                            ],
-                                            child: WorkDetailsScreen(
-                                              id: work.id!,
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: similarWorks.length,
+                        itemBuilder: (context, index) {
+                          var work = similarWorks[index]!;
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                              vertical: SizeConfig.blockWidth * 2,
+                            ),
+                            child: WorkCard(
+                              title: work.requiredProfession ?? '--',
+                              location: work.location ?? '--',
+                              timeAgo: timeAgo(work.updatedAt!),
+                              jobType: work.workPlace ?? '--',
+                              experience: work.experienceLevel ?? '--',
+                              experienceImage:
+                              'assets/images/home/work_select.png',
+                              gender: work.gender ?? '--',
+                              genderImage: 'assets/images/home/gender.png',
+                              jobTypeImage: 'assets/images/home/home.png',
+                              language: work.knowLanguage!.join(", ") ?? '--',
+                              languageImage: 'assets/images/home/speak.png',
+                              onShowInterest: () {},
+                              onCardClick: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
+                                          providers: [
+                                            BlocProvider(
+                                              create: (context) => HomeBloc()
+                                                ..add(FetchWorkSingleView(
+                                                    workId: work.id!)),
                                             ),
-                                          )));
-                            },
-                            actionRows: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: customIconButton(
-                                    text: work.intrestShown != null
-                                        ? 'INTERESTED'
-                                        : 'SHOW INTEREST',
-                                    onPressed: () {
-                                      if (Config.userType == 'professional') {
-                                        if (work.intrestShown == null) {
-                                          showInterestedBloc
-                                              .add(SaveInterestedWork(
-                                            workID: work.id!,
-                                            contact: true,
-                                            onSuccess: () {
-                                              setState(() {
-                                                work.intrestShown =
-                                                    IntrestShown(
-                                                  isContacted: true,
-                                                );
-                                              });
-                                            },
-                                            onError: () {},
-                                          ));
+                                            BlocProvider(
+                                              create: (context) =>
+                                                  ShowInterestedBloc(),
+                                            )
+                                          ],
+                                          child: WorkDetailsScreen(
+                                            id: work.id!,
+                                          ),
+                                        )));
+                              },
+                              actionRows: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: customIconButton(
+                                      text: work.intrestShown != null
+                                          ? 'INTERESTED'
+                                          : 'SHOW INTEREST',
+                                      onPressed: () {
+                                        if (Config.userType == 'professional') {
+                                          if (work.intrestShown == null) {
+                                            showInterestedBloc
+                                                .add(SaveInterestedWork(
+                                              workID: work.id!,
+                                              contact: true,
+                                              onSuccess: () {
+                                                setState(() {
+                                                  work.intrestShown =
+                                                      IntrestShown(
+                                                        isContacted: true,
+                                                      );
+                                                });
+                                              },
+                                              onError: () {},
+                                            ));
+                                          }
+                                        } else {
+                                          showInterestBottomSheet(context);
                                         }
-                                      } else {
-                                        showInterestBottomSheet(context);
-                                      }
-                                    },
-                                    backgroundColor: work.intrestShown != null
-                                        ? COLORS.semanticTwo.withOpacity(0.08)
-                                        : COLORS.primary,
-                                    showIcon: false,
-                                    width: SizeConfig.blockWidth * 55,
-                                    height: SizeConfig.blockHeight * 6.5,
-                                    image: true,
-                                    imageChild: Padding(
-                                      padding: EdgeInsets.only(
-                                          right: SizeConfig.blockWidth),
-                                      child: Image.asset(
-                                        work.intrestShown == null
-                                            ? 'assets/images/profile/like.png'
-                                            : 'assets/images/home/like.png',
-                                        width: SizeConfig.blockWidth * 5,
-                                        height: SizeConfig.blockHeight * 5,
-                                        fit: BoxFit.contain,
-                                        color: work.intrestShown != null
-                                            ? COLORS.semanticTwo
-                                            : COLORS.white,
+                                      },
+                                      backgroundColor: work.intrestShown != null
+                                          ? COLORS.semanticTwo.withOpacity(0.08)
+                                          : COLORS.primary,
+                                      showIcon: false,
+                                      width: SizeConfig.blockWidth * 55,
+                                      height: SizeConfig.blockHeight * 6.5,
+                                      image: true,
+                                      imageChild: Padding(
+                                        padding: EdgeInsets.only(
+                                            right: SizeConfig.blockWidth),
+                                        child: Image.asset(
+                                          work.intrestShown == null
+                                              ? 'assets/images/profile/like.png'
+                                              : 'assets/images/home/like.png',
+                                          width: SizeConfig.blockWidth * 5,
+                                          height: SizeConfig.blockHeight * 5,
+                                          fit: BoxFit.contain,
+                                          color: work.intrestShown != null
+                                              ? COLORS.semanticTwo
+                                              : COLORS.white,
+                                        ),
                                       ),
+                                      textColor: work.intrestShown != null
+                                          ? COLORS.semanticTwo
+                                          : COLORS.white,
                                     ),
-                                    textColor: work.intrestShown != null
-                                        ? COLORS.semanticTwo
-                                        : COLORS.white,
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    if (work.isProfessionalCanCall == true) ...[
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      if (work.isProfessionalCanCall == true) ...[
+                                        IconActionCard(
+                                          iconBool: false,
+                                          imageUrl: Image.asset(
+                                            'assets/images/home/phone.png',
+                                            width: SizeConfig.blockWidth * 4.25,
+                                            height: SizeConfig.blockHeight * 4.25,
+                                            fit: BoxFit.contain,
+                                          ),
+                                          onTap: () {
+                                            makePhoneCall(work.user!.mobile!);
+                                          },
+                                        ),
+                                      ],
                                       IconActionCard(
                                         iconBool: false,
                                         imageUrl: Image.asset(
-                                          'assets/images/home/phone.png',
-                                          width: SizeConfig.blockWidth * 4.25,
-                                          height: SizeConfig.blockHeight * 4.25,
+                                          'assets/images/home/share.png',
+                                          width: SizeConfig.blockWidth * 5.2,
+                                          height: SizeConfig.blockHeight * 5.2,
                                           fit: BoxFit.contain,
                                         ),
                                         onTap: () {
-                                          makePhoneCall(work.user!.mobile!);
+                                          shareJobDetails();
                                         },
                                       ),
                                     ],
-                                    IconActionCard(
-                                      iconBool: false,
-                                      imageUrl: Image.asset(
-                                        'assets/images/home/share.png',
-                                        width: SizeConfig.blockWidth * 5.2,
-                                        height: SizeConfig.blockHeight * 5.2,
-                                        fit: BoxFit.contain,
-                                      ),
-                                      onTap: () {
-                                        shareJobDetails();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    )
+                          );
+                        },
+                      )
+                    ]
+
                   ],
                 ),
               ),
@@ -555,6 +558,12 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                   canCall: singleWork.isProfessionalCanCall!,
                   interested: singleWork.intrestShown != null,
                   onTapIconOne: () {
+                    makePhoneCall(singleWork.user!.mobile!);
+                  },
+                  onTapIconTwo: () {
+                    shareJobDetails();
+                  },
+                  onShowInterest: () {
                     if (singleWork.intrestShown == null) {
                       showInterestedBloc.add(SaveInterestedWork(
                         workID: singleWork.id!,
@@ -571,12 +580,6 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                     } else {
                       showInterestBottomSheet(context);
                     }
-                  },
-                  onTapIconTwo: () {
-                    makePhoneCall(singleWork.user!.mobile!);
-                  },
-                  onShowInterest: () {
-                    shareJobDetails();
                   }),
             ),
           );

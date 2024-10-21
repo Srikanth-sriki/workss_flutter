@@ -159,13 +159,13 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.info_outline, // You can change this to any icon or image
+              Icons.info_outline,
               size: SizeConfig.blockWidth * 15,
               color: COLORS.neutralDarkOne,
             ),
             SizedBox(height: SizeConfig.blockHeight * 2),
             Text(
-              'No data available', // Customize the message here
+              'No data available',
               style: TextStyle(
                 color: COLORS.neutralDarkOne,
                 fontSize: SizeConfig.blockWidth * 4,
