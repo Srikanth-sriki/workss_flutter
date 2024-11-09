@@ -48,7 +48,7 @@ class DynamicWorkListImage extends StatelessWidget {
         return Padding(
           padding:  EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
           child: Container(
-            height: SizeConfig.blockHeight*45,
+            height: SizeConfig.blockHeight*40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(SizeConfig.blockWidth*4),
               image: DecorationImage(

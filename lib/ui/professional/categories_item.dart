@@ -61,14 +61,11 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                 borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(SizeConfig.blockWidth * 8),
                     bottomRight: Radius.circular(SizeConfig.blockWidth * 8))),
-            child: ScaleTransition(
-              scale: _scaleAnimation,
-              child: Image.asset(
-                widget.categoriesItem['images'],
-                width: SizeConfig.blockWidth * 100,
-                height: SizeConfig.blockHeight * 50,
-                fit: BoxFit.contain,
-              ),
+            child: Image.asset(
+              widget.categoriesItem['images'],
+              width: SizeConfig.blockWidth * 100,
+              height: SizeConfig.blockHeight * 50,
+              fit: BoxFit.contain,
             ),
           ),
           SizedBox(height: SizeConfig.blockHeight * 2),

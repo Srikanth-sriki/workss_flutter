@@ -37,7 +37,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           gender: event.gender,
           city: event.city,
           keyWord: event.keyWord,
-          profession: event.profession);
+          profession: event.profession,
+          currentLatitude: event.currentLatitude,
+          currentLongitude: event.currentLongitude);
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
@@ -82,7 +84,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         WorkViewModel workViewModel;
         workViewModel = WorkViewModel.fromJson(jsonDecoded["data"]);
         emit(FetchWorkViewSuccess(workViewModel));
-
       } else {
         String message = jsonDecoded["message"];
         customLog("The failure reason: $message");
@@ -93,5 +94,4 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(const FetchWorkViewError("Something Went wrong"));
     }
   }
-
 }

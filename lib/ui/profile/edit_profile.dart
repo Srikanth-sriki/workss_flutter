@@ -90,32 +90,11 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
 
   void _validateForm() {}
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-    return await Geolocator.getCurrentPosition();
-  }
-
   String? formatChargeType(String? chargeType) {
     switch (chargeType!.toLowerCase()) {
       case 'hours':
         return 'Hours';
-      case ' per day':
+      case 'perday':
         return 'PerDay';
       case 'month':
         return 'Month';
@@ -165,8 +144,11 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
           : [];
       selectedCharge = widget.profileFetch.userType == 'professional'
           ? formatChargeType(widget.profileFetch.chargeType!)
-          : '';
-
+          : null;
+      print(selectedCharge);
+      print("selectedCharge");
+      print(widget.profileFetch.chargeType);
+      print(formatChargeType(widget.profileFetch.chargeType!));
       WidgetsBinding.instance.addPostFrameCallback((_) {
         List<DropdownItem<Language>> item = items;
         controller.setItems(item);
@@ -182,20 +164,6 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         name: knownLanguages[index],
         id: index + 1, // Assigning a dynamic ID starting from 1
       );
-    });
-  }
-
-  void fetchCurrentLocation() async {
-    setState(() {
-      _isLoadingMap = true;
-    });
-    Position position = await _determinePosition();
-    final result = await getAddress(position.latitude, position.longitude);
-    setState(() {
-      pinCodeController.text = result['pincode'] ?? '';
-      _isLoadingMap = false;
-      latitude = position.latitude.toString();
-      longitude = position.longitude.toString();
     });
   }
 
@@ -232,6 +200,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
       setState(() {
         imagesList = true;
       });
+    } else if (selectedCharge == '' || selectedCharge == null) {
     } else {
       List<String> languageSelect =
           selectedLanguage.map((lang) => lang.name).toList();
@@ -280,6 +249,21 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         workImages.removeAt(index);
       }
     });
+  }
+
+  String? _onPinCodeChanged(String? value) {
+    if (value != null && value.length == 6) {
+      getLatLngFromPinCode(value).then((latLng) {
+        setState(() {
+          latitude = latLng['lat']?.toString();
+          longitude = latLng['lng']?.toString();
+          loading = false;
+        });
+
+        print('Latitude: $latitude, Longitude: $longitude');
+      });
+    }
+    return null;
   }
 
   @override
@@ -400,12 +384,18 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             title: 'email'.tr()),
                         buildTextField(
                           label: 'Pincode',
-                          controller: pinCodeController,
+                          inputNameType: TextInputType.phone,
+                          controller: pinCodeController,maxLength: 6,
+
                           hintText: "Enter your pincode".tr(),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               setState(() => pinError = true);
                               return 'Please enter a pincode'.tr();
+                            }
+                            else if (value!.length != 6) {
+                              setState(() => pinError = true);
+                              return 'Please enter valid pincode'.tr();
                             }
                             setState(() => pinError = false);
                             return null;
@@ -421,12 +411,17 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                       strokeWidth: SizeConfig.blockWidth * 0.5,
                                       color: COLORS.accent))
                               : null,
-                          onTap: () {
-                            fetchCurrentLocation();
-                          },
+                          onTap: () async {},
                           error: pinError,
                           onChanged: (value) {
-                            _validateForm();
+                            if (value!.length == 6) {
+                              setState(() {
+                                loading = true;
+                              });
+                            }
+
+                            _onPinCodeChanged(value);
+                            return null;
                           },
                           title: 'Pincode'.tr(),
                         ),
@@ -476,6 +471,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           normalTextField(
                               hintText: "Experience".tr(),
                               controller: experienceController,
+                              maxLength: 3,
                               inputType: TextInputType.number,
                               onChanged: (value) {
                                 _validateForm();
@@ -492,44 +488,44 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               errorMessage: '',
                               suffix: false,
                               prefix: false,
-                              suffixIcon: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: COLORS.neutralDarkTwo,
-                                      border: Border(
-                                        right: BorderSide(
-                                          width: SizeConfig.blockWidth * 0.1,
-                                          color: COLORS.neutralDarkTwo,
-                                        ),
-                                      ),
-                                    ),
-                                    height: SizeConfig.blockHeight * 5,
-                                    width: SizeConfig.blockWidth * 0.4,
-                                    margin: EdgeInsets.symmetric(
-                                        horizontal: SizeConfig.blockWidth * 1),
-                                  ),
-                                  Container(
-                                    constraints: BoxConstraints(
-                                      maxWidth: SizeConfig.blockWidth *
-                                          30, // Add constraints
-                                    ),
-                                    child: CustomDropdownButtonFormField(
-                                      selectedValue: selectedExperence,
-                                      items: const ['Year', 'Month'],
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          selectedExperence = newValue;
-                                        });
-                                      },
-                                      hintText: 'Select Duration',
-                                      iconSize: SizeConfig.blockWidth * 6,
-                                      iconColor: COLORS.accent,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              // suffixIcon: Row(
+                              //   mainAxisSize: MainAxisSize.min,
+                              //   children: [
+                              //     Container(
+                              //       decoration: BoxDecoration(
+                              //         color: COLORS.neutralDarkTwo,
+                              //         border: Border(
+                              //           right: BorderSide(
+                              //             width: SizeConfig.blockWidth * 0.1,
+                              //             color: COLORS.neutralDarkTwo,
+                              //           ),
+                              //         ),
+                              //       ),
+                              //       height: SizeConfig.blockHeight * 5,
+                              //       width: SizeConfig.blockWidth * 0.4,
+                              //       margin: EdgeInsets.symmetric(
+                              //           horizontal: SizeConfig.blockWidth * 1),
+                              //     ),
+                              //     Container(
+                              //       constraints: BoxConstraints(
+                              //         maxWidth: SizeConfig.blockWidth *
+                              //             30, // Add constraints
+                              //       ),
+                              //       child: CustomDropdownButtonFormField(
+                              //         selectedValue: selectedExperence,
+                              //         items: const ['Year', 'Month'],
+                              //         onChanged: (String? newValue) {
+                              //           setState(() {
+                              //             selectedExperence = newValue;
+                              //           });
+                              //         },
+                              //         hintText: 'Select Duration',
+                              //         iconSize: SizeConfig.blockWidth * 6,
+                              //         iconColor: COLORS.accent,
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
                               hasError: yearError),
                           SizedBox(height: SizeConfig.blockHeight),
                         ],
@@ -578,11 +574,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                   ),
                                   child: CustomDropdownButtonFormField(
                                     selectedValue: selectedCharge,
-                                    items: const ['Hours', 'PerDay', 'Month'],
+                                    items: const [' Hourly', 'PerDay', 'Monthly'],
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedCharge = newValue;
-                                        _validateForm();
                                       });
                                     },
                                     hintText: 'Select Duration',
@@ -643,6 +638,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               hintText: "Enter your age".tr(),
                               controller: ageController,
                               inputType: TextInputType.number,
+                              maxLength: 2,
                               onChanged: (value) {
                                 _validateForm();
                               },
@@ -705,7 +701,8 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                 marginTop: SizeConfig.blockHeight,
                                 backgroundColor: COLORS.white),
                             chipDecoration: ChipDecoration(
-                                backgroundColor: COLORS.primary.withOpacity(0.05),
+                                backgroundColor:
+                                    COLORS.primary.withOpacity(0.05),
                                 wrap: true,
                                 labelStyle: TextStyle(
                                     color: COLORS.primary,
@@ -768,7 +765,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               selectedTextColor: COLORS.neutralDark,
                               disabledTextColor: COLORS.neutralDark,
                               disabledIcon:
-                              Icon(Icons.lock, color: Colors.grey.shade300),
+                                  Icon(Icons.lock, color: Colors.grey.shade300),
                             ),
                             validator: (value) {
                               if (selectedLanguage.isEmpty) {

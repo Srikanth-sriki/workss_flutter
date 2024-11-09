@@ -3,10 +3,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/notification/notification_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 
-class NotificationListScreen extends StatelessWidget {
+
+
+
+
+
+
+class NotificationListScreen extends StatefulWidget {
   const NotificationListScreen({super.key});
+
+  @override
+  State<NotificationListScreen> createState() => _NotificationListScreenState();
+}
+
+class _NotificationListScreenState extends State<NotificationListScreen> {
+  late NotificationBloc notificationBloc;
+  int notificationLength = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    notificationBloc = BlocProvider.of<NotificationBloc>(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,28 +38,35 @@ class NotificationListScreen extends StatelessWidget {
         backgroundColor: COLORS.white,
         titleColors: COLORS.neutralDark,
         actions: [
-          TextButton(
-              onPressed: () {
-                context
-                    .read<NotificationBloc>()
-                    .add(const FetchNotificationClearAll());
-              },
-              child: Padding(
-                padding: EdgeInsets.only(right: SizeConfig.blockWidth * 2),
-                child: Text(
-                  'Clear',
-                  style: TextStyle(
-                    color: COLORS.accent,
-                    fontSize: SizeConfig.blockWidth * 3.8,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",
+          if(notificationLength >1)...[
+            TextButton(
+                onPressed: () {
+
+                  notificationBloc.add(const FetchNotificationClearAll());
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(right: SizeConfig.blockWidth * 2),
+                  child: Text(
+                    'Clear',
+                    style: TextStyle(
+                      color: COLORS.accent,
+                      fontSize: SizeConfig.blockWidth * 3.8,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
                   ),
-                ),
-              ))
+                ))
+          ]
+
         ],
       ),
       body: BlocConsumer<NotificationBloc, NotificationState>(
         listener: (context, state) {
+          if(state is NotificationFetchSuccess){
+            setState(() {
+              notificationLength = state.notifications.length;
+            });
+          }
           if (state is NotificationClearSuccess) {
             showCustomSnackBar(
                 context: context,
@@ -58,10 +86,13 @@ class NotificationListScreen extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is FetchNotificationListLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return globalLoadingWidget();
           } else if (state is NotificationFetchSuccess) {
             if (state.notifications.isEmpty) {
-              return const Center(child: Text("No notifications available"));
+              return SizedBox(
+                  width: SizeConfig.screenWidth,
+                  height: SizeConfig.blockHeight * 80,
+                  child: emptyComponent());
             }
             return ListView.builder(
               padding: EdgeInsets.symmetric(
@@ -85,7 +116,6 @@ class NotificationListScreen extends StatelessWidget {
                           borderRadius: BorderRadius.all(
                               Radius.circular(SizeConfig.blockWidth * 3)),
                           color: COLORS.semantic),
-
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.symmetric(
                           horizontal: SizeConfig.blockWidth * 4),
@@ -103,7 +133,11 @@ class NotificationListScreen extends StatelessWidget {
                             ),
                             softWrap: true,
                           ),
-                           Icon(Icons.delete, color: Colors.white,size: SizeConfig.blockWidth*5,),
+                          Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                            size: SizeConfig.blockWidth * 5,
+                          ),
                         ],
                       ),
                     ),
@@ -144,12 +178,13 @@ class NotificationListScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                    )
-                    );
+                    ));
               },
             );
           } else if (state is NotificationFetchFailure) {
-            return Center(child: Text(state.message));
+            return ErrorScreen(onRetry: () {
+              notificationBloc.add(const FetchNotificationList());
+            });
           } else {
             return const Center(child: Text("No notifications to display"));
           }

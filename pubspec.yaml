@@ -67,6 +67,10 @@ dependencies:
   flutter_local_notifications: ^17.2.3
   overlay_support: ^2.1.0
   package_info_plus: ^8.0.3
+  shimmer_animation: ^2.2.1
+  loading_animation_widget: ^1.3.0
+  map_location_picker: ^1.3.2
+  location: ^7.0.1
 
 
 
@@ -105,6 +109,8 @@ flutter:
      - assets/images/login/login_success.png
      - assets/images/bottom_tab/chart.png
      - assets/images/bottom_tab/chart_select.png
+     - assets/images/bottom_tab/profile_01.png
+     - assets/images/bottom_tab/profile_select_01.png
      - assets/images/bottom_tab/profile.png
      - assets/images/bottom_tab/profile_select.png
      - assets/images/bottom_tab/reel.png
@@ -115,9 +121,14 @@ flutter:
      - assets/images/bottom_tab/prop_select.png
      - assets/images/bottom_tab/work.png
      - assets/images/bottom_tab/work_select.png
+     - assets/images/bottom_tab/prop_01.png
+     - assets/images/bottom_tab/prop_select_01.png
+     - assets/images/bottom_tab/work_01.png
+     - assets/images/bottom_tab/work_select_01.png
      - assets/images/home/translation.png
      - assets/images/home/filter.png
      - assets/images/home/home.png
+     - assets/images/home/app_share.png
      - assets/images/home/gender.png
      - assets/images/home/speak.png
      - assets/images/home/work_select.png
@@ -146,6 +157,13 @@ flutter:
      - assets/images/home/like.png
      - assets/images/professions/bookmarked.png
      - assets/images/lottie/insight_check.json
+     - assets/images/lottie/error.json
+     - assets/images/lottie/empty.json
+     - assets/images/profile/home_location.png
+     - assets/images/profile/Buildings_location.png
+     - assets/images/profile/other_location.png
+     - assets/images/profile/delete_2d.png
+     - assets/images/profile/success.png
 
 
   #   - images/a_dot_ham.jpeg

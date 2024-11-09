@@ -1,0 +1,536 @@
+import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:http/http.dart' as http;
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:uuid/uuid.dart';
+import 'package:works_app/components/size_config.dart';
+
+import '../../../bloc/profile/profile_bloc.dart';
+import '../../../components/colors.dart';
+import '../../../dao/get_user_location.dart';
+import '../../../global_helper/helper_function.dart';
+import '../../../global_helper/reuse_widget.dart';
+import '../../../models/address_location_list.dart';
+import '../component.dart';
+import '../modal/edit_address_cancel.dart';
+import '../modal/edit_address_success.dart';
+
+class EditAddressScreen extends StatefulWidget {
+  late AddressListModal addressItem;
+   EditAddressScreen({super.key,required this.addressItem});
+
+  @override
+  State<EditAddressScreen> createState() => _EditAddressScreenState();
+}
+
+class _EditAddressScreenState extends State<EditAddressScreen> {
+  late ProfileBloc profileBloc;
+  GoogleMapController? _mapController;
+  Location _location = Location();
+  final TextEditingController houseNo = TextEditingController();
+  final TextEditingController homeAddress = TextEditingController();
+  final TextEditingController Instructions = TextEditingController();
+  final TextEditingController otherName = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  late LatLng _initialPosition;
+  late LatLng _currentPosition;
+  String _currentAddress = 'Loading address...';
+  bool _isMapDragging = false;
+  late String _selectedType ;
+  bool isChecked = false;
+  bool otherNameError = false;
+  bool loading = false;
+  double latitude = 0.0;
+  double longitude = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    profileBloc = BlocProvider.of<ProfileBloc>(context);
+    initialData();
+
+  }
+  void initialData() {
+     _initialPosition = LatLng(
+      double.tryParse(widget.addressItem.latitude ?? '0.0') ?? 0.0,
+      double.tryParse(widget.addressItem.longitude ?? '0.0') ?? 0.0,
+    );
+     _currentPosition=LatLng(
+       double.tryParse(widget.addressItem.latitude ?? '0.0') ?? 0.0,
+       double.tryParse(widget.addressItem.longitude ?? '0.0') ?? 0.0,
+     );
+     _selectedType = capitalizeFirstLetter(widget.addressItem.addressType!);
+     houseNo.text =  widget.addressItem.houseNo!;
+     homeAddress.text =widget.addressItem.area!;
+     Instructions.text =widget.addressItem.instructions!;
+     otherName.text =widget.addressItem.addressTypeName!;
+     isChecked = widget.addressItem.isDefault!;
+      latitude = double.tryParse(widget.addressItem.latitude ?? '0.0')!;
+      longitude =  double.tryParse(widget.addressItem.longitude ?? '0.0')!;
+  }
+
+  Future<void> _getCurrentLocation() async {
+    PermissionStatus permissionGranted = await _location.requestPermission();
+    print("Permission status: $permissionGranted");
+
+    if (permissionGranted == PermissionStatus.granted) {
+      LocationData locationData = await _location.getLocation();
+      setState(() {
+        _currentPosition =
+            LatLng(locationData.latitude!, locationData.longitude!);
+        _initialPosition = _currentPosition;
+        _currentAddress = 'Fetching address...';
+        latitude = locationData.latitude!;
+        longitude = locationData.longitude!;
+      });
+      print(_currentPosition);
+      _updateMapCamera(_currentPosition);
+      _getAddressFromCoordinates(_currentPosition);
+    } else {
+      print("Location permission not granted");
+    }
+  }
+
+  void _updateMapCamera(LatLng newPosition) {
+    print("Updating map camera to new position: $newPosition");
+    _mapController?.animateCamera(CameraUpdate.newLatLng(newPosition));
+  }
+
+  Future<void> _getAddressFromCoordinates(LatLng coordinates) async {
+    print("Fetching address for coordinates: $coordinates");
+    Map<String, String> addressData =
+        await getAddress(coordinates.latitude, coordinates.longitude);
+    setState(() {
+      _currentAddress = addressData['address'] ?? '';
+      homeAddress.text = addressData['address'] ?? '';
+    });
+  }
+
+  Future<void> _setSelectedType(String type) async {
+    setState(() {
+      _selectedType = type;
+    });
+  }
+  @override
+  void dispose() {
+    houseNo.dispose();
+    homeAddress.dispose();
+    Instructions.dispose();
+    otherName.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.unfocus();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: COLORS.white,
+        appBar: const CustomAppBar(
+          title: 'Edit Location',
+          backgroundColor: COLORS.white,
+          titleColors: COLORS.neutralDark,
+        ),
+        body: BlocListener<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state is AddressLocationLoading) {
+              setState(() {
+                loading = true;
+              });
+            } else if (state is AddressLocationEditSuccess) {
+              setState(() {
+                loading = false;
+              });
+              showMaterialModalBottomSheet(
+                enableDrag: false,
+                expand: false,
+                isDismissible: false,
+                backgroundColor: COLORS.white,
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (context) => EditAddressSuccessBottomSheet(),
+              );
+            } else if (state is AddressLocationEditFailed) {
+              setState(() {
+                loading = false;
+              });
+              showCustomSnackBar(
+                context: context,
+                message: state.message,
+              );
+            }
+            setState(() {});
+          },
+  child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              pinned: true,
+              backgroundColor: COLORS.white,
+              forceMaterialTransparency: true,
+              automaticallyImplyLeading: false,
+              elevation: 0,
+              expandedHeight: SizeConfig.blockHeight * 80,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  children: [
+                    GoogleMap(
+                      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                        Factory<OneSequenceGestureRecognizer>(
+                            () => EagerGestureRecognizer()),
+                      },
+                      mapType: MapType.normal,
+                      zoomControlsEnabled: false,
+                      myLocationEnabled: true,
+                      zoomGesturesEnabled: true,
+                      scrollGesturesEnabled: true,
+                      myLocationButtonEnabled: false,
+                      rotateGesturesEnabled: false,
+                      tiltGesturesEnabled: false,
+                      initialCameraPosition: CameraPosition(
+                        target: _initialPosition,
+                        zoom: 10,
+                      ),
+                      onMapCreated: (GoogleMapController controller) {
+                        _mapController = controller;
+                        print("Map created, controller assigned.");
+                      },
+                      onCameraMove: (CameraPosition position) {
+                        setState(() {
+                          _isMapDragging = true;
+                          _currentPosition = position.target;
+                          longitude = position.target.longitude;
+                          latitude =position.target.latitude;
+                        });
+                      },
+                      onCameraIdle: () {
+                        setState(() {
+                          _isMapDragging = false;
+                        });
+                        _getAddressFromCoordinates(_currentPosition);
+                      },
+                      // markers: {
+                      //   Marker(
+                      //     markerId: MarkerId("currentLocation"),
+                      //     position: _currentPosition,
+                      //     draggable: true,
+                      //     onDragEnd: (LatLng position) {
+                      //       setState(() {
+                      //         _currentPosition = position;
+                      //       });
+                      //       _getAddressFromCoordinates(_currentPosition);
+                      //     },
+                      //   ),
+                      // },
+                    ),
+                    Center(
+                      child: Icon(
+                        Icons.location_on,
+                        color: COLORS.semantic,
+                        size: SizeConfig.blockWidth * 10,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: SizeConfig.blockHeight * 5,
+                      left: 0,
+                      right: 0,
+                      child: InkWell(
+                        onTap: _getCurrentLocation,
+                        child: Container(
+                          width: SizeConfig.blockWidth * 40,
+                          margin: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 20,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 2,
+                            vertical: SizeConfig.blockWidth * 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: COLORS.white,
+                            borderRadius:
+                                BorderRadius.circular(SizeConfig.blockWidth * 3),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.my_location_rounded,
+                                color: COLORS.accent,
+                                size: SizeConfig.blockWidth * 5,
+                              ),
+                              SizedBox(width: SizeConfig.blockWidth * 1.5),
+                              Text(
+                                'Use my Current Location',
+                                style: TextStyle(
+                                  color: COLORS.black,
+                                  fontSize: SizeConfig.blockWidth * 3.25,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Address form
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 4.5,
+                      vertical: SizeConfig.blockWidth * 4,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_on_rounded,
+                          color: COLORS.accent,
+                          size: SizeConfig.blockWidth * 5,
+                        ),
+                        SizedBox(
+                          width: SizeConfig.blockWidth * 3,
+                        ),
+                        SizedBox(
+                          width: SizeConfig.blockWidth * 80,
+                          child: Text(
+                            _currentAddress,
+                            style: TextStyle(
+                              color: COLORS.black,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                            softWrap: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(
+                    color: COLORS.neutralDarkTwo,
+                    thickness: SizeConfig.blockHeight * 0.1,
+                  ),
+                  SizedBox(height: SizeConfig.blockHeight * 2),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildTypeButton('Home', 'assets/images/profile/home_location.png'),
+                        SizedBox(
+                          width: SizeConfig.blockWidth * 4,
+                        ),
+                        _buildTypeButton('Office', 'assets/images/profile/Buildings_location.png'),
+                        SizedBox(
+                          width: SizeConfig.blockWidth * 4,
+                        ),
+                        _buildTypeButton(
+                            'Other', 'assets/images/profile/other_location.png'),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 4.5,
+                      vertical: SizeConfig.blockWidth * 4.5,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_selectedType == 'Other') ...[
+                            buildTextField(
+                                label: 'Name of Address',
+                                controller: otherName,
+                                hintText: "Name of Address".tr(),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    setState(() => otherNameError = true);
+                                    return 'Enter name of address'.tr();
+                                  }
+                                  setState(() => otherNameError = false);
+                                  return null;
+                                },
+                                error: otherNameError,
+                                title: 'Name of Address'.tr(),
+                                onChanged: (value) {})
+                          ],
+                          buildTextField(
+                              label: 'House/Flat/Block No',
+                              controller: houseNo,
+                              hintText: "Enter house/flat/block no".tr(),
+                              validator: (value) {},
+                              error: false,
+                              title: 'House/Flat/Block No'.tr(),
+                              onChanged: (value) {}),
+                          buildTextField(
+                            label: 'Apartment/Road/Area',
+                            controller: homeAddress,
+                            hintText: "Enter apartment/road/area".tr(),
+                            validator: (value) {},
+                            error: false,
+                            title: 'Apartment/Road/Area'.tr(),
+                            onChanged: (value) {},
+                          ),
+                          buildBioTextField(
+                              label: 'Instructions'.tr(),
+                              controller: Instructions,
+                              hintText:
+                                  "Write instructions to reach out you".tr(),
+                              validator: (value) {},
+                              error: false,
+                              title: 'Instructions'.tr(),maxLines: 6,
+                              onChanged: (value) {}),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Checkbox(
+                                value: isChecked,
+                                side: BorderSide(
+                                    color: COLORS.neutralDarkOne,
+                                    width: SizeConfig.blockWidth * 0.3),
+                                checkColor: COLORS.white,
+                                activeColor: COLORS.primary,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    isChecked = value!;
+                                  });
+                                },
+                              ),
+                              Text(
+                                'Save it as a default address'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDark,
+                                  fontSize: SizeConfig.blockWidth * 3.5,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: SizeConfig.blockHeight * 2),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              customButton(
+                                  text: 'CANCEL'.tr(),
+                                  onPressed: () {
+                                    showMaterialModalBottomSheet(
+                                      enableDrag: false,
+                                      expand: false,
+                                      isDismissible: false,
+                                      backgroundColor: COLORS.white,
+                                      context: context,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius:
+                                        BorderRadius.vertical(top: Radius.circular(20)),
+                                      ),
+                                      builder: (context) => EditAddressCancelBottomSheet(reset: initialData,),
+                                    );
+                                  },
+                                  backgroundColor: COLORS.neutralDarkTwo,
+                                  showIcon: false,
+                                  width: SizeConfig.blockWidth * 42,
+                                  height: SizeConfig.blockHeight * 8,
+                                  textColor: COLORS.black,
+                                  loading: loading
+                              ),
+                              customButton(
+                                  text: 'SAVE'.tr(),
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      profileBloc.add(AddressLocationEdit(
+                                          addressId: widget.addressItem.id!,
+                                          addressType: _selectedType.toLowerCase(),
+                                          addressTypeName: otherName.text,
+                                          houseNo: houseNo.text,
+                                          area: homeAddress.text,
+                                          instructions: Instructions.text,
+                                          isDefault: isChecked,
+                                          latitude: latitude.toString(),
+                                          longitude: longitude.toString()));
+                                    }
+                                  },
+                                  backgroundColor: COLORS.primary,
+                                  showIcon: false,
+                                  width: SizeConfig.blockWidth * 42,
+                                  height: SizeConfig.blockHeight * 8,
+                                  textColor: COLORS.white,
+                                  loading: loading
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: SizeConfig.blockHeight * 2),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+),
+      ),
+    );
+  }
+
+  Widget _buildTypeButton(String type, String icon) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+        _selectedType == type ? COLORS.primary : COLORS.neutralDarkTwo,
+        foregroundColor: _selectedType == type ? Colors.white : Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+        ),
+      ),
+      onPressed: () => _setSelectedType(type),
+      icon:  Image.asset(
+        icon,
+        width:
+        SizeConfig.blockWidth * 4,
+        height:
+        SizeConfig.blockWidth * 4,
+        fit: BoxFit.contain,color: _selectedType == type ? COLORS.white : COLORS.primary,
+      ),
+      label: Text(
+        type,
+        style: TextStyle(
+          fontSize: SizeConfig.blockWidth * 3.5,
+          fontWeight: FontWeight.w400,
+          fontFamily: "Poppins",
+        ),
+      ),
+    );
+  }
+}

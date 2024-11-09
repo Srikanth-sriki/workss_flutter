@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/ui/onboarding/register_form.dart';
@@ -10,6 +11,7 @@ import 'package:works_app/ui/post_work/post_work_success.dart';
 import 'package:works_app/ui/profile/component.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
+import '../../bloc/profile/profile_bloc.dart';
 import '../../components/size_config.dart';
 import '../../dao/get_user_location.dart';
 import '../../global_helper/ImagePickerComponent.dart';
@@ -17,6 +19,7 @@ import '../../global_helper/dropdown.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_posted_work.dart';
+import '../profile/location/location_list_modal.dart';
 
 class EditPostWorkScreen extends StatefulWidget {
   final VoidCallback refreshPageCallback;
@@ -52,6 +55,8 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   String? latitude = "0.0";
   String? longitude = "0.0";
   bool addressError = false;
+  String addressId = '';
+  String addressSelected = 'Select work location';
 
   List<DropdownItem<Language>> items = [
     DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
@@ -132,7 +137,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
     latitude = widget.fetchPostedModel.latitude!;
     longitude = widget.fetchPostedModel.longitude!;
     bioController.text = widget.fetchPostedModel.description!;
-    addressController.text = widget.fetchPostedModel.location!;
+    addressSelected = widget.fetchPostedModel.location!;
   }
 
   List<Language> convertLanguages(List<String> knownLanguages) {
@@ -157,7 +162,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
           experienceLevel: _experienceLevel!.toLowerCase(),
           gender: _selectedGender!.toLowerCase(),
           knowLanguage: languageSelect,
-          location: addressController.text,
+          location: addressSelected,
           workPlace: _selectedWorkPlace!.toLowerCase(),
           workImages: workImages,
           isProfessionalCanCall: isChecked,
@@ -217,7 +222,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        return false;
+        return true;
       },
       child: GestureDetector(
         onTap: () {
@@ -412,25 +417,81 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                           },
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 1.5),
-                        _buildTextField(
-                            label: 'Work Address',
-                            controller: addressController,
-                            hintText: "Select work location".tr(),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                setState(() => addressError = true);
-                                return 'Please enter your address'.tr();
-                              }
-                              setState(() => addressError = false);
-                              return null;
-                            },
-                            error: addressError,
-                            onChanged: (value) {
-                              _validateForm();
-                              return null;
-                            },
-                            onTap: _fetchCurrentLocation,
-                            title: 'Work Address'.tr()),
+                        registerText(text: 'Work Address'),
+                        InkWell(
+                          onTap: () {
+                            showMaterialModalBottomSheet(
+                              enableDrag: true,
+                              expand: false,
+                              isDismissible: true,
+                              backgroundColor: COLORS.white,
+                              context: context,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(
+                                      SizeConfig.blockWidth * 3.8),
+                                ),
+                              ),
+                              builder: (context) => BlocProvider(
+                                create: (context) => ProfileBloc()
+                                  ..add(const AddressLocationListEvent()),
+                                child: AddressListModalBottomSheet(
+                                  selectedAddressId: addressId,
+                                  onAddressSelected: (id, address,latitudeAdd,longitudeAdd) {
+                                    setState(() {
+                                      addressId = id;
+                                      addressSelected = address;
+                                      latitude = latitudeAdd;
+                                      longitude = longitudeAdd;
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: SizeConfig.blockWidth*100,
+                            height: SizeConfig.blockHeight*7.5,
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight,horizontal: SizeConfig.blockWidth*3.5),
+                            decoration: BoxDecoration(
+                                border: Border.all(width: SizeConfig.blockWidth*0.2,color: COLORS.neutralDarkTwo),
+                                borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3.5)
+                            ),
+                            child: Text(addressSelected,
+                              style: TextStyle(
+                                color: addressSelected == 'Select work location'?COLORS.neutralDarkOne:COLORS.neutralDark,
+
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                                fontSize: addressSelected == 'Select work location'?SizeConfig.blockWidth * 3.2:SizeConfig.blockWidth * 3.5,
+
+                              ),textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: SizeConfig.blockHeight * 1.5),
+                        // _buildTextField(
+                        //     label: 'Work Address',
+                        //     controller: addressController,
+                        //     hintText: "Select work location".tr(),
+                        //     validator: (value) {
+                        //       if (value == null || value.isEmpty) {
+                        //         setState(() => addressError = true);
+                        //         return 'Please enter your address'.tr();
+                        //       }
+                        //       setState(() => addressError = false);
+                        //       return null;
+                        //     },
+                        //     error: addressError,
+                        //     onChanged: (value) {
+                        //       _validateForm();
+                        //       return null;
+                        //     },
+                        //     onTap: _fetchCurrentLocation,
+                        //     title: 'Work Address'.tr()),
                         buildDropdown(
                           value: _selectedWorkPlace,
                           label: 'Work Place'.tr(),

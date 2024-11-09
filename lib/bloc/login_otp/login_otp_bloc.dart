@@ -37,10 +37,11 @@ class LoginOtpBloc extends Bloc<LoginOtpEvent, LoginOtpState> {
       customLog("The status Code : ${response.statusCode}");
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+
         String accessToken = jsonDecoded["data"]["access_token"];
         String userId = jsonDecoded["data"]["userData"]["id"];
         bool profileCompleted = jsonDecoded["data"]["userData"]["is_registered"];
-        String userType = jsonDecoded["data"]["userData"]["user_type"];
+        String userType = jsonDecoded["data"]["userData"]["user_type"]??"";
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString(LocalConstant.accessToken, accessToken);

@@ -6,17 +6,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/ui/profile/Interested_works.dart';
 import 'package:works_app/ui/profile/bookmark_list.dart';
 import 'package:works_app/ui/profile/conatct_us.dart';
 import 'package:works_app/ui/profile/edit_profile.dart';
 import 'package:works_app/ui/profile/faq.dart';
+import 'package:works_app/ui/profile/location/location_create.dart';
 import 'package:works_app/ui/profile/posted_work.dart';
 import 'package:works_app/ui/profile/setting.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_profile_model.dart';
+import 'location/location_list.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool verified = false;
   late ProfileFetch profileFetch;
   bool interestedWork = false;
+  bool isVerified = false;
 
   @override
   void initState() {
@@ -64,9 +68,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             setState(() {
               profileFetch = state.profileFetch!;
               phoneNumber = state.profileFetch.mobile!;
+              Config.phoneNumber = state.profileFetch.mobile!;
               profileImage = state.profileFetch.profilePic!;
               userName = state.profileFetch.name!;
-              interestedWork= state.profileFetch.userType =='professional'?true:false;
+              Config.name = state.profileFetch.name!;
+              isVerified = state .profileFetch.isVerified!;
+              interestedWork =
+                  state.profileFetch.userType == 'professional' ? true : false;
             });
           } else if (state is FetchProfileFailed) {
             loading = false;
@@ -108,16 +116,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                userName,
-                                style: TextStyle(
-                                  color: COLORS.white,
-                                  fontSize: SizeConfig.blockWidth * 4.25,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: "Poppins",
+                              SizedBox(
+                                width: SizeConfig.blockWidth*48,
+                                child: Text(
+                                  userName,
+                                  style: TextStyle(
+                                    color: COLORS.white,
+                                    fontSize: SizeConfig.blockWidth * 4.25,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Poppins",
+                                  ),maxLines: 1,softWrap: true,overflow:TextOverflow.ellipsis,
                                 ),
                               ),
-
                               Row(
                                 children: [
                                   Text(
@@ -178,50 +188,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 3,
-                            vertical: SizeConfig.blockHeight * 1),
-                        decoration: BoxDecoration(
-                          color: COLORS.semanticTwo,
-                          borderRadius: BorderRadius.only(
-                              bottomLeft:
-                                  Radius.circular(SizeConfig.blockWidth * 4)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.verified,
-                              color: COLORS.white,
-                              size: SizeConfig.blockWidth * 3.5,
-                            ),
-                            SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
-                            ),
-                            Text(
-                              'Verified'.tr(),
-                              style: TextStyle(
+                    if(isVerified == true)...[
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.blockWidth * 3,
+                              vertical: SizeConfig.blockHeight * 1),
+                          decoration: BoxDecoration(
+                            color: COLORS.semanticTwo,
+                            borderRadius: BorderRadius.only(
+                                bottomLeft:
+                                Radius.circular(SizeConfig.blockWidth * 4)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.verified,
                                 color: COLORS.white,
-                                fontSize: SizeConfig.blockWidth * 3,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
+                                size: SizeConfig.blockWidth * 3.5,
                               ),
-                            ),
-                          ],
+                              SizedBox(
+                                width: SizeConfig.blockWidth * 1.5,
+                              ),
+                              Text(
+                                'Verified'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.white,
+                                  fontSize: SizeConfig.blockWidth * 3,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    )
+                      )
+                    ]
+
                   ],
                 )
               ],
               Expanded(
                 child: ListView(
                   children: [
+                    _buildListItem(
+                        'assets/images/profile/other_location.png', 'My Addresses', () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                      create: (context) => ProfileBloc()
+                                        ..add(AddressLocationListEvent())),
+                                ],
+                                child: LocationListScreen(),
+                              )));
+                    }),
                     _buildListItem(
                         'assets/images/profile/posted_work.png', 'Posted Works',
                         () {
@@ -237,54 +264,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ],
                                     child: PostedWorkList(),
                                   )));
-
                     }),
                     _buildListItem('assets/images/profile/bookmark.png',
                         'Saved Professionals', () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MultiBlocProvider(
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MultiBlocProvider(
                                     providers: [
                                       BlocProvider(
                                         create: (context) => ProfileBloc()
-                                          ..add(const FetchSavedProfessionalEvent()),
+                                          ..add(
+                                              const FetchSavedProfessionalEvent()),
                                       ),
                                       BlocProvider(
-                                        create: (context) => ShowInterestedBloc(),
+                                        create: (context) =>
+                                            ShowInterestedBloc(),
                                       ),
                                     ],
                                     child: const BookMarkListScreen(),
                                   )));
-
                     }),
-                    if(interestedWork == true)...[
+                    if (interestedWork == true) ...[
                       _buildListItem(
                           'assets/images/profile/like.png', 'Interested Works',
-                              () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
+                          () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
                                       providers: [
                                         BlocProvider(
                                           create: (context) => ProfileBloc()
-                                            ..add(const FetchInterestedWorkEvent()),
+                                            ..add(
+                                                const FetchInterestedWorkEvent()),
                                         ),
                                       ],
                                       child: InterestedWorkList(),
                                     )));
-                          }),
+                      }),
                     ],
-
                     _buildListItem('assets/images/profile/share.png',
                         'Share with Friends', () {}),
                     _buildListItem('assets/images/profile/question.png', 'FAQs',
                         () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MultiBlocProvider(
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MultiBlocProvider(
                                     providers: [
                                       BlocProvider(
                                         create: (context) => ProfileBloc()
@@ -302,15 +329,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildListItem(
                         'assets/images/profile/contact.png', 'Help & Support',
                         () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MultiBlocProvider(
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MultiBlocProvider(
                                     providers: [
                                       BlocProvider(
-                                        create: (context) => ProfileBloc()
-
-                                      ),
+                                          create: (context) => ProfileBloc()),
                                     ],
                                     child: ContactUsScreen(),
                                   )));
@@ -323,6 +348,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             builder: (BuildContext context) => SettingApp()),
                       );
                     }),
+
                   ],
                 ),
               ),
@@ -338,7 +364,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: SizeConfig.blockHeight*3.5,vertical: SizeConfig.blockHeight*1.25),
+        margin: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockHeight * 3.5,
+            vertical: SizeConfig.blockHeight * 1.25),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -347,22 +375,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: SizeConfig.blockWidth * 12,
               height: SizeConfig.blockWidth * 12,
               padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
-              margin: EdgeInsets.only(right: SizeConfig.blockWidth * 1,),
+              margin: EdgeInsets.only(
+                right: SizeConfig.blockWidth * 1,
+              ),
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                  color: COLORS.primaryOne.withOpacity(0.3)),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                  color: COLORS.primaryOne.withOpacity(0.2)),
               child: Image.asset(
                 imagePath,
                 width: SizeConfig.blockWidth * 5, // Adjust size as needed
                 height: SizeConfig.blockHeight * 5,
-                fit: BoxFit.contain,
+                fit: BoxFit.contain,color: COLORS.neutralDark,
               ),
             ),
-            SizedBox(width: SizeConfig.blockWidth*4,),
+            SizedBox(
+              width: SizeConfig.blockWidth * 4,
+            ),
             Text(
               title.tr(),
               style: TextStyle(
-                  fontSize: SizeConfig.blockWidth * 4,
+                  fontSize: SizeConfig.blockWidth * 3.6,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
                   color: COLORS.primaryTwo),

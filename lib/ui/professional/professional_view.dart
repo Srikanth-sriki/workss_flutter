@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
@@ -44,8 +45,8 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
       body: BlocConsumer<ProfessionalBloc, ProfessionalState>(
         listener: (context, state) {},
         builder: (context, state) {
-          if (state is ProfessionalViewLoading) {
-            return Container();
+          if (state is ProfessionalViewLoading || state is ProfessionalInitial) {
+            return globalLoadingWidget();
           } else if (state is ProfessionalViewSuccess) {
             final professional = state.professionalViewModel.professional!;
             final similarProfessionals =
@@ -205,27 +206,41 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Image.asset(
-                                professional.isSaved != null
-                                    ? 'assets/images/professions/bookmarked.png'
-                                    : 'assets/images/profile/bookmark.png',
-                                width: professional.isSaved != null
-                                    ? SizeConfig.blockWidth * 5.25
-                                    : SizeConfig.blockWidth * 4.25,
-                                height: professional.isSaved != null
-                                    ? SizeConfig.blockHeight * 5.25
-                                    : SizeConfig.blockHeight * 4.25,
-                                fit: BoxFit.contain,
-                                color: professional.isSaved != null
-                                    ? COLORS.accent
-                                    : COLORS.neutralDarkOne,
+                              InkWell(
+                                onTap: (){
+                                  showInterestedBloc.add(ProfessionalSavedUs(
+                                    PropId: professional.id!,
+                                    onSuccess: () {
+                                      setState(() {
+                                        professional.isSaved =
+                                            IsContacted(id: '');
+                                      });
+                                    },
+                                    onError: () {},
+                                  ));
+                                },
+                                child: Image.asset(
+                                  professional.isSaved != null
+                                      ? 'assets/images/professions/bookmarked.png'
+                                      : 'assets/images/profile/bookmark.png',
+                                  width: professional.isSaved != null
+                                      ? SizeConfig.blockWidth * 5.25
+                                      : SizeConfig.blockWidth * 4.25,
+                                  height: professional.isSaved != null
+                                      ? SizeConfig.blockHeight * 5.25
+                                      : SizeConfig.blockHeight * 4.25,
+                                  fit: BoxFit.contain,
+                                  color: professional.isSaved != null
+                                      ? COLORS.accent
+                                      : COLORS.neutralDarkOne,
+                                ),
                               ),
                               IconButton(
                                 icon: Icon(Icons.more_vert,
                                     color: COLORS.black,
                                     size: SizeConfig.blockWidth * 6.5),
                                 onPressed: () {
-                                  // Add functionality for more button
+
                                 },
                               )
                             ]),
@@ -298,7 +313,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                 ),
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
                                       formatPrice(professional.charges!),
@@ -430,6 +445,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                   setState(() {
                                                     professionalData.isContacted =
                                                         IsContacted(id: '');
+                                                    makePhoneCall(professionalData.mobile!);
                                                   });
                                                 },
                                                 onError: () {},
@@ -439,7 +455,11 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                           jobType:
                                           professionalData.professionType!,
                                           onShare: () {
-                                            shareJobDetails();
+                                            shareJobDetails(
+                                              experience: professionalData.experiencedYears!,
+                                              location: professionalData.city!,
+                                              jobTitle:  professionalData.professionType!,
+                                            );
                                           },
                                           onTap: () {
                                             Navigator.push(
@@ -492,7 +512,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
               ),
             );
           } else if (state is ProfessionalViewError) {
-            return Container();
+            ErrorScreen(onRetry: () {
+              professionalBloc.add(FetchProfessionalView(widget.id));
+            });
           }
           return Container();
         },

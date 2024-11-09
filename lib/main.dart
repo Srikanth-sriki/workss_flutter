@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:works_app/bloc/professional/professional_bloc.dart';
@@ -97,6 +99,7 @@ Future<void> main() async {
 
   // Ensure localization is initialized
   await EasyLocalization.ensureInitialized();
+  // LatLng initialLocation = await fetchInitialLocation();
 
   // Start the app
   runApp(
@@ -116,6 +119,19 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
+}
+
+Future<LatLng> fetchInitialLocation() async {
+  Location location = Location();
+  PermissionStatus permissionGranted = await location.requestPermission();
+
+  if (permissionGranted == PermissionStatus.granted) {
+    LocationData locationData = await location.getLocation();
+    return LatLng(locationData.latitude!, locationData.longitude!);
+  }
+
+  // Fallback to a default location if permission is denied.
+  return LatLng(12.9716, 77.5946);
 }
 
 
@@ -223,6 +239,8 @@ class _MyAppState extends State<MyApp> {
                           profession: '',
                           keyWord: '',
                           city: '',
+                          currentLongitude: '',
+                          currentLatitude: '',
                           gender: ''))),
                 BlocProvider(create: (context) => ProfessionalBloc()),
                 BlocProvider(create: (context) => ProfileBloc()..add(const FetchProfileEvent())),
@@ -291,6 +309,8 @@ class _AuthenticationState extends State<Authentication> {
                         profession: '',
                         keyWord: '',
                         city: '',
+                        currentLongitude: '',
+                        currentLatitude: '',
                         gender: ''))),
               BlocProvider(create: (context) => ProfessionalBloc()),
               BlocProvider(create: (context) => ProfileBloc()..add(const FetchProfileEvent())),

@@ -13,24 +13,84 @@ class TermsAndCondition extends StatefulWidget {
 }
 
 class _TermsAndConditionState extends State<TermsAndCondition> {
-  WebViewController controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..loadRequest(Uri.parse('https://workss.co/terms&conditions'));
+  bool isLoading = true;
+  late WebViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            setState(() {
+              isLoading = true;
+            });
+          },
+          onPageStarted: (String url) {
+            setState(() {
+              isLoading = true;
+            });
+          },
+          onPageFinished: (String url) {
+            setState(() {
+              isLoading = false;
+            });
+          },
+          onHttpError: (HttpResponseError error) {
+            setState(() {
+              isLoading = false;
+            });
+          },
+          onWebResourceError: (WebResourceError error) {
+            setState(() {
+              isLoading = false;
+            });
+          },
+          onNavigationRequest: (NavigationRequest request) {
+            if (request.url.startsWith('https://workss.co/terms&conditions')) {
+              return NavigationDecision.navigate;
+            }
+            return NavigationDecision.prevent;
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse('https://workss.co/terms&conditions'));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: COLORS.white,
       appBar: const CustomAppBar(
-          title: 'Terms & Conditions',
-          backgroundColor: COLORS.white,
-          titleColors: COLORS.neutralDark),
+        title: 'Terms & Conditions',
+        backgroundColor: COLORS.white,
+        titleColors: COLORS.neutralDark,
+      ),
       body: SafeArea(
-          child: Container(
-        padding: EdgeInsets.symmetric(
-            vertical: SizeConfig.blockHeight * 4,
-            horizontal: SizeConfig.blockWidth * 4),
-        child: WebViewWidget(controller: controller),
-      )),
+        child: Stack(
+          children: [
+            // WebView widget
+            Container(
+              padding: EdgeInsets.symmetric(
+                vertical: SizeConfig.blockHeight,
+                horizontal: SizeConfig.blockWidth * 4,
+              ),
+              child: WebViewWidget(controller: controller),
+            ),
+
+
+            if (isLoading)
+              const Center(
+                child: CircularProgressIndicator(
+                  color: COLORS.primary,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

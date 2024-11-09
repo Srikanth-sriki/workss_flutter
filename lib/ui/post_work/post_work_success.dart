@@ -130,7 +130,7 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
                                     create: (context) => ShowInterestedBloc(),
                                   ),
                                 ],
-                                child: const ViewInsightsScreen(),
+                                child:  ViewInsightsScreen(id: widget.workId!,),
                               )));
                     },
                     backgroundColor: COLORS.neutralDarkTwo,
@@ -147,18 +147,12 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
                   child: customButton(
                     text: 'Explore Professionals'.tr(),
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                    create: (context) => ProfileBloc()
-                                      ..add(const FetchPostedEvent()),
-                                  ),
-                                ],
-                                child: const PostedWorkList(),
-                              )));
+                      Navigator.pushNamed(
+                        context,
+                        '/main_screen',
+                        arguments: {'selectedIndex': 1},
+                      );
+
                     },
                     backgroundColor: COLORS.primary,
                     showIcon: false,

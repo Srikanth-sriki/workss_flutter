@@ -146,10 +146,8 @@ class ProfileDao {
       "group_alert": groupAlert,
     };
 
-    final response = await http.post(
-        Uri.parse(url),
-        headers: Config.authHeaders(),
-        body: jsonEncode(body));
+    final response = await http.post(Uri.parse(url),
+        headers: Config.authHeaders(), body: jsonEncode(body));
     return response;
   }
 
@@ -212,6 +210,92 @@ class ProfileDao {
     return response;
   }
 
+  Future locationCreate({
+    required String addressType,
+    required String houseNo,
+    required String area,
+    required String instructions,
+    required bool isDefault,
+    required String latitude,
+    required String longitude,
+    required String addressTypeName
+  }) async {
+    var url = '${Config.url}/user/address/create';
 
+    Map<String, dynamic> body = {
+      "address_type": addressType,
+      "address_type_name":addressTypeName,
+      "house_no": houseNo,
+      "area": area,
+      "instructions": instructions,
+      "is_default": isDefault,
+      "latitude": latitude,
+      "longitude": longitude,
+    };
 
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    return response;
+  }
+
+  Future locationEdit({
+    required String addressId,
+    required String addressType,
+    required String houseNo,
+    required String area,
+    required String instructions,
+    required bool isDefault,
+    required String latitude,
+    required String longitude,
+    required String addressTypeName
+  }) async {
+    var url = '${Config.url}/user/address/edit';
+
+    Map<String, dynamic> body = {
+      "id":addressId,
+      "address_type": addressType,
+      "address_type_name":addressTypeName,
+      "house_no": houseNo,
+      "area": area,
+      "instructions": instructions,
+      "is_default": isDefault,
+      "latitude": latitude,
+      "longitude": longitude,
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    return response;
+  }
+
+  Future addressLocationList() async {
+    var url = '${Config.url}/user/address/list';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog("Response body : ${response.body}");
+
+    return response;
+  }
+
+  Future addressLocationDelete({required String id}) async {
+    var url = '${Config.url}/user/address/delete';
+    Map<String, dynamic> body = {"id": id};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
 }

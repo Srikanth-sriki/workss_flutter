@@ -152,19 +152,104 @@ class FetchFaqEvent extends ProfileEvent {
   List<Object> get props => [];
 }
 
-
 class ContactUsEvent extends ProfileEvent {
   String name;
   String email;
   String mobile;
   String message;
-  ContactUsEvent({required this.name,required this.email,required this.mobile,required this.message});
+  ContactUsEvent(
+      {required this.name,
+      required this.email,
+      required this.mobile,
+      required this.message});
   @override
-  List<Object> get props => [name,mobile,email,message];
+  List<Object> get props => [name, mobile, email, message];
 }
 
 class FetchSavedProfessionalEvent extends ProfileEvent {
   const FetchSavedProfessionalEvent();
   @override
   List<Object> get props => [];
+}
+
+class AddressLocationCreate extends ProfileEvent {
+  String addressType;
+  String addressTypeName;
+  String houseNo;
+  String area;
+  String instructions;
+  bool isDefault;
+  String latitude;
+  String longitude;
+  AddressLocationCreate({
+    required this.addressType,
+    required this.addressTypeName,
+    required this.houseNo,
+    required this.area,
+    required this.instructions,
+    required this.isDefault,
+    required this.latitude,
+    required this.longitude,
+  });
+  @override
+  List<Object> get props => [
+        addressType,
+    addressTypeName,
+        houseNo,
+        area,
+        instructions,
+        isDefault,
+        latitude,
+        longitude
+      ];
+}
+
+class AddressLocationEdit extends ProfileEvent {
+  String addressId;
+  String addressType;
+  String addressTypeName;
+  String houseNo;
+  String area;
+  String instructions;
+  bool isDefault;
+  String latitude;
+  String longitude;
+  AddressLocationEdit({
+    required this.addressId,
+    required this.addressType,
+    required this.addressTypeName,
+    required this.houseNo,
+    required this.area,
+    required this.instructions,
+    required this.isDefault,
+    required this.latitude,
+    required this.longitude,
+  });
+  @override
+  List<Object> get props => [
+        addressType,
+    addressTypeName,
+        houseNo,
+        area,
+        instructions,
+        isDefault,
+        latitude,
+        longitude
+      ];
+}
+
+class AddressLocationListEvent extends ProfileEvent {
+  const AddressLocationListEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class AddressLocationIdDelete extends ProfileEvent {
+  String id;
+  VoidCallback onSuccess;
+  VoidCallback onError;
+  AddressLocationIdDelete(
+      {required this.onSuccess, required this.onError, required this.id});
+  @override
+  List<Object> get props => [onSuccess, onError, id];
 }

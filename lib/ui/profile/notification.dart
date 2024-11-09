@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 
 import '../../bloc/profile/profile_bloc.dart';
 import '../../components/colors.dart';
@@ -42,7 +43,7 @@ class SwitchTile extends StatelessWidget {
             ),
           ),
           trailing: Transform.scale(
-            scale: 0.9, // Adjust scale to change the size
+            scale: 0.75,
             child: Switch(
               value: value,
               onChanged: onChanged,
@@ -61,7 +62,6 @@ class SwitchTile extends StatelessWidget {
   }
 }
 
-
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -79,10 +79,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
-    context.read<ProfileBloc>().add(FetchSettingEvent()); // Fetch settings here
+    context.read<ProfileBloc>().add(const FetchSettingEvent());
   }
 
-  // Helper method to update the specific switch's value in the settings model
   void _updateNotificationSetting({
     bool? workPostedInCity,
     bool? workViewedIntrestShowed,
@@ -94,29 +93,41 @@ class _NotificationScreenState extends State<NotificationScreen> {
     bool? groupAlert,
   }) {
     setState(() {
-      if (workPostedInCity != null) settingFetchModelList.workPostedInCity = workPostedInCity;
-      if (workViewedIntrestShowed != null) settingFetchModelList.workViewedIntrestShowed = workViewedIntrestShowed;
-      if (friendRequest != null) settingFetchModelList.friendRequest = friendRequest;
-      if (newClipsFromFriends != null) settingFetchModelList.newClipsFromFriends = newClipsFromFriends;
-      if (newFriendSuggestions != null) settingFetchModelList.newFriendSuggestions = newFriendSuggestions;
+      if (workPostedInCity != null) {
+        settingFetchModelList.workPostedInCity = workPostedInCity;
+      }
+      if (workViewedIntrestShowed != null) {
+        settingFetchModelList.workViewedIntrestShowed = workViewedIntrestShowed;
+      }
+      if (friendRequest != null) {
+        settingFetchModelList.friendRequest = friendRequest;
+      }
+      if (newClipsFromFriends != null) {
+        settingFetchModelList.newClipsFromFriends = newClipsFromFriends;
+      }
+      if (newFriendSuggestions != null) {
+        settingFetchModelList.newFriendSuggestions = newFriendSuggestions;
+      }
       if (msgRecevied != null) settingFetchModelList.msgRecevied = msgRecevied;
-      if (cmtOrLikeOnYourPost != null) settingFetchModelList.cmtOrLikeOnYourPost = cmtOrLikeOnYourPost;
+      if (cmtOrLikeOnYourPost != null) {
+        settingFetchModelList.cmtOrLikeOnYourPost = cmtOrLikeOnYourPost;
+      }
       if (groupAlert != null) settingFetchModelList.groupAlert = groupAlert;
     });
 
-    // Dispatch the event with the updated values
     context.read<ProfileBloc>().add(
-      NotificationSettingEvent(
-        workPostedInCity: settingFetchModelList.workPostedInCity!,
-        workViewedIntrestShowed: settingFetchModelList.workViewedIntrestShowed!,
-        friendRequest: settingFetchModelList.friendRequest!,
-        newClipsFromFriends: settingFetchModelList.newClipsFromFriends!,
-        newFriendSuggestions: settingFetchModelList.newFriendSuggestions!,
-        msgRecevied: settingFetchModelList.msgRecevied!,
-        cmtOrLikeOnYourPost: settingFetchModelList.cmtOrLikeOnYourPost!,
-        groupAlert: settingFetchModelList.groupAlert!,
-      ),
-    );
+          NotificationSettingEvent(
+            workPostedInCity: settingFetchModelList.workPostedInCity!,
+            workViewedIntrestShowed:
+                settingFetchModelList.workViewedIntrestShowed!,
+            friendRequest: settingFetchModelList.friendRequest!,
+            newClipsFromFriends: settingFetchModelList.newClipsFromFriends!,
+            newFriendSuggestions: settingFetchModelList.newFriendSuggestions!,
+            msgRecevied: settingFetchModelList.msgRecevied!,
+            cmtOrLikeOnYourPost: settingFetchModelList.cmtOrLikeOnYourPost!,
+            groupAlert: settingFetchModelList.groupAlert!,
+          ),
+        );
   }
 
   @override
@@ -130,7 +141,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {
-          if (state is ProfileLoading) {
+          if (state is ProfileLoading || state is ProfileInitial) {
             setState(() {
               loading = true;
             });
@@ -147,90 +158,95 @@ class _NotificationScreenState extends State<NotificationScreen> {
             });
           }
         },
-        child: Column(
-          children: [
-            if (loading) ...[
-              Center(child: CircularProgressIndicator())
-            ] else if (error) ...[
-              Center(child: Text('state.message'))
-            ] else if (!loading && !error) ...[
-              SafeArea(
-                child: SingleChildScrollView(
-                  child: Container(
+        child: SafeArea(
+            child: SingleChildScrollView(
+                child: Container(
                     padding: EdgeInsets.symmetric(
                       vertical: SizeConfig.blockHeight * 2,
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        buildSectionHeaderFirst('Works Notifications'),
-                        buildSwitchTile(
-                          title: 'Works Posted in Cities',
-                          value: settingFetchModelList.workPostedInCity!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(workPostedInCity: value);
-                          },
+                    child: Column(children: [
+                      if (loading) ...[
+                        globalLoadingWidget()
+                      ] else if (error) ...[
+                        ErrorScreen(onRetry: () {
+                          profileBloc.add(const FetchSettingEvent());
+                        })
+                      ] else if (!loading && !error) ...[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildSectionHeaderFirst('Works Notifications'),
+                            buildSwitchTile(
+                              title: 'Works Posted in Cities',
+                              value: settingFetchModelList.workPostedInCity!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(
+                                    workPostedInCity: value);
+                              },
+                            ),
+                            buildSwitchTile(
+                              title: 'Works Viewed, Interest Showed',
+                              value: settingFetchModelList
+                                  .workViewedIntrestShowed!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(
+                                    workViewedIntrestShowed: value);
+                              },
+                            ),
+                            // buildSectionHeader('Social Notifications'),
+                            // buildSwitchTile(
+                            //   title: 'Friend Request',
+                            //   value: settingFetchModelList.friendRequest!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(
+                            //         friendRequest: value);
+                            //   },
+                            // ),
+                            // buildSwitchTile(
+                            //   title: 'New Clips from Friends',
+                            //   value: settingFetchModelList.newClipsFromFriends!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(
+                            //         newClipsFromFriends: value);
+                            //   },
+                            // ),
+                            // buildSwitchTile(
+                            //   title: 'New Friends and Suggestions',
+                            //   value:
+                            //       settingFetchModelList.newFriendSuggestions!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(
+                            //         newFriendSuggestions: value);
+                            //   },
+                            // ),
+                            // buildSectionHeader('Clips Notifications'),
+                            // buildSwitchTile(
+                            //   title: 'Messages Received',
+                            //   value: settingFetchModelList.msgRecevied!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(msgRecevied: value);
+                            //   },
+                            // ),
+                            // buildSwitchTile(
+                            //   title: 'Comments or Likes on Your Posts',
+                            //   value: settingFetchModelList.cmtOrLikeOnYourPost!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(
+                            //         cmtOrLikeOnYourPost: value);
+                            //   },
+                            // ),
+                            // buildSwitchTile(
+                            //   title: 'Group Alerts',
+                            //   value: settingFetchModelList.groupAlert!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(groupAlert: value);
+                            //   },
+                            // ),
+                          ],
                         ),
-                        buildSwitchTile(
-                          title: 'Works Viewed, Interest Showed',
-                          value: settingFetchModelList.workViewedIntrestShowed!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(workViewedIntrestShowed: value);
-                          },
-                        ),
-                        buildSectionHeader('Social Notifications'),
-                        buildSwitchTile(
-                          title: 'Friend Request',
-                          value: settingFetchModelList.friendRequest!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(friendRequest: value);
-                          },
-                        ),
-                        buildSwitchTile(
-                          title: 'New Clips from Friends',
-                          value: settingFetchModelList.newClipsFromFriends!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(newClipsFromFriends: value);
-                          },
-                        ),
-                        buildSwitchTile(
-                          title: 'New Friends and Suggestions',
-                          value: settingFetchModelList.newFriendSuggestions!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(newFriendSuggestions: value);
-                          },
-                        ),
-                        buildSectionHeader('Clips Notifications'),
-                        buildSwitchTile(
-                          title: 'Messages Received',
-                          value: settingFetchModelList.msgRecevied!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(msgRecevied: value);
-                          },
-                        ),
-                        buildSwitchTile(
-                          title: 'Comments or Likes on Your Posts',
-                          value: settingFetchModelList.cmtOrLikeOnYourPost!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(cmtOrLikeOnYourPost: value);
-                          },
-                        ),
-                        buildSwitchTile(
-                          title: 'Group Alerts',
-                          value: settingFetchModelList.groupAlert!,
-                          onChanged: (value) {
-                            _updateNotificationSetting(groupAlert: value);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ]
-          ],
-        ),
+                      ]
+                    ])))),
       ),
     );
   }
@@ -238,8 +254,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget buildSectionHeader(String title) {
     return Padding(
       padding: EdgeInsets.only(
-        top: SizeConfig.blockHeight*3,bottom: SizeConfig.blockHeight,
-        right: SizeConfig.blockWidth * 6,left: SizeConfig.blockWidth * 6,
+        top: SizeConfig.blockHeight * 3,
+        bottom: SizeConfig.blockHeight,
+        right: SizeConfig.blockWidth * 6,
+        left: SizeConfig.blockWidth * 6,
       ),
       child: Text(
         title.tr(),
@@ -252,11 +270,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
     );
   }
+
   Widget buildSectionHeaderFirst(String title) {
     return Padding(
       padding: EdgeInsets.only(
-        top: SizeConfig.blockHeight,bottom: SizeConfig.blockHeight,
-        right: SizeConfig.blockWidth * 6,left: SizeConfig.blockWidth * 6,
+        top: SizeConfig.blockHeight,
+        bottom: SizeConfig.blockHeight,
+        right: SizeConfig.blockWidth * 6,
+        left: SizeConfig.blockWidth * 6,
       ),
       child: Text(
         title.tr(),

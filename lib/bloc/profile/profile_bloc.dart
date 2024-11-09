@@ -7,6 +7,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:works_app/models/address_location_list.dart';
 import 'package:works_app/models/faq_model.dart';
 import 'package:works_app/models/fetch_posted_view.dart';
 import 'package:works_app/models/fetch_posted_work.dart';
@@ -67,6 +68,18 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       await mapFetchSavedProfessionalsEvent(event, emit);
     });
 
+    on<AddressLocationCreate>((event, emit) async {
+      await mapAddressCreateEvent(event, emit);
+    });
+    on<AddressLocationEdit>((event, emit) async {
+      await mapAddressEditEvent(event, emit);
+    });
+    on<AddressLocationListEvent>((event, emit) async {
+      await mapAddressListEvent(event, emit);
+    });
+    on<AddressLocationIdDelete>((event, emit) async {
+      await mapDeleteAddressEvent(event, emit);
+    });
   }
 
   Future<void> mapFetchProfileEvent(
@@ -80,6 +93,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         Config.phoneNumber = jsonDecoded["data"]["mobile"] ?? "";
         Config.name = jsonDecoded["data"]["name"] ?? "";
+        customLog(Config.phoneNumber);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString(LocalConstant.phoneNumber, Config.phoneNumber);
+        await prefs.setString(LocalConstant.name, Config.name);
         ProfileFetch profileFetch;
         profileFetch = ProfileFetch.fromJson(jsonDecoded["data"]);
         emit(FetchProfileSuccess(profileFetch: profileFetch));
@@ -343,8 +360,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         SettingFetchModelList settingFetchModelList;
-        settingFetchModelList = SettingFetchModelList.fromJson(jsonDecoded["data"]);
-        emit(NotificationFetchSettingSuccess(settingFetchModelList: settingFetchModelList));
+        settingFetchModelList =
+            SettingFetchModelList.fromJson(jsonDecoded["data"]);
+        emit(NotificationFetchSettingSuccess(
+            settingFetchModelList: settingFetchModelList));
       } else {
         String message = jsonDecoded["message"];
         customLog("The failure reason: $message");
@@ -421,7 +440,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         for (var i in jsonDecoded["data"]) {
           professionalsPostedWork.add(ProfessionalsPostedWork.fromJson(i));
         }
-        emit(FetchSavedProfessionalSuccess(professionalsPostedWork: professionalsPostedWork));
+        emit(FetchSavedProfessionalSuccess(
+            professionalsPostedWork: professionalsPostedWork));
       } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
         customLog("The failure reason: $message");
@@ -432,6 +452,115 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } catch (error) {
       customLog("The error of resend otp is : $error");
       emit(FetchSavedProfessionalFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapAddressCreateEvent(
+      AddressLocationCreate event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const AddressLocationLoading());
+      var response = await profileDao.locationCreate(
+          addressType: event.addressType,
+          addressTypeName: event.addressTypeName,
+          houseNo: event.houseNo,
+          area: event.area,
+          instructions: event.instructions,
+          isDefault: event.isDefault,
+          latitude: event.latitude,
+          longitude: event.longitude);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(AddressLocationCreateSuccess(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(AddressLocationCreateFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(AddressLocationCreateFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapAddressEditEvent(
+      AddressLocationEdit event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const AddressLocationLoading());
+      var response = await profileDao.locationEdit(
+          addressId:event.addressId,
+          addressTypeName: event.addressTypeName,
+          addressType: event.addressType,
+          houseNo: event.houseNo,
+          area: event.area,
+          instructions: event.instructions,
+          isDefault: event.isDefault,
+          latitude: event.latitude,
+          longitude: event.longitude);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      customLog(response);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(AddressLocationEditSuccess(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(AddressLocationEditFailed(message: message));
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(AddressLocationEditFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapAddressListEvent(
+      AddressLocationListEvent event, Emitter<ProfileState> emit) async {
+    try {
+      emit(const AddressLocationLoading());
+      var response = await profileDao.addressLocationList();
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        List<AddressListModal> addressListModal = [];
+        for (var i in jsonDecoded["data"]) {
+          addressListModal.add(AddressListModal.fromJson(i));
+        }
+        emit(AddressLocationListSuccess(addressListModal: addressListModal));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(AddressLocationListFailed(message: message));
+      } else {
+        emit(AddressLocationListFailed(message: '"Something Went wrong"'));
+      }
+    } catch (error) {
+      customLog("The error of resend otp is : $error");
+      emit(AddressLocationListFailed(message: "Something Went wrong"));
+    }
+  }
+
+  Future<void> mapDeleteAddressEvent(
+      AddressLocationIdDelete event, Emitter<ProfileState> emit) async {
+    try {
+      // emit(const WorkInterestedLoading());
+      var response = await profileDao.addressLocationDelete(id: event.id);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(DeleteAddressLocationSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(DeleteAddressLocationFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(DeleteAddressLocationFailed(message: message));
+      }
+    } catch (error) {
+      emit(DeleteAddressLocationFailed(message: "Something went wrong"));
     }
   }
 }

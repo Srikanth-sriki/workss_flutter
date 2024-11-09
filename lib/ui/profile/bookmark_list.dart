@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/size_config.dart';
 
+import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/professionals_list_model.dart';
+import '../professional/professional_view.dart';
 
 class BookMarkListScreen extends StatefulWidget {
   const BookMarkListScreen({super.key});
@@ -64,74 +66,110 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
             child: Builder(
               builder: (context) {
                 if (loading) {
-                  return  SizedBox(
+                  return SizedBox(
                       height: SizeConfig.screenHeight,
                       child: ShimmerJobCards());
                 } else if (error) {
-                  return Center(child: Text('Failed to load.'));
+                  return ErrorScreen(onRetry: (){
+                    profileBloc.add(const FetchSavedProfessionalEvent());
+                  });
                 } else if (!loading && !error) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
-                    child:  ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: professionalsPostedWork.length!,
-                        itemBuilder: (context, index) {
-                          var professionalData =
-                          professionalsPostedWork![index];
-                          return Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: SizeConfig.blockWidth * 2,
-                                horizontal: SizeConfig.blockWidth * 4),
-                            child: buildProfessionalCard(
-                                onTap: (){},
-                                accountVerified:
-                                professionalData!.isVerified!,
-                                image: professionalData!.profilePic!,
-                                name: professionalData!.name!,
-                                profession: professionalData.professionType!,
-                                location: professionalData.city!,
-                                languages: professionalData.knownLanguages!
-                                    .join(", "),
-                                gender: professionalData.gender!,
-                                price: professionalData.charges!,
-                                paymentType: professionalData.chargeType!,
-                                contacted:
-                                professionalData.isContacted != null,
-                                saved: true,
-                                experience:
-                                professionalData.experiencedYears!,
-                                experienceImage:
-                                'assets/images/home/work_select.png',
-                                genderImage: 'assets/images/home/gender.png',
-                                jobTypeImage:
-                                'assets/images/profile/prof.png',
-                                language: professionalData.knownLanguages!
-                                    .join(", "),
-                                languageImage: 'assets/images/home/speak.png',
-                                onShowInterest: () {
-                                  if (professionalData.isContacted == null) {
-                                    showInterestedBloc
-                                        .add(ProfessionalContactUs(
-                                      PropId: professionalData.id!,
-                                      onSuccess: () {
-                                        setState(() {
-                                          professionalData.isContacted =
-                                              IsContacted(id: '');
-                                        });
+                  return professionalsPostedWork.isNotEmpty
+                      ? Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: SizeConfig.blockHeight),
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: professionalsPostedWork.length!,
+                              itemBuilder: (context, index) {
+                                var professionalData =
+                                    professionalsPostedWork![index];
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: SizeConfig.blockWidth * 2,
+                                      horizontal: SizeConfig.blockWidth * 4),
+                                  child: buildProfessionalCard(
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MultiBlocProvider(
+                                                      providers: [
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                              ProfessionalBloc()
+                                                                ..add(FetchProfessionalView(
+                                                                    professionalData
+                                                                        .id!)),
+                                                        ),
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc(),
+                                                        )
+                                                      ],
+                                                      child:
+                                                          ProfessionalViewScreen(
+                                                        id: professionalData
+                                                            .id!,
+                                                      ),
+                                                    )));
                                       },
-                                      onError: () {},
-                                    ));
-                                  }
-                                },
-                                jobType: professionalData.professionType!,
-                                onShare: () {},
-                                savedTap: () {
-
-                                }),
-                          );
-                        }),
-                  );
+                                      accountVerified:
+                                          professionalData!.isVerified!,
+                                      image: professionalData!.profilePic!,
+                                      name: professionalData!.name!,
+                                      profession:
+                                          professionalData.professionType!,
+                                      location: professionalData.city!,
+                                      languages: professionalData
+                                          .knownLanguages!
+                                          .join(", "),
+                                      gender: professionalData.gender!,
+                                      price: professionalData.charges!,
+                                      paymentType: professionalData.chargeType!,
+                                      contacted:
+                                          professionalData.isContacted != null,
+                                      saved: true,
+                                      experience:
+                                          professionalData.experiencedYears!,
+                                      experienceImage:
+                                          'assets/images/home/work_select.png',
+                                      genderImage:
+                                          'assets/images/home/gender.png',
+                                      jobTypeImage:
+                                          'assets/images/profile/prof.png',
+                                      language: professionalData.knownLanguages!
+                                          .join(", "),
+                                      languageImage:
+                                          'assets/images/home/speak.png',
+                                      onShowInterest: () {
+                                        if (professionalData.isContacted ==
+                                            null) {
+                                          showInterestedBloc
+                                              .add(ProfessionalContactUs(
+                                            PropId: professionalData.id!,
+                                            onSuccess: () {
+                                              setState(() {
+                                                professionalData.isContacted =
+                                                    IsContacted(id: '');
+                                              });
+                                            },
+                                            onError: () {},
+                                          ));
+                                        }
+                                      },
+                                      jobType: professionalData.professionType!,
+                                      onShare: () {},
+                                      savedTap: () {}),
+                                );
+                              }),
+                        )
+                      : SizedBox(
+                          width: SizeConfig.screenWidth,
+                          height: SizeConfig.blockHeight * 80,
+                          child: emptyComponent());
                 }
 
                 return Container();

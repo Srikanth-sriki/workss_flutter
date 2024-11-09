@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
@@ -34,7 +35,7 @@ PreferredSizeWidget customAppBar({
       elevation: 0,
       automaticallyImplyLeading: false,
       title: Text(
-        'Workss',
+        '.Workss',
         style: TextStyle(
           color: COLORS.primary,
           fontSize: SizeConfig.blockWidth * 6,
@@ -126,7 +127,7 @@ Widget normalTextField(
       fontFamily: "Poppins",
       fontWeight: fontWeight,
       letterSpacing: 0.3,
-      fontSize: SizeConfig.blockWidth * 4,
+      fontSize: SizeConfig.blockWidth * 3.8,
     ),
     onChanged: onChanged,
     validator: validator,
@@ -137,6 +138,7 @@ Widget normalTextField(
     cursorColor: COLORS.black,
     cursorErrorColor: COLORS.black,
     maxLines: maxLines,
+    maxLength: maxLength,
     onTap: onTap,
     decoration: textFieldDecoration(
         hint: hintText,
@@ -145,7 +147,9 @@ Widget normalTextField(
         prefixIcon: prefixIcon,
         errorMessage: errorMessage,
         hasError: hasError,
-        suffixIcon: suffixIcon),
+        suffixIcon: suffixIcon).copyWith(
+      counterText: '',
+    ),
   );
 }
 
@@ -546,8 +550,10 @@ Widget bottomTabIcon({required String icon}) {
   );
 }
 
-Widget buildGenderSelection(
-    {required void Function(String?)? onChanged, required String? groupValue}) {
+Widget buildGenderSelection({
+  required void Function(String?)? onChanged,
+  required String? groupValue,
+}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisAlignment: MainAxisAlignment.center,
@@ -557,54 +563,61 @@ Widget buildGenderSelection(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Radio<String>(
-                value: 'male',
-                groupValue: groupValue,
-                onChanged: onChanged,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                fillColor: const WidgetStatePropertyAll(COLORS.primary),
-              ),
-              Text(
-                'Male'.tr(),
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 3.8,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
+          GestureDetector(
+            onTap: () => onChanged?.call('male'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Radio<String>(
+                  value: 'male',
+                  groupValue: groupValue,
+                  onChanged: onChanged,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  fillColor: const MaterialStatePropertyAll(COLORS.primary),
                 ),
-              ),
-            ],
+                Text(
+                  'Male'.tr(),
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 3.8,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(width: SizeConfig.blockWidth * 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Radio<String>(
-                value: 'female',
-                groupValue: groupValue,
-                onChanged: onChanged,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                fillColor: const WidgetStatePropertyAll(COLORS.primary),
-              ),
-              Text(
-                'Female'.tr(),
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 3.8,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
+          GestureDetector(
+            onTap: () => onChanged?.call('female'),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Radio<String>(
+                  value: 'female',
+                  groupValue: groupValue,
+                  onChanged: onChanged,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  fillColor: const MaterialStatePropertyAll(COLORS.primary),
                 ),
-              ),
-            ],
+                Text(
+                  'Female'.tr(),
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 3.8,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     ],
   );
 }
+
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -679,7 +692,7 @@ Widget buildBioTextField(
     required String hintText,
     required String? Function(String?) validator,
     required String? Function(String?) onChanged,
-    required bool error,
+    required bool error, int maxLines =8,
     required String title}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,7 +708,7 @@ Widget buildBioTextField(
           prefix: false,
           errorMessage: '',
           hasError: error,
-          maxLines: 8),
+          maxLines: maxLines),
     ],
   );
 }
@@ -732,7 +745,7 @@ Widget buildProfessionalCard(
           padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            color: COLORS.primaryOne.withOpacity(0.25),
+            color: COLORS.primaryOne.withOpacity(0.15),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -852,7 +865,7 @@ Widget buildProfessionalCard(
                             height: SizeConfig.blockHeight * 0.2),softWrap: true,
                       ),
                       Text(
-                        capitalizeEachWord(paymentType),
+                        paymentType == 'perday'?'Per Day':capitalizeEachWord(paymentType),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 2.8,
@@ -978,32 +991,36 @@ Widget buildDynamicRadioSelection({
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: options.map((option) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Radio<String>(
-                value: option['value']!,
-                groupValue: groupValue,
-                onChanged: onChanged,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                fillColor: const WidgetStatePropertyAll(COLORS.primary),
-              ),
-              Text(
-                option['label']!.tr(),
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 3.5,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
+          return GestureDetector(
+            onTap: () => onChanged?.call(option['value']),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Radio<String>(
+                  value: option['value']!,
+                  groupValue: groupValue,
+                  onChanged: onChanged,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  fillColor: const MaterialStatePropertyAll(COLORS.primary),
                 ),
-              ),
-            ],
+                Text(
+                  option['label']!.tr(),
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 3.5,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ],
+            ),
           );
         }).toList(),
       ),
     ],
   );
 }
+
 
 class IconActionCard extends StatelessWidget {
   final IconData? icon;
@@ -1196,3 +1213,60 @@ void showInterestBottomSheet(BuildContext context) {
     },
   );
 }
+
+
+
+class ErrorScreen extends StatelessWidget {
+  final VoidCallback onRetry;
+  const ErrorScreen({
+    super.key,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            Lottie.asset(
+              'assets/images/lottie/error.json',
+              width: SizeConfig.blockWidth *
+                  60,
+              // height: SizeConfig.blockWidth *
+              //     40,
+              fit: BoxFit
+                  .cover,
+            ),
+             SizedBox(height: SizeConfig.blockHeight*2),
+            Text(
+              'Something went wrong!',
+              style: TextStyle(
+                color: COLORS.neutralDark,
+                fontSize: SizeConfig.blockWidth * 3.6,
+                fontWeight: FontWeight.w400,
+                fontFamily: "Poppins",
+
+              ),textAlign: TextAlign.center,
+            ),
+             SizedBox(height: SizeConfig.blockHeight*4),
+            customButton(
+              text: 'Retry now'.tr(),
+              onPressed: onRetry,
+              backgroundColor:  COLORS.primary,
+              showIcon: false,
+              width: SizeConfig.blockWidth * 42,
+              height: SizeConfig.blockHeight * 8,
+              textColor: COLORS.white,
+            )
+
+          ],
+        ),
+      ),
+    );
+  }
+}
+

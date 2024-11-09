@@ -30,6 +30,14 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args.containsKey('selectedIndex')) {
+        setState(() {
+          _selectedIndex = args['selectedIndex'];
+        });
+      }
+    });
   }
 
 
@@ -98,16 +106,16 @@ class _MainScreenState extends State<MainScreen> {
         child: BottomNavigationBar(
           items: [
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/work.png'),
+              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/work_01.png'),
               label: 'Works'.tr(),
               activeIcon:
-                  bottomTabIcon(icon: 'assets/images/bottom_tab/work_select.png'),
+                  bottomTabIcon(icon: 'assets/images/bottom_tab/work_select_01.png'),
             ),
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop.png'),
+              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop_01.png'),
               label: 'Pros'.tr(),
               activeIcon:
-                  bottomTabIcon(icon: 'assets/images/bottom_tab/prop_select.png'),
+                  bottomTabIcon(icon: 'assets/images/bottom_tab/prop_select_01.png'),
             ),
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/add_post.png'),
@@ -116,10 +124,10 @@ class _MainScreenState extends State<MainScreen> {
                   icon: 'assets/images/bottom_tab/add_post_select.png'),
             ),
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile.png'),
+              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile_01.png'),
               label: 'Account'.tr(),
               activeIcon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/profile_select.png'),
+                  icon: 'assets/images/bottom_tab/profile_select_01.png'),
             ),
           ],
           currentIndex: _selectedIndex,

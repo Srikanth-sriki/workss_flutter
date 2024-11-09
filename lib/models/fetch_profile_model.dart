@@ -24,6 +24,7 @@ class ProfileFetch {
   int? age;
   String? fcmToken;
   bool? isRegistered;
+  bool?isVerified;
   List<String>? workImages;
   String ?charges;
   String ?chargeType;
@@ -54,6 +55,7 @@ class ProfileFetch {
      this.chargeType,
      this.createdAt,
      this.updatedAt,
+    this.isVerified,
     // required this.deletedAt,
   });
 
@@ -74,7 +76,8 @@ class ProfileFetch {
     gender: json.containsKey("gender")?json["gender"]??null:null,
     age: json.containsKey("age")?json["age"]??null:null,
     fcmToken: json.containsKey("fcm_token")?json["fcm_token"]??null:null,
-    isRegistered: json.containsKey("is_registered")?json["is_registered"]??null:null,
+    isRegistered: json.containsKey("is_registered")?json["is_registered"]??false:false,
+    isVerified:json.containsKey("is_verified")?json["is_verified"]??false:false,
     workImages: json.containsKey("work_images")?json["work_images"] == null?null:List<String>.from(json["work_images"].map((x) => x)):null,
     charges: json.containsKey("charges")?json["charges"]??null:null,
     chargeType: json.containsKey("charge_type")?json["charge_type"]??null:null,
@@ -106,6 +109,7 @@ class ProfileFetch {
     "charge_type": chargeType,
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
+    "is_verified":isVerified
     // "deletedAt": deletedAt,
   };
 }

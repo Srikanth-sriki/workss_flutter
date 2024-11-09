@@ -8,6 +8,7 @@ import 'package:works_app/models/fetch_posted_work.dart';
 import 'package:works_app/ui/profile/component.dart';
 import 'package:works_app/ui/profile/view_insights.dart';
 
+import '../../bloc/home/home_bloc.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/helper_function.dart';
@@ -15,6 +16,7 @@ import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_profile_model.dart';
 import '../home/component.dart';
+import '../home/work_details.dart';
 import '../post_work/edit_post_work.dart';
 
 class PostedWorkList extends StatefulWidget {
@@ -80,241 +82,334 @@ class _PostedWorkListState extends State<PostedWorkList> {
             child: Builder(
               builder: (context) {
                 if (loading) {
-                  return  SizedBox(
+                  return SizedBox(
                       height: SizeConfig.screenHeight,
-                      child: ShimmerJobCards());
+                      child: const ShimmerJobCards());
                 } else if (error) {
-                  return Center(child: Text('Failed to load.'));
+                  return ErrorScreen(onRetry: () {
+                    _refreshPageAfterEdit();
+                  });
                 } else if (!loading && !error) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: fetchPostedModel.length,
-                      itemBuilder: (context, index) {
-                        var profile = fetchPostedModel[index];
-                        return Padding(
+                  return fetchPostedModel.isNotEmpty
+                      ? Padding(
                           padding: EdgeInsets.symmetric(
-                            vertical: SizeConfig.blockWidth * 1.5,
-                            horizontal: SizeConfig.blockHeight * 4,
-                          ),
-                          child: WorkCard(
-                            title: profile.requiredProfession!,
-                            location: profile.location!,
-                            timeAgo: timeAgo(profile.updatedAt!),
-                            jobType: profile.workPlace!,
-                            experience: profile.experienceLevel!,
-                            gender: profile.gender!,
-                            language: profile.knowLanguage!.join(", "),
-                            experienceImage:
-                            'assets/images/home/work_select.png',
-                            genderImage: 'assets/images/home/gender.png',
-                            jobTypeImage: 'assets/images/home/home.png',
-                            languageImage: 'assets/images/home/speak.png',
-                            onShowInterest: () {},
-                            onCardClick: () {},
-                            actionRows: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: SizeConfig.blockHeight * 1.25,
-                                          horizontal: SizeConfig.blockWidth * 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: COLORS.primary.withOpacity(0.2),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(SizeConfig.blockWidth * 3),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              profile.workIntrests!.length!.toString(),
-                                              style: TextStyle(
-                                                color: COLORS.primary,
-                                                fontSize: SizeConfig.blockWidth * 6,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: "Poppins",
+                              vertical: SizeConfig.blockHeight),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: fetchPostedModel.length,
+                            itemBuilder: (context, index) {
+                              var profile = fetchPostedModel[index];
+                              return Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: SizeConfig.blockWidth * 1.5,
+                                  horizontal: SizeConfig.blockHeight * 4,
+                                ),
+                                child: WorkCard(
+                                  title: profile.requiredProfession!,
+                                  location: profile.location!,
+                                  timeAgo: timeAgo(profile.updatedAt!),
+                                  jobType: profile.workPlace!,
+                                  experience: profile.experienceLevel!,
+                                  gender: profile.gender!,
+                                  language: profile.knowLanguage!.join(", "),
+                                  experienceImage:
+                                      'assets/images/home/work_select.png',
+                                  genderImage: 'assets/images/home/gender.png',
+                                  jobTypeImage: 'assets/images/home/home.png',
+                                  languageImage: 'assets/images/home/speak.png',
+                                  onShowInterest: () {},
+                                  onCardClick: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) => HomeBloc()
+                                                    ..add(FetchWorkSingleView(
+                                                        workId: profile.id!)),
+                                                ),
+                                                BlocProvider(
+                                                  create: (context) => ShowInterestedBloc(),
+                                                )
+                                              ],
+                                              child: WorkDetailsScreen(
+                                                id: profile.id!,
+                                              ),
+                                            )));
+                                  },
+                                  actionRows: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical:
+                                                    SizeConfig.blockHeight *
+                                                        1.25,
+                                                horizontal:
+                                                    SizeConfig.blockWidth * 6,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: COLORS.primary
+                                                    .withOpacity(0.2),
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(
+                                                      SizeConfig.blockWidth *
+                                                          3),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    profile
+                                                        .workIntrests!.length!
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                      color: COLORS.primary,
+                                                      fontSize: SizeConfig
+                                                              .blockWidth *
+                                                          6,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily: "Poppins",
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                      width: SizeConfig
+                                                              .blockWidth *
+                                                          1.5),
+                                                  Text(
+                                                    'Interested \nProfessionals',
+                                                    style: TextStyle(
+                                                      color: COLORS.black,
+                                                      fontSize: SizeConfig
+                                                              .blockWidth *
+                                                          2.25,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontFamily: "Poppins",
+                                                      height: SizeConfig
+                                                              .blockHeight *
+                                                          0,
+                                                    ),
+                                                  )
+                                                ],
                                               ),
                                             ),
-                                            SizedBox(width: SizeConfig.blockWidth * 1.5),
-                                            Text(
-                                              'Interested \nProfessionals',
-                                              style: TextStyle(
-                                                color: COLORS.black,
-                                                fontSize: SizeConfig.blockWidth * 2.25,
-                                                fontWeight: FontWeight.w400,
-                                                fontFamily: "Poppins",
-                                                height: SizeConfig.blockHeight * 0,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(width: SizeConfig.blockWidth * 2), // Space between the two containers
-                                    Expanded(
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                          vertical: SizeConfig.blockHeight * 1.25,
-                                          horizontal: SizeConfig.blockWidth * 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: COLORS.primary.withOpacity(0.2),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(SizeConfig.blockWidth * 3),
                                           ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              profile.workViews!.length!.toString(),
-                                              style: TextStyle(
-                                                color: COLORS.accent,
-                                                fontSize: SizeConfig.blockWidth * 6,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: "Poppins",
+                                          SizedBox(
+                                              width: SizeConfig.blockWidth *
+                                                  2), // Space between the two containers
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                vertical:
+                                                    SizeConfig.blockHeight *
+                                                        1.25,
+                                                horizontal:
+                                                    SizeConfig.blockWidth * 6,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: COLORS.primary
+                                                    .withOpacity(0.2),
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(
+                                                      SizeConfig.blockWidth *
+                                                          3),
+                                                ),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    profile.workViews!.length!
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                      color: COLORS.accent,
+                                                      fontSize: SizeConfig
+                                                              .blockWidth *
+                                                          6,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily: "Poppins",
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                      width: SizeConfig
+                                                              .blockWidth *
+                                                          1.5),
+                                                  Text(
+                                                    'Work Post \nViewed by',
+                                                    style: TextStyle(
+                                                      color: COLORS.black,
+                                                      fontSize: SizeConfig
+                                                              .blockWidth *
+                                                          2.25,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontFamily: "Poppins",
+                                                      height: SizeConfig
+                                                              .blockHeight *
+                                                          0,
+                                                    ),
+                                                  )
+                                                ],
                                               ),
                                             ),
-                                            SizedBox(width: SizeConfig.blockWidth * 1.5),
-                                            Text(
-                                              'Work Post \nViewed by',
-                                              style: TextStyle(
-                                                color: COLORS.black,
-                                                fontSize: SizeConfig.blockWidth * 2.25,
-                                                fontWeight: FontWeight.w400,
-                                                fontFamily: "Poppins",
-                                                height: SizeConfig.blockHeight * 0,
-                                              ),
-                                            )
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: SizeConfig.blockHeight * 1.5,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    customIconButton(
-                                      text: 'VIEW INSIGHTS',
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => MultiBlocProvider(
-                                                  providers: [
-                                                    BlocProvider(
-                                                      create: (context) => ProfileBloc()
-                                                        ..add( FetchPostViewEvent(workId: profile.id!)),
-                                                    ),
-                                                    BlocProvider(
-                                                      create: (context) => ShowInterestedBloc(),
-                                                    ),
-                                                  ],
-                                                  child: const ViewInsightsScreen(),
-                                                )));
-                                      },
-                                      backgroundColor: COLORS.primary,
-                                      showIcon: false,
-                                      height: SizeConfig.blockHeight * 6.5,
-                                      textColor: COLORS.white,
-                                      width: SizeConfig.blockWidth * 50,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        IconActionCard(
-                                          iconBool: false,
-                                          imageUrl: Image.asset(
-                                            'assets/images/profile/edit.png',
-                                            width: SizeConfig.blockWidth * 4.25,
+                                      SizedBox(
+                                        height: SizeConfig.blockHeight * 1.5,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          customIconButton(
+                                            text: 'VIEW INSIGHTS',
+                                            onPressed: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MultiBlocProvider(
+                                                            providers: [
+                                                              BlocProvider(
+                                                                create: (context) =>
+                                                                    ProfileBloc()
+                                                                      ..add(FetchPostViewEvent(
+                                                                          workId:
+                                                                              profile.id!)),
+                                                              ),
+                                                              BlocProvider(
+                                                                create: (context) =>
+                                                                    ShowInterestedBloc(),
+                                                              ),
+                                                            ],
+                                                            child:
+                                                                ViewInsightsScreen(
+                                                              id: profile.id!,
+                                                            ),
+                                                          )));
+                                            },
+                                            backgroundColor: COLORS.primary,
+                                            showIcon: false,
                                             height:
-                                            SizeConfig.blockHeight * 4.25,
-                                            fit: BoxFit.contain,
+                                                SizeConfig.blockHeight * 6.5,
+                                            textColor: COLORS.white,
+                                            width: SizeConfig.blockWidth * 50,
                                           ),
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    MultiBlocProvider(
-                                                      providers: [
-                                                        BlocProvider(
-                                                            create: (context) =>
-                                                                PostWorkBloc()),
-                                                      ],
-                                                      child: EditPostWorkScreen(
-                                                        fetchPostedModel: profile,
-                                                        refreshPageCallback:
-                                                        _refreshPageAfterEdit,
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              IconActionCard(
+                                                iconBool: false,
+                                                imageUrl: Image.asset(
+                                                  'assets/images/profile/edit.png',
+                                                  width:
+                                                      SizeConfig.blockWidth * 5,
+                                                  height:
+                                                      SizeConfig.blockHeight *
+                                                          5,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MultiBlocProvider(
+                                                        providers: [
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  PostWorkBloc()),
+                                                        ],
+                                                        child:
+                                                            EditPostWorkScreen(
+                                                          fetchPostedModel:
+                                                              profile,
+                                                          refreshPageCallback:
+                                                              _refreshPageAfterEdit,
+                                                        ),
                                                       ),
                                                     ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                        IconActionCard(
-                                          iconBool: false,
-                                          imageUrl: Image.asset(
-                                            'assets/images/profile/delete.png',
-                                            width: SizeConfig.blockWidth * 5.2,
-                                            height: SizeConfig.blockHeight * 5.2,
-                                            fit: BoxFit.contain,
-                                          ),
-                                          onTap: () {
-                                            PostWorkBloc().add(
-                                              PostWorkDeleteEvent(
-                                                workID: profile.id!,
-                                                onSuccess: () {
-                                                  // Remove the deleted item from the list without showing the loading spinner
-                                                  _removePostedWorkItem(
-                                                      profile.id!);
-                                                  showCustomSnackBar(
-                                                    context: context,
-                                                    message:
-                                                    "Posted Work deleted successfully!",
-                                                    backgroundColor:
-                                                    COLORS.semanticTwo,
                                                   );
                                                 },
-                                                onError: () {
-                                                  // Handle the error case here, if needed
-                                                },
                                               ),
-                                            );
-                                          },
-                                          color: COLORS.accent,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                              IconActionCard(
+                                                iconBool: false,
+                                                imageUrl: Image.asset(
+                                                  'assets/images/profile/delete.png',
+                                                  width:
+                                                      SizeConfig.blockWidth * 5,
+                                                  height:
+                                                      SizeConfig.blockHeight *
+                                                          5,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                                onTap: () {
+                                                  PostWorkBloc().add(
+                                                    PostWorkDeleteEvent(
+                                                      workID: profile.id!,
+                                                      onSuccess: () {
+                                                        // Remove the deleted item from the list without showing the loading spinner
+                                                        _removePostedWorkItem(
+                                                            profile.id!);
+                                                        showCustomSnackBar(
+                                                          context: context,
+                                                          message:
+                                                              "Posted Work deleted successfully!",
+                                                          backgroundColor:
+                                                              COLORS
+                                                                  .semanticTwo,
+                                                        );
+                                                      },
+                                                      onError: () {
+                                                        showCustomSnackBar(
+                                                          context: context,
+                                                          message: "Something Went wrong",
+                                                        );
+                                                      },
+                                                    ),
+                                                  );
+                                                },
+                                                color: COLORS.accent,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  );
+                        )
+                      : SizedBox(
+                          width: SizeConfig.screenWidth,
+                          height: SizeConfig.blockHeight * 80,
+                          child: emptyComponent());
                 }
 
                 return Container();

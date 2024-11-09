@@ -69,18 +69,39 @@ Future<void> makePhoneCall(String phoneNumber) async {
   }
 }
 
-Future<void> shareJobDetails() async {
-  final String jobDetails = 'Check out this job:\nJob Title: Developer\nCompany: XYZ Corp\nLocation: Remote\n\nDownload the app from the link: https://example.com/app';
-  final ByteData bytes = await rootBundle.load('assets/images/login/intro1.png');
+Future<void> shareJobDetails({
+  required String jobTitle,
+  required String experience,
+  required String location,
+}) async {
+  final String jobDetails = '''🚀 Discover amazing job opportunities with Works! 🚀
+
+Check out this job:
+📌 **Job Title:** $jobTitle
+🏢 **Experience:** $experience
+🌍 **Location:** $location
+
+With Works, easily find jobs, connect with employers, and apply in a few clicks. 
+
+Explore more exciting job opportunities with Works!
+
+Download Works now and take the next step in your career:
+👉 https://play.google.com/store/apps/details?id=com.workss.works_app 👈''';
+
+  final ByteData bytes = await rootBundle.load('assets/images/home/app_share.png');
   final Uint8List list = bytes.buffer.asUint8List();
+
   final tempDir = await getTemporaryDirectory();
   final file = await File('${tempDir.path}/banner.png').create();
   file.writeAsBytesSync(list);
+
+  // Share the job details with the image
   await Share.shareXFiles(
     [XFile(file.path)],
     text: jobDetails,
   );
 }
+
 
 
 Future<File?> compressImage(File file) async {

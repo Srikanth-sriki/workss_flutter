@@ -13,9 +13,11 @@ class HomeDao {
       required String keyWord,
       required String profession,
       required String city,
+      required String currentLongitude,
+      required String currentLatitude,
       required String gender}) async {
     var url =
-        '${Config.url}/user/home/fetch-works?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize';
+        '${Config.url}/user/home/fetch-works?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize&currentLatitude=$currentLatitude&currentLongitude=$currentLongitude';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -264,8 +266,7 @@ class HomeDao {
   }
 
   Future fetchWorkView({required String workId}) async {
-    var url =
-        '${Config.url}/user/home/view-work?work_id=$workId';
+    var url = '${Config.url}/user/home/view-work?work_id=$workId';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -303,7 +304,7 @@ class HomeDao {
 
   Future fetchNotificationClearAll() async {
     var url = '${Config.url}/user/notification/clear-all';
-    final response = await http.get(
+    final response = await http.post(
       Uri.parse(url),
       headers: Config.authHeaders(),
     );

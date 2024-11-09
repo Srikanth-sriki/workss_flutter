@@ -4,13 +4,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/ui/onboarding/register_form.dart';
+import 'package:works_app/ui/post_work/address_dropdown.dart';
 import 'package:works_app/ui/post_work/post_work_success.dart';
 import 'package:works_app/ui/profile/component.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:works_app/ui/profile/location/location_list_modal.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
+import '../../bloc/profile/profile_bloc.dart';
 import '../../components/size_config.dart';
 import '../../dao/get_user_location.dart';
 import '../../global_helper/ImagePickerComponent.dart';
@@ -26,6 +30,7 @@ class PostWorkScreen extends StatefulWidget {
 
 class _PostWorkScreenState extends State<PostWorkScreen> {
   late PostWorkBloc postWorkBloc;
+  late ProfileBloc profileBloc;
   final _formKey = GlobalKey<FormState>();
   final controller = MultiSelectController<Language>();
   final TextEditingController bioController = TextEditingController();
@@ -47,6 +52,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   String? latitude = "0.0";
   String? longitude = "0.0";
   bool addressError = false;
+  String addressId = '';
+  String addressSelected = 'Select work location';
 
   var items = [
     DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
@@ -100,6 +107,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   void initState() {
     super.initState();
     postWorkBloc = BlocProvider.of<PostWorkBloc>(context);
+    profileBloc = BlocProvider.of<ProfileBloc>(context);
   }
 
   void _submitButton() {
@@ -107,7 +115,26 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
       setState(() {
         imagesList = true;
       });
-    } else {
+    }
+    else  if (_experienceLevel == null) {
+      showCustomSnackBar(
+        context: context,
+        message: "Please select experience level",
+      );
+    }
+    else  if (_selectedGender == null) {
+      showCustomSnackBar(
+        context: context,
+        message: "Please select gender",
+      );
+    }
+    else  if (addressSelected.isEmpty) {
+      showCustomSnackBar(
+        context: context,
+        message: "Please select work address",
+      );
+    }
+    else {
       List<String> languageSelect =
           selectedLanguage.map((lang) => lang.name).toList();
       postWorkBloc.add(CreatePostWorkEvent(
@@ -115,7 +142,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
           experienceLevel: _experienceLevel!.toLowerCase(),
           gender: _selectedGender!.toLowerCase(),
           knowLanguage: languageSelect,
-          location: addressController.text,
+          location: addressSelected??'',
           workPlace: _selectedWorkPlace!.toLowerCase(),
           workImages: workImages,
           isProfessionalCanCall: isChecked,
@@ -146,19 +173,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     return await Geolocator.getCurrentPosition();
   }
 
-  void _fetchCurrentLocation() async {
-    setState(() {
-      _isLoadingMap = true;
-    });
-    Position position = await _determinePosition();
-    final result = await getAddress(position.latitude, position.longitude);
-    setState(() {
-      addressController.text = result['address'] ?? '';
-      _isLoadingMap = false;
-      latitude = position.latitude.toString();
-      longitude = position.longitude.toString();
-    });
-  }
+
 
   @override
   void dispose() {
@@ -173,6 +188,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     workImages = [];
     isChecked = false;
     buttonVisible = false;
+    addressSelected = 'Select work location';
     super.dispose();
   }
 
@@ -190,6 +206,15 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
       addressController.clear();
       bioController.clear();
       controller.clearAll();
+      addressSelected = 'Select work location';
+    });
+  }
+
+  String? workAddress;
+
+  void updateWorkAddress(String? newAddress) {
+    setState(() {
+      workAddress = newAddress;
     });
   }
 
@@ -256,10 +281,10 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                   );
                 } else if (state is PostWorkSuccess) {
                   loading = false;
-                  showCustomSnackBar(
-                      context: context,
-                      message: state.message,
-                      backgroundColor: COLORS.semanticTwo);
+                  // showCustomSnackBar(
+                  //     context: context,
+                  //     message: state.message,
+                  //     backgroundColor: COLORS.semanticTwo);
                   FocusScopeNode currentFocus = FocusScope.of(context);
                   if (!currentFocus.hasPrimaryFocus) {
                     currentFocus.unfocus();
@@ -441,25 +466,82 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                           },
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 1.5),
-                        _buildTextField(
-                            label: 'Work Address',
-                            controller: addressController,
-                            hintText: "Select work location".tr(),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                setState(() => addressError = true);
-                                return 'Please enter your address'.tr();
-                              }
-                              setState(() => addressError = false);
-                              return null;
-                            },
-                            error: addressError,
-                            onChanged: (value) {
-                              _validateForm();
-                              return null;
-                            },
-                            onTap: _fetchCurrentLocation,
-                            title: 'Work Address'.tr()),
+                        registerText(text: 'Work Address'),
+                        InkWell(
+                          onTap: () {
+                            showMaterialModalBottomSheet(
+                              enableDrag: true,
+                              expand: false,
+                              isDismissible: true,
+                              backgroundColor: COLORS.white,
+                              context: context,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(
+                                      SizeConfig.blockWidth * 3.8),
+                                ),
+                              ),
+                              builder: (context) => BlocProvider(
+                                create: (context) => ProfileBloc()
+                                  ..add(const AddressLocationListEvent()),
+                                child: AddressListModalBottomSheet(
+                                  selectedAddressId: addressId,
+                                  onAddressSelected: (id, address,latitudeAdd,longitudeAdd) {
+                                    setState(() {
+                                      addressId = id;
+                                      addressSelected = address;
+                                      latitude = latitudeAdd;
+                                      longitude =longitudeAdd;
+                                    });
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: SizeConfig.blockWidth*100,
+                            height: SizeConfig.blockHeight*7.5,
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight,horizontal: SizeConfig.blockWidth*3.5),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: SizeConfig.blockWidth*0.2,color: COLORS.neutralDarkTwo),
+                              borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3.5)
+                            ),
+                            child: Text(addressSelected,
+                            style: TextStyle(
+                              color: addressSelected == 'Select work location'?COLORS.neutralDarkOne:COLORS.neutralDark,
+
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                              fontSize: addressSelected == 'Select work location'?SizeConfig.blockWidth * 3.2:SizeConfig.blockWidth * 3.5,
+
+                            ),textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: SizeConfig.blockHeight * 1.5),
+                        // _buildTextField(
+                        //   label: 'Work Address',
+                        //   controller: addressController,
+                        //   hintText: "Select work location".tr(),
+                        //   validator: (value) {
+                        //     if (value == null || value.isEmpty) {
+                        //       setState(() => addressError = true);
+                        //       return 'Please enter your address'.tr();
+                        //     }
+                        //     setState(() => addressError = false);
+                        //     return null;
+                        //   },
+                        //   error: addressError,
+                        //   onChanged: (value) {
+                        //     _validateForm();
+                        //     return null;
+                        //   },
+                        //
+                        //   title: 'Work Address'.tr(),
+                        // ),
                         buildDropdown(
                           label: 'Work Place'.tr(),
                           hintText: 'Ex : Home, Bank, etc'.tr(),
@@ -495,7 +577,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                             onChanged: (value) {
                               _validateForm();
                             },
-                            title: 'Bio'.tr()),
+                            title: 'Work Details'.tr()),
                         MultipleImagePickerComponent(
                           onImagesSelected: _onImagesSelected,
                           error: imagesList,
@@ -557,6 +639,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                           text: 'POST WORK'.tr(),
                           loading: loading,
                           onPressed: () {
+                            print(latitude);
+                            print(longitude);
                             if (_formKey.currentState!.validate()) {
                               _submitButton();
                             }

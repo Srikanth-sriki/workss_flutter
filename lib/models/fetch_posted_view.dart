@@ -137,7 +137,7 @@ class WorkViewDetails {
 class User {
   String? id;
   // String? countryCode;
-  // String? mobile;
+  String? mobile;
   String? name;
   // String? email;
   String? profilePic;
@@ -166,7 +166,7 @@ class User {
   User({
     this.id,
     // this.countryCode,
-    // this.mobile,
+    this.mobile,
     this.name,
     // this.email,
     this.profilePic,
@@ -196,6 +196,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) => User(
     id: json.containsKey('id') ? json["id"]??"" : "",
     name: json.containsKey('name') ? json["name"]??"" : "",
+    mobile: json.containsKey('mobile') ? json["mobile"]??"" : "",
     profilePic: json.containsKey('profile_pic') ? json["profile_pic"]??"" : "",
     userType: json.containsKey('user_type') ? json["user_type"]??"" : "",
     professionType: json.containsKey('profession_type') ? json["profession_type"] ??"": "",
@@ -225,5 +226,6 @@ class User {
     "charges": charges,
     "charge_type": chargeType,
     "is_verified": isVerified,
+    "mobile":mobile
   };
 }

@@ -3,18 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/global_helper/loading_placeholder/work_insight.dart';
 
+import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_posted_view.dart';
+import '../professional/professional_view.dart';
 import 'component.dart';
 
 class ViewInsightsScreen extends StatefulWidget {
-  const ViewInsightsScreen({super.key});
+  final String id;
+  const ViewInsightsScreen({super.key,required this.id});
 
   @override
   State<ViewInsightsScreen> createState() => _ViewInsightsScreenState();
@@ -61,9 +65,11 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
         },
         child: Builder(builder: (context) {
           if (loading) {
-            return ShimmerInsightsScreen();
+            return globalLoadingWidget();
           } else if (error) {
-            return Center(child: Text('Failed to load .'));
+            return ErrorScreen(onRetry: (){
+              profileBloc.add(FetchPostViewEvent(workId: widget.id));
+            });
           } else if (!loading && !error) {
             return SafeArea(
               child: SingleChildScrollView(
@@ -106,10 +112,10 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                               'assets/images/lottie/insight_check.json',
                               width: SizeConfig.blockWidth *
                                   60,
-                              height: SizeConfig.blockWidth *
-                                  30,
+                              // height: SizeConfig.blockWidth *
+                              //     40,
                               fit: BoxFit
-                                  .contain,
+                                  .cover,
                             ),
                             SizedBox(
                               height: SizeConfig.blockHeight,
@@ -118,7 +124,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                               'Professionals are looking at your \nwork! ',
                               style: TextStyle(
                                 color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3.8,
+                                fontSize: SizeConfig.blockWidth * 3.6,
                                 fontWeight: FontWeight.w400,
                                 fontFamily: "Poppins",
 
@@ -356,8 +362,33 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
             padding: EdgeInsets.symmetric(
                 vertical: SizeConfig.blockWidth * 2,
                 horizontal: SizeConfig.blockWidth * 4),
-            child: buildProfessionalCard(
-                onTap: (){},
+            child: professionalData.user != null?
+
+            buildProfessionalCard(
+                onTap: (){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) =>
+                                    ProfessionalBloc()
+                                      ..add(FetchProfessionalView(
+                                          professionalData
+                                              .id!)),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) =>
+                                        ShowInterestedBloc(),
+                                  )
+                                ],
+                                child: ProfessionalViewScreen(
+                                  id: professionalData.id!,
+                                ),
+                              )));
+                },
                 accountVerified: professionalData!.user!.isVerified!,
                 image: professionalData!.user!.profilePic!,
                 name: professionalData!.user!.name!,
@@ -383,6 +414,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                         setState(() {
                           professionalData = WorkViewDetails(isContacted: true);
                         });
+                        makePhoneCall(professionalData.user!.mobile!);
                       },
                       onError: () {},
                     ));
@@ -390,11 +422,15 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                 },
                 jobType: professionalData.user!.professionType!,
                 onShare: () {
-                  shareJobDetails();
+                  shareJobDetails(
+                    experience: professionalData.user!.experiencedYears!,
+                    location: professionalData.user!.city!,
+                    jobTitle:  professionalData.user!.professionType!,
+                  );
                 },
                 savedTap: () {
                   showInterestedBloc.add(ProfessionalSavedUs(
-                    PropId: professionalData.id!,
+                    PropId: professionalData.userId!,
                     onSuccess: () {
                       setState(() {
                         // professionalData.isSaved =
@@ -403,7 +439,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                     },
                     onError: () {},
                   ));
-                }),
+                }):null,
           );
         });
   }

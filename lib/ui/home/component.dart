@@ -47,7 +47,7 @@ class WorkCard extends StatelessWidget {
         padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
-          color: COLORS.primaryOne.withOpacity(0.25),
+          color: COLORS.primaryOne.withOpacity(0.15),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +61,7 @@ class WorkCard extends StatelessWidget {
                     capitalizeEachWord(title),
                     style: TextStyle(
                       color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 3.7,
+                      fontSize: SizeConfig.blockWidth * 3.5,
                       fontWeight: FontWeight.w500,
                       fontFamily: "Poppins",
                     ),
@@ -80,7 +80,7 @@ class WorkCard extends StatelessWidget {
                     timeAgo,
                     style: TextStyle(
                       color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 2.8,
+                      fontSize: SizeConfig.blockWidth * 2.6,
                       fontWeight: FontWeight.w500,
                       fontFamily: "Poppins",
                     ),
@@ -103,7 +103,7 @@ class WorkCard extends StatelessWidget {
                     maxLines: 1,overflow: TextOverflow.ellipsis,softWrap: true,
                     style: TextStyle(
                       color: COLORS.neutralDarkOne,
-                      fontSize: SizeConfig.blockWidth * 3.1,
+                      fontSize: SizeConfig.blockWidth * 3,
                       fontWeight: FontWeight.w400,
                       fontFamily: "Poppins",
                     ),
@@ -148,7 +148,7 @@ Widget registerText({required String text, required String image}) {
           capitalizeEachWord(text),
           style: TextStyle(
             color: COLORS.neutralDarkOne,
-            fontSize: SizeConfig.blockWidth * 3.4,
+            fontSize: SizeConfig.blockWidth * 3.3,
             fontWeight: FontWeight.w400,
             fontFamily: "Poppins",
           ),

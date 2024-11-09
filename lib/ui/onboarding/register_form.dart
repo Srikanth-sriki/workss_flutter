@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -16,6 +17,8 @@ import '../../global_helper/dropdown.dart';
 import '../../global_helper/reuse_widget.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+
 
 class Language {
   final String name;
@@ -101,14 +104,21 @@ class _RegisterFormState extends State<RegisterForm> {
 
   void _validateForm() {
     print(isSubmitButtonEnabled);
+    print(widget.userType != 'jobs');
+    print(_enterName.text.isNotEmpty);
+    print(pinCodeController.text.isNotEmpty);
+    print(profilePicture.isNotEmpty);
+    print(workImages.isNotEmpty);
+    print(_selectedCity!.isNotEmpty);
 
     if (widget.userType != 'jobs' &&
         _enterName.text.isNotEmpty &&
         _selectedCity != null &&
+        _selectedCity!.isNotEmpty &&
         pinCodeController.text.isNotEmpty &&
         profilePicture.isNotEmpty &&
-        workImages.isNotEmpty &&
-        _selectedCity!.isNotEmpty) {
+        // workImages.isNotEmpty &&
+        bioController.text.isNotEmpty) {
       setState(() {
         isSubmitButtonEnabled = true;
       });
@@ -150,7 +160,8 @@ class _RegisterFormState extends State<RegisterForm> {
       setState(() {
         imagesList = true;
       });
-    } else {
+    }
+    else {
       if (isSubmitButtonEnabled == true) {
         List<String> languageSelect =
             selectedLanguage.map((lang) => lang.name).toList();
@@ -189,27 +200,7 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
-  // void _onImagesSelected(List<File> images) {
-  //   setState(() {
-  //     _selectedImages = images;
-  //     if (_selectedImages.length > 1) {
-  //       initialRegisterBloc
-  //           .add(UploadMultipleImageEvent(imagePath: _selectedImages[1]));
-  //     } else {
-  //       initialRegisterBloc
-  //           .add(UploadMultipleImageEvent(imagePath: _selectedImages[0]));
-  //     }
-  //   });
-  // }
-  //
-  // void _removeImage(int index) {
-  //   setState(() {
-  //     _selectedImages.removeAt(index);
-  //     print(_selectedImages);
-  //     workImages.removeAt(index);
-  //     print(workImages);
-  //   });
-  // }
+
   void _onImagesSelected(List<File> images) {
     setState(() {
       _selectedImages = images;
@@ -241,22 +232,25 @@ class _RegisterFormState extends State<RegisterForm> {
     profilePicture = "";
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
     print(Config.accessToken);
-    _fetchCurrentLocation();
   }
 
-  void _fetchCurrentLocation() async {
-    setState(() {
-      _isLoadingMap = true;
-    });
-    Position position = await _determinePosition();
-    final result = await getAddress(position.latitude, position.longitude);
-    setState(() {
-      pinCodeController.text = result['pincode'] ?? '';
-      _isLoadingMap = false;
-      latitude = position.latitude.toString();
-      longitude = position.longitude.toString();
-    });
+
+  String? _onPinCodeChanged(String? value) {
+    if (value != null && value.length == 6) {
+      getLatLngFromPinCode(value).then((latLng) {
+        setState(() {
+          latitude = latLng['lat']?.toString();
+          longitude = latLng['lng']?.toString();
+        });
+
+        print('Latitude: $latitude, Longitude: $longitude');
+      });
+    }
+    return null;
   }
+
+
+
 
   @override
   void dispose() {
@@ -269,26 +263,26 @@ class _RegisterFormState extends State<RegisterForm> {
     super.dispose();
   }
 
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-    return await Geolocator.getCurrentPosition();
-  }
+  // Future<Position> _determinePosition() async {
+  //   bool serviceEnabled;
+  //   LocationPermission permission;
+  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  //   if (!serviceEnabled) {
+  //     return Future.error('Location services are disabled.');
+  //   }
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       return Future.error('Location permissions are denied');
+  //     }
+  //   }
+  //   if (permission == LocationPermission.deniedForever) {
+  //     return Future.error(
+  //         'Location permissions are permanently denied, we cannot request permissions.');
+  //   }
+  //   return await Geolocator.getCurrentPosition();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -422,6 +416,8 @@ class _RegisterFormState extends State<RegisterForm> {
                         //     title: 'Pincode'.tr()),
                         buildTextField(
                           label: 'Pincode',
+                          inputNameType: TextInputType.phone,
+                          maxLength: 6,
                           controller: pinCodeController,
                           hintText: _isLoadingMap
                               ? "Fetching current pincode..."
@@ -430,6 +426,10 @@ class _RegisterFormState extends State<RegisterForm> {
                             if (value == null || value.isEmpty) {
                               setState(() => pinError = true);
                               return 'Please enter a pincode'.tr();
+                            }
+                            else if (value!.length != 6) {
+                              setState(() => pinError = true);
+                              return 'Please enter valid pincode'.tr();
                             }
                             setState(() => pinError = false);
                             return null;
@@ -445,17 +445,14 @@ class _RegisterFormState extends State<RegisterForm> {
                                       strokeWidth: SizeConfig.blockWidth * 0.5,
                                       color: COLORS.accent))
                               : null,
-                          onTap: () async {
-                            // try {
-                            //   Position position = await _determinePosition();
-                            //   await getAddress(position.latitude, position.longitude);
-                            // } catch (e) {}
-                          },
+                          onTap: () async {},
                           error: pinError,
-                          onChanged: (value) {
-                            _validateForm();
+                          onChanged: (value){
+                            _onPinCodeChanged(value);
+                            return null;
                           },
                           title: 'Pincode'.tr(),
+
                         ),
 
                         buildDropdown(
@@ -503,6 +500,7 @@ class _RegisterFormState extends State<RegisterForm> {
                               hintText: "Experience".tr(),
                               controller: experienceController,
                               inputType: TextInputType.number,
+                              maxLength: 3,
                               onChanged: (value) {
                                 _validateForm();
                               },
@@ -604,7 +602,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   ),
                                   child: CustomDropdownButtonFormField(
                                     selectedValue: selectedCharge,
-                                    items: const [' Hours', 'PerDay', 'Month'],
+                                    items: const [' Hourly', 'PerDay', 'Monthly'],
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedCharge = newValue;
@@ -667,7 +665,7 @@ class _RegisterFormState extends State<RegisterForm> {
                           registerText(text: 'Age'.tr()),
                           normalTextField(
                               hintText: "Enter your age".tr(),
-                              controller: ageController,
+                              controller: ageController,maxLength: 2,
                               inputType: TextInputType.number,
                               onChanged: (value) {
                                 _validateForm();
@@ -731,7 +729,8 @@ class _RegisterFormState extends State<RegisterForm> {
                                 marginTop: SizeConfig.blockHeight,
                                 backgroundColor: COLORS.white),
                             chipDecoration: ChipDecoration(
-                                backgroundColor: COLORS.primary.withOpacity(0.05),
+                                backgroundColor:
+                                    COLORS.primary.withOpacity(0.05),
                                 wrap: true,
                                 labelStyle: TextStyle(
                                     color: COLORS.primary,
@@ -749,12 +748,12 @@ class _RegisterFormState extends State<RegisterForm> {
                                 )),
                             fieldDecoration: FieldDecoration(
                               animateSuffixIcon: true,
-                              padding:EdgeInsets.only(
+                              padding: EdgeInsets.only(
                                 top: SizeConfig.blockHeight * 2.2,
                                 bottom: SizeConfig.blockHeight * 2.2,
                                 left: SizeConfig.blockWidth * 4,
                                 right: SizeConfig.blockWidth * 3,
-                              ) ,
+                              ),
                               suffixIcon: Icon(
                                 Icons.keyboard_arrow_down_outlined,
                                 color: COLORS.accent,
@@ -794,7 +793,7 @@ class _RegisterFormState extends State<RegisterForm> {
                               selectedTextColor: COLORS.neutralDark,
                               disabledTextColor: COLORS.neutralDark,
                               disabledIcon:
-                              Icon(Icons.lock, color: Colors.grey.shade300),
+                                  Icon(Icons.lock, color: Colors.grey.shade300),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {

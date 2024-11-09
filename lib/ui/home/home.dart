@@ -9,6 +9,7 @@ import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/ui/home/component.dart';
 import 'package:works_app/ui/home/notification_list.dart';
 import 'package:works_app/ui/home/work_details.dart';
+import 'package:works_app/ui/home/work_search.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
 import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
@@ -35,6 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentPage = 1;
   int pageSize = 10;
   int maxPageNumber = 1;
+  String? selectedProfession = '';
+  String? selectedCity = '';
+  String selectedGender = '';
 
   @override
   void initState() {
@@ -54,13 +58,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _fetchData() {
     homeBloc.add(FetchHomeScreenEvent(
-      page: currentPage,
-      pageSize: pageSize,
-      keyWord: "",
-      profession: "",
-      city: "",
-      gender: "",
-    ));
+        page: currentPage,
+        pageSize: pageSize,
+        keyWord: "",
+        profession: "",
+        city: "",
+        gender: "",
+        currentLongitude: '',
+        currentLatitude: ''));
   }
 
   void _loadMoreData() {
@@ -76,13 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
       currentPage = 1;
       isFetchingMore = false;
       homeBloc.add(FetchHomeScreenEvent(
-        page: currentPage,
-        pageSize: pageSize,
-        keyWord: "",
-        profession: profession ?? "",
-        city: city ?? "",
-        gender: gender ?? "",
-      ));
+          page: currentPage,
+          pageSize: pageSize,
+          keyWord: "",
+          profession: profession ?? "",
+          city: city ?? "",
+          gender: gender ?? "",
+          currentLongitude: '',
+          currentLatitude: ''));
     });
   }
 
@@ -134,12 +140,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {});
                   },
                   builder: (context, state) {
-                    if (state is HomeScreenLoading && currentPage == 1 || state is HomeInitial) {
-                      return  const ShimmerJobCards();
+                    if (state is HomeScreenLoading && currentPage == 1 ||
+                        state is HomeInitial) {
+                      return const ShimmerJobCards();
                     } else if (state is FetchHomeScreenSuccess) {
                       return _buildListView();
                     } else if (state is FetchHomeScreenFailed) {
-                      return Container();
+                      return ErrorScreen(onRetry: () {
+                        homeBloc.add(FetchHomeScreenEvent(
+                            page: currentPage,
+                            pageSize: pageSize,
+                            keyWord: "",
+                            profession: "",
+                            city: "",
+                            gender: "",
+                            currentLongitude: '',
+                            currentLatitude: ''));
+                      });
                     }
                     return Container();
                   },
@@ -154,28 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildListView() {
     if (homeFetchModel.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.info_outline,
-              size: SizeConfig.blockWidth * 15,
-              color: COLORS.neutralDarkOne,
-            ),
-            SizedBox(height: SizeConfig.blockHeight * 2),
-            Text(
-              'No data available',
-              style: TextStyle(
-                color: COLORS.neutralDarkOne,
-                fontSize: SizeConfig.blockWidth * 4,
-                fontWeight: FontWeight.w500,
-                fontFamily: "Poppins",
-              ),
-            ),
-          ],
-        ),
-      );
+      return emptyComponent();
     }
 
     return ListView.builder(
@@ -186,7 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
         if (index < homeFetchModel.length) {
           final work = homeFetchModel[index];
           return Container(
-            padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
+            padding:
+                EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
             margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 1.8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -194,7 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 if (index == 0) ...[
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
+                    padding:
+                        EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
                     child: Text(
                       'Works'.tr(),
                       style: TextStyle(
@@ -224,17 +222,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                MultiBlocProvider(
+                            builder: (context) => MultiBlocProvider(
                                   providers: [
                                     BlocProvider(
-                                      create: (context) =>
-                                      HomeBloc()
-                                        ..add(FetchWorkSingleView(workId: work.id!)),
+                                      create: (context) => HomeBloc()
+                                        ..add(FetchWorkSingleView(
+                                            workId: work.id!)),
                                     ),
                                     BlocProvider(
-                                      create: (context) =>
-                                          ShowInterestedBloc(),
+                                      create: (context) => ShowInterestedBloc(),
                                     )
                                   ],
                                   child: WorkDetailsScreen(
@@ -252,23 +248,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? 'INTERESTED'
                               : 'SHOW INTEREST',
                           onPressed: () {
-
-                            if(Config.userType =='professional') {
+                            if (Config.userType == 'professional') {
                               if (work.intrestShown == null) {
                                 showInterestedBloc.add(SaveInterestedWork(
                                   workID: work.id!,
                                   contact: true,
                                   onSuccess: () {
                                     setState(() {
-                                      work.intrestShown =
-                                          IntrestShown(isContacted: true,);
+                                      work.intrestShown = IntrestShown(
+                                        isContacted: true,
+                                      );
                                     });
                                   },
                                   onError: () {},
                                 ));
                               }
-                            }
-                            else {
+                            } else {
                               showInterestBottomSheet(context);
                             }
                           },
@@ -280,9 +275,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: SizeConfig.blockHeight * 6.5,
                           image: true,
                           imageChild: Padding(
-                            padding: EdgeInsets.only(right: SizeConfig.blockWidth),
+                            padding:
+                                EdgeInsets.only(right: SizeConfig.blockWidth),
                             child: Image.asset(
-                             work.intrestShown==null? 'assets/images/profile/like.png':'assets/images/home/like.png',
+                              work.intrestShown == null
+                                  ? 'assets/images/profile/like.png'
+                                  : 'assets/images/home/like.png',
                               width: SizeConfig.blockWidth * 5,
                               height: SizeConfig.blockHeight * 5,
                               fit: BoxFit.contain,
@@ -300,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if(work.isProfessionalCanCall == true)...[
+                          if (work.isProfessionalCanCall == true) ...[
                             IconActionCard(
                               iconBool: false,
                               imageUrl: Image.asset(
@@ -314,7 +312,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                           ],
-
                           IconActionCard(
                             iconBool: false,
                             imageUrl: Image.asset(
@@ -324,7 +321,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               fit: BoxFit.contain,
                             ),
                             onTap: () {
-                              shareJobDetails();
+                              shareJobDetails(
+                                experience: work.experienceLevel!,
+                                location: work.location!,
+                                jobTitle:  work.requiredProfession!,
+                              );
                             },
                           ),
                         ],
@@ -336,17 +337,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         } else if (isFetchingMore) {
-          return  Center(child: SizedBox(
-              height: SizeConfig.blockHeight * 3,
-              width: SizeConfig.blockHeight * 3,
-              child: CircularProgressIndicator(color: COLORS.primary,strokeWidth: SizeConfig.blockWidth*0.8,)));
+          return Center(
+              child: SizedBox(
+                  height: SizeConfig.blockHeight * 3,
+                  width: SizeConfig.blockHeight * 3,
+                  child: CircularProgressIndicator(
+                    color: COLORS.primary,
+                    strokeWidth: SizeConfig.blockWidth * 0.8,
+                  )));
         } else {
           return const SizedBox.shrink();
         }
       },
     );
   }
-
 
   Widget _buildHeader() {
     return Column(
@@ -402,30 +406,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   InkWell(
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  MultiBlocProvider(
+                              builder: (context) => MultiBlocProvider(
                                     providers: [
                                       BlocProvider(
-                                        create: (context) =>
-                                        NotificationBloc()
-                                          ..add(FetchNotificationList()),
+                                        create: (context) => NotificationBloc()
+                                          ..add(const FetchNotificationList()),
                                       ),
-
                                     ],
-                                    child: NotificationListScreen(
-
-                                    ),
+                                    child: const NotificationListScreen(),
                                   )));
                     },
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 2.5),
                           color: COLORS.primaryOne.withOpacity(0.3)),
                       child: Icon(
                         Icons.notifications_none,
@@ -447,36 +446,62 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: SizeConfig.blockWidth * 72,
-                height: SizeConfig.blockHeight * 8,
-                decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                    color: COLORS.neutralDarkTwo.withOpacity(0.6)),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.blockWidth * 4),
-                      child: Icon(
-                        Icons.search,
-                        color: COLORS.neutralDarkOne,
-                        size: SizeConfig.blockWidth * 6,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                      create: (context) => HomeBloc()
+                                        ..add(FetchHomeScreenEvent(
+                                            page: 1,
+                                            pageSize: 20,
+                                            profession: '',
+                                            keyWord: '',
+                                            city: '',
+                                            currentLongitude: '',
+                                            currentLatitude: '',
+                                            gender: ''))),
+                                  BlocProvider(
+                                    create: (context) => ShowInterestedBloc(),
+                                  )
+                                ],
+                                child: const WorkSearchList(),
+                              )));
+                },
+                child: Container(
+                  width: SizeConfig.blockWidth * 72,
+                  height: SizeConfig.blockHeight * 8,
+                  decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                      color: COLORS.neutralDarkTwo.withOpacity(0.6)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 4),
+                        child: Icon(
+                          Icons.search,
+                          color: COLORS.neutralDarkOne,
+                          size: SizeConfig.blockWidth * 6,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Search by Profession type'.tr(),
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3.3,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+                      Text(
+                        'Search by Profession type'.tr(),
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.25,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               InkWell(
@@ -493,13 +518,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.vertical(
                           top: Radius.circular(SizeConfig.blockWidth * 6)),
                     ),
-                    builder: (context) => const SearchFilterBottomSheet(),
+                    builder: (context) => SearchFilterBottomSheet(
+                      initialProfession: selectedProfession,
+                      initialCity: selectedCity,
+                      initialGender: selectedGender,
+                    ),
                   );
 
                   if (result != null) {
-                    String? selectedProfession = result['selectedProfession'];
-                    String? selectedCity = result['selectedCity'];
-                    String selectedGender = result['selectedGender'];
+                    selectedProfession = result['selectedProfession'];
+                    selectedCity = result['selectedCity'];
+                    selectedGender = result['selectedGender'];
                     filterHomeScreenData(
                       selectedProfession,
                       selectedCity,

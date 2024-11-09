@@ -88,19 +88,19 @@ class AuthenticationBloc
 
     emit(const AuthenticationLoginRequired());
 
-    if (GlobalBlocClass.authenticationContext != null) {
-
-      Navigator.pushAndRemoveUntil(
-        GlobalBlocClass.authenticationContext!,
-        MaterialPageRoute(
-          builder: (context) => const LogoutSuccess(),
-        ),
-            (Route<dynamic> route) => false,
-      );
-      // const snackBar = SnackBar(content: Text("Logout Successfully"));
-      // ScaffoldMessenger.of(GlobalBlocClass.authenticationContext!)
-      //     .showSnackBar(snackBar);
-    }
+    // if (GlobalBlocClass.authenticationContext != null) {
+    //
+    //   Navigator.pushAndRemoveUntil(
+    //     GlobalBlocClass.authenticationContext!,
+    //     MaterialPageRoute(
+    //       builder: (context) => const LogoutSuccess(),
+    //     ),
+    //         (Route<dynamic> route) => false,
+    //   );
+    //   // const snackBar = SnackBar(content: Text("Logout Successfully"));
+    //   // ScaffoldMessenger.of(GlobalBlocClass.authenticationContext!)
+    //   //     .showSnackBar(snackBar);
+    // }
   }
 
   Future<void> mapAuthenticationLogin(

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/profile/component.dart';
 
@@ -34,6 +35,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
   void initState() {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
+    setState(() {
+      _enterName.text = Config.name;
+      _phoneController.text = Config.phoneNumber;
+    });
   }
 
   @override
@@ -85,9 +90,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                 loading = false;
               });
               showCustomSnackBar(
-                context: context,
-                message: state.message, backgroundColor: COLORS.semanticTwo
-              );
+                  context: context,
+                  message: state.message,
+                  backgroundColor: COLORS.semanticTwo);
               Navigator.pop(context);
             } else if (state is ContactUsFailed) {
               setState(() {

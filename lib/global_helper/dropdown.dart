@@ -73,7 +73,11 @@ class CustomDropdownButtonFormField extends StatelessWidget {
           .toList(),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Please select an option';
+          // return 'Please select an option';
+          showCustomSnackBar(
+            context: context,
+            message: 'Please ${hintText}',
+          );
         }
         return null;
       },

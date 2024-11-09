@@ -208,8 +208,10 @@ Widget buildTextField(
     required String? Function(String?) validator,
     required String? Function(String?) onChanged,
     required bool error,
-      Widget? prefixIcon,
+    Widget? prefixIcon,
+    int? maxLength,
     bool? prefix = false,
+    TextInputType? inputNameType =TextInputType.text,
     void Function()? onTap,
     required String title}) {
   return Column(
@@ -219,7 +221,7 @@ Widget buildTextField(
       normalTextField(
           hintText: hintText,
           controller: controller,
-          inputType: TextInputType.text,
+          // inputType: TextInputType.text,
           onChanged: onChanged,
           validator: validator,
           fontWeight: FontWeight.w400,
@@ -227,6 +229,8 @@ Widget buildTextField(
           errorMessage: '',
           hasError: error,
           suffixIcon: prefixIcon,
+          inputType: inputNameType!,
+          maxLength: maxLength,
           onTap: onTap),
     ],
   );

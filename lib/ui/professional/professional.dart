@@ -9,13 +9,16 @@ import 'package:works_app/models/professionals_list_model.dart';
 import 'package:works_app/ui/home/component.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
 import 'package:works_app/ui/professional/categories.dart';
+import 'package:works_app/ui/professional/professional_search.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
+import '../../bloc/notification/notification_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../home/filter.dart';
+import '../home/notification_list.dart';
 import 'categories_item.dart';
 
 class ProfessionalsScreen extends StatefulWidget {
@@ -35,6 +38,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   int currentPage = 1;
   int pageSize = 10;
   int maxPageNumber = 1;
+  String? selectedProfession = '';
+  String? selectedCity = '';
+  String selectedGender ='';
   final List<Map<String, dynamic>> categoriesData = [
     {
       'title': 'Construction',
@@ -262,15 +268,31 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                               ),
                             ),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 2.5),
-                                color: COLORS.primaryOne.withOpacity(0.3)),
-                            child: Icon(
-                              Icons.notifications_none,
-                              size: SizeConfig.blockWidth * 5.5,
+                          InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => NotificationBloc()
+                                              ..add(const FetchNotificationList()),
+                                          ),
+                                        ],
+                                        child: const NotificationListScreen(),
+                                      )));
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 2.5),
+                                  color: COLORS.primaryOne.withOpacity(0.3)),
+                              child: Icon(
+                                Icons.notifications_none,
+                                size: SizeConfig.blockWidth * 5.5,
+                              ),
                             ),
                           ),
                         ],
@@ -289,36 +311,60 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        width: SizeConfig.blockWidth * 72,
-                        height: SizeConfig.blockHeight * 8,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                                SizeConfig.blockWidth * 3.25),
-                            color: COLORS.neutralDarkTwo.withOpacity(0.6)),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: SizeConfig.blockWidth * 4),
-                              child: Icon(
-                                Icons.search,
-                                color: COLORS.neutralDarkOne,
-                                size: SizeConfig.blockWidth * 6,
+                      InkWell(
+                        onTap: (){
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                          create: (context) => ProfessionalBloc()
+                                            ..add(ProfessionalListEvent(
+                                                page: 1,
+                                                pageSize: 20,
+                                                profession: '',
+                                                keyWord: '',
+                                                city: '',
+                                                gender: ''))),
+                                      BlocProvider(
+                                        create: (context) => ShowInterestedBloc(),
+                                      )
+                                    ],
+                                    child: const ProfessionalSearchList(),
+                                  )));
+                        },
+                        child: Container(
+                          width: SizeConfig.blockWidth * 72,
+                          height: SizeConfig.blockHeight * 8,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 3.25),
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.blockWidth * 4),
+                                child: Icon(
+                                  Icons.search,
+                                  color: COLORS.neutralDarkOne,
+                                  size: SizeConfig.blockWidth * 6,
+                                ),
                               ),
-                            ),
-                            Text(
-                              'Search by Profession type'.tr(),
-                              style: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3.3,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
+                              Text(
+                                'Search by Profession type'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 3.3,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       InkWell(
@@ -333,18 +379,19 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             context: context,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(
-                                      SizeConfig.blockWidth * 6)),
+                                  top: Radius.circular(SizeConfig.blockWidth * 6)),
                             ),
-                            builder: (context) =>
-                                const SearchFilterBottomSheet(),
+                            builder: (context) => SearchFilterBottomSheet(
+                              initialProfession: selectedProfession,
+                              initialCity: selectedCity,
+                              initialGender: selectedGender,
+                            ),
                           );
 
                           if (result != null) {
-                            String? selectedProfession =
-                                result['selectedProfession'];
-                            String? selectedCity = result['selectedCity'];
-                            String selectedGender = result['selectedGender'];
+                            selectedProfession = result['selectedProfession'];
+                            selectedCity = result['selectedCity'];
+                            selectedGender = result['selectedGender'];
                             filterProfessionalScreenData(
                               selectedProfession,
                               selectedCity,
@@ -379,226 +426,243 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                     color: COLORS.neutralDarkTwo,
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 5,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Categories'.tr(),
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 3.8,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    CategoriesScreen(
-                                        categoriesData: categoriesData)),
-                          );
-                        },
-                        child: Text(
-                          'See All'.tr(),
-                          style: TextStyle(
-                            color: COLORS.accent,
-                            fontSize: SizeConfig.blockWidth * 3.6,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
+                Expanded(
+                  child: SingleChildScrollView(physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 5,
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: SizeConfig.blockHeight * 20,
-                  child: ListView.builder(
-                      itemCount: categoriesData.length,
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.blockWidth * 5,
-                          vertical: SizeConfig.blockHeight),
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                      CategoriesItemScreen(
-                                          categoriesItem:
-                                              categoriesData[index])),
-                            );
-                          },
-                          child: Container(
-                            padding:
-                                EdgeInsets.all(SizeConfig.blockWidth * 3),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: SizeConfig.blockWidth * 18,
-                                  height: SizeConfig.blockWidth * 18,
-                                  decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            categoriesData[index]
-                                                ['images']),
-                                        fit: BoxFit.contain,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 20),
-                                      color: COLORS.primaryOne
-                                          .withOpacity(0.5)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Categories'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDark,
+                                  fontSize: SizeConfig.blockWidth * 3.8,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
                                 ),
-                                SizedBox(
-                                  height: SizeConfig.blockHeight * 0.5,
-                                ),
-                                Text(
-                                  categoriesData[index]['title'],
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            CategoriesScreen(
+                                                categoriesData: categoriesData)),
+                                  );
+                                },
+                                child: Text(
+                                  'See All'.tr(),
                                   style: TextStyle(
-                                    color: COLORS.neutralDark,
-                                    fontSize: SizeConfig.blockWidth * 3,
-                                    fontWeight: FontWeight.w500,
+                                    color: COLORS.accent,
+                                    fontSize: SizeConfig.blockWidth * 3.6,
+                                    fontWeight: FontWeight.w400,
                                     fontFamily: "Poppins",
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        );
-                      }),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 5,
-                  ),
-                  child: Text(
-                    'Professionals'.tr(),
-                    style: TextStyle(
-                      color: COLORS.neutralDarkOne,
-                      fontSize: SizeConfig.blockWidth * 3.8,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: "Poppins",
-                    ),
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-                SizedBox(
-                  height: SizeConfig.blockHeight * 0.5,
-                ),
-                if (isProfessionalLoad == true) ...[
-                  const Expanded(
-                      child: ShimmerJobCards())
-                ] else ...[
-                  Expanded(
-                    child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        physics: AlwaysScrollableScrollPhysics(),
-                        itemCount: professionalsPostedWork.length!,
-                        itemBuilder: (context, index) {
-                          var professionalData =
-                          professionalsPostedWork![index];
-                          return Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: SizeConfig.blockWidth * 2,
-                                horizontal: SizeConfig.blockWidth * 4),
-                            child: buildProfessionalCard(
-                                accountVerified:
-                                professionalData!.isVerified!,
-                                image: professionalData!.profilePic!,
-                                name: professionalData!.name!,
-                                profession: professionalData.professionType!,
-                                location: professionalData.city!,
-                                languages: professionalData.knownLanguages!
-                                    .join(", "),
-                                gender: professionalData.gender!,
-                                price: professionalData.charges!,
-                                paymentType: professionalData.chargeType!,
-                                contacted:
-                                professionalData.isContacted != null,
-                                saved: professionalData.isSaved != null,
-                                experience:
-                                professionalData.experiencedYears!,
-                                experienceImage:
-                                'assets/images/home/work_select.png',
-                                genderImage: 'assets/images/home/gender.png',
-                                jobTypeImage:
-                                'assets/images/profile/prof.png',
-                                language: professionalData.knownLanguages!
-                                    .join(", "),
-                                languageImage: 'assets/images/home/speak.png',
-                                onShowInterest: () {
-                                  if (professionalData.isContacted == null) {
-                                    showInterestedBloc
-                                        .add(ProfessionalContactUs(
-                                      PropId: professionalData.id!,
-                                      onSuccess: () {
-                                        setState(() {
-                                          professionalData.isContacted =
-                                              IsContacted(id: '');
-                                        });
-                                      },
-                                      onError: () {},
-                                    ));
-                                  }
-                                },
-                                jobType: professionalData.professionType!,
-                                onShare: () {
-                                  shareJobDetails();
-                                },
-                                onTap: () {
-                                  Navigator.push(
+                        ),
+                        SizedBox(
+                          height: SizeConfig.blockHeight * 20,
+                          child: ListView.builder(
+                              itemCount: categoriesData.length,
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 5,
+                                  vertical: SizeConfig.blockHeight),
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              MultiBlocProvider(
-                                                providers: [
-                                                  BlocProvider(
-                                                    create: (context) =>
-                                                    ProfessionalBloc()
-                                                      ..add(FetchProfessionalView(
-                                                          professionalData
-                                                              .id!)),
-                                                  ),
-                                                  BlocProvider(
-                                                    create: (context) =>
-                                                        ShowInterestedBloc(),
-                                                  )
-                                                ],
-                                                child: ProfessionalViewScreen(
-                                                  id: professionalData.id!,
-                                                ),
-                                              )));
-                                },
-                                savedTap: () {
-                                  showInterestedBloc.add(ProfessionalSavedUs(
-                                    PropId: professionalData.id!,
-                                    onSuccess: () {
-                                      setState(() {
-                                        professionalData.isSaved =
-                                            IsContacted(id: '');
-                                      });
-                                    },
-                                    onError: () {},
-                                  ));
-                                }),
-                          );
-                        }),
-                  )
+                                          builder: (BuildContext context) =>
+                                              CategoriesItemScreen(
+                                                  categoriesItem:
+                                                  categoriesData[index])),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding:
+                                    EdgeInsets.all(SizeConfig.blockWidth * 3),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: SizeConfig.blockWidth * 18,
+                                          height: SizeConfig.blockWidth * 18,
+                                          decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                image: AssetImage(
+                                                    categoriesData[index]
+                                                    ['images']),
+                                                fit: BoxFit.contain,
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                  SizeConfig.blockWidth * 20),
+                                              color: COLORS.primaryOne
+                                                  .withOpacity(0.5)),
+                                        ),
+                                        SizedBox(
+                                          height: SizeConfig.blockHeight * 0.5,
+                                        ),
+                                        Text(
+                                          categoriesData[index]['title'],
+                                          style: TextStyle(
+                                            color: COLORS.neutralDark,
+                                            fontSize: SizeConfig.blockWidth * 3,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: "Poppins",
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 5,
+                          ),
+                          child: Text(
+                            'Professionals'.tr(),
+                            style: TextStyle(
+                              color: COLORS.neutralDarkOne,
+                              fontSize: SizeConfig.blockWidth * 3.8,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                        SizedBox(
+                          height: SizeConfig.blockHeight * 0.5,
+                        ),
+                        if (isProfessionalLoad == true) ...[
+                          const Expanded(
+                              child: ShimmerJobCards())
+                        ] else ...[
+                          professionalsPostedWork.isNotEmpty?
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: professionalsPostedWork.length!,
+                              itemBuilder: (context, index) {
+                                var professionalData =
+                                professionalsPostedWork![index];
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: SizeConfig.blockWidth * 2,
+                                      horizontal: SizeConfig.blockWidth * 4),
+                                  child: buildProfessionalCard(
+                                      accountVerified:
+                                      professionalData!.isVerified!,
+                                      image: professionalData!.profilePic!,
+                                      name: professionalData!.name!,
+                                      profession: professionalData.professionType!,
+                                      location: professionalData.city!,
+                                      languages: professionalData.knownLanguages!
+                                          .join(", "),
+                                      gender: professionalData.gender!,
+                                      price: professionalData.charges!,
+                                      paymentType: professionalData.chargeType!,
+                                      contacted:
+                                      professionalData.isContacted != null,
+                                      saved: professionalData.isSaved != null,
+                                      experience:
+                                      professionalData.experiencedYears!,
+                                      experienceImage:
+                                      'assets/images/home/work_select.png',
+                                      genderImage: 'assets/images/home/gender.png',
+                                      jobTypeImage:
+                                      'assets/images/profile/prof.png',
+                                      language: professionalData.knownLanguages!
+                                          .join(", "),
+                                      languageImage: 'assets/images/home/speak.png',
+                                      onShowInterest: () {
+                                        if (professionalData.isContacted == null) {
+                                          showInterestedBloc
+                                              .add(ProfessionalContactUs(
+                                            PropId: professionalData.id!,
+                                            onSuccess: () {
+                                              setState(() {
+                                                professionalData.isContacted =
+                                                    IsContacted(id: '');
+                                                makePhoneCall(professionalData.mobile!);
+                                              });
+                                            },
+                                            onError: () {},
+                                          ));
+                                        }
+                                      },
+                                      jobType: professionalData.professionType!,
+                                      onShare: () {
+                                        shareJobDetails(
+                                          experience: professionalData.experiencedYears!,
+                                          location: professionalData.city!,
+                                          jobTitle:  professionalData.professionType!,
+                                        );
+                                      },
+                                      onTap: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MultiBlocProvider(
+                                                      providers: [
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                          ProfessionalBloc()
+                                                            ..add(FetchProfessionalView(
+                                                                professionalData
+                                                                    .id!)),
+                                                        ),
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc(),
+                                                        )
+                                                      ],
+                                                      child: ProfessionalViewScreen(
+                                                        id: professionalData.id!,
+                                                      ),
+                                                    )));
+                                      },
+                                      savedTap: () {
+                                        showInterestedBloc.add(ProfessionalSavedUs(
+                                          PropId: professionalData.id!,
+                                          onSuccess: () {
+                                            setState(() {
+                                              professionalData.isSaved =
+                                                  IsContacted(id: '');
+                                            });
+                                          },
+                                          onError: () {},
+                                        ));
+                                      }),
+                                );
+                              }):Padding(
+                            padding: EdgeInsets.only(top: SizeConfig.blockHeight*6),
+                            child: emptyComponent(),
+                          )
+                        ],
+                      ],
+                    ),
+                  ),
+                )
 
-                ],
               ],
             ),
           ),

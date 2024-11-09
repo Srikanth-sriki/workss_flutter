@@ -214,3 +214,67 @@ class FetchSavedProfessionalFailed extends ProfileState {
   @override
   List<Object> get props => [message];
 }
+
+class AddressLocationLoading extends ProfileState {
+  const AddressLocationLoading();
+  @override
+  List<Object> get props => [];
+}
+
+
+class AddressLocationCreateSuccess extends ProfileState {
+  final String message;
+  const AddressLocationCreateSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class AddressLocationCreateFailed extends ProfileState {
+  final String message;
+  const AddressLocationCreateFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class AddressLocationEditSuccess extends ProfileState {
+  final String message;
+  const AddressLocationEditSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class AddressLocationEditFailed extends ProfileState {
+  final String message;
+  const AddressLocationEditFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class AddressLocationListSuccess extends ProfileState {
+  List<AddressListModal> addressListModal = [];
+  AddressLocationListSuccess({required this.addressListModal});
+  @override
+  List<Object> get props => [addressListModal];
+}
+
+class AddressLocationListFailed extends ProfileState {
+  String message;
+
+  AddressLocationListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class DeleteAddressLocationFailed extends ProfileState {
+  String message;
+  DeleteAddressLocationFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class DeleteAddressLocationSuccess extends ProfileState {
+  String message;
+  DeleteAddressLocationSuccess({required this.message});
+  @override
+  List<Object> get props => [];
+}

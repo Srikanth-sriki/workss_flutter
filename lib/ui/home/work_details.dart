@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 
 import '../../bloc/home/home_bloc.dart';
@@ -72,8 +73,8 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
         }
       },
       builder: (context, state) {
-        if (state is FetchWorkViewLoading) {
-          return Container();
+        if (state is FetchWorkViewLoading || state is HomeInitial) {
+          return globalLoadingWidget();
         } else if (state is FetchWorkViewSuccess) {
           final singleWork = state.workViewModel.work!;
           final similarWorks = state.workViewModel.similarWorks!;
@@ -255,11 +256,11 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                             ),
                           },
                           buildingsEnabled: true,
-                          liteModeEnabled: true,
+                          liteModeEnabled: false,
                           indoorViewEnabled: true,
                           trafficEnabled: true,
                           tiltGesturesEnabled: true,
-                          mapToolbarEnabled: true,
+                          mapToolbarEnabled: false,
                           mapType: MapType.hybrid,
                         ),
                       ),
@@ -290,16 +291,16 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.location_on_rounded,
                                 color: COLORS.accent,
-                                size: SizeConfig.blockWidth * 5,
+                                size: SizeConfig.blockWidth * 4,
                               ),
                               SizedBox(width: SizeConfig.blockWidth * 1.5),
                               SizedBox(
@@ -383,10 +384,10 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       imageUrls: singleWork.workImages!,
                     ),
                     SizedBox(height: SizeConfig.blockHeight * 2),
-                    if(similarWorks.isNotEmpty)...[
+                    if (similarWorks.isNotEmpty) ...[
                       Padding(
-                        padding:
-                        EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
+                        padding: EdgeInsets.only(
+                            bottom: SizeConfig.blockHeight * 0.5),
                         child: Text(
                           'Similar works',
                           style: TextStyle(
@@ -414,7 +415,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                               jobType: work.workPlace ?? '--',
                               experience: work.experienceLevel ?? '--',
                               experienceImage:
-                              'assets/images/home/work_select.png',
+                                  'assets/images/home/work_select.png',
                               gender: work.gender ?? '--',
                               genderImage: 'assets/images/home/gender.png',
                               jobTypeImage: 'assets/images/home/home.png',
@@ -426,24 +427,28 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => MultiBlocProvider(
-                                          providers: [
-                                            BlocProvider(
-                                              create: (context) => HomeBloc()
-                                                ..add(FetchWorkSingleView(
-                                                    workId: work.id!)),
-                                            ),
-                                            BlocProvider(
-                                              create: (context) =>
-                                                  ShowInterestedBloc(),
-                                            )
-                                          ],
-                                          child: WorkDetailsScreen(
-                                            id: work.id!,
-                                          ),
-                                        )));
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      HomeBloc()
+                                                        ..add(
+                                                            FetchWorkSingleView(
+                                                                workId:
+                                                                    work.id!)),
+                                                ),
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc(),
+                                                )
+                                              ],
+                                              child: WorkDetailsScreen(
+                                                id: work.id!,
+                                              ),
+                                            )));
                               },
                               actionRows: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(
@@ -462,8 +467,8 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                                 setState(() {
                                                   work.intrestShown =
                                                       IntrestShown(
-                                                        isContacted: true,
-                                                      );
+                                                    isContacted: true,
+                                                  );
                                                 });
                                               },
                                               onError: () {},
@@ -502,16 +507,19 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                   ),
                                   Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      if (work.isProfessionalCanCall == true) ...[
+                                      if (work.isProfessionalCanCall ==
+                                          true) ...[
                                         IconActionCard(
                                           iconBool: false,
                                           imageUrl: Image.asset(
                                             'assets/images/home/phone.png',
                                             width: SizeConfig.blockWidth * 4.25,
-                                            height: SizeConfig.blockHeight * 4.25,
+                                            height:
+                                                SizeConfig.blockHeight * 4.25,
                                             fit: BoxFit.contain,
                                           ),
                                           onTap: () {
@@ -528,7 +536,11 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                           fit: BoxFit.contain,
                                         ),
                                         onTap: () {
-                                          shareJobDetails();
+                                          shareJobDetails(
+                                            experience: work.experienceLevel!,
+                                            location: work.location!,
+                                            jobTitle:  work.requiredProfession!,
+                                          );
                                         },
                                       ),
                                     ],
@@ -540,7 +552,6 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                         },
                       )
                     ]
-
                   ],
                 ),
               ),
@@ -561,10 +572,15 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                     makePhoneCall(singleWork.user!.mobile!);
                   },
                   onTapIconTwo: () {
-                    shareJobDetails();
+                    shareJobDetails(
+                      experience: singleWork.experienceLevel!,
+                      location: singleWork.location!,
+                      jobTitle:  singleWork.requiredProfession!,
+                    );
                   },
                   onShowInterest: () {
-                    if (singleWork.intrestShown == null) {
+                    if (Config.userType == 'professional' &&
+                        singleWork.intrestShown == null) {
                       showInterestedBloc.add(SaveInterestedWork(
                         workID: singleWork.id!,
                         contact: true,
@@ -583,7 +599,11 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                   }),
             ),
           );
-        } else if (state is FetchWorkViewError) {}
+        } else if (state is FetchWorkViewError) {
+          ErrorScreen(onRetry: () {
+            homeBloc.add(FetchWorkSingleView(workId: widget.id));
+          });
+        }
         return Container();
       },
     );

@@ -46,3 +46,47 @@ Future<Map<String, String>> getAddress(double lat, double lng) async {
     return {'address': 'Error', 'pincode': ''};
   }
 }
+
+
+Future<Map<String, double>> getLatLngFromPinCode(String pincode) async {
+  final uuid = Uuid();
+  final requestId = uuid.v4();
+  final correlationId = uuid.v4();
+
+
+  try {
+    final response = await http.get(
+      Uri.parse(
+        'https://api.olamaps.io/places/v1/geocode?address=$pincode&api_key=$apiKey', // Adjust the URL for forward geocoding if available
+      ),
+      headers: {
+        'X-Request-Id': requestId,
+        'X-Correlation-Id': correlationId,
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      print('Full Response: $data');
+
+      if (data['geocodingResults'].isNotEmpty) {
+        final location = data['geocodingResults'][0]['geometry']['location'];
+        final lat = location['lat'];
+        final lng = location['lng'];
+        print('Latitude: $lat, Longitude: $lng');
+
+        return {'lat': lat, 'lng': lng};
+      } else {
+        print('No geocoding results found');
+        return {'lat': 0.0, 'lng': 0.0};
+      }
+    } else {
+      print('Failed to fetch coordinates: ${response.statusCode}');
+      return {'lat': 0.0, 'lng': 0.0};
+    }
+  } catch (error) {
+    print('Error fetching coordinates: $error');
+    return {'lat': 0.0, 'lng': 0.0};
+  }
+}
