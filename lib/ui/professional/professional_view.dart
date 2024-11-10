@@ -208,16 +208,35 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                             children: [
                               InkWell(
                                 onTap: (){
-                                  showInterestedBloc.add(ProfessionalSavedUs(
-                                    PropId: professional.id!,
-                                    onSuccess: () {
-                                      setState(() {
-                                        professional.isSaved =
-                                            IsContacted(id: '');
-                                      });
-                                    },
-                                    onError: () {},
-                                  ));
+                                 if(professional.isSaved == null){
+                                   showInterestedBloc.add(ProfessionalSavedUs(
+                                     PropId: professional.id!,
+                                     onSuccess: () {
+                                       setState(() {
+                                         professional.isSaved =
+                                             IsContacted(id: '');
+                                       });
+                                     },
+                                     onError: () {},
+                                   ));
+                                 }
+                                 else{
+                                   showInterestedBloc.add(ProfessionalSavedUs(
+                                     PropId: professional.id!,
+                                     onSuccess: () {
+                                       setState(() {
+                                         professional.isSaved =
+                                            null;
+                                       });
+                                     },
+                                     onError: () {
+                                       showCustomSnackBar(
+                                         context: context,
+                                         message: "Something Went wrong",
+                                       );
+                                     },
+                                   ));
+                                 }
                                 },
                                 child: Image.asset(
                                   professional.isSaved != null
@@ -266,7 +285,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               padding: EdgeInsets.only(
                                   bottom: SizeConfig.blockHeight * 0.5),
                               child: Text(
-                                'Professional Details',
+                                'Professional Details'.tr(),
                                 style: TextStyle(
                                   color: COLORS.neutralDarkOne,
                                   fontSize: SizeConfig.blockWidth * 3.6,
@@ -343,7 +362,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               padding: EdgeInsets.only(
                                   bottom: SizeConfig.blockHeight * 0.5),
                               child: Text(
-                                'Bio',
+                                'Bio'.tr(),
                                 style: TextStyle(
                                   color: COLORS.neutralDarkOne,
                                   fontSize: SizeConfig.blockWidth * 3.4,
@@ -360,7 +379,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               padding: EdgeInsets.only(
                                   bottom: SizeConfig.blockHeight * 0.5),
                               child: Text(
-                                'Gallery',
+                                'Gallery'.tr(),
                                 style: TextStyle(
                                   color: COLORS.neutralDarkOne,
                                   fontSize: SizeConfig.blockWidth * 3.6,
@@ -379,7 +398,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                 padding: EdgeInsets.only(
                                     bottom: SizeConfig.blockHeight * 0.5,top: SizeConfig.blockHeight),
                                 child: Text(
-                                  'Similar Professionals',
+                                  'Similar Professionals'.tr(),
                                   style: TextStyle(
                                     color: COLORS.neutralDarkOne,
                                     fontSize: SizeConfig.blockWidth * 3.6,
@@ -451,6 +470,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                 onError: () {},
                                               ));
                                             }
+                                            else{
+                                              makePhoneCall(professionalData.mobile!);
+                                            }
                                           },
                                           jobType:
                                           professionalData.professionType!,
@@ -488,17 +510,45 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                         )));
                                           },
                                           savedTap: () {
-                                            showInterestedBloc
-                                                .add(ProfessionalSavedUs(
-                                              PropId: professionalData.id!,
-                                              onSuccess: () {
-                                                setState(() {
-                                                  professionalData.isSaved =
-                                                      IsContacted(id: '');
-                                                });
-                                              },
-                                              onError: () {},
-                                            ));
+                                            if(  professionalData.isSaved  == null){
+                                              showInterestedBloc
+                                                  .add(ProfessionalSavedUs(
+                                                PropId: professionalData.id!,
+                                                onSuccess: () {
+                                                  setState(() {
+                                                    professionalData.isSaved =
+                                                        IsContacted(id: '');
+                                                  });
+                                                },
+                                                onError: () {
+                                                  showCustomSnackBar(
+                                                    context: context,
+                                                    message: "Something Went wrong",
+                                                  );
+
+                                                },
+                                              ));
+                                            }
+                                            else{
+                                              showInterestedBloc
+                                                  .add(ProfessionalSavedUs(
+                                                PropId: professionalData.id!,
+                                                onSuccess: () {
+                                                  setState(() {
+                                                    professionalData.isSaved =
+                                                       null;
+                                                  });
+                                                },
+                                                onError: () {
+                                                  showCustomSnackBar(
+                                                    context: context,
+                                                    message: "Something Went wrong",
+                                                  );
+
+                                                },
+                                              ));
+                                            }
+
                                           }),
                                     );
                                   })
@@ -512,7 +562,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
               ),
             );
           } else if (state is ProfessionalViewError) {
-            ErrorScreen(onRetry: () {
+            return ErrorScreen(onRetry: () {
               professionalBloc.add(FetchProfessionalView(widget.id));
             });
           }

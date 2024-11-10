@@ -13,7 +13,8 @@ import '../../../global_helper/reuse_widget.dart';
 import '../location/location_list.dart';
 
 class EditAddressSuccessBottomSheet extends StatefulWidget {
-  const EditAddressSuccessBottomSheet({super.key});
+  late String routeType;
+   EditAddressSuccessBottomSheet({super.key,required this.routeType});
 
   @override
   _EditAddressSuccessBottomSheetState createState() =>
@@ -79,20 +80,28 @@ class _EditAddressSuccessBottomSheetState extends State<EditAddressSuccessBottom
             child: customButton(
               text: 'Okay'.tr(),
               onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MultiBlocProvider(
-                          providers: [
-                            BlocProvider(
-                                create: (context) => ProfileBloc()
-                                  ..add(const AddressLocationListEvent())),
-                          ],
-                          child: const LocationListScreen(),
-                        )));
+                if(widget.routeType == 'screen'){
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                  create: (context) => ProfileBloc()
+                                    ..add(const AddressLocationListEvent())),
+                            ],
+                            child: const LocationListScreen(),
+                          )));
+                }
+                else{
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                }
+
               },
               backgroundColor: COLORS.primary,
               showIcon: false,

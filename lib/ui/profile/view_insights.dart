@@ -284,11 +284,11 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildStatBox(
-              'Interested Professional',
+              'Interested Professional'.tr(),
               '${viewFetchPostedWork.workIntrestsDetailsView!.length}',
               COLORS.primary!),
           _buildStatBox(
-              'Work Post Viewed by',
+              'Work Post Viewed by'.tr(),
               '${viewFetchPostedWork.workViewsDetailsView!.length}',
               COLORS.accent!),
         ],

@@ -607,6 +607,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                             onError: () {},
                                           ));
                                         }
+                                        else{
+                                          makePhoneCall(professionalData.mobile!);
+                                        }
                                       },
                                       jobType: professionalData.professionType!,
                                       onShare: () {
@@ -641,16 +644,41 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                     )));
                                       },
                                       savedTap: () {
-                                        showInterestedBloc.add(ProfessionalSavedUs(
-                                          PropId: professionalData.id!,
-                                          onSuccess: () {
-                                            setState(() {
-                                              professionalData.isSaved =
-                                                  IsContacted(id: '');
-                                            });
-                                          },
-                                          onError: () {},
-                                        ));
+                                        if(professionalData.isSaved ==null){
+                                          showInterestedBloc.add(ProfessionalSavedUs(
+                                            PropId: professionalData.id!,
+                                            onSuccess: () {
+                                              setState(() {
+                                                professionalData.isSaved =
+                                                    IsContacted(id: '');
+                                              });
+                                            },
+                                            onError: () {
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: "Something Went wrong",
+                                              );
+                                            },
+                                          ));
+                                        }
+                                        else{
+                                          showInterestedBloc.add(ProfessionalSavedUs(
+                                            PropId: professionalData.id!,
+                                            onSuccess: () {
+                                              setState(() {
+                                                professionalData.isSaved =
+                                                  null;
+                                              });
+                                            },
+                                            onError: () {
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: "Something Went wrong",
+                                              );
+                                            },
+                                          ));
+                                        }
+
                                       }),
                                 );
                               }):Padding(

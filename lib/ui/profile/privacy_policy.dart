@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:works_app/components/size_config.dart';
@@ -23,11 +22,12 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(COLORS.white)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
             setState(() {
-              isLoading = true;
+              isLoading = progress < 100;
             });
           },
           onPageStarted: (String url) {
@@ -73,16 +73,17 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       body: SafeArea(
         child: Stack(
           children: [
-            // WebView widget
-            Container(
-              padding: EdgeInsets.symmetric(
-                vertical: SizeConfig.blockHeight,
-                horizontal: SizeConfig.blockWidth * 4,
+            // WebView widget only displayed once content is loaded
+            if (!isLoading)
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: SizeConfig.blockHeight,
+                  horizontal: SizeConfig.blockWidth * 4,
+                ),
+                child: WebViewWidget(controller: controller),
               ),
-              child: WebViewWidget(controller: controller),
-            ),
 
-
+            // Loading indicator
             if (isLoading)
               const Center(
                 child: CircularProgressIndicator(

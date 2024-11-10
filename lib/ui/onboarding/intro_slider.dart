@@ -88,7 +88,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                             'skip'.tr(),
                             style: TextStyle(
                               color: COLORS.neutralDark,
-                              fontSize: SizeConfig.blockWidth * 4.25,
+                              fontSize: SizeConfig.blockWidth * 4,
                               fontWeight: FontWeight.w500,
                               fontFamily: "Poppins",
                             ),
@@ -201,7 +201,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                         title,
                         style: TextStyle(
                           color: COLORS.primaryTwo,
-                          fontSize: SizeConfig.blockWidth * 4.5,
+                          fontSize: SizeConfig.blockWidth * 4,
                           fontWeight: FontWeight.w600,
                           fontFamily: "Poppins",
                         ),
@@ -212,7 +212,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                         description,
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.6,
+                          fontSize: SizeConfig.blockWidth * 3.4,
                           fontWeight: FontWeight.w400,
                           fontFamily: "Poppins",
                         ),

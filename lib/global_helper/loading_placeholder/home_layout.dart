@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
@@ -99,7 +100,7 @@ Widget emptyComponent(){
         ),
         SizedBox(height: SizeConfig.blockHeight * 2),
         Text(
-          'No data available',
+          'No data available'.tr(),
           style: TextStyle(
             color: COLORS.neutralDarkOne,
             fontSize: SizeConfig.blockWidth * 3.6,

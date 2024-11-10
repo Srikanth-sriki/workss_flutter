@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -22,8 +23,9 @@ import '../modal/edit_address_cancel.dart';
 import '../modal/edit_address_success.dart';
 
 class EditAddressScreen extends StatefulWidget {
+  late String routeType;
   late AddressListModal addressItem;
-   EditAddressScreen({super.key,required this.addressItem});
+   EditAddressScreen({super.key,required this.addressItem,required this.routeType});
 
   @override
   State<EditAddressScreen> createState() => _EditAddressScreenState();
@@ -42,7 +44,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   late LatLng _initialPosition;
   late LatLng _currentPosition;
   String _currentAddress = 'Loading address...';
-  bool _isMapDragging = false;
+  bool isMapDragging = false;
   late String _selectedType ;
   bool isChecked = false;
   bool otherNameError = false;
@@ -77,6 +79,9 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    setState(() {
+      isMapDragging = true;
+    });
     PermissionStatus permissionGranted = await _location.requestPermission();
     print("Permission status: $permissionGranted");
 
@@ -89,6 +94,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
         _currentAddress = 'Fetching address...';
         latitude = locationData.latitude!;
         longitude = locationData.longitude!;
+        isMapDragging = false;
       });
       print(_currentPosition);
       _updateMapCamera(_currentPosition);
@@ -96,6 +102,9 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     } else {
       print("Location permission not granted");
     }
+    setState(() {
+      isMapDragging = false;
+    });
   }
 
   void _updateMapCamera(LatLng newPosition) {
@@ -118,6 +127,14 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
       _selectedType = type;
     });
   }
+  void _onCameraMove(CameraPosition position) {
+    setState(() {
+      _currentPosition = position.target;
+      latitude = position.target.latitude;
+      longitude = position.target.longitude;
+    });
+  }
+
   @override
   void dispose() {
     houseNo.dispose();
@@ -163,7 +180,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                   borderRadius:
                   BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                builder: (context) => EditAddressSuccessBottomSheet(),
+                builder: (context) => EditAddressSuccessBottomSheet(routeType: widget.routeType,),
               );
             } else if (state is AddressLocationEditFailed) {
               setState(() {
@@ -189,53 +206,26 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                 background: Stack(
                   children: [
                     GoogleMap(
-                      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                      gestureRecognizers: <Factory<
+                          OneSequenceGestureRecognizer>>{
                         Factory<OneSequenceGestureRecognizer>(
-                            () => EagerGestureRecognizer()),
+                                () => EagerGestureRecognizer()),
                       },
                       mapType: MapType.normal,
-                      zoomControlsEnabled: false,
-                      myLocationEnabled: true,
+                      zoomControlsEnabled: true,
+
                       zoomGesturesEnabled: true,
                       scrollGesturesEnabled: true,
                       myLocationButtonEnabled: false,
                       rotateGesturesEnabled: false,
                       tiltGesturesEnabled: false,
-                      initialCameraPosition: CameraPosition(
-                        target: _initialPosition,
-                        zoom: 10,
-                      ),
-                      onMapCreated: (GoogleMapController controller) {
-                        _mapController = controller;
-                        print("Map created, controller assigned.");
-                      },
-                      onCameraMove: (CameraPosition position) {
-                        setState(() {
-                          _isMapDragging = true;
-                          _currentPosition = position.target;
-                          longitude = position.target.longitude;
-                          latitude =position.target.latitude;
-                        });
-                      },
-                      onCameraIdle: () {
-                        setState(() {
-                          _isMapDragging = false;
-                        });
-                        _getAddressFromCoordinates(_currentPosition);
-                      },
-                      // markers: {
-                      //   Marker(
-                      //     markerId: MarkerId("currentLocation"),
-                      //     position: _currentPosition,
-                      //     draggable: true,
-                      //     onDragEnd: (LatLng position) {
-                      //       setState(() {
-                      //         _currentPosition = position;
-                      //       });
-                      //       _getAddressFromCoordinates(_currentPosition);
-                      //     },
-                      //   ),
-                      // },
+
+                      initialCameraPosition: CameraPosition(target: _initialPosition, zoom: 18),
+                      onMapCreated: (controller) => _mapController = controller,
+                      onCameraMove: (position) => _onCameraMove(position),
+                      onCameraIdle: () => _getAddressFromCoordinates(_currentPosition),
+                      myLocationEnabled: true,
+
                     ),
                     Center(
                       child: Icon(
@@ -274,7 +264,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               ),
                               SizedBox(width: SizeConfig.blockWidth * 1.5),
                               Text(
-                                'Use my Current Location',
+                                'Use my Current Location'.tr(),
                                 style: TextStyle(
                                   color: COLORS.black,
                                   fontSize: SizeConfig.blockWidth * 3.25,
@@ -287,6 +277,42 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                         ),
                       ),
                     ),
+                    if(isMapDragging)...[
+                      Positioned(
+                        top: SizeConfig.blockHeight*35,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            width: SizeConfig.blockWidth*65,
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*4, vertical:SizeConfig.blockHeight*2),
+                            decoration: BoxDecoration(
+                              color: COLORS.primaryTwo.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                LoadingAnimationWidget.hexagonDots(
+                                  color: COLORS.accent,
+                                  size: SizeConfig.blockHeight * 3.5,
+                                ),
+                                SizedBox(width: SizeConfig.blockWidth*3,),
+                                Text(
+                                  'Updating location...'.tr(),
+                                  style: TextStyle(
+                                    color: COLORS.white,
+                                    fontSize: SizeConfig.blockWidth * 3.8,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]
                   ],
                 ),
               ),
@@ -316,7 +342,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                         SizedBox(
                           width: SizeConfig.blockWidth * 80,
                           child: Text(
-                            _currentAddress,
+                            _currentAddress.tr(),
                             style: TextStyle(
                               color: COLORS.black,
                               fontSize: SizeConfig.blockWidth * 3.25,

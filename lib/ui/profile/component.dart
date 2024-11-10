@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 import '../../components/colors.dart';
@@ -190,10 +191,10 @@ Widget registerText({required String text}) {
         vertical: SizeConfig.blockHeight * 0.5,
         horizontal: SizeConfig.blockWidth),
     child: Text(
-      text,
+      text.tr(),
       style: TextStyle(
         color: COLORS.neutralDark,
-        fontSize: SizeConfig.blockWidth * 3.8,
+        fontSize: SizeConfig.blockWidth * 3.6,
         fontWeight: FontWeight.w500,
         fontFamily: "Poppins",
       ),

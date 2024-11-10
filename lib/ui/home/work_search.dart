@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/global_helper/popup.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/home/work_details.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +39,9 @@ class _WorkSearchListState extends State<WorkSearchList> {
   String searchKeyword = "";
   Location _location = Location();
   LatLng? _currentPosition;
-  double? latitude;
-  double? longitude;
+  bool isLiveLocationEnabled = false;
+  String currentLatitude = '';
+  String currentLongitude = '';
 
   @override
   void initState() {
@@ -77,8 +79,8 @@ class _WorkSearchListState extends State<WorkSearchList> {
         profession: "",
         city: "",
         gender: "",
-        currentLongitude: '',
-        currentLatitude: ''));
+        currentLongitude: currentLongitude,
+        currentLatitude: currentLatitude));
   }
 
   void _loadMoreData() {
@@ -87,6 +89,44 @@ class _WorkSearchListState extends State<WorkSearchList> {
       currentPage++;
     });
     _fetchData();
+  }
+
+  void _toggleLiveLocation() {
+    setState(() {
+      isLiveLocationEnabled = !isLiveLocationEnabled;
+    });
+
+    if (isLiveLocationEnabled) {
+      _getCurrentLocation();
+    } else {
+      setState(() {
+        currentLatitude = '';
+        currentLongitude = '';
+      });
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {});
+
+    PermissionStatus permissionGranted = await _location.requestPermission();
+    print("Permission status: $permissionGranted");
+
+    if (permissionGranted == PermissionStatus.granted) {
+      LocationData locationData = await _location.getLocation();
+
+      setState(() {
+        currentLatitude = locationData.latitude.toString();
+        currentLongitude = locationData.longitude.toString();
+        print(currentLatitude);
+        _fetchData();
+      });
+
+    } else {
+      print("Location permission not granted");
+    }
+
+    setState(() {});
   }
 
   // Future<void> _getCurrentLocation() async {
@@ -146,54 +186,69 @@ class _WorkSearchListState extends State<WorkSearchList> {
               padding: EdgeInsets.symmetric(
                   horizontal: SizeConfig.blockWidth * 4.5,
                   vertical: SizeConfig.blockHeight * 2),
-              child: TextField(
-                controller: _searchController,
-                style: TextStyle(
-                  color: COLORS.neutralDarkOne,
-                  fontSize: SizeConfig.blockWidth * 3.25,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
-                ),
-                cursorColor: COLORS.black,
-                decoration: InputDecoration(
-                  fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                  focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                  filled: true,
-                  hintText: 'Ex: Plumber, Swimming Coach'.tr(),
-                  hintStyle: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.25,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      style: TextStyle(
+                        color: COLORS.neutralDarkOne,
+                        fontSize: SizeConfig.blockWidth * 3.25,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      cursorColor: COLORS.black,
+                      decoration: InputDecoration(
+                        fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                        focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                        filled: true,
+                        hintText: 'Ex: Plumber, Swimming Coach'.tr(),
+                        hintStyle: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.25,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: COLORS.neutralDarkOne,
+                          size: SizeConfig.blockWidth * 5,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderSide: BorderSide(
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              width: SizeConfig.blockWidth * 0.1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderSide: BorderSide(
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              width: SizeConfig.blockWidth * 0.1),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderSide: BorderSide(
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              width: SizeConfig.blockWidth * 0.1),
+                        ),
+                      ),
+                      onChanged: _onSearchChanged,
+                    ),
                   ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: COLORS.neutralDarkOne,
-                    size: SizeConfig.blockWidth * 5,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                    borderSide: BorderSide(
-                        color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        width: SizeConfig.blockWidth * 0.1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                    borderSide: BorderSide(
-                        color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        width: SizeConfig.blockWidth * 0.1),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                    borderSide: BorderSide(
-                        color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        width: SizeConfig.blockWidth * 0.1),
-                  ),
-                ),
-                onChanged: _onSearchChanged,
+                  // SizedBox(width: SizeConfig.blockWidth*3),
+                  // GestureDetector(
+                  //   onTap: _toggleLiveLocation,
+                  //   child: Icon(
+                  //     Icons.my_location,
+                  //     color: isLiveLocationEnabled ? COLORS.primary:COLORS.primaryOne,
+                  //     size: SizeConfig.blockWidth*6,
+                  //   ),
+                  // ),
+                ],
               ),
             ),
             // Row(
@@ -382,6 +437,36 @@ class _WorkSearchListState extends State<WorkSearchList> {
                               },
                               onError: () {},
                             ));
+                          } else {
+                            showCustomAlertDialog(
+                              context: context,
+                              title: 'Are you Sure?',
+                              message: 'Do you want to Uninterest this Work?',
+                              positiveButtonText: 'YES',
+                              negativeButtonText: 'NO',
+                              onPositivePressed: () {
+                                showInterestedBloc.add(SaveInterestedWork(
+                                  workID: work.id!,
+                                  contact: true,
+                                  onSuccess: () {
+                                    setState(() {
+                                      work.intrestShown = null;
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                  onError: () {
+                                    showCustomSnackBar(
+                                      context: context,
+                                      message: "Something Went wrong",
+                                    );
+                                    Navigator.of(context).pop();
+                                  },
+                                ));
+                              },
+                              onNegativePressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            );
                           }
                         } else {
                           showInterestBottomSheet(context);
@@ -392,7 +477,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           : COLORS.primary,
                       showIcon: false,
                       width: SizeConfig.blockWidth * 55,
-                      height: SizeConfig.blockHeight * 6.5,
+                      height: SizeConfig.blockHeight * 7,
                       image: true,
                       imageChild: Padding(
                         padding: EdgeInsets.only(right: SizeConfig.blockWidth),
@@ -443,7 +528,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           shareJobDetails(
                             experience: work.experienceLevel!,
                             location: work.location!,
-                            jobTitle:  work.requiredProfession!,
+                            jobTitle: work.requiredProfession!,
                           );
                         },
                       ),

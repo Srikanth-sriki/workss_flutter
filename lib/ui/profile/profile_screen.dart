@@ -7,6 +7,7 @@ import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/config.dart';
+import 'package:works_app/global_helper/helper_function.dart';
 import 'package:works_app/ui/profile/Interested_works.dart';
 import 'package:works_app/ui/profile/bookmark_list.dart';
 import 'package:works_app/ui/profile/conatct_us.dart';
@@ -19,6 +20,7 @@ import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_profile_model.dart';
+import '../onboarding/select_user_type.dart';
 import 'location/location_list.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -38,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late ProfileFetch profileFetch;
   bool interestedWork = false;
   bool isVerified = false;
+  bool isRegistered = false;
 
   @override
   void initState() {
@@ -66,13 +69,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           } else if (state is FetchProfileSuccess) {
             loading = false;
             setState(() {
-              profileFetch = state.profileFetch!;
+              profileFetch = state.profileFetch;
               phoneNumber = state.profileFetch.mobile!;
               Config.phoneNumber = state.profileFetch.mobile!;
               profileImage = state.profileFetch.profilePic!;
-              userName = state.profileFetch.name!;
-              Config.name = state.profileFetch.name!;
-              isVerified = state .profileFetch.isVerified!;
+              userName = state.profileFetch.name ?? "";
+              Config.name = state.profileFetch.name ?? "";
+              isVerified = state.profileFetch.isVerified!;
+              isRegistered = state.profileFetch.isRegistered!;
               interestedWork =
                   state.profileFetch.userType == 'professional' ? true : false;
             });
@@ -87,167 +91,213 @@ class _ProfileScreenState extends State<ProfileScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               if (loading == false) ...[
-                Stack(
-                  children: [
-                    Container(
-                      color: COLORS.primaryTwo,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.blockWidth * 5,
-                          vertical: SizeConfig.blockHeight * 4),
-                      margin:
-                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: SizeConfig.blockWidth * 20,
-                            height: SizeConfig.blockWidth * 20,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(profileImage),
-                                  fit: BoxFit.fill,
-                                ),
-                                border: Border.all(
-                                    color: COLORS.primary,
-                                    width: SizeConfig.blockWidth * 0.15),
-                                borderRadius: BorderRadius.all(Radius.circular(
-                                    SizeConfig.blockWidth * 3))),
-                          ),
-                          SizedBox(width: SizeConfig.blockWidth * 6),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: SizeConfig.blockWidth*48,
-                                child: Text(
-                                  userName,
-                                  style: TextStyle(
-                                    color: COLORS.white,
-                                    fontSize: SizeConfig.blockWidth * 4.25,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: "Poppins",
-                                  ),maxLines: 1,softWrap: true,overflow:TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    '+91 ${phoneNumber}',
-                                    style: TextStyle(
-                                      color: COLORS.primary,
-                                      fontSize: SizeConfig.blockWidth * 3.8,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) =>
-                                                    ProfileBloc(),
-                                              ),
-                                              BlocProvider(
-                                                create: (context) =>
-                                                    InitialRegisterBloc(),
-                                              )
-                                            ],
-                                            child: EditProfileRegisterForm(
-                                              refreshPageCallback:
-                                                  _refreshPageAfterEdit,
-                                              profileFetch: profileFetch,
-                                            ),
-                                          )));
-                            },
-                            child: Container(
-                              width: SizeConfig.blockWidth * 8,
-                              height: SizeConfig.blockWidth * 8,
-                              alignment: Alignment.center,
+                if (isRegistered != false) ...[
+                  Stack(
+                    children: [
+                      Container(
+                        color: COLORS.primaryTwo,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 5,
+                            vertical: SizeConfig.blockHeight * 4),
+                        margin:
+                            EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: SizeConfig.blockWidth * 20,
+                              height: SizeConfig.blockWidth * 20,
                               decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(profileImage),
+                                    fit: BoxFit.fill,
+                                  ),
                                   border: Border.all(
-                                      color: COLORS.accent,
-                                      width: SizeConfig.blockWidth * 0.3),
+                                      color: COLORS.primary,
+                                      width: SizeConfig.blockWidth * 0.15),
                                   borderRadius: BorderRadius.all(
                                       Radius.circular(
-                                          SizeConfig.blockWidth * 2))),
-                              child: Icon(
-                                Icons.edit,
-                                color: COLORS.accent,
-                                size: SizeConfig.blockWidth * 4,
-                              ),
+                                          SizeConfig.blockWidth * 3))),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if(isVerified == true)...[
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 3,
-                              vertical: SizeConfig.blockHeight * 1),
-                          decoration: BoxDecoration(
-                            color: COLORS.semanticTwo,
-                            borderRadius: BorderRadius.only(
-                                bottomLeft:
-                                Radius.circular(SizeConfig.blockWidth * 4)),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.verified,
-                                color: COLORS.white,
-                                size: SizeConfig.blockWidth * 3.5,
-                              ),
-                              SizedBox(
-                                width: SizeConfig.blockWidth * 1.5,
-                              ),
-                              Text(
-                                'Verified'.tr(),
-                                style: TextStyle(
-                                  color: COLORS.white,
-                                  fontSize: SizeConfig.blockWidth * 3,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: "Poppins",
+                            SizedBox(width: SizeConfig.blockWidth * 6),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: SizeConfig.blockWidth * 48,
+                                  child: Text(
+                                    userName,
+                                    style: TextStyle(
+                                      color: COLORS.white,
+                                      fontSize: SizeConfig.blockWidth * 4.25,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: "Poppins",
+                                    ),
+                                    maxLines: 1,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      '+91 ${phoneNumber}',
+                                      style: TextStyle(
+                                        color: COLORS.primary,
+                                        fontSize: SizeConfig.blockWidth * 3.8,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      ProfileBloc(),
+                                                ),
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      InitialRegisterBloc(),
+                                                )
+                                              ],
+                                              child: EditProfileRegisterForm(
+                                                refreshPageCallback:
+                                                    _refreshPageAfterEdit,
+                                                profileFetch: profileFetch,
+                                              ),
+                                            )));
+                              },
+                              child: Container(
+                                width: SizeConfig.blockWidth * 8,
+                                height: SizeConfig.blockWidth * 8,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: COLORS.accent,
+                                        width: SizeConfig.blockWidth * 0.3),
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(
+                                            SizeConfig.blockWidth * 2))),
+                                child: Icon(
+                                  Icons.edit,
+                                  color: COLORS.accent,
+                                  size: SizeConfig.blockWidth * 4,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      )
-                    ]
-
-                  ],
-                )
+                      ),
+                      if (isVerified == true) ...[
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: SizeConfig.blockWidth * 3,
+                                vertical: SizeConfig.blockHeight * 1),
+                            decoration: BoxDecoration(
+                              color: COLORS.semanticTwo,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(
+                                      SizeConfig.blockWidth * 4)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.verified,
+                                  color: COLORS.white,
+                                  size: SizeConfig.blockWidth * 3.5,
+                                ),
+                                SizedBox(
+                                  width: SizeConfig.blockWidth * 1.5,
+                                ),
+                                Text(
+                                  'Verified'.tr(),
+                                  style: TextStyle(
+                                    color: COLORS.white,
+                                    fontSize: SizeConfig.blockWidth * 3,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ]
+                    ],
+                  )
+                ] else ...[
+                  Container(
+                    color: COLORS.primaryTwo,
+                    width: SizeConfig.screenWidth,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 5,
+                        vertical: SizeConfig.blockHeight * 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "It looks like you haven't registered yet. \nPlease complete your registration!".tr(),
+                          style: TextStyle(
+                              fontSize: SizeConfig.blockWidth * 3.6,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              color: COLORS.white),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: SizeConfig.blockHeight*2,),
+                        customButton(
+                          text: 'Register Now'.tr(),
+                          backgroundColor: COLORS.primary,
+                          showIcon: false,
+                          width: SizeConfig.blockWidth * 50,
+                           height: SizeConfig.blockHeight * 8,
+                          textColor: COLORS.white,
+                          onPressed: (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                  const SelectUserType()),
+                            );
+                          }
+                        )
+                      ],
+                    ),
+                  )
+                ]
               ],
               Expanded(
                 child: ListView(
                   children: [
-                    _buildListItem(
-                        'assets/images/profile/other_location.png', 'My Addresses', () {
+                    _buildListItem('assets/images/profile/other_location.png',
+                        'My Addresses', () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                      create: (context) => ProfileBloc()
-                                        ..add(AddressLocationListEvent())),
-                                ],
-                                child: LocationListScreen(),
-                              )));
+                                    providers: [
+                                      BlocProvider(
+                                          create: (context) => ProfileBloc()
+                                            ..add(
+                                                const AddressLocationListEvent())),
+                                    ],
+                                    child: LocationListScreen(),
+                                  )));
                     }),
                     _buildListItem(
                         'assets/images/profile/posted_work.png', 'Posted Works',
@@ -299,13 +349,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             ..add(
                                                 const FetchInterestedWorkEvent()),
                                         ),
+                                        BlocProvider(
+                                          create: (context) =>
+                                              ShowInterestedBloc(),
+                                        )
                                       ],
                                       child: InterestedWorkList(),
                                     )));
                       }),
                     ],
-                    _buildListItem('assets/images/profile/share.png',
-                        'Share with Friends', () {}),
+                    _buildListItem(
+                        'assets/images/profile/share.png', 'Share with Friends',
+                        () {
+                      shareAppWithFriend();
+                    }),
                     _buildListItem('assets/images/profile/question.png', 'FAQs',
                         () {
                       Navigator.push(
@@ -348,7 +405,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             builder: (BuildContext context) => SettingApp()),
                       );
                     }),
-
                   ],
                 ),
               ),
@@ -386,7 +442,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 imagePath,
                 width: SizeConfig.blockWidth * 5, // Adjust size as needed
                 height: SizeConfig.blockHeight * 5,
-                fit: BoxFit.contain,color: COLORS.neutralDark,
+                fit: BoxFit.contain, color: COLORS.neutralDark,
               ),
             ),
             SizedBox(

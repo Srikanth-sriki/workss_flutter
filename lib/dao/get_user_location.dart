@@ -26,6 +26,8 @@ Future<Map<String, String>> getAddress(double lat, double lng) async {
       // Parse the response
       final data = json.decode(response.body);
       print('Full Response: $data');
+      print( data['results'][0]);
+      print( data['results'][1]);
 
       final formattedAddress =
           data['results'][0]['formatted_address'] ?? 'Address not found';

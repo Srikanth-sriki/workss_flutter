@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/helper_function.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
@@ -155,14 +156,39 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                                 professionalData.isContacted =
                                                     IsContacted(id: '');
                                               });
+                                              makePhoneCall(professionalData.mobile!);
                                             },
                                             onError: () {},
                                           ));
                                         }
+                                        else{
+                                          makePhoneCall(professionalData.mobile!);
+                                        }
                                       },
                                       jobType: professionalData.professionType!,
                                       onShare: () {},
-                                      savedTap: () {}),
+                                      savedTap: () {
+                                        showInterestedBloc.add(ProfessionalSavedUs(
+                                          PropId: professionalData.id!,
+                                          onSuccess: () {
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message:
+                                              "Successfully removed from your saved list!",
+                                              backgroundColor:
+                                              COLORS
+                                                  .semanticTwo,
+                                            );
+                                            profileBloc.add(const FetchSavedProfessionalEvent());
+                                          },
+                                          onError: () {
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message: "Something Went wrong",
+                                            );
+                                          },
+                                        ));
+                                      }),
                                 );
                               }),
                         )

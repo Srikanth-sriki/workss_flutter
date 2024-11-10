@@ -14,6 +14,7 @@ import '../../../global_helper/loading_placeholder/home_layout.dart';
 import '../../../global_helper/reuse_widget.dart';
 import '../../../models/address_location_list.dart';
 import 'location_create.dart';
+import 'location_edit.dart';
 
 class AddressListModalBottomSheet extends StatefulWidget {
   final String? selectedAddressId; // Accept selected ID
@@ -132,7 +133,7 @@ class _AddressListModalBottomSheetState
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Select Address',
+                            'Select Address'.tr(),
                             style: TextStyle(
                               fontSize: SizeConfig.blockWidth * 4,
                               fontWeight: FontWeight.w400,
@@ -164,7 +165,7 @@ class _AddressListModalBottomSheetState
                               backgroundColor: COLORS.primary,
                               showIcon: false,
                               width: SizeConfig.blockWidth * 30,
-                              height: SizeConfig.blockHeight * 8,
+                              height: SizeConfig.blockHeight * 6.5,
                               textColor: COLORS.white,
                               icon: Icons.add,
                               prefixIconBool: false),
@@ -219,34 +220,95 @@ class _AddressListModalBottomSheetState
                                     CrossAxisAlignment.start,
                                     children: [
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Image.asset(
-                                            addressItem.addressType ==
-                                                'home'
-                                                ? 'assets/images/profile/home_location.png'
-                                                : addressItem.addressType ==
-                                                'office'
-                                                ? 'assets/images/profile/Buildings_location.png'
-                                                : 'assets/images/profile/other_location.png',
-                                            width:
-                                            SizeConfig.blockWidth * 4,
-                                            height:
-                                            SizeConfig.blockWidth * 4,
-                                            fit: BoxFit.contain,
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Image.asset(
+                                                addressItem.addressType ==
+                                                    'home'
+                                                    ? 'assets/images/profile/home_location.png'
+                                                    : addressItem.addressType ==
+                                                    'office'
+                                                    ? 'assets/images/profile/Buildings_location.png'
+                                                    : 'assets/images/profile/other_location.png',
+                                                width:
+                                                SizeConfig.blockWidth * 4,
+                                                height:
+                                                SizeConfig.blockWidth * 4,
+                                                fit: BoxFit.contain,
+                                              ),
+                                              SizedBox(
+                                                  width: SizeConfig.blockWidth *
+                                                      2),
+                                              Text(
+                                                addressItem.addressType!
+                                                    .toUpperCase(),
+                                                style: TextStyle(
+                                                  fontSize:
+                                                  SizeConfig.blockWidth *
+                                                      3.25,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontFamily: "Poppins",
+                                                  color: COLORS.neutralDark,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                  width: SizeConfig.blockWidth *
+                                                      2),
+                                              if(addressItem
+                                                  .addressType == 'other' && addressItem.addressTypeName!.isNotEmpty)...[
+                                                Container(
+                                                  width: SizeConfig.blockWidth*40,
+                                                  decoration: BoxDecoration(border: Border(left: BorderSide(color: COLORS.primaryOne,width: SizeConfig.blockWidth*0.2))),
+                                                  padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*2),
+                                                  child: Text(
+                                                    capitalizeFirstLetter(addressItem.addressTypeName!),
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                      SizeConfig.blockWidth *
+                                                          3.25,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontFamily: "Poppins",
+                                                      color: COLORS.neutralDark,
+                                                    ),maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                )
+                                              ],
+                                            ],
                                           ),
-                                          SizedBox(
-                                              width: SizeConfig.blockWidth *
-                                                  2),
-                                          Text(
-                                            addressItem.addressType!
-                                                .toUpperCase(),
-                                            style: TextStyle(
-                                              fontSize:
-                                              SizeConfig.blockWidth *
-                                                  3.25,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Poppins",
-                                              color: COLORS.neutralDark,
+                                          InkWell(
+                                            onTap: (){
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          MultiBlocProvider(
+                                                            providers: [
+                                                              BlocProvider(
+                                                                  create: (context) =>
+                                                                      ProfileBloc()),
+                                                            ],
+                                                            child: EditAddressScreen(
+                                                              routeType:"modal",
+                                                                addressItem:
+                                                                addressItem),
+                                                          )));
+                                            },
+                                            child: Text(
+                                            'EDIT'.tr(),
+                                              style: TextStyle(
+                                                fontSize:
+                                                SizeConfig.blockWidth *
+                                                    3.25,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: "Poppins",
+                                                color: COLORS.accent,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -311,7 +373,7 @@ class _AddressListModalBottomSheetState
                                 },
                                 backgroundColor: COLORS.primary,
                                 showIcon: true,
-                                height: SizeConfig.blockHeight * 8,
+                                height: SizeConfig.blockHeight * 6.5,
                                 textColor: COLORS.white,
                                 icon: Icons.add,
                                 prefixIconBool: false),

@@ -6,6 +6,7 @@ import 'package:works_app/models/faq_model.dart';
 
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 
 class FaqScreen extends StatefulWidget {
@@ -61,10 +62,12 @@ class _FaqScreenState extends State<FaqScreen> {
           if (loading) {
             return const Center(child: CircularProgressIndicator());
           } else if (error) {
-            return Center(child: Text('Failed to load FAQs.'));
+            return ErrorScreen(onRetry: () {
+              profileBloc.add(FetchFaqEvent());
+            });
           } else if (!loading && !error) {
             if (faqModelListModal.isEmpty) {
-              return Center(child: Text('No FAQs available.'));
+              return emptyComponent();
             }
             return SafeArea(
               child: Padding(
@@ -101,11 +104,11 @@ class _FaqScreenState extends State<FaqScreen> {
                     ),
                     SizedBox(height: SizeConfig.blockHeight * 2),
                     Text(
-                      'Have further questions? Let \nus know.',
+                      'Have further questions? Let \nus know.'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: COLORS.neutralDark,
-                        fontSize: SizeConfig.blockWidth * 3.8,
+                        fontSize: SizeConfig.blockWidth * 3.6,
                         fontWeight: FontWeight.w500,
                         fontFamily: "Poppins",
                       ),

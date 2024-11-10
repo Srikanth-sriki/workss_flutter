@@ -1090,7 +1090,7 @@ Widget showInterestButton({
                 : COLORS.primary,
             showIcon: false,
             width: SizeConfig.blockWidth * 55,
-            height: SizeConfig.blockHeight * 6.5,
+            height: SizeConfig.blockHeight * 7,
             image: true,
             imageChild: Padding(
               padding: EdgeInsets.only(right: SizeConfig.blockWidth),
@@ -1149,7 +1149,7 @@ void showCustomSnackBar({
 }) {
   final snackBar = SnackBar(
     content: Text(
-      message,
+      message.tr(),
       style: TextStyle(
         color: COLORS.neutralDark,
         fontSize: SizeConfig.blockWidth * 3.25,
@@ -1243,7 +1243,7 @@ class ErrorScreen extends StatelessWidget {
             ),
              SizedBox(height: SizeConfig.blockHeight*2),
             Text(
-              'Something went wrong!',
+              'Something went wrong!'.tr(),
               style: TextStyle(
                 color: COLORS.neutralDark,
                 fontSize: SizeConfig.blockWidth * 3.6,

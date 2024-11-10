@@ -167,7 +167,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'otp'.tr(),
+                  'OTP'.tr(),
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 4.25,

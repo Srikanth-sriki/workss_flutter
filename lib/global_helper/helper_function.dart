@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -62,10 +63,19 @@ String capitalizeEachWord(String input) {
 
 Future<void> makePhoneCall(String phoneNumber) async {
   final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+
+  var status = await Permission.phone.status;
+  if (!status.isGranted) {
+    status = await Permission.phone.request();
+    if (!status.isGranted) {
+      throw 'Phone call permission not granted';
+    }
+  }
+
   if (await canLaunchUrl(phoneUri)) {
     await launchUrl(phoneUri);
   } else {
-    throw 'Could not launch $phoneNumber';
+    launch("tel:$phoneUri");
   }
 }
 
@@ -101,6 +111,38 @@ Download Works now and take the next step in your career:
     text: jobDetails,
   );
 }
+
+
+
+Future<void> shareAppWithFriend() async {
+  final String appPromotionMessage = '''🚀 Discover Your Next Job Opportunity with Works! 🚀
+
+Works makes job hunting easy and efficient:
+🌟 Find jobs that match your skills and experience
+👥 Connect directly with employers
+📲 Apply with just a few clicks
+
+Don’t miss out on your dream job. Download Works now and take control of your career path!
+
+👉 Download Works here: https://play.google.com/store/apps/details?id=com.workss.works_app 👈
+''';
+
+  // Load an image from assets
+  final ByteData bytes = await rootBundle.load('assets/images/home/app_share.png');
+  final Uint8List imageBytes = bytes.buffer.asUint8List();
+
+  // Save the image as a temporary file to share
+  final tempDir = await getTemporaryDirectory();
+  final file = await File('${tempDir.path}/app_banner.png').create();
+  file.writeAsBytesSync(imageBytes);
+
+  // Share the app promotion message along with the image
+  await Share.shareXFiles(
+    [XFile(file.path)],
+    text: appPromotionMessage,
+  );
+}
+
 
 
 

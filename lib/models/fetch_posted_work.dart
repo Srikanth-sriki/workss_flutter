@@ -26,6 +26,7 @@ class FetchPostedModel {
   // dynamic deletedAt;
   List<Work>? workIntrests;
   List<Work>? workViews;
+  User? user;
 
   FetchPostedModel({
     this.id,
@@ -46,6 +47,7 @@ class FetchPostedModel {
     this.updatedAt,
     this.workIntrests,
     this.workViews,
+    this.user
     // this.deletedAt,
   });
 
@@ -68,6 +70,7 @@ class FetchPostedModel {
     updatedAt: DateTime.parse(json["updatedAt"]),
     workIntrests:  json.containsKey("workIntrests") ? json["workIntrests"] == null ? null :  List<Work>.from(json["workIntrests"].map((x) => Work.fromJson(x))) : null,
     workViews: json.containsKey("workViews") ? json["workViews"] == null ? null :  List<Work>.from(json["workViews"].map((x) => Work.fromJson(x))) : null,
+    user: json["user"] != null ? User.fromJson(json["user"]) : null,
     // deletedAt: json["deletedAt"],
   );
 
@@ -90,6 +93,7 @@ class FetchPostedModel {
     "updatedAt": updatedAt!.toIso8601String(),
     "workIntrests": List<dynamic>.from(workIntrests!.map((x) => x.toJson())),
     "workViews": List<dynamic>.from(workViews!.map((x) => x.toJson())),
+    "user": user?.toJson(),
     // "deletedAt": deletedAt,
   };
 }
@@ -131,5 +135,40 @@ class Work {
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
     "deletedAt": deletedAt,
+  };
+}
+class User {
+  String? id;
+  String? name;
+  String? city;
+  String? professionType;
+  String? countryCode;
+  String? mobile;
+
+  User({
+    this.id,
+    this.name,
+    this.city,
+    this.professionType,
+    this.countryCode,
+    this.mobile,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json["id"]??"",
+    name: json["name"]??"",
+    city: json["city"]??"",
+    professionType: json["profession_type"]??"",
+    countryCode: json["country_code"]??"",
+    mobile: json["mobile"]??"",
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "city": city,
+    "profession_type": professionType,
+    "country_code": countryCode,
+    "mobile": mobile,
   };
 }

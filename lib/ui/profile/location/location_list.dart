@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -148,7 +149,7 @@ class _LocationListScreenState extends State<LocationListScreen> {
                                                 ),
                                                 Text(
                                                   addressItem.addressType!
-                                                      .toUpperCase(),
+                                                      .toUpperCase().tr(),
                                                   style: TextStyle(
                                                     fontSize:
                                                         SizeConfig.blockWidth *
@@ -221,13 +222,14 @@ class _LocationListScreenState extends State<LocationListScreen> {
                                                                             ProfileBloc()),
                                                                   ],
                                                                   child: EditAddressScreen(
+                                                                      routeType:'screen',
                                                                       addressItem:
                                                                           addressItem),
                                                                 )));
                                                   },
                                                   isSemanticButton: false,
                                                   child: Text(
-                                                    'EDIT',
+                                                    'EDIT'.tr(),
                                                     style: TextStyle(
                                                       fontSize: SizeConfig
                                                               .blockWidth *
@@ -273,7 +275,7 @@ class _LocationListScreenState extends State<LocationListScreen> {
                                                   },
                                                   isSemanticButton: false,
                                                   child: Text(
-                                                    'DELETE',
+                                                    'DELETE'.tr(),
                                                     style: TextStyle(
                                                       fontSize: SizeConfig
                                                               .blockWidth *

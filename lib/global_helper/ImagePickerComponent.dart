@@ -681,7 +681,7 @@ class _MultipleImagePickerComponentState
                           vertical: SizeConfig.blockHeight * 0.5,
                           horizontal: SizeConfig.blockWidth * 2),
                       child: Text(
-                        'Please upload picture',
+                        'Please upload picture'.tr(),
                         style: TextStyle(
                           color: COLORS.semantic,
                           fontWeight: FontWeight.w300,
@@ -719,7 +719,7 @@ class _MultipleImagePickerComponentState
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Upload your work images\n(max 2 pictures)',
+              'Upload your work images\n(max 2 pictures)'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: COLORS.neutralDark,
@@ -760,7 +760,7 @@ class _MultipleImagePickerComponentState
           ),
           SizedBox(width: SizeConfig.blockWidth),
           Text(
-            'Upload Picture',
+            'Upload Picture'.tr(),
             style: TextStyle(
               color: COLORS.primary,
               fontWeight: FontWeight.w400,

@@ -22,11 +22,12 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
 
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(COLORS.white)  // Set WebView background color to avoid black screen
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
             setState(() {
-              isLoading = true;
+              isLoading = progress < 100;
             });
           },
           onPageStarted: (String url) {
@@ -72,16 +73,17 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
       body: SafeArea(
         child: Stack(
           children: [
-            // WebView widget
-            Container(
-              padding: EdgeInsets.symmetric(
-                vertical: SizeConfig.blockHeight,
-                horizontal: SizeConfig.blockWidth * 4,
+
+            if (!isLoading)
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: SizeConfig.blockHeight,
+                  horizontal: SizeConfig.blockWidth * 4,
+                ),
+                child: WebViewWidget(controller: controller),
               ),
-              child: WebViewWidget(controller: controller),
-            ),
 
-
+            // Loading indicator
             if (isLoading)
               const Center(
                 child: CircularProgressIndicator(

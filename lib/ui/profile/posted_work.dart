@@ -1,9 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/bloc/show_interested/show_interested_bloc.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/popup.dart';
 import 'package:works_app/models/fetch_posted_work.dart';
 import 'package:works_app/ui/profile/component.dart';
 import 'package:works_app/ui/profile/view_insights.dart';
@@ -103,7 +105,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                               return Padding(
                                 padding: EdgeInsets.symmetric(
                                   vertical: SizeConfig.blockWidth * 1.5,
-                                  horizontal: SizeConfig.blockHeight * 4,
+                                  horizontal: SizeConfig.blockHeight * 2.5,
                                 ),
                                 child: WorkCard(
                                   title: profile.requiredProfession!,
@@ -190,7 +192,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                               .blockWidth *
                                                           1.5),
                                                   Text(
-                                                    'Interested \nProfessionals',
+                                                    'Interested \nProfessionals'.tr(),
                                                     style: TextStyle(
                                                       color: COLORS.black,
                                                       fontSize: SizeConfig
@@ -253,12 +255,10 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                               .blockWidth *
                                                           1.5),
                                                   Text(
-                                                    'Work Post \nViewed by',
+                                                    'Work Post \nViewed by'.tr(),
                                                     style: TextStyle(
                                                       color: COLORS.black,
-                                                      fontSize: SizeConfig
-                                                              .blockWidth *
-                                                          2.25,
+                                                      fontSize: SizeConfig.blockWidth * 2.25,
                                                       fontWeight:
                                                           FontWeight.w400,
                                                       fontFamily: "Poppins",
@@ -312,7 +312,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                             backgroundColor: COLORS.primary,
                                             showIcon: false,
                                             height:
-                                                SizeConfig.blockHeight * 6.5,
+                                                SizeConfig.blockHeight * 7,
                                             textColor: COLORS.white,
                                             width: SizeConfig.blockWidth * 50,
                                           ),
@@ -368,30 +368,44 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                   fit: BoxFit.contain,
                                                 ),
                                                 onTap: () {
-                                                  PostWorkBloc().add(
-                                                    PostWorkDeleteEvent(
-                                                      workID: profile.id!,
-                                                      onSuccess: () {
-                                                        // Remove the deleted item from the list without showing the loading spinner
-                                                        _removePostedWorkItem(
-                                                            profile.id!);
-                                                        showCustomSnackBar(
-                                                          context: context,
-                                                          message:
+                                                  showCustomAlertDialog(
+                                                    context: context,
+                                                    title: 'Do you want to Delete?',
+                                                    message: 'Do you want to Delete your Posted Work?',
+                                                    positiveButtonText: 'DELETE',
+                                                    negativeButtonText: 'CANCEL',
+                                                    onPositivePressed: () {
+                                                      PostWorkBloc().add(
+                                                        PostWorkDeleteEvent(
+                                                          workID: profile.id!,
+                                                          onSuccess: () {
+                                                            _removePostedWorkItem(
+                                                                profile.id!);
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message:
                                                               "Posted Work deleted successfully!",
-                                                          backgroundColor:
+                                                              backgroundColor:
                                                               COLORS
                                                                   .semanticTwo,
-                                                        );
-                                                      },
-                                                      onError: () {
-                                                        showCustomSnackBar(
-                                                          context: context,
-                                                          message: "Something Went wrong",
-                                                        );
-                                                      },
-                                                    ),
+                                                            );
+                                                            Navigator.of(context).pop();
+                                                          },
+                                                          onError: () {
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message: "Something Went wrong",
+                                                            );
+                                                            Navigator.of(context).pop();
+                                                          },
+                                                        ),
+                                                      );
+                                                    },
+                                                    onNegativePressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
                                                   );
+
                                                 },
                                                 color: COLORS.accent,
                                               ),

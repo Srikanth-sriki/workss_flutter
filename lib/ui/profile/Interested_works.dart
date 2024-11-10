@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/popup.dart';
 import 'package:works_app/models/fetch_posted_work.dart';
 import 'package:works_app/ui/profile/component.dart';
 
@@ -24,6 +25,7 @@ class InterestedWorkList extends StatefulWidget {
 
 class _InterestedWorkListState extends State<InterestedWorkList> {
   late ProfileBloc profileBloc;
+  late ShowInterestedBloc showInterestedBloc;
   late List<FetchPostedModel> fetchPostedModel;
   bool loading = true;
   bool error = false;
@@ -32,6 +34,7 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
   void initState() {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
+    showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
   }
 
   @override
@@ -68,7 +71,7 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
               return SizedBox(
                   height: SizeConfig.screenHeight, child: ShimmerJobCards());
             } else if (error) {
-              return ErrorScreen(onRetry: (){
+              return ErrorScreen(onRetry: () {
                 profileBloc.add(const FetchInterestedWorkEvent());
               });
             } else if (!loading && !error) {
@@ -85,7 +88,7 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                             return Container(
                               padding: EdgeInsets.symmetric(
                                 vertical: SizeConfig.blockWidth * 1.5,
-                                horizontal: SizeConfig.blockHeight * 4,
+                                horizontal: SizeConfig.blockHeight * 3.25,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -140,7 +143,43 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                                         Expanded(
                                           child: customIconButton(
                                               text: 'INTERESTED',
-                                              onPressed: () {},
+                                              onPressed: () {
+                                                showCustomAlertDialog(
+                                                  context: context,
+                                                  title: 'Are you Sure?',
+                                                  message:
+                                                      'Do you want to Uninterest this Work?',
+                                                  positiveButtonText: 'YES',
+                                                  negativeButtonText: 'NO',
+                                                  onPositivePressed: () {
+                                                    showInterestedBloc
+                                                        .add(SaveInterestedWork(
+                                                      workID: profile.id!,
+                                                      contact: true,
+                                                      onSuccess: () {
+                                                        setState(() {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                          profileBloc.add(
+                                                              const FetchInterestedWorkEvent());
+                                                        });
+                                                      },
+                                                      onError: () {
+                                                        showCustomSnackBar(
+                                                          context: context,
+                                                          message:
+                                                              "Something Went wrong",
+                                                        );
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ));
+                                                  },
+                                                  onNegativePressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                );
+                                              },
                                               backgroundColor: COLORS
                                                   .semanticTwo
                                                   .withOpacity(0.08),
@@ -158,25 +197,33 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
+                                            if(profile.user != null)...[
+                                              IconActionCard(
+                                                onTap: () {
+                                                  makePhoneCall(profile.user!.mobile!);
+                                                },
+                                                iconBool: false,
+                                                imageUrl: Image.asset(
+                                                  'assets/images/home/phone.png',
+                                                  width: SizeConfig.blockWidth *
+                                                      4.25,
+                                                  height: SizeConfig.blockHeight *
+                                                      4.25,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              )
+                                            ],
                                             IconActionCard(
                                               iconBool: false,
-                                              imageUrl: Image.asset(
-                                                'assets/images/home/phone.png',
-                                                width: SizeConfig.blockWidth *
-                                                    4.25,
-                                                height: SizeConfig.blockHeight *
-                                                    4.25,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                            IconActionCard(
-                                              iconBool: false,onTap: (){
-                                              shareJobDetails(
-                                                experience: profile.experienceLevel!,
-                                                location: profile.workPlace!,
-                                                jobTitle:  profile.requiredProfession!,
-                                              );
-                                            },
+                                              onTap: () {
+                                                shareJobDetails(
+                                                  experience:
+                                                      profile.experienceLevel!,
+                                                  location: profile.workPlace!,
+                                                  jobTitle: profile
+                                                      .requiredProfession!,
+                                                );
+                                              },
                                               imageUrl: Image.asset(
                                                 'assets/images/home/share.png',
                                                 width:

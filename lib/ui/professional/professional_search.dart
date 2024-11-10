@@ -252,6 +252,9 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                       onError: () {},
                     ));
                   }
+                  else{
+                    makePhoneCall(professionalData.mobile!);
+                  }
                 },
                 jobType: professionalData.professionType!,
                 onShare: () {
@@ -286,16 +289,40 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                               )));
                 },
                 savedTap: () {
-                  showInterestedBloc.add(ProfessionalSavedUs(
-                    PropId: professionalData.id!,
-                    onSuccess: () {
-                      setState(() {
-                        professionalData.isSaved =
-                            IsContacted(id: '');
-                      });
-                    },
-                    onError: () {},
-                  ));
+                  if(professionalData.isSaved ==null){
+                    showInterestedBloc.add(ProfessionalSavedUs(
+                      PropId: professionalData.id!,
+                      onSuccess: () {
+                        setState(() {
+                          professionalData.isSaved =
+                              IsContacted(id: '');
+                        });
+                      },
+                      onError: () {
+                        showCustomSnackBar(
+                          context: context,
+                          message: "Something Went wrong",
+                        );
+                      },
+                    ));
+                  }
+                  else{
+                    showInterestedBloc.add(ProfessionalSavedUs(
+                      PropId: professionalData.id!,
+                      onSuccess: () {
+                        setState(() {
+                          professionalData.isSaved =
+                          null;
+                        });
+                      },
+                      onError: () {
+                        showCustomSnackBar(
+                          context: context,
+                          message: "Something Went wrong",
+                        );
+                      },
+                    ));
+                  }
                 }),
           );
         } else if (isFetchingMore) {

@@ -507,7 +507,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                               border: Border.all(width: SizeConfig.blockWidth*0.2,color: COLORS.neutralDarkTwo),
                               borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3.5)
                             ),
-                            child: Text(addressSelected,
+                            child: Text(addressSelected.tr(),
                             style: TextStyle(
                               color: addressSelected == 'Select work location'?COLORS.neutralDarkOne:COLORS.neutralDark,
 

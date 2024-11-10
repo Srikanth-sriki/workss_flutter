@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -5,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
+import 'package:works_app/global_helper/popup.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 
 import '../../bloc/home/home_bloc.dart';
@@ -71,11 +73,17 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                 );
           });
         }
+
       },
       builder: (context, state) {
         if (state is FetchWorkViewLoading || state is HomeInitial) {
           return globalLoadingWidget();
-        } else if (state is FetchWorkViewSuccess) {
+        }else if (state is FetchWorkViewError) {
+          return ErrorScreen(onRetry: () {
+            homeBloc.add(FetchWorkSingleView(workId: widget.id));
+          });
+        }
+        else if (state is FetchWorkViewSuccess) {
           final singleWork = state.workViewModel.work!;
           final similarWorks = state.workViewModel.similarWorks!;
           return Scaffold(
@@ -138,13 +146,13 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                 ],
               ),
               actions: [
-                IconButton(
-                  icon: Icon(Icons.more_vert,
-                      color: COLORS.black, size: SizeConfig.blockWidth * 6.5),
-                  onPressed: () {
-                    // Add functionality for more button
-                  },
-                ),
+                // IconButton(
+                //   icon: Icon(Icons.more_vert,
+                //       color: COLORS.black, size: SizeConfig.blockWidth * 6.5),
+                //   onPressed: () {
+                //     // Add functionality for more button
+                //   },
+                // ),
               ],
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(1.0),
@@ -168,7 +176,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       padding:
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
                       child: Text(
-                        'Work Deatils',
+                        'Work Deatils'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.6,
@@ -202,7 +210,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       padding:
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
                       child: Text(
-                        'Work Address',
+                        'Work Address'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.6,
@@ -336,7 +344,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       padding:
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
                       child: Text(
-                        'Work Description',
+                        'Work Description'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.6,
@@ -363,7 +371,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       padding:
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
                       child: Text(
-                        'Work Images',
+                        'Work Images'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.6,
@@ -389,7 +397,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                         padding: EdgeInsets.only(
                             bottom: SizeConfig.blockHeight * 0.5),
                         child: Text(
-                          'Similar works',
+                          'Similar works'.tr(),
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
                             fontSize: SizeConfig.blockWidth * 3.6,
@@ -471,8 +479,48 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                                   );
                                                 });
                                               },
-                                              onError: () {},
+                                              onError: () {
+                                                showCustomSnackBar(
+                                                  context: context,
+                                                  message: "Something Went wrong",
+                                                );
+                                                Navigator.of(context).pop();
+                                              },
                                             ));
+                                          }
+                                          else{
+                                            showCustomAlertDialog(
+                                              context: context,
+                                              title: 'Are you Sure?',
+                                              message: 'Do you want to Uninterest this Work?',
+                                              positiveButtonText: 'YES',
+                                              negativeButtonText: 'NO',
+                                              onPositivePressed: () {
+                                                showInterestedBloc.add(SaveInterestedWork(
+                                                  workID: work.id!,
+                                                  contact: true,
+                                                  onSuccess: () {
+                                                    setState(() {
+                                                      work.intrestShown = null;
+                                                      Navigator.of(context).pop();
+                                                    });
+                                                  },
+                                                  onError: () {
+                                                    showCustomSnackBar(
+                                                      context: context,
+                                                      message: "Something Went wrong",
+                                                    );
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ));
+
+
+                                              },
+                                              onNegativePressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            );
+
                                           }
                                         } else {
                                           showInterestBottomSheet(context);
@@ -483,7 +531,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                           : COLORS.primary,
                                       showIcon: false,
                                       width: SizeConfig.blockWidth * 55,
-                                      height: SizeConfig.blockHeight * 6.5,
+                                      height: SizeConfig.blockHeight * 7,
                                       image: true,
                                       imageChild: Padding(
                                         padding: EdgeInsets.only(
@@ -512,7 +560,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       if (work.isProfessionalCanCall ==
-                                          true) ...[
+                                          true && work.user != null) ...[
                                         IconActionCard(
                                           iconBool: false,
                                           imageUrl: Image.asset(
@@ -566,7 +614,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                           color: COLORS.neutralDarkTwo,
                           width: SizeConfig.blockWidth * 0.15))),
               child: showInterestButton(
-                  canCall: singleWork.isProfessionalCanCall!,
+                  canCall: singleWork.isProfessionalCanCall! && singleWork.user != null,
                   interested: singleWork.intrestShown != null,
                   onTapIconOne: () {
                     makePhoneCall(singleWork.user!.mobile!);
@@ -579,30 +627,59 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                     );
                   },
                   onShowInterest: () {
-                    if (Config.userType == 'professional' &&
-                        singleWork.intrestShown == null) {
-                      showInterestedBloc.add(SaveInterestedWork(
-                        workID: singleWork.id!,
-                        contact: true,
-                        onSuccess: () {
-                          setState(() {
-                            singleWork.intrestShown = IntrestShown(
-                              isContacted: true,
-                            );
-                          });
-                        },
-                        onError: () {},
-                      ));
+                    if (Config.userType == 'professional') {
+                      if( singleWork.intrestShown == null){
+                        showInterestedBloc.add(SaveInterestedWork(
+                          workID: singleWork.id!,
+                          contact: true,
+                          onSuccess: () {
+                            setState(() {
+                              singleWork.intrestShown = IntrestShown(
+                                isContacted: true,
+                              );
+                            });
+                          },
+                          onError: () {},
+                        ));
+                      } else{
+                        showCustomAlertDialog(
+                          context: context,
+                          title: 'Are you Sure?',
+                          message: 'Do you want to Uninterest this Work?',
+                          positiveButtonText: 'YES',
+                          negativeButtonText: 'NO',
+                          onPositivePressed: () {
+                            showInterestedBloc.add(SaveInterestedWork(
+                              workID: singleWork.id!,
+                              contact: true,
+                              onSuccess: () {
+                                setState(() {
+                                  singleWork.intrestShown = null;
+                                });
+                                Navigator.of(context).pop();
+                              },
+                              onError: () {
+                                showCustomSnackBar(
+                                  context: context,
+                                  message: "Something Went wrong",
+                                );
+                                Navigator.of(context).pop();
+                              },
+                            ));
+                          },
+                          onNegativePressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        );
+
+                      }
+
                     } else {
                       showInterestBottomSheet(context);
                     }
                   }),
             ),
           );
-        } else if (state is FetchWorkViewError) {
-          ErrorScreen(onRetry: () {
-            homeBloc.add(FetchWorkSingleView(workId: widget.id));
-          });
         }
         return Container();
       },

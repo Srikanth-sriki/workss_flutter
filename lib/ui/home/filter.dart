@@ -61,10 +61,10 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Search & Filter',
+                'Search & Filter'.tr(),
                 style: TextStyle(
                   color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 4.5,
+                  fontSize: SizeConfig.blockWidth * 4.25,
                   fontWeight: FontWeight.w500,
                   fontFamily: "Poppins",
                 ),

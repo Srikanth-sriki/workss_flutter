@@ -6,6 +6,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
+import 'package:works_app/global_helper/popup.dart';
 import 'package:works_app/ui/home/component.dart';
 import 'package:works_app/ui/home/notification_list.dart';
 import 'package:works_app/ui/home/work_details.dart';
@@ -55,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
   }
+
 
   void _fetchData() {
     homeBloc.add(FetchHomeScreenEvent(
@@ -260,8 +262,48 @@ class _HomeScreenState extends State<HomeScreen> {
                                       );
                                     });
                                   },
-                                  onError: () {},
+                                  onError: () {
+                                    showCustomSnackBar(
+                                      context: context,
+                                      message: "Something Went wrong",
+                                    );
+                                    Navigator.of(context).pop();
+                                  },
                                 ));
+                              }
+                              else{
+                                showCustomAlertDialog(
+                                  context: context,
+                                  title: 'Are you Sure?',
+                                  message: 'Do you want to Uninterest this Work?',
+                                  positiveButtonText: 'YES',
+                                  negativeButtonText: 'NO',
+                                  onPositivePressed: () {
+                                    showInterestedBloc.add(SaveInterestedWork(
+                                      workID: work.id!,
+                                      contact: true,
+                                      onSuccess: () {
+                                        setState(() {
+                                          work.intrestShown = null;
+                                          Navigator.of(context).pop();
+                                        });
+                                      },
+                                      onError: () {
+                                        showCustomSnackBar(
+                                          context: context,
+                                          message: "Something Went wrong",
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                    ));
+
+
+                                  },
+                                  onNegativePressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                );
+
                               }
                             } else {
                               showInterestBottomSheet(context);
@@ -272,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               : COLORS.primary,
                           showIcon: false,
                           width: SizeConfig.blockWidth * 55,
-                          height: SizeConfig.blockHeight * 6.5,
+                          height: SizeConfig.blockHeight * 7,
                           image: true,
                           imageChild: Padding(
                             padding:
@@ -298,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if (work.isProfessionalCanCall == true) ...[
+                          if (work.isProfessionalCanCall == true && work.user != null) ...[
                             IconActionCard(
                               iconBool: false,
                               imageUrl: Image.asset(
@@ -492,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Text(
-                        'Search by Profession type'.tr(),
+                        'Search by Works type'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.25,

@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +10,7 @@ import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/onboarding/otp_screen.dart';
+import 'package:works_app/ui/profile/terms_and_con.dart';
 
 import '../../bloc/login/login_bloc.dart';
 import '../../bloc/login_otp/login_otp_bloc.dart';
@@ -28,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool buttonVisible = true;
   late LoginBloc loginBloc;
   bool loading = false;
+  bool isChecked = false;
 
   @override
   void initState() {
@@ -47,7 +50,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final phoneWithoutCountryCode = phone.replaceFirst('+91', '');
       _phoneController.text = phoneWithoutCountryCode;
       RegExp regex = RegExp(r"^(?:[+0]9)?\d{10}$");
-      if (regex.hasMatch(phoneWithoutCountryCode)) {}
+      if (regex.hasMatch(phoneWithoutCountryCode)) {
+        setState(() {
+          buttonVisible = false;
+        });
+      }
     } on PlatformException catch (e) {
       print('Failed to get mobile number because of: ${e.message}');
     }
@@ -56,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _validatePhoneNumber(String value) {
     setState(() {
       RegExp regex = RegExp(r"^[0-9]{10}$");
-      if (regex.hasMatch(value)) {
+      if (regex.hasMatch(value) ) {
         _hasError = false;
         _errorMessage = '';
         buttonVisible = false;
@@ -71,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _buttonVisible(String value) {
     setState(() {
       RegExp regex = RegExp(r"^[0-9]{10}$");
-      if (regex.hasMatch(value)) {
+      if (regex.hasMatch(value) && isChecked) {
         buttonVisible = false;
       } else {
         buttonVisible = true;
@@ -164,6 +171,67 @@ class _LoginScreenState extends State<LoginScreen> {
                       hasError: _hasError,
                       buttonVisibleChange: _buttonVisible),
                   const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox(
+
+                      side: BorderSide(
+                          color: COLORS.neutralDarkOne,
+                          width: SizeConfig.blockWidth * 0.3),
+                      checkColor: COLORS.white,
+                      activeColor: COLORS.primary,
+                      onChanged: (bool? value) {
+                      setState(() {
+                      isChecked = value!;
+
+                      });
+
+                    }, value: isChecked,
+
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isChecked = !isChecked;
+                      });
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: "I accept the ".tr(),
+                        style: TextStyle(
+                          color: COLORS.neutralDark,
+                          fontSize: SizeConfig.blockWidth * 3.4,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",),
+                        children: [
+                          TextSpan(
+                            text: "Terms & Conditions".tr(),
+                            style: TextStyle(
+                              color: COLORS.accent,
+                              fontSize: SizeConfig.blockWidth * 3.4,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) => TermsAndCondition(),
+                                  ),
+                                );
+                              },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+
+                  SizedBox(height: SizeConfig.blockHeight,),
                   customButton(
                     text: 'mobile_number_button'.tr(),
                     onPressed: _onGetOtpPressed,

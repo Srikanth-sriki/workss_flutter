@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -21,7 +22,8 @@ import '../component.dart';
 class AddressScreen extends StatefulWidget {
   final VoidCallback refreshPageCallback;
   final String routePage;
-  const AddressScreen({super.key, required this.refreshPageCallback,required this.routePage});
+  const AddressScreen(
+      {super.key, required this.refreshPageCallback, required this.routePage});
 
   @override
   State<AddressScreen> createState() => _AddressScreenState();
@@ -39,7 +41,7 @@ class _AddressScreenState extends State<AddressScreen> {
   LatLng _initialPosition = LatLng(12.9716, 77.5946);
   LatLng _currentPosition = LatLng(12.9716, 77.5946);
   String _currentAddress = 'Loading address...';
-  bool _isMapDragging = false;
+  bool isMapDragging = true;
   bool loading = false;
   String _selectedType = 'Home';
   bool isChecked = false;
@@ -57,25 +59,38 @@ class _AddressScreenState extends State<AddressScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    setState(() {
+      isMapDragging = true;
+    });
     PermissionStatus permissionGranted = await _location.requestPermission();
     print("Permission status: $permissionGranted");
 
     if (permissionGranted == PermissionStatus.granted) {
       LocationData locationData = await _location.getLocation();
-      setState(() {
-        _currentPosition =
-            LatLng(locationData.latitude!, locationData.longitude!);
-        _initialPosition = _currentPosition;
-        _currentAddress = 'Fetching address...';
-        latitude = locationData.latitude!;
-        longitude = locationData.longitude!;
-      });
-      print(_currentPosition);
+      _updateLocationState(locationData);
       _updateMapCamera(_currentPosition);
       _getAddressFromCoordinates(_currentPosition);
     } else {
       print("Location permission not granted");
     }
+    setState(() {
+      isMapDragging = false;
+    });
+  }
+
+  void _updateLocationState(LocationData locationData) {
+    setState(() {
+      isMapDragging = true;
+    });
+    setState(() {
+      _currentPosition =
+          LatLng(locationData.latitude!, locationData.longitude!);
+      _initialPosition = _currentPosition;
+      _currentAddress = 'Fetching address...';
+      latitude = locationData.latitude!;
+      longitude = locationData.longitude!;
+      isMapDragging = false;
+    });
   }
 
   void _updateMapCamera(LatLng newPosition) {
@@ -99,6 +114,14 @@ class _AddressScreenState extends State<AddressScreen> {
     });
   }
 
+  void _onCameraMove(CameraPosition position) {
+    setState(() {
+      _currentPosition = position.target;
+      latitude = position.target.latitude;
+      longitude = position.target.longitude;
+    });
+  }
+
   @override
   void dispose() {
     houseNo.dispose();
@@ -111,12 +134,7 @@ class _AddressScreenState extends State<AddressScreen> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        FocusScopeNode currentFocus = FocusScope.of(context);
-        if (!currentFocus.hasPrimaryFocus) {
-          currentFocus.unfocus();
-        }
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: COLORS.white,
         appBar: const CustomAppBar(
@@ -141,10 +159,11 @@ class _AddressScreenState extends State<AddressScreen> {
                 backgroundColor: COLORS.white,
                 context: context,
                 shape: const RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
-                builder: (context) => AddressSuccessBottomSheet(routePage: widget.routePage,),
+                builder: (context) => AddressSuccessBottomSheet(
+                  routePage: widget.routePage,
+                ),
               );
             } else if (state is AddressLocationCreateFailed) {
               setState(() {
@@ -177,48 +196,20 @@ class _AddressScreenState extends State<AddressScreen> {
                                 () => EagerGestureRecognizer()),
                           },
                           mapType: MapType.normal,
-                          zoomControlsEnabled: false,
-                          myLocationEnabled: true,
+                          zoomControlsEnabled: true,
                           zoomGesturesEnabled: true,
                           scrollGesturesEnabled: true,
                           myLocationButtonEnabled: false,
                           rotateGesturesEnabled: false,
                           tiltGesturesEnabled: false,
                           initialCameraPosition: CameraPosition(
-                            target: _initialPosition,
-                            zoom: 18,
-                          ),
-                          onMapCreated: (GoogleMapController controller) {
-                            _mapController = controller;
-                            print("Map created, controller assigned.");
-                          },
-                          onCameraMove: (CameraPosition position) {
-                            setState(() {
-                              _isMapDragging = true;
-                              _currentPosition = position.target;
-                              longitude = position.target.longitude;
-                              latitude =position.target.latitude;
-                            });
-                          },
-                          onCameraIdle: () {
-                            setState(() {
-                              _isMapDragging = false;
-                            });
-                            _getAddressFromCoordinates(_currentPosition);
-                          },
-                          // markers: {
-                          //   Marker(
-                          //     markerId: MarkerId("currentLocation"),
-                          //     position: _currentPosition,
-                          //     draggable: true,
-                          //     onDragEnd: (LatLng position) {
-                          //       setState(() {
-                          //         _currentPosition = position;
-                          //       });
-                          //       _getAddressFromCoordinates(_currentPosition);
-                          //     },
-                          //   ),
-                          // },
+                              target: _initialPosition, zoom: 18),
+                          onMapCreated: (controller) =>
+                              _mapController = controller,
+                          onCameraMove: (position) => _onCameraMove(position),
+                          onCameraIdle: () =>
+                              _getAddressFromCoordinates(_currentPosition),
+                          myLocationEnabled: true,
                         ),
                         Center(
                           child: Icon(
@@ -257,7 +248,7 @@ class _AddressScreenState extends State<AddressScreen> {
                                   ),
                                   SizedBox(width: SizeConfig.blockWidth * 1.5),
                                   Text(
-                                    'Use my Current Location',
+                                    'Use my Current Location'.tr(),
                                     style: TextStyle(
                                       color: COLORS.black,
                                       fontSize: SizeConfig.blockWidth * 3.25,
@@ -270,6 +261,46 @@ class _AddressScreenState extends State<AddressScreen> {
                             ),
                           ),
                         ),
+                        if (isMapDragging) ...[
+                          Positioned(
+                            top: SizeConfig.blockHeight * 35,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Container(
+                                width: SizeConfig.blockWidth * 65,
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.blockWidth * 4,
+                                    vertical: SizeConfig.blockHeight * 2),
+                                decoration: BoxDecoration(
+                                  color: COLORS.primaryTwo.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    LoadingAnimationWidget.hexagonDots(
+                                      color: COLORS.accent,
+                                      size: SizeConfig.blockHeight * 3.5,
+                                    ),
+                                    SizedBox(
+                                      width: SizeConfig.blockWidth * 3,
+                                    ),
+                                    Text(
+                                      'Updating location...'.tr(),
+                                      style: TextStyle(
+                                        color: COLORS.white,
+                                        fontSize: SizeConfig.blockWidth * 3.8,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]
                       ],
                     ),
                   ),
@@ -299,7 +330,7 @@ class _AddressScreenState extends State<AddressScreen> {
                             SizedBox(
                               width: SizeConfig.blockWidth * 80,
                               child: Text(
-                                _currentAddress,
+                                _currentAddress.tr(),
                                 style: TextStyle(
                                   color: COLORS.black,
                                   fontSize: SizeConfig.blockWidth * 3.25,
@@ -324,16 +355,18 @@ class _AddressScreenState extends State<AddressScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            _buildTypeButton('Home', 'assets/images/profile/home_location.png'),
+                            _buildTypeButton('Home',
+                                'assets/images/profile/home_location.png'),
                             SizedBox(
                               width: SizeConfig.blockWidth * 4,
                             ),
-                            _buildTypeButton('Office', 'assets/images/profile/Buildings_location.png'),
+                            _buildTypeButton('Office',
+                                'assets/images/profile/Buildings_location.png'),
                             SizedBox(
                               width: SizeConfig.blockWidth * 4,
                             ),
-                            _buildTypeButton(
-                                'Other', 'assets/images/profile/other_location.png'),
+                            _buildTypeButton('Other',
+                                'assets/images/profile/other_location.png'),
                           ],
                         ),
                       ),
@@ -347,7 +380,7 @@ class _AddressScreenState extends State<AddressScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if(_selectedType == 'Other')...[
+                              if (_selectedType == 'Other') ...[
                                 buildTextField(
                                     label: 'Name of Address',
                                     controller: otherName,
@@ -394,7 +427,8 @@ class _AddressScreenState extends State<AddressScreen> {
                                   hintText:
                                       "Write instructions to reach out you"
                                           .tr(),
-                                  validator: (value) {},maxLines: 5,
+                                  validator: (value) {},
+                                  maxLines: 5,
                                   error: false,
                                   title: 'Instructions'.tr(),
                                   onChanged: (value) {}),
@@ -428,28 +462,32 @@ class _AddressScreenState extends State<AddressScreen> {
                               ),
                               SizedBox(height: SizeConfig.blockHeight * 2),
                               customButton(
-                                text: 'SAVE'.tr(),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate() && _currentAddress !='Loading address...') {
-                                    profileBloc.add(AddressLocationCreate(
-                                        addressType: _selectedType.toLowerCase(),
-                                        addressTypeName: otherName.text,
-                                        houseNo: houseNo.text,
-                                        area: homeAddress.text,
-                                        instructions: Instructions.text,
-                                        isDefault: isChecked,
-                                        latitude: latitude.toString(),
-                                        longitude: longitude.toString()));
-                                  }
-
-                                },
-                                backgroundColor: _currentAddress !='Loading address...'?COLORS.primary:COLORS.primary.withOpacity(0.2),
-                                showIcon: false,
-                                width: SizeConfig.blockWidth * 100,
-                                height: SizeConfig.blockHeight * 8,
-                                textColor: COLORS.white,
-                                  loading: loading
-                              ),
+                                  text: 'SAVE'.tr(),
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate() &&
+                                        _currentAddress !=
+                                            'Loading address...') {
+                                      profileBloc.add(AddressLocationCreate(
+                                          addressType:
+                                              _selectedType.toLowerCase(),
+                                          addressTypeName: otherName.text,
+                                          houseNo: houseNo.text,
+                                          area: homeAddress.text,
+                                          instructions: Instructions.text,
+                                          isDefault: isChecked,
+                                          latitude: latitude.toString(),
+                                          longitude: longitude.toString()));
+                                    }
+                                  },
+                                  backgroundColor:
+                                      _currentAddress != 'Loading address...'
+                                          ? COLORS.primary
+                                          : COLORS.primary.withOpacity(0.2),
+                                  showIcon: false,
+                                  width: SizeConfig.blockWidth * 100,
+                                  height: SizeConfig.blockHeight * 8,
+                                  textColor: COLORS.white,
+                                  loading: loading),
                               SizedBox(height: SizeConfig.blockHeight * 2),
                             ],
                           ),
@@ -477,21 +515,21 @@ class _AddressScreenState extends State<AddressScreen> {
         ),
       ),
       onPressed: () => _setSelectedType(type),
-      icon:  Image.asset(
+      icon: Image.asset(
         icon,
-        width:
-        SizeConfig.blockWidth * 4,
-        height:
-        SizeConfig.blockWidth * 4,
-        fit: BoxFit.contain,color: _selectedType == type ? COLORS.white : COLORS.primary,
+        width: SizeConfig.blockWidth * 4,
+        height: SizeConfig.blockWidth * 4,
+        fit: BoxFit.contain,
+        color: _selectedType == type ? COLORS.white : COLORS.primary,
       ),
       label: Text(
-        type,
+        type.tr(),
         style: TextStyle(
           fontSize: SizeConfig.blockWidth * 3.5,
           fontWeight: FontWeight.w400,
           fontFamily: "Poppins",
         ),
+        textAlign: TextAlign.center,
       ),
     );
   }
