@@ -408,20 +408,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                 onChanged: (value) {})
                           ],
                           buildTextField(
-                              label: 'House/Flat/Block No',
+                              label: 'Address',
                               controller: houseNo,
                               hintText: "Enter house/flat/block no".tr(),
                               validator: (value) {},
                               error: false,
-                              title: 'House/Flat/Block No'.tr(),
+                              title: 'Address'.tr(),
                               onChanged: (value) {}),
                           buildTextField(
-                            label: 'Apartment/Road/Area',
+                            label: 'Location',
                             controller: homeAddress,
                             hintText: "Enter apartment/road/area".tr(),
                             validator: (value) {},
                             error: false,
-                            title: 'Apartment/Road/Area'.tr(),
+                            title: 'Location'.tr(),
                             onChanged: (value) {},
                           ),
                           buildBioTextField(

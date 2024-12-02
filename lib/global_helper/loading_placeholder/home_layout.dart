@@ -7,7 +7,6 @@ import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 
-
 class ShimmerJobCards extends StatelessWidget {
   const ShimmerJobCards({super.key});
 
@@ -16,50 +15,52 @@ class ShimmerJobCards extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding:  EdgeInsets.only(left:SizeConfig.blockWidth*4,right: SizeConfig.blockWidth*4, top: SizeConfig.blockWidth*2),
+        padding: EdgeInsets.only(
+            left: SizeConfig.blockWidth * 4,
+            right: SizeConfig.blockWidth * 4,
+            top: SizeConfig.blockWidth * 2),
         child: ListView.builder(
           shrinkWrap: true,
           // physics: NeverScrollableScrollPhysics(),
           itemCount: 4,
           itemBuilder: (context, index) {
             return Padding(
-              padding:  EdgeInsets.only(bottom: SizeConfig.blockWidth*4),
-              child:Shimmer(
-              color:COLORS.primary.withOpacity(0.1),
-              colorOpacity: 0.3,
-              enabled: true,
-              direction: const ShimmerDirection.fromLTRB(),
-              child: Container(
-                height: SizeConfig.blockHeight*25,
-                width: SizeConfig.blockWidth*100,
-                decoration: BoxDecoration(
-                  color: COLORS.primaryOne.withOpacity(0.25),
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
-                ),
-              ),
-            )
+                padding: EdgeInsets.only(bottom: SizeConfig.blockWidth * 4),
+                child: Shimmer(
+                  color: COLORS.primary.withOpacity(0.1),
+                  colorOpacity: 0.3,
+                  enabled: true,
+                  direction: const ShimmerDirection.fromLTRB(),
+                  child: Container(
+                    height: SizeConfig.blockHeight * 25,
+                    width: SizeConfig.blockWidth * 100,
+                    decoration: BoxDecoration(
+                      color: COLORS.primaryOne.withOpacity(0.25),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                    ),
+                  ),
+                )
 
-              // Shimmer.fromColors(
-              //   baseColor: Colors.grey[300]!,
-              //   highlightColor: Colors.grey[100]!,
-              //   child: Container(
-              //     height: SizeConfig.blockHeight*24,
-              //     decoration: BoxDecoration(
-              //       borderRadius: BorderRadius.circular(SizeConfig.blockWidth*4),
-              //       color: Colors.grey,
-              //     ),
-              //     padding: EdgeInsets.all(SizeConfig.blockWidth*4),
-              //   ),
-              // ),
-            );
+                // Shimmer.fromColors(
+                //   baseColor: Colors.grey[300]!,
+                //   highlightColor: Colors.grey[100]!,
+                //   child: Container(
+                //     height: SizeConfig.blockHeight*24,
+                //     decoration: BoxDecoration(
+                //       borderRadius: BorderRadius.circular(SizeConfig.blockWidth*4),
+                //       color: Colors.grey,
+                //     ),
+                //     padding: EdgeInsets.all(SizeConfig.blockWidth*4),
+                //   ),
+                // ),
+                );
           },
         ),
       ),
     );
   }
 }
-
-
 
 Widget globalLoadingWidget() {
   return Scaffold(
@@ -82,8 +83,30 @@ Widget globalLoadingWidget() {
   );
 }
 
+Widget professionalLoading() {
+  return Padding(
+      padding: EdgeInsets.only(
+          bottom: SizeConfig.blockWidth * 1.5,
+          left: SizeConfig.blockWidth * 4,
+          right: SizeConfig.blockWidth * 4,
+          top: SizeConfig.blockWidth * 1.5),
+      child: Shimmer(
+        color: COLORS.primary.withOpacity(0.1),
+        colorOpacity: 0.3,
+        enabled: true,
+        direction: const ShimmerDirection.fromLTRB(),
+        child: Container(
+          height: SizeConfig.blockHeight * 25,
+          width: SizeConfig.blockWidth * 100,
+          decoration: BoxDecoration(
+            color: COLORS.primaryOne.withOpacity(0.25),
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+          ),
+        ),
+      ));
+}
 
-Widget emptyComponent(){
+Widget emptyComponent() {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -91,12 +114,9 @@ Widget emptyComponent(){
       children: [
         Lottie.asset(
           'assets/images/lottie/empty.json',
-          width: SizeConfig.blockWidth *
-              60,
-          height: SizeConfig.blockWidth *
-              30,
-          fit: BoxFit
-              .contain,
+          width: SizeConfig.blockWidth * 60,
+          height: SizeConfig.blockWidth * 30,
+          fit: BoxFit.contain,
         ),
         SizedBox(height: SizeConfig.blockHeight * 2),
         Text(

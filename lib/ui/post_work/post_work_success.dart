@@ -48,7 +48,7 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushNamed(context, '/main_screen');
+        Navigator.pushNamedAndRemoveUntil(context, '/main_screen', (route) => false);
         return true;
       },
       child: Scaffold(
@@ -117,6 +117,22 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
                   child: customButton(
                     text: 'View Insights'.tr(),
                     onPressed: () {
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) => MultiBlocProvider(
+                      //           providers: [
+                      //             BlocProvider(
+                      //               create: (context) => ProfileBloc()
+                      //                 ..add( FetchPostViewEvent(workId: widget.workId)),
+                      //             ),
+                      //             BlocProvider(
+                      //               create: (context) => ShowInterestedBloc(),
+                      //             ),
+                      //           ],
+                      //           child:  ViewInsightsScreen(id: widget.workId!,),
+                      //         )));
+
                       Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -124,13 +140,10 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
                                 providers: [
                                   BlocProvider(
                                     create: (context) => ProfileBloc()
-                                      ..add( FetchPostViewEvent(workId: widget.workId)),
-                                  ),
-                                  BlocProvider(
-                                    create: (context) => ShowInterestedBloc(),
+                                      ..add(const FetchPostedEvent()),
                                   ),
                                 ],
-                                child:  ViewInsightsScreen(id: widget.workId!,),
+                                child: const PostedWorkList(),
                               )));
                     },
                     backgroundColor: COLORS.neutralDarkTwo,

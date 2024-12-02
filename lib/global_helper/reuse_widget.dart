@@ -544,8 +544,8 @@ class TextFieldWithDropdown extends StatelessWidget {
 Widget bottomTabIcon({required String icon}) {
   return Image.asset(
     icon,
-    width: SizeConfig.blockWidth * 4.4,
-    height: SizeConfig.blockWidth * 4.4,
+    width: SizeConfig.blockWidth * 4.6,
+    height: SizeConfig.blockWidth * 4.6,
     fit: BoxFit.contain,
   );
 }
@@ -736,242 +736,248 @@ Widget buildProfessionalCard(
     required bool saved,
     required VoidCallback onTap,
     required String image}) {
-  return InkWell(
-    onTap: onTap,
-    child: Stack(
-      children: [
-        Container(
-          width: SizeConfig.blockWidth * 100,
-          padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            color: COLORS.primaryOne.withOpacity(0.15),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: SizeConfig.blockWidth * 12,
-                    height: SizeConfig.blockWidth * 12,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: COLORS.primary,
-                            width: SizeConfig.blockWidth * 0.2),
-                        image: DecorationImage(
-                            image: NetworkImage(image), fit: BoxFit.cover),
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(SizeConfig.blockWidth * 2))),
-                  ),
-                  SizedBox(width: SizeConfig.blockWidth * 2),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width:SizeConfig.blockWidth*60,
-                        child: Text(
-                          name,
-                          style: TextStyle(
-                            color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 3.8,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Poppins",
-                            overflow: TextOverflow.ellipsis
-                          ),
-                          maxLines: 1,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.location_on_rounded,
-                            color: COLORS.accent,
-                            size: SizeConfig.blockWidth * 3.5,
-                          ),
-                          SizedBox(width: SizeConfig.blockWidth * 1),
-                          SizedBox(
-                            width:SizeConfig.blockWidth*60,
-                            child: Text(
-                              location,
-                              style: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                                  overflow: TextOverflow.ellipsis
-                              ),
-                              maxLines: 1,
+  return TouchRippleEffect(
+    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+    rippleColor: Colors.white60,
+    child: InkWell(
+      onTap: onTap,
+      splashColor: Colors.white.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+      child: Stack(
+        children: [
+          Container(
+            width: SizeConfig.blockWidth * 100,
+            padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+              color: COLORS.primaryOne.withOpacity(0.15),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: SizeConfig.blockWidth * 12,
+                      height: SizeConfig.blockWidth * 12,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.2),
+                          image: DecorationImage(
+                              image: NetworkImage(image), fit: BoxFit.cover),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(SizeConfig.blockWidth * 2))),
+                    ),
+                    SizedBox(width: SizeConfig.blockWidth * 2),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width:SizeConfig.blockWidth*60,
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3.8,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: "Poppins",
+                              overflow: TextOverflow.ellipsis
                             ),
+                            maxLines: 1,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: SizeConfig.blockHeight,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  SizedBox(
-                      width: SizeConfig.blockWidth * 50,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          registerTextCard(
-                              text: jobType,
-                              image: jobTypeImage,
-                              imageSize: 3.4,
-                              textFontSize: 3),
-                          registerTextCard(
-                              text: experience,
-                              image: experienceImage,
-                              imageSize: 3.4,
-                              textFontSize: 3),
-                          registerTextCard(
-                              text: language,
-                              image: languageImage,
-                              imageSize: 3.4,
-                              textFontSize: 3),
-                          registerTextCard(
-                              text: gender,
-                              image: genderImage,
-                              imageSize: 3.4,
-                              textFontSize: 3)
-                        ],
-                      )),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        formatPrice(price),
-                        style: TextStyle(
-                            color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 4.2,
-                            fontWeight: FontWeight.w600,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.location_on_rounded,
+                              color: COLORS.accent,
+                              size: SizeConfig.blockWidth * 3.5,
+                            ),
+                            SizedBox(width: SizeConfig.blockWidth * 1),
+                            SizedBox(
+                              width:SizeConfig.blockWidth*60,
+                              child: Text(
+                                location,
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 3,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                    overflow: TextOverflow.ellipsis
+                                ),
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: SizeConfig.blockHeight,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                        width: SizeConfig.blockWidth * 50,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            registerTextCard(
+                                text: jobType,
+                                image: jobTypeImage,
+                                imageSize: 3.4,
+                                textFontSize: 3),
+                            registerTextCard(
+                                text: experience,
+                                image: experienceImage,
+                                imageSize: 3.4,
+                                textFontSize: 3),
+                            registerTextCard(
+                                text: language,
+                                image: languageImage,
+                                imageSize: 3.4,
+                                textFontSize: 3),
+                            registerTextCard(
+                                text: gender,
+                                image: genderImage,
+                                imageSize: 3.4,
+                                textFontSize: 3)
+                          ],
+                        )),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          formatPrice(price),
+                          style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 4.2,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: "Poppins",
+                              height: SizeConfig.blockHeight * 0.2),softWrap: true,
+                        ),
+                        Text(
+                          paymentType == 'perday'?'Per Day':capitalizeEachWord(paymentType),
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 2.8,
+                            fontWeight: FontWeight.w400,
                             fontFamily: "Poppins",
-                            height: SizeConfig.blockHeight * 0.2),softWrap: true,
-                      ),
-                      Text(
-                        paymentType == 'perday'?'Per Day':capitalizeEachWord(paymentType),
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 2.8,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: SizeConfig.blockHeight),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: customButton(
-                      text: contacted ? 'CONTACTED' : "CONTACT",
-                      onPressed: onShowInterest,
-                      backgroundColor:
-                          contacted ? COLORS.semanticTwo : COLORS.primary,
-                      showIcon: false,
-                      textColor: COLORS.white,
+                      ],
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      IconActionCard(
-                        iconBool: false,
-                        onTap: savedTap,
-                        imageUrl: Image.asset(
-                          saved
-                              ? 'assets/images/professions/bookmarked.png'
-                              : 'assets/images/profile/bookmark.png',
-                          width: saved
-                              ? SizeConfig.blockWidth * 5.25
-                              : SizeConfig.blockWidth * 4.25,
-                          height: saved
-                              ? SizeConfig.blockHeight * 5.25
-                              : SizeConfig.blockHeight * 4.25,
-                          fit: BoxFit.contain,
-                          color: saved ? COLORS.accent : COLORS.neutralDarkOne,
-                        ),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.blockHeight),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: customButton(
+                        text: contacted ? 'CONTACTED' : "CONTACT",
+                        onPressed: onShowInterest,
+                        backgroundColor:
+                            contacted ? COLORS.semanticTwo : COLORS.primary,
+                        showIcon: false,
+                        textColor: COLORS.white,
                       ),
-                      IconActionCard(
-                        iconBool: false,
-                        onTap: onShare,
-                        imageUrl: Image.asset(
-                          'assets/images/home/share.png',
-                          width: SizeConfig.blockWidth * 5.2,
-                          height: SizeConfig.blockHeight * 5.2,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ],
-          ),
-        ),
-        Visibility(
-          visible: accountVerified,
-          child: Positioned(
-            right: 0,
-            top: 0,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 3,
-                  vertical: SizeConfig.blockHeight * 1),
-              decoration: BoxDecoration(
-                color: COLORS.semanticTwo,
-                borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(SizeConfig.blockWidth * 4),
-                    topRight: Radius.circular(SizeConfig.blockWidth * 4)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.verified,
-                    color: COLORS.white,
-                    size: SizeConfig.blockWidth * 3.25,
-                  ),
-                  SizedBox(
-                    width: SizeConfig.blockWidth * 1.5,
-                  ),
-                  Text(
-                    'Verified'.tr(),
-                    style: TextStyle(
-                      color: COLORS.white,
-                      fontSize: SizeConfig.blockWidth * 3,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: "Poppins",
                     ),
-                  ),
-                ],
-              ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconActionCard(
+                          iconBool: false,
+                          onTap: savedTap,
+                          imageUrl: Image.asset(
+                            saved
+                                ? 'assets/images/professions/bookmarked.png'
+                                : 'assets/images/profile/bookmark.png',
+                            width: saved
+                                ? SizeConfig.blockWidth * 5.25
+                                : SizeConfig.blockWidth * 4.25,
+                            height: saved
+                                ? SizeConfig.blockHeight * 5.25
+                                : SizeConfig.blockHeight * 4.25,
+                            fit: BoxFit.contain,
+                            color: saved ? COLORS.accent : COLORS.neutralDarkOne,
+                          ),
+                        ),
+                        IconActionCard(
+                          iconBool: false,
+                          onTap: onShare,
+                          imageUrl: Image.asset(
+                            'assets/images/home/share.png',
+                            width: SizeConfig.blockWidth * 5.2,
+                            height: SizeConfig.blockHeight * 5.2,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ],
             ),
           ),
-        )
-      ],
+          Visibility(
+            visible: accountVerified,
+            child: Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 3,
+                    vertical: SizeConfig.blockHeight * 1),
+                decoration: BoxDecoration(
+                  color: COLORS.semanticTwo,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(SizeConfig.blockWidth * 4),
+                      topRight: Radius.circular(SizeConfig.blockWidth * 4)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.verified,
+                      color: COLORS.white,
+                      size: SizeConfig.blockWidth * 3.25,
+                    ),
+                    SizedBox(
+                      width: SizeConfig.blockWidth * 1.5,
+                    ),
+                    Text(
+                      'Verified'.tr(),
+                      style: TextStyle(
+                        color: COLORS.white,
+                        fontSize: SizeConfig.blockWidth * 3,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
     ),
   );
 }
@@ -1022,6 +1028,59 @@ Widget buildDynamicRadioSelection({
 }
 
 
+// class IconActionCard extends StatelessWidget {
+//   final IconData? icon;
+//   final bool? iconBool;
+//   final Widget? imageUrl;
+//   final double? width;
+//   final double? height;
+//   final void Function()? onTap;
+//   final Color? color;
+//
+//   const IconActionCard(
+//       {super.key,
+//       this.icon,
+//       this.iconBool = true,
+//       this.imageUrl,
+//       this.width,
+//       this.height,
+//       this.color = COLORS.primaryOne,
+//       this.onTap});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return TouchRippleEffect(
+//       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+//       rippleColor: Colors.white60,
+//       child: InkWell(
+//         onTap: onTap,
+//         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+//         child: Container(
+//           width: width ?? SizeConfig.blockWidth * 11,
+//           height: height ?? SizeConfig.blockWidth * 11,
+//           margin: EdgeInsets.only(left: SizeConfig.blockWidth * 2),
+//           // padding: EdgeInsets.symmetric(
+//           //   vertical: SizeConfig.blockWidth * 1.5,
+//           //   horizontal: SizeConfig.blockWidth * 3,
+//           // ),
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+//             color: color!.withOpacity(0.3),
+//           ),
+//           child: iconBool == true
+//               ? Icon(
+//                   icon,
+//                   size: SizeConfig.blockWidth * 5.5,
+//                 )
+//               : Center(
+//                   child: imageUrl,
+//                 ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 class IconActionCard extends StatelessWidget {
   final IconData? icon;
   final bool? iconBool;
@@ -1031,44 +1090,47 @@ class IconActionCard extends StatelessWidget {
   final void Function()? onTap;
   final Color? color;
 
-  const IconActionCard(
-      {super.key,
-      this.icon,
-      this.iconBool = true,
-      this.imageUrl,
-      this.width,
-      this.height,
-      this.color = COLORS.primaryOne,
-      this.onTap});
+  const IconActionCard({
+    super.key,
+    this.icon,
+    this.iconBool = true,
+    this.imageUrl,
+    this.width,
+    this.height,
+    this.color = COLORS.primaryOne,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: width ?? SizeConfig.blockWidth * 11,
-        height: height ?? SizeConfig.blockWidth * 11,
-        margin: EdgeInsets.only(left: SizeConfig.blockWidth * 2),
-        // padding: EdgeInsets.symmetric(
-        //   vertical: SizeConfig.blockWidth * 1.5,
-        //   horizontal: SizeConfig.blockWidth * 3,
-        // ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
-          color: color!.withOpacity(0.3),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+        splashColor: Colors.white.withOpacity(0.3), // Optional: adjust ripple color
+        child: Container(
+          width: width ?? SizeConfig.blockWidth * 12,
+          height: height ?? SizeConfig.blockWidth * 12,
+          margin: EdgeInsets.only(left: SizeConfig.blockWidth * 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+            color: color!.withOpacity(0.3),
+          ),
+          child: iconBool == true
+              ? Icon(
+            icon,
+            size: SizeConfig.blockWidth * 5.5,
+          )
+              : Center(
+            child: imageUrl,
+          ),
         ),
-        child: iconBool == true
-            ? Icon(
-                icon,
-                size: SizeConfig.blockWidth * 5.5,
-              )
-            : Center(
-                child: imageUrl,
-              ),
       ),
     );
   }
 }
+
 
 Widget showInterestButton({
   required final void Function()? onTapIconOne,
@@ -1140,6 +1202,64 @@ Widget showInterestButton({
   );
 }
 
+Widget showContactUsButton({
+  required VoidCallback onShowInterest,
+  required final void Function()? savedTap,
+  required final void Function()? onShare,
+  required bool saved,
+  required bool contacted,
+}) {
+  return   Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Expanded(
+        child: customButton(
+          text: contacted ? 'CONTACTED' : "CONTACT",
+          onPressed: onShowInterest,
+          backgroundColor:
+          contacted ? COLORS.semanticTwo : COLORS.primary,
+          showIcon: false,
+          textColor: COLORS.white,
+        ),
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // IconActionCard(
+          //   iconBool: false,
+          //   onTap: savedTap,
+          //   imageUrl: Image.asset(
+          //     saved
+          //         ? 'assets/images/professions/bookmarked.png'
+          //         : 'assets/images/profile/bookmark.png',
+          //     width: saved
+          //         ? SizeConfig.blockWidth * 5.25
+          //         : SizeConfig.blockWidth * 4.25,
+          //     height: saved
+          //         ? SizeConfig.blockHeight * 5.25
+          //         : SizeConfig.blockHeight * 4.25,
+          //     fit: BoxFit.contain,
+          //     color: saved ? COLORS.accent : COLORS.neutralDarkOne,
+          //   ),
+          // ),
+          IconActionCard(
+            iconBool: false,
+            onTap: onShare,
+            imageUrl: Image.asset(
+              'assets/images/home/share.png',
+              width: SizeConfig.blockWidth * 5.2,
+              height: SizeConfig.blockHeight * 5.2,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      )
+    ],
+  );
+}
+
 void showCustomSnackBar({
   required BuildContext context,
   required String message,
@@ -1178,7 +1298,7 @@ void showInterestBottomSheet(BuildContext context) {
       borderRadius: BorderRadius.vertical(
           top: Radius.circular(SizeConfig.blockWidth * 5)),
     ),
-    backgroundColor: COLORS.primaryTwo, // Background color similar to the image
+    backgroundColor: COLORS.primaryTwo,
     builder: (context) {
       return Padding(
         padding: const EdgeInsets.all(20.0),
@@ -1225,46 +1345,44 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment:CrossAxisAlignment.center,
+        children: [
 
-            Lottie.asset(
-              'assets/images/lottie/error.json',
-              width: SizeConfig.blockWidth *
-                  60,
-              // height: SizeConfig.blockWidth *
-              //     40,
-              fit: BoxFit
-                  .cover,
-            ),
-             SizedBox(height: SizeConfig.blockHeight*2),
-            Text(
-              'Something went wrong!'.tr(),
-              style: TextStyle(
-                color: COLORS.neutralDark,
-                fontSize: SizeConfig.blockWidth * 3.6,
-                fontWeight: FontWeight.w400,
-                fontFamily: "Poppins",
+          Lottie.asset(
+            'assets/images/lottie/error.json',
+            width: SizeConfig.blockWidth *
+                60,
+            // height: SizeConfig.blockWidth *
+            //     40,
+            fit: BoxFit
+                .cover,
+          ),
+          SizedBox(height: SizeConfig.blockHeight*2),
+          Text(
+            'Something went wrong!'.tr(),
+            style: TextStyle(
+              color: COLORS.neutralDark,
+              fontSize: SizeConfig.blockWidth * 3.6,
+              fontWeight: FontWeight.w400,
+              fontFamily: "Poppins",
 
-              ),textAlign: TextAlign.center,
-            ),
-             SizedBox(height: SizeConfig.blockHeight*4),
-            customButton(
-              text: 'Retry now'.tr(),
-              onPressed: onRetry,
-              backgroundColor:  COLORS.primary,
-              showIcon: false,
-              width: SizeConfig.blockWidth * 42,
-              height: SizeConfig.blockHeight * 8,
-              textColor: COLORS.white,
-            )
+            ),textAlign: TextAlign.center,
+          ),
+          SizedBox(height: SizeConfig.blockHeight*4),
+          customButton(
+            text: 'Retry now'.tr(),
+            onPressed: onRetry,
+            backgroundColor:  COLORS.primary,
+            showIcon: false,
+            width: SizeConfig.blockWidth * 42,
+            height: SizeConfig.blockHeight * 8,
+            textColor: COLORS.white,
+          )
 
-          ],
-        ),
+        ],
       ),
     );
   }

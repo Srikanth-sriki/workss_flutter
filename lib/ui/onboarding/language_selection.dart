@@ -234,6 +234,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: COLORS.white,
         toolbarHeight: SizeConfig.blockHeight * 15,
+        scrolledUnderElevation: 0,
         flexibleSpace: FlexibleSpaceBar(
           titlePadding: EdgeInsets.fromLTRB(
               SizeConfig.blockWidth * 4,

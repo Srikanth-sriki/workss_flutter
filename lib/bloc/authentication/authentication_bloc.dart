@@ -74,34 +74,22 @@ class AuthenticationBloc
     }
   }
 
-  Future<void> mapAuthenticationLogout(AuthenticationLogoutEvent event,
-      Emitter<AuthenticationState> emit) async {
-    ///Get values from local storage and remove them
+  Future<void> mapAuthenticationLogout(
+      AuthenticationLogoutEvent event, Emitter<AuthenticationState> emit) async {
+    // Get values from local storage and remove them
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(LocalConstant.accessToken);
-    prefs.remove(LocalConstant.userId);
-    prefs.remove(LocalConstant.profileCompleted);
-    prefs.remove(LocalConstant.phoneNumber);
-    prefs.remove(LocalConstant.name);
+    await prefs.remove(LocalConstant.accessToken);
+    await prefs.remove(LocalConstant.userId);
+    await prefs.remove(LocalConstant.profileCompleted);
+    await prefs.remove(LocalConstant.phoneNumber);
+    await prefs.remove(LocalConstant.name);
 
     print("--------------------logout--------------------");
 
+    // Emit the AuthenticationLoginRequired state without closing the Bloc
     emit(const AuthenticationLoginRequired());
-
-    // if (GlobalBlocClass.authenticationContext != null) {
-    //
-    //   Navigator.pushAndRemoveUntil(
-    //     GlobalBlocClass.authenticationContext!,
-    //     MaterialPageRoute(
-    //       builder: (context) => const LogoutSuccess(),
-    //     ),
-    //         (Route<dynamic> route) => false,
-    //   );
-    //   // const snackBar = SnackBar(content: Text("Logout Successfully"));
-    //   // ScaffoldMessenger.of(GlobalBlocClass.authenticationContext!)
-    //   //     .showSnackBar(snackBar);
-    // }
   }
+
 
   Future<void> mapAuthenticationLogin(
       AuthenticationLogin event, Emitter<AuthenticationState> emit) async {

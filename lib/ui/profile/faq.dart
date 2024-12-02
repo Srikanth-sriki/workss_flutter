@@ -6,6 +6,7 @@ import 'package:works_app/models/faq_model.dart';
 
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 
@@ -116,7 +117,9 @@ class _FaqScreenState extends State<FaqScreen> {
                     SizedBox(height: SizeConfig.blockHeight * 4),
                     customButton(
                       text: 'MAIL US'.tr(),
-                      onPressed: () {},
+                      onPressed: () {
+                        launchEmail();
+                      },
                       backgroundColor: COLORS.primary,
                       showIcon: false,
                       width: SizeConfig.blockWidth * 100,

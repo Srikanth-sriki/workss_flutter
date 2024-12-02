@@ -1,8 +1,6 @@
-
-
 import 'dart:io';
 
-class Config{
+class Config {
   static String url = "http://13.127.193.213/api";
   static String accessToken = '';
   static String id = '';
@@ -11,17 +9,15 @@ class Config{
   static String languageSelected = "";
   static String introUploaded = "";
   static String name = "";
+  static String profilePic = "";
+  static bool accountVerify = false;
+  static bool isRegistered = false;
   static String userType = "";
   static String fcmToken = "";
 
-
-
-
-
-
-  static Map<String, String> headers(){
+  static Map<String, String> headers() {
     return {
-      HttpHeaders.contentTypeHeader : "application/json",
+      HttpHeaders.contentTypeHeader: "application/json",
     };
   }
   // static Map<String, String> authHeaders() {
@@ -37,5 +33,4 @@ class Config{
       HttpHeaders.authorizationHeader: "Bearer ${Config.accessToken}",
     };
   }
-
 }

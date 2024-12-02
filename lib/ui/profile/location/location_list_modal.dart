@@ -220,33 +220,49 @@ class _AddressListModalBottomSheetState
                                     CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Image.asset(
-                                                addressItem.addressType ==
-                                                    'home'
-                                                    ? 'assets/images/profile/home_location.png'
-                                                    : addressItem.addressType ==
-                                                    'office'
-                                                    ? 'assets/images/profile/Buildings_location.png'
-                                                    : 'assets/images/profile/other_location.png',
-                                                width:
-                                                SizeConfig.blockWidth * 4,
-                                                height:
-                                                SizeConfig.blockWidth * 4,
-                                                fit: BoxFit.contain,
-                                              ),
-                                              SizedBox(
-                                                  width: SizeConfig.blockWidth *
-                                                      2),
-                                              Text(
-                                                addressItem.addressType!
-                                                    .toUpperCase(),
+                                          Image.asset(
+                                            addressItem.addressType ==
+                                                'home'
+                                                ? 'assets/images/profile/home_location.png'
+                                                : addressItem.addressType ==
+                                                'office'
+                                                ? 'assets/images/profile/Buildings_location.png'
+                                                : 'assets/images/profile/other_location.png',
+                                            width:
+                                            SizeConfig.blockWidth * 4,
+                                            height:
+                                            SizeConfig.blockWidth * 4,
+                                            fit: BoxFit.contain,
+                                          ),
+                                          SizedBox(
+                                              width: SizeConfig.blockWidth *
+                                                  2),
+                                          Text(
+                                            addressItem.addressType!
+                                                .toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize:
+                                              SizeConfig.blockWidth *
+                                                  3.25,
+                                              fontWeight: FontWeight.w400,
+                                              fontFamily: "Poppins",
+                                              color: COLORS.neutralDark,
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              width: SizeConfig.blockWidth *
+                                                  2),
+                                          if(addressItem
+                                              .addressType == 'other' && addressItem.addressTypeName!.isNotEmpty)...[
+                                            Container(
+                                              width: SizeConfig.blockWidth*40,
+                                              decoration: BoxDecoration(border: Border(left: BorderSide(color: COLORS.primaryOne,width: SizeConfig.blockWidth*0.2))),
+                                              padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*2),
+                                              child: Text(
+                                                capitalizeFirstLetter(addressItem.addressTypeName!),
                                                 style: TextStyle(
                                                   fontSize:
                                                   SizeConfig.blockWidth *
@@ -254,70 +270,18 @@ class _AddressListModalBottomSheetState
                                                   fontWeight: FontWeight.w400,
                                                   fontFamily: "Poppins",
                                                   color: COLORS.neutralDark,
-                                                ),
+                                                ),maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                              SizedBox(
-                                                  width: SizeConfig.blockWidth *
-                                                      2),
-                                              if(addressItem
-                                                  .addressType == 'other' && addressItem.addressTypeName!.isNotEmpty)...[
-                                                Container(
-                                                  width: SizeConfig.blockWidth*40,
-                                                  decoration: BoxDecoration(border: Border(left: BorderSide(color: COLORS.primaryOne,width: SizeConfig.blockWidth*0.2))),
-                                                  padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*2),
-                                                  child: Text(
-                                                    capitalizeFirstLetter(addressItem.addressTypeName!),
-                                                    style: TextStyle(
-                                                      fontSize:
-                                                      SizeConfig.blockWidth *
-                                                          3.25,
-                                                      fontWeight: FontWeight.w400,
-                                                      fontFamily: "Poppins",
-                                                      color: COLORS.neutralDark,
-                                                    ),maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                )
-                                              ],
-                                            ],
-                                          ),
-                                          InkWell(
-                                            onTap: (){
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          MultiBlocProvider(
-                                                            providers: [
-                                                              BlocProvider(
-                                                                  create: (context) =>
-                                                                      ProfileBloc()),
-                                                            ],
-                                                            child: EditAddressScreen(
-                                                              routeType:"modal",
-                                                                addressItem:
-                                                                addressItem),
-                                                          )));
-                                            },
-                                            child: Text(
-                                            'EDIT'.tr(),
-                                              style: TextStyle(
-                                                fontSize:
-                                                SizeConfig.blockWidth *
-                                                    3.25,
-                                                fontWeight: FontWeight.w400,
-                                                fontFamily: "Poppins",
-                                                color: COLORS.accent,
-                                              ),
-                                            ),
-                                          ),
+                                            )
+                                          ],
                                         ],
                                       ),
                                       SizedBox(
                                           height:
                                           SizeConfig.blockWidth * 2),
                                       Text(
-                                        '${addressItem.houseNo ?? ''} ${addressItem.area ?? ''} ${addressItem.instructions ?? ''}',
+                                        '${addressItem.area ?? addressItem.houseNo} ',
                                         style: TextStyle(
                                           color: COLORS.black,
                                           fontSize:
@@ -327,6 +291,56 @@ class _AddressListModalBottomSheetState
                                         ),
                                         softWrap: true,
                                       ),
+                                      Align(
+                                        alignment: Alignment.bottomRight,
+                                        child:    InkWell(
+                                          onTap: (){
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ProfileBloc()),
+                                                          ],
+                                                          child: EditAddressScreen(
+                                                              routeType:"modal",
+                                                              addressItem:
+                                                              addressItem),
+                                                        )));
+                                          },
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              Image.asset(
+                                                'assets/images/profile/edit.png',
+                                                width:
+                                                SizeConfig.blockWidth * 4,
+                                                height:
+                                                SizeConfig.blockWidth *
+                                                    4,
+                                                fit: BoxFit.contain,
+                                              ),
+                                              SizedBox(width: SizeConfig.blockWidth,),
+                                              Text(
+                                                'EDIT'.tr(),
+                                                style: TextStyle(
+                                                  fontSize: SizeConfig
+                                                      .blockWidth *
+                                                      3,
+                                                  fontWeight:
+                                                  FontWeight.w500,
+                                                  fontFamily: "Poppins",
+                                                  color: COLORS.accent,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      )
                                     ],
                                   ),
                                 ),

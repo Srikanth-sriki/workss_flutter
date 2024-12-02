@@ -36,7 +36,7 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
           pageSize: event.pageSize,
           gender: event.gender,
           city: event.city,
-          keyWord: event.keyWord,
+          keyWord: event.keyWord,currentLatitude: event.currentLatitude,currentLongitude: event.currentLongitude,
           profession: event.profession);
       if (response.statusCode != 200) {
         throw Exception(

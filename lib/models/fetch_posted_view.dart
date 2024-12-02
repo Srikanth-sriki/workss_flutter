@@ -162,6 +162,8 @@ class User {
   // DateTime? createdAt;
   // DateTime? updatedAt;
   // dynamic deletedAt;
+  IsContacted?isSaved;
+  IsContacted? isContacted;
 
   User({
     this.id,
@@ -191,6 +193,8 @@ class User {
     // this.createdAt,
     // this.updatedAt,
     // this.deletedAt,
+    this.isSaved,
+    this.isContacted,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -210,6 +214,12 @@ class User {
     charges: json.containsKey('charges') ? json["charges"]??"" : "",
     chargeType: json.containsKey('charge_type') ? json["charge_type"]??"" : "",
     isVerified: json.containsKey('is_verified') ? json["is_verified"]??false : false,
+    isSaved: json["isSaved"] != null
+        ? IsContacted.fromJson(json["isSaved"])
+        : null,
+    isContacted: json["isContacted"] != null
+        ? IsContacted.fromJson(json["isContacted"])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -226,6 +236,32 @@ class User {
     "charges": charges,
     "charge_type": chargeType,
     "is_verified": isVerified,
-    "mobile":mobile
+    "mobile":mobile,
+    "isSaved":isSaved,
+    "isContacted": isContacted?.toJson(),
+  };
+}
+
+class IsContacted {
+  String? id;
+  String? userId;
+  String? professionalId;
+
+  IsContacted({
+    this.id,
+    this.userId,
+    this.professionalId,
+  });
+
+  factory IsContacted.fromJson(Map<String, dynamic> json) => IsContacted(
+    id: json["id"],
+    userId: json["userId"],
+    professionalId: json["professionalId"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "userId": userId,
+    "professionalId": professionalId,
   };
 }

@@ -283,6 +283,7 @@
   "Address Saved Successfully!": "முகவரி வெற்றிகரமாக சேமிக்கப்பட்டது!",
   "Your address is saved securely for quick \naccess in future transactions.": "உங்கள் முகவரி எதிர்கால லாபங்களில் எளிதாக அணுக முடியும் என்பதால் பாதுகாப்பாக சேமிக்கப்பட்டுள்ளது.",
   "Do you want to Clear?": "நீங்கள் அதை தெளிவுபடுத்த விரும்புகிறீர்களா?",
-  "Do you want to Clear all Notifications?": "நீங்கள் அனைத்து அறிவிப்புகளையும் தெளிவுபடுத்த விரும்புகிறீர்களா?"
+  "Do you want to Clear all Notifications?": "நீங்கள் அனைத்து அறிவிப்புகளையும் தெளிவுபடுத்த விரும்புகிறீர்களா?",
+  "Address": "முகவரி"
 }
 

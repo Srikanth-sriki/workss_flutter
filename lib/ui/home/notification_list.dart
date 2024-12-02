@@ -212,28 +212,40 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
           if(showHint)...[
           Positioned(
             top: SizeConfig.blockHeight*10,
-            left: SizeConfig.blockWidth*30,right: 0,bottom: 0,
+            left: 0,right: 0,bottom: 0,
             child: Center(
-              child: Material(
-                color: Colors.transparent,
-                child: Row(
-                  children: [
-                     Icon(
-                      Icons.swipe_left,
-                      color: COLORS.neutralDark,
-                       size: SizeConfig.blockWidth*5,
-                    ),
-                    SizedBox(width: SizeConfig.blockWidth*2.5),
-                    Text(
-                      'Swipe to delete',
-                      style: TextStyle(
-                        color: COLORS.neutralDark,
-                        fontSize: SizeConfig.blockWidth * 3.8,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+              child: Container(
+                height: SizeConfig.blockHeight*8,
+                width: SizeConfig.blockWidth*50,
+
+                alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 4,
+                    vertical: SizeConfig.blockHeight * 2),
+                decoration: BoxDecoration(
+                  color: COLORS.primaryTwo.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(10),),
+                child: Material(
+                  color: Colors.transparent,
+                  child: Row(
+                    children: [
+                       Icon(
+                        Icons.swipe_left,
+                        color: COLORS.white,
+                         size: SizeConfig.blockWidth*5,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: SizeConfig.blockWidth*2.5),
+                      Text(
+                        'Swipe to delete',
+                        style: TextStyle(
+                          color: COLORS.white,
+                          fontSize: SizeConfig.blockWidth * 3.8,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -50,6 +50,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,40 +61,42 @@ class _PostedWorkListState extends State<PostedWorkList> {
         titleColors: COLORS.neutralDark,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: BlocListener<ProfileBloc, ProfileState>(
-            listener: (context, state) {
-              if (state is ProfileLoading || state is ProfileInitial) {
-                setState(() {
-                  loading = true;
-                  error = false;
-                });
-              } else if (state is FetchPostedWorkSuccess) {
-                setState(() {
-                  loading = false;
-                  error = false;
-                  fetchPostedModel = state.fetchPostedModel!;
-                });
-              } else if (state is FetchPostedWorkFailed) {
-                setState(() {
-                  loading = false;
-                  error = true;
-                });
-              }
-            },
-            child: Builder(
-              builder: (context) {
-                if (loading) {
-                  return SizedBox(
-                      height: SizeConfig.screenHeight,
-                      child: const ShimmerJobCards());
-                } else if (error) {
-                  return ErrorScreen(onRetry: () {
-                    _refreshPageAfterEdit();
-                  });
-                } else if (!loading && !error) {
-                  return fetchPostedModel.isNotEmpty
-                      ? Padding(
+        child: BlocListener<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state is ProfileLoading || state is ProfileInitial) {
+              setState(() {
+                loading = true;
+                error = false;
+              });
+            } else if (state is FetchPostedWorkSuccess) {
+              setState(() {
+                loading = false;
+                error = false;
+                fetchPostedModel = state.fetchPostedModel!;
+              });
+            } else if (state is FetchPostedWorkFailed) {
+              setState(() {
+                loading = false;
+                error = true;
+              });
+            }
+          },
+          child: Builder(
+            builder: (context) {
+              if (loading) {
+                return SizedBox(
+                    height: SizeConfig.screenHeight,
+                    child: const ShimmerJobCards());
+              } else if (error) {
+                return SizedBox(
+                    height: SizeConfig.screenHeight,
+                    child: ErrorScreen(onRetry: () {
+                  _refreshPageAfterEdit();
+                }));
+              } else if (!loading && !error) {
+                return fetchPostedModel.isNotEmpty
+                    ? SingleChildScrollView(
+                      child: Padding(
                           padding: EdgeInsets.symmetric(
                               vertical: SizeConfig.blockHeight),
                           child: ListView.builder(
@@ -138,6 +141,8 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                               ],
                                               child: WorkDetailsScreen(
                                                 id: profile.id!,
+                                                refreshPageCallback: _refreshPageAfterEdit,
+                                                routeType: 'posted',
                                               ),
                                             )));
                                   },
@@ -419,16 +424,16 @@ class _PostedWorkListState extends State<PostedWorkList> {
                               );
                             },
                           ),
-                        )
-                      : SizedBox(
-                          width: SizeConfig.screenWidth,
-                          height: SizeConfig.blockHeight * 80,
-                          child: emptyComponent());
-                }
+                        ),
+                    )
+                    : SizedBox(
+                        width: SizeConfig.screenWidth,
+                        height: SizeConfig.blockHeight * 80,
+                        child: emptyComponent());
+              }
 
-                return Container();
-              },
-            ),
+              return Container();
+            },
           ),
         ),
       ),

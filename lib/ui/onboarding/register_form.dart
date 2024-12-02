@@ -324,10 +324,10 @@ class _RegisterFormState extends State<RegisterForm> {
                 setState(() {
                   loading = false;
                 });
-                showCustomSnackBar(
-                    context: context,
-                    message: "Registered Successfully",
-                    backgroundColor: COLORS.semanticTwo);
+                // showCustomSnackBar(
+                //     context: context,
+                //     message: "Registered Successfully",
+                //     backgroundColor: COLORS.semanticTwo);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(

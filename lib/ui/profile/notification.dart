@@ -168,9 +168,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       if (loading) ...[
                         globalLoadingWidget()
                       ] else if (error) ...[
-                        ErrorScreen(onRetry: () {
-                          profileBloc.add(const FetchSettingEvent());
-                        })
+                        SizedBox(
+                          height: SizeConfig.blockHeight*80,
+                          child: ErrorScreen(onRetry: () {
+                            profileBloc.add(const FetchSettingEvent());
+                          }),
+                        )
                       ] else if (!loading && !error) ...[
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,

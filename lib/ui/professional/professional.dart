@@ -34,13 +34,13 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   List<ProfessionalsPostedWork> professionalsPostedWork = [];
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
-  bool isProfessionalLoad = false;
+  bool isProfessionalLoad = true;
   int currentPage = 1;
   int pageSize = 10;
   int maxPageNumber = 1;
   String? selectedProfession = '';
   String? selectedCity = '';
-  String selectedGender ='';
+  String selectedGender = '';
   final List<Map<String, dynamic>> categoriesData = [
     {
       'title': 'Construction',
@@ -117,11 +117,12 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     _fetchData();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent &&
-          !isFetchingMore &&
-          currentPage < maxPageNumber) {
-        _loadMoreData();
+      if (_scrollController.position.atEdge && !isFetchingMore) {
+        final isBottom = _scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent;
+        if (isBottom && currentPage < maxPageNumber) {
+          _loadMoreData();
+        }
       }
     });
   }
@@ -132,24 +133,30 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
     _fetchData();
   }
 
-  void _fetchData() {
-    print('bhhhhhhhhhhhhh');
+  void _fetchData({bool isNewFetch = false}) {
+    if (isNewFetch) {
+      professionalsPostedWork.clear();
+      currentPage = 1;
+    }
     professionalBloc.add(ProfessionalListEvent(
-      page: currentPage,
-      pageSize: pageSize,
-      keyWord: "",
-      profession: "",
-      city: "",
-      gender: "",
-    ));
+        page: currentPage,
+        pageSize: pageSize,
+        keyWord: "",
+        profession: "",
+        city: "",
+        gender: "",
+        currentLongitude: '',
+        currentLatitude: ''));
   }
 
   void _loadMoreData() {
-    setState(() {
-      isFetchingMore = true;
-    });
-    currentPage++;
-    _fetchData();
+    if (!isFetchingMore && currentPage < maxPageNumber) {
+      setState(() {
+        isFetchingMore = true;
+      });
+      currentPage++;
+      _fetchData();
+    }
   }
 
   void filterProfessionalScreenData(
@@ -158,13 +165,14 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
       currentPage = 1;
       isFetchingMore = false;
       professionalBloc.add(ProfessionalListEvent(
-        page: currentPage,
-        pageSize: pageSize,
-        keyWord: "",
-        profession: profession ?? "",
-        city: city ?? "",
-        gender: gender ?? "",
-      ));
+          page: currentPage,
+          pageSize: pageSize,
+          keyWord: "",
+          profession: profession ?? "",
+          city: city ?? "",
+          gender: gender ?? "",
+          currentLongitude: '',
+          currentLatitude: ''));
     });
   }
 
@@ -194,7 +202,11 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
               if (currentPage == 1) {
                 professionalsPostedWork = state.professionalsPostedWork;
               } else {
-                professionalsPostedWork.addAll(state.professionalsPostedWork);
+                // Filter out duplicates by checking ID before adding
+                final newItems = state.professionalsPostedWork.where(
+                    (newItem) => !professionalsPostedWork
+                        .any((existingItem) => existingItem.id == newItem.id));
+                professionalsPostedWork.addAll(newItems);
               }
               maxPageNumber = state.maxPageNumber;
               isFetchingMore = false;
@@ -205,9 +217,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
               isFetchingMore = false;
               isProfessionalLoad = false;
             });
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(state.message),
-            ));
+            // Optionally, show an error message
+            // showCustomSnackBar(context: context, message: state.message);
           }
           setState(() {});
         },
@@ -269,22 +280,26 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             ),
                           ),
                           InkWell(
-                            onTap: (){
+                            onTap: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider(
-                                            create: (context) => NotificationBloc()
-                                              ..add(const FetchNotificationList()),
-                                          ),
-                                        ],
-                                        child: const NotificationListScreen(),
-                                      )));
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) =>
+                                                    NotificationBloc()
+                                                      ..add(
+                                                          const FetchNotificationList()),
+                                              ),
+                                            ],
+                                            child:
+                                                const NotificationListScreen(),
+                                          )));
                             },
                             child: Container(
-                              padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                              padding:
+                                  EdgeInsets.all(SizeConfig.blockWidth * 3),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                       SizeConfig.blockWidth * 2.5),
@@ -312,27 +327,31 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       InkWell(
-                        onTap: (){
+                        onTap: () {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                          create: (context) => ProfessionalBloc()
-                                            ..add(ProfessionalListEvent(
-                                                page: 1,
-                                                pageSize: 20,
-                                                profession: '',
-                                                keyWord: '',
-                                                city: '',
-                                                gender: ''))),
-                                      BlocProvider(
-                                        create: (context) => ShowInterestedBloc(),
-                                      )
-                                    ],
-                                    child: const ProfessionalSearchList(),
-                                  )));
+                                        providers: [
+                                          BlocProvider(
+                                              create: (context) =>
+                                                  ProfessionalBloc()
+                                                    ..add(ProfessionalListEvent(
+                                                        page: 1,
+                                                        pageSize: 20,
+                                                        profession: '',
+                                                        keyWord: '',
+                                                        city: '',
+                                                        currentLongitude: '',
+                                                        currentLatitude: '',
+                                                        gender: ''))),
+                                          BlocProvider(
+                                            create: (context) =>
+                                                ShowInterestedBloc(),
+                                          )
+                                        ],
+                                        child: const ProfessionalSearchList(),
+                                      )));
                         },
                         child: Container(
                           width: SizeConfig.blockWidth * 72,
@@ -379,7 +398,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             context: context,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(SizeConfig.blockWidth * 6)),
+                                  top: Radius.circular(
+                                      SizeConfig.blockWidth * 6)),
                             ),
                             builder: (context) => SearchFilterBottomSheet(
                               initialProfession: selectedProfession,
@@ -427,7 +447,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(physics: AlwaysScrollableScrollPhysics(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: _scrollController,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,7 +478,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                     MaterialPageRoute(
                                         builder: (BuildContext context) =>
                                             CategoriesScreen(
-                                                categoriesData: categoriesData)),
+                                                categoriesData:
+                                                    categoriesData)),
                                   );
                                 },
                                 child: Text(
@@ -490,15 +513,17 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                           builder: (BuildContext context) =>
                                               CategoriesItemScreen(
                                                   categoriesItem:
-                                                  categoriesData[index])),
+                                                      categoriesData[index])),
                                     );
                                   },
                                   child: Container(
-                                    padding:
-                                    EdgeInsets.all(SizeConfig.blockWidth * 3),
+                                    padding: EdgeInsets.all(
+                                        SizeConfig.blockWidth * 3),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         Container(
                                           width: SizeConfig.blockWidth * 18,
@@ -507,11 +532,13 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               image: DecorationImage(
                                                 image: AssetImage(
                                                     categoriesData[index]
-                                                    ['images']),
+                                                        ['images']),
                                                 fit: BoxFit.contain,
                                               ),
-                                              borderRadius: BorderRadius.circular(
-                                                  SizeConfig.blockWidth * 20),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      SizeConfig.blockWidth *
+                                                          20),
                                               color: COLORS.primaryOne
                                                   .withOpacity(0.5)),
                                         ),
@@ -552,145 +579,173 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                           height: SizeConfig.blockHeight * 0.5,
                         ),
                         if (isProfessionalLoad == true) ...[
-                          const Expanded(
-                              child: ShimmerJobCards())
+                          professionalLoading(),
+                          professionalLoading(),
+                          professionalLoading(),
                         ] else ...[
-                          professionalsPostedWork.isNotEmpty?
-                          ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: professionalsPostedWork.length!,
-                              itemBuilder: (context, index) {
-                                var professionalData =
-                                professionalsPostedWork![index];
-                                return Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: SizeConfig.blockWidth * 2,
-                                      horizontal: SizeConfig.blockWidth * 4),
-                                  child: buildProfessionalCard(
-                                      accountVerified:
-                                      professionalData!.isVerified!,
-                                      image: professionalData!.profilePic!,
-                                      name: professionalData!.name!,
-                                      profession: professionalData.professionType!,
-                                      location: professionalData.city!,
-                                      languages: professionalData.knownLanguages!
-                                          .join(", "),
-                                      gender: professionalData.gender!,
-                                      price: professionalData.charges!,
-                                      paymentType: professionalData.chargeType!,
-                                      contacted:
-                                      professionalData.isContacted != null,
-                                      saved: professionalData.isSaved != null,
-                                      experience:
-                                      professionalData.experiencedYears!,
-                                      experienceImage:
-                                      'assets/images/home/work_select.png',
-                                      genderImage: 'assets/images/home/gender.png',
-                                      jobTypeImage:
-                                      'assets/images/profile/prof.png',
-                                      language: professionalData.knownLanguages!
-                                          .join(", "),
-                                      languageImage: 'assets/images/home/speak.png',
-                                      onShowInterest: () {
-                                        if (professionalData.isContacted == null) {
-                                          showInterestedBloc
-                                              .add(ProfessionalContactUs(
-                                            PropId: professionalData.id!,
-                                            onSuccess: () {
-                                              setState(() {
-                                                professionalData.isContacted =
-                                                    IsContacted(id: '');
-                                                makePhoneCall(professionalData.mobile!);
-                                              });
-                                            },
-                                            onError: () {},
-                                          ));
-                                        }
-                                        else{
-                                          makePhoneCall(professionalData.mobile!);
-                                        }
-                                      },
-                                      jobType: professionalData.professionType!,
-                                      onShare: () {
-                                        shareJobDetails(
-                                          experience: professionalData.experiencedYears!,
+                          professionalsPostedWork.isNotEmpty
+                              ? ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: professionalsPostedWork.length!,
+                                  itemBuilder: (context, index) {
+                                    var professionalData =
+                                        professionalsPostedWork![index];
+                                    return Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: SizeConfig.blockWidth * 2,
+                                          horizontal:
+                                              SizeConfig.blockWidth * 4),
+                                      child: buildProfessionalCard(
+                                          accountVerified:
+                                              professionalData!.isVerified!,
+                                          image: professionalData!.profilePic!,
+                                          name: professionalData!.name!,
+                                          profession:
+                                              professionalData.professionType!,
                                           location: professionalData.city!,
-                                          jobTitle:  professionalData.professionType!,
-                                        );
-                                      },
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    MultiBlocProvider(
-                                                      providers: [
-                                                        BlocProvider(
-                                                          create: (context) =>
-                                                          ProfessionalBloc()
-                                                            ..add(FetchProfessionalView(
-                                                                professionalData
-                                                                    .id!)),
-                                                        ),
-                                                        BlocProvider(
-                                                          create: (context) =>
-                                                              ShowInterestedBloc(),
-                                                        )
-                                                      ],
-                                                      child: ProfessionalViewScreen(
-                                                        id: professionalData.id!,
-                                                      ),
-                                                    )));
-                                      },
-                                      savedTap: () {
-                                        if(professionalData.isSaved ==null){
-                                          showInterestedBloc.add(ProfessionalSavedUs(
-                                            PropId: professionalData.id!,
-                                            onSuccess: () {
-                                              setState(() {
-                                                professionalData.isSaved =
-                                                    IsContacted(id: '');
-                                              });
-                                            },
-                                            onError: () {
-                                              showCustomSnackBar(
-                                                context: context,
-                                                message: "Something Went wrong",
-                                              );
-                                            },
-                                          ));
-                                        }
-                                        else{
-                                          showInterestedBloc.add(ProfessionalSavedUs(
-                                            PropId: professionalData.id!,
-                                            onSuccess: () {
-                                              setState(() {
-                                                professionalData.isSaved =
-                                                  null;
-                                              });
-                                            },
-                                            onError: () {
-                                              showCustomSnackBar(
-                                                context: context,
-                                                message: "Something Went wrong",
-                                              );
-                                            },
-                                          ));
-                                        }
-
-                                      }),
-                                );
-                              }):Padding(
-                            padding: EdgeInsets.only(top: SizeConfig.blockHeight*6),
-                            child: emptyComponent(),
-                          )
+                                          languages: professionalData
+                                              .knownLanguages!
+                                              .join(", "),
+                                          gender: professionalData.gender!,
+                                          price: professionalData.charges!,
+                                          paymentType:
+                                              professionalData.chargeType!,
+                                          contacted: professionalData.isContacted !=
+                                              null,
+                                          saved:
+                                              professionalData.isSaved != null,
+                                          experience: professionalData
+                                              .experiencedYears!,
+                                          experienceImage:
+                                              'assets/images/home/work_select.png',
+                                          genderImage:
+                                              'assets/images/home/gender.png',
+                                          jobTypeImage:
+                                              'assets/images/profile/prof.png',
+                                          language: professionalData
+                                              .knownLanguages!
+                                              .join(", "),
+                                          languageImage:
+                                              'assets/images/home/speak.png',
+                                          onShowInterest: () {
+                                            if (professionalData.isContacted ==
+                                                null) {
+                                              showInterestedBloc
+                                                  .add(ProfessionalContactUs(
+                                                PropId: professionalData.id!,
+                                                onSuccess: () {
+                                                  setState(() {
+                                                    professionalData
+                                                            .isContacted =
+                                                        IsContacted(id: '');
+                                                    makePhoneCall(
+                                                        professionalData
+                                                            .mobile!);
+                                                  });
+                                                },
+                                                onError: () {},
+                                              ));
+                                            } else {
+                                              makePhoneCall(
+                                                  professionalData.mobile!);
+                                            }
+                                          },
+                                          jobType:
+                                              professionalData.professionType!,
+                                          onShare: () {
+                                            shareJobDetails(
+                                              experience: professionalData
+                                                  .experiencedYears!,
+                                              location: professionalData.city!,
+                                              jobTitle: professionalData
+                                                  .professionType!,
+                                            );
+                                          },
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  ProfessionalBloc()
+                                                                    ..add(FetchProfessionalView(
+                                                                        professionalData
+                                                                            .id!)),
+                                                            ),
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  ShowInterestedBloc(),
+                                                            )
+                                                          ],
+                                                          child:
+                                                              ProfessionalViewScreen(
+                                                            id: professionalData
+                                                                .id!,
+                                                            refreshPageCallback:
+                                                                () {
+                                                              _fetchData(
+                                                                  isNewFetch:
+                                                                      true);
+                                                            },
+                                                          ),
+                                                        )));
+                                          },
+                                          savedTap: () {
+                                            if (professionalData.isSaved ==
+                                                null) {
+                                              showInterestedBloc
+                                                  .add(ProfessionalSavedUs(
+                                                PropId: professionalData.id!,
+                                                onSuccess: () {
+                                                  setState(() {
+                                                    professionalData.isSaved =
+                                                        IsContacted(id: '');
+                                                  });
+                                                },
+                                                onError: () {
+                                                  showCustomSnackBar(
+                                                    context: context,
+                                                    message:
+                                                        "Something Went wrong",
+                                                  );
+                                                },
+                                              ));
+                                            } else {
+                                              showInterestedBloc
+                                                  .add(ProfessionalSavedUs(
+                                                PropId: professionalData.id!,
+                                                onSuccess: () {
+                                                  setState(() {
+                                                    professionalData.isSaved =
+                                                        null;
+                                                  });
+                                                },
+                                                onError: () {
+                                                  showCustomSnackBar(
+                                                    context: context,
+                                                    message:
+                                                        "Something Went wrong",
+                                                  );
+                                                },
+                                              ));
+                                            }
+                                          }),
+                                    );
+                                  })
+                              : Padding(
+                                  padding: EdgeInsets.only(
+                                      top: SizeConfig.blockHeight * 6),
+                                  child: emptyComponent(),
+                                )
                         ],
                       ],
                     ),
                   ),
                 )
-
               ],
             ),
           ),

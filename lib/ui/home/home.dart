@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +33,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late HomeBloc homeBloc;
   late ShowInterestedBloc showInterestedBloc;
-  late List<HomeFetchModel> homeFetchModel;
+  late List<HomeFetchModel> homeFetchModel = [];
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
   int currentPage = 1;
@@ -46,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
-
+    _fetchData();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -57,25 +59,55 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchData();
+  }
 
-  void _fetchData() {
+  // void _fetchData() {
+  //   homeBloc.add(FetchHomeScreenEvent(
+  //       page: currentPage,
+  //       pageSize: pageSize,
+  //       keyWord: "",
+  //       profession: "",
+  //       city: "",
+  //       gender: "",
+  //       currentLongitude: '',
+  //       currentLatitude: ''));
+  // }
+  void _fetchData({bool isNewFetch = false}) {
+    if (isNewFetch) {
+      homeFetchModel.clear();
+      currentPage = 1;
+    }
+
     homeBloc.add(FetchHomeScreenEvent(
         page: currentPage,
         pageSize: pageSize,
         keyWord: "",
-        profession: "",
-        city: "",
-        gender: "",
+        profession: selectedProfession ?? "",
+        city: selectedCity ?? "",
+        gender: selectedGender ?? "",
         currentLongitude: '',
         currentLatitude: ''));
   }
 
+  // void _loadMoreData() {
+  //   setState(() {
+  //     isFetchingMore = true;
+  //   });
+  //   currentPage++;
+  //   _fetchData();
+  // }
   void _loadMoreData() {
-    setState(() {
-      isFetchingMore = true;
-    });
-    currentPage++;
-    _fetchData();
+    if (!isFetchingMore && currentPage < maxPageNumber) {
+      setState(() {
+        isFetchingMore = true;
+      });
+      currentPage++;
+      _fetchData();
+    }
   }
 
   void filterHomeScreenData(String? profession, String? city, String gender) {
@@ -124,9 +156,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (state is FetchHomeScreenSuccess) {
                       setState(() {
                         if (currentPage == 1) {
+                          // Only set data for the first page
                           homeFetchModel = state.homeFetchModel;
                         } else {
-                          homeFetchModel.addAll(state.homeFetchModel);
+                          // Only add new unique items for subsequent pages
+                          final newItems = state.homeFetchModel
+                              .where((item) => !homeFetchModel.contains(item));
+                          homeFetchModel.addAll(newItems);
                         }
                         maxPageNumber = state.maxPageNumber;
                         isFetchingMore = false;
@@ -135,11 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       setState(() {
                         isFetchingMore = false;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(state.message),
-                      ));
                     }
-                    setState(() {});
                   },
                   builder: (context, state) {
                     if (state is HomeScreenLoading && currentPage == 1 ||
@@ -192,6 +224,21 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
+                  addFriendText(textOne: 'Add Friends', textTwo: 'View All'),
+                  SizedBox(
+                    height: SizeConfig.blockHeight * 33,
+                    child: ListView.builder(
+                        itemCount: 8,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return addFriendCard(
+                              added: index % 2 == 0?true:false,
+                              image: 'assets/images/home/dumy1.png',
+                              name: 'Julia Vandervort-Will');
+                        }),
+                  ),
+                  SizedBox(height: SizeConfig.blockHeight * 2),
                   Padding(
                     padding:
                         EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
@@ -205,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       textAlign: TextAlign.end,
                     ),
-                  )
+                  ),
                 ],
                 WorkCard(
                   title: work.requiredProfession ?? '--',
@@ -237,6 +284,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ],
                                   child: WorkDetailsScreen(
                                     id: work.id!,
+                                    refreshPageCallback: () {
+                                      _fetchData(isNewFetch: true);
+                                    },
+                                    routeType: 'general',
                                   ),
                                 )));
                   },
@@ -270,12 +321,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Navigator.of(context).pop();
                                   },
                                 ));
-                              }
-                              else{
+                              } else {
                                 showCustomAlertDialog(
                                   context: context,
                                   title: 'Are you Sure?',
-                                  message: 'Do you want to Uninterest this Work?',
+                                  message:
+                                      'Do you want to Uninterest this Work?',
                                   positiveButtonText: 'YES',
                                   negativeButtonText: 'NO',
                                   onPositivePressed: () {
@@ -296,14 +347,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Navigator.of(context).pop();
                                       },
                                     ));
-
-
                                   },
                                   onNegativePressed: () {
                                     Navigator.of(context).pop();
                                   },
                                 );
-
                               }
                             } else {
                               showInterestBottomSheet(context);
@@ -340,7 +388,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if (work.isProfessionalCanCall == true && work.user != null) ...[
+                          if (work.isProfessionalCanCall == true &&
+                              work.user != null) ...[
                             IconActionCard(
                               iconBool: false,
                               imageUrl: Image.asset(
@@ -366,7 +415,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               shareJobDetails(
                                 experience: work.experienceLevel!,
                                 location: work.location!,
-                                jobTitle:  work.requiredProfession!,
+                                jobTitle: work.requiredProfession!,
                               );
                             },
                           ),

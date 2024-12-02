@@ -37,6 +37,11 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
   }
 
+
+  void _refreshPageAfterEdit() {
+    profileBloc.add(const FetchInterestedWorkEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,30 +70,33 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
             });
           }
         },
-        child: SafeArea(child: SingleChildScrollView(
-          child: Builder(builder: (context) {
-            if (loading) {
-              return SizedBox(
-                  height: SizeConfig.screenHeight, child: ShimmerJobCards());
-            } else if (error) {
-              return ErrorScreen(onRetry: () {
+        child: SafeArea(child: Builder(builder: (context) {
+          if (loading) {
+            return SizedBox(
+                height: SizeConfig.screenHeight, child: ShimmerJobCards());
+          } else if (error) {
+            return SizedBox(
+              height: SizeConfig.screenHeight,
+              child: ErrorScreen(onRetry: () {
                 profileBloc.add(const FetchInterestedWorkEvent());
-              });
-            } else if (!loading && !error) {
-              return fetchPostedModel.isNotEmpty
-                  ? Padding(
+              }),
+            );
+          } else if (!loading && !error) {
+            return fetchPostedModel.isNotEmpty
+                ? SingleChildScrollView(
+                  child: Padding(
                       padding: EdgeInsets.symmetric(
                           vertical: SizeConfig.blockHeight),
                       child: ListView.builder(
                           shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
+                          physics: const NeverScrollableScrollPhysics(),
                           itemCount: fetchPostedModel.length,
                           itemBuilder: (context, index) {
                             var profile = fetchPostedModel[index];
                             return Container(
                               padding: EdgeInsets.symmetric(
                                 vertical: SizeConfig.blockWidth * 1.5,
-                                horizontal: SizeConfig.blockHeight * 3.25,
+                                horizontal: SizeConfig.blockHeight * 2.5,
                               ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -131,6 +139,8 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                                                     ],
                                                     child: WorkDetailsScreen(
                                                       id: profile.id!,
+                                                      refreshPageCallback: _refreshPageAfterEdit,
+                                                      routeType: 'general',
                                                     ),
                                                   )));
                                     },
@@ -197,7 +207,7 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            if(profile.user != null)...[
+                                            if(profile.user != null && profile.isProfessionalCanCall == true)...[
                                               IconActionCard(
                                                 onTap: () {
                                                   makePhoneCall(profile.user!.mobile!);
@@ -242,15 +252,15 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                               ),
                             );
                           }),
-                    )
-                  : SizedBox(
-                      width: SizeConfig.screenWidth,
-                      height: SizeConfig.blockHeight * 80,
-                      child: emptyComponent());
-            }
-            return Container();
-          }),
-        )),
+                    ),
+                )
+                : SizedBox(
+                    width: SizeConfig.screenWidth,
+                    height: SizeConfig.blockHeight * 80,
+                    child: emptyComponent());
+          }
+          return Container();
+        })),
       ),
     );
   }

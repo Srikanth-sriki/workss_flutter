@@ -164,6 +164,8 @@ flutter:
      - assets/images/profile/other_location.png
      - assets/images/profile/delete_2d.png
      - assets/images/profile/success.png
+     - assets/images/home/share-banner.png
+     - assets/images/home/dumy1.png
 
 
   #   - images/a_dot_ham.jpeg

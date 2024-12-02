@@ -53,41 +53,44 @@ class _LocationListScreenState extends State<LocationListScreen> {
           children: [
             SizedBox(
               height: SizeConfig.screenHeight,
-              child: SingleChildScrollView(
-                child: BlocListener<ProfileBloc, ProfileState>(
-                  listener: (context, state) {
-                    if (state is AddressLocationLoading ||
-                        state is ProfileInitial) {
-                      setState(() {
-                        loading = true;
-                        error = false;
-                      });
-                    } else if (state is AddressLocationListSuccess) {
-                      setState(() {
-                        loading = false;
-                        error = false;
-                        addressListModal = state.addressListModal!;
-                      });
-                    } else if (state is AddressLocationListFailed) {
-                      setState(() {
-                        loading = false;
-                        error = true;
-                      });
-                    }
-                  },
-                  child: Builder(
-                    builder: (context) {
-                      if (loading) {
-                        return SizedBox(
-                            height: SizeConfig.screenHeight,
-                            child: const ShimmerJobCards());
-                      } else if (error) {
-                        return ErrorScreen(onRetry: () {
+              child: BlocListener<ProfileBloc, ProfileState>(
+                listener: (context, state) {
+                  if (state is AddressLocationLoading ||
+                      state is ProfileInitial) {
+                    setState(() {
+                      loading = true;
+                      error = false;
+                    });
+                  } else if (state is AddressLocationListSuccess) {
+                    setState(() {
+                      loading = false;
+                      error = false;
+                      addressListModal = state.addressListModal!;
+                    });
+                  } else if (state is AddressLocationListFailed) {
+                    setState(() {
+                      loading = false;
+                      error = true;
+                    });
+                  }
+                },
+                child: Builder(
+                  builder: (context) {
+                    if (loading) {
+                      return SizedBox(
+                          height: SizeConfig.screenHeight,
+                          child: const ShimmerJobCards());
+                    } else if (error) {
+                      return SizedBox(
+                        height: SizeConfig.screenHeight,
+                        child: ErrorScreen(onRetry: () {
                           _refreshPageAfterEdit();
-                        });
-                      } else if (!loading && !error) {
-                        return addressListModal.isNotEmpty
-                            ? Padding(
+                        }),
+                      );
+                    } else if (!loading && !error) {
+                      return addressListModal.isNotEmpty
+                          ? SingleChildScrollView(
+                            child: Padding(
                                 padding: EdgeInsets.symmetric(
                                     vertical: SizeConfig.blockHeight * 1.5),
                                 child: ListView.builder(
@@ -191,7 +194,7 @@ class _LocationListScreenState extends State<LocationListScreen> {
                                             SizedBox(
                                               width: SizeConfig.blockWidth * 80,
                                               child: Text(
-                                                '${addressItem.houseNo ?? ''} ${addressItem.area ?? ''} ${addressItem.instructions ?? ''}',
+                                                '${addressItem.area ?? addressItem.houseNo} ',
                                                 style: TextStyle(
                                                   color: COLORS.black,
                                                   fontSize:
@@ -295,15 +298,15 @@ class _LocationListScreenState extends State<LocationListScreen> {
                                     );
                                   },
                                 ),
-                              )
-                            : SizedBox(
-                                width: SizeConfig.screenWidth,
-                                height: SizeConfig.blockHeight * 80,
-                                child: emptyComponent());
-                      }
-                      return Container();
-                    },
-                  ),
+                              ),
+                          )
+                          : SizedBox(
+                              width: SizeConfig.screenWidth,
+                              height: SizeConfig.blockHeight * 80,
+                              child: emptyComponent());
+                    }
+                    return Container();
+                  },
                 ),
               ),
             ),

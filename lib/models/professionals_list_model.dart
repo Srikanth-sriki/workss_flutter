@@ -110,9 +110,9 @@ class IsContacted {
   });
 
   factory IsContacted.fromJson(Map<String, dynamic> json) => IsContacted(
-    id: json["id"],
-    userId: json["userId"],
-    professionalId: json["professionalId"],
+    id: json["id"]??"",
+    userId: json["userId"]??"",
+    professionalId: json["professionalId"]??"",
   );
 
   Map<String, dynamic> toJson() => {

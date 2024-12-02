@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:location/location.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
@@ -15,8 +17,6 @@ import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../models/professionals_list_model.dart';
 
-
-
 class ProfessionalSearchList extends StatefulWidget {
   const ProfessionalSearchList({super.key});
 
@@ -29,12 +29,18 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
   late ShowInterestedBloc showInterestedBloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  late List<ProfessionalsPostedWork> professionalsPostedWork;
   Timer? _debounce;
   bool isFetchingMore = false;
   int currentPage = 1;
   int pageSize = 10;
   int maxPageNumber = 1;
   String searchKeyword = "";
+  bool isLiveLocationEnabled = false;
+  String currentLatitude = '';
+  String currentLongitude = '';
+  Location _location = Location();
+  bool mapLoading = false;
 
   @override
   void initState() {
@@ -43,7 +49,7 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !isFetchingMore &&
           currentPage < maxPageNumber) {
         _loadMoreData();
@@ -64,16 +70,21 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
     });
   }
 
+  void _fetchData({bool isNewFetch = false}) {
+    // if (isNewFetch) {
+    //   professionalsPostedWork.clear();
+    //   currentPage = 1;
+    // }
 
-  void _fetchData() {
     professionalBloc.add(ProfessionalListEvent(
-      page: currentPage,
-      pageSize: pageSize,
-      keyWord: searchKeyword,
-      profession: "",
-      city: "",
-      gender: "",
-    ));
+        page: currentPage,
+        pageSize: pageSize,
+        keyWord: searchKeyword,
+        profession: "",
+        city: "",
+        gender: "",
+        currentLongitude: currentLatitude,
+        currentLatitude: currentLongitude));
   }
 
   void _loadMoreData() {
@@ -92,6 +103,47 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
     super.dispose();
   }
 
+  void _toggleLiveLocation(bool value) {
+    setState(() {
+      isLiveLocationEnabled = value;
+    });
+
+    if (isLiveLocationEnabled) {
+      _getCurrentLocation();
+    } else {
+      setState(() {
+        currentLatitude = '';
+        currentLongitude = '';
+      });
+      _fetchData();
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    setState(() {
+      mapLoading = true;
+    });
+
+    PermissionStatus permissionGranted = await _location.requestPermission();
+    print("Permission status: $permissionGranted");
+
+    if (permissionGranted == PermissionStatus.granted) {
+      LocationData locationData = await _location.getLocation();
+
+      setState(() {
+        currentLatitude = locationData.latitude.toString();
+        currentLongitude = locationData.longitude.toString();
+        print(currentLatitude);
+        _fetchData();
+        mapLoading = false;
+      });
+    } else {
+      print("Location permission not granted");
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +159,10 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
         child: Column(
           children: [
             Container(
-              padding:  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*4.5,vertical: SizeConfig.blockHeight*2),
+              padding: EdgeInsets.only(
+                  right: SizeConfig.blockWidth * 4.5,
+                  left: SizeConfig.blockWidth * 4.5,
+                  top: SizeConfig.blockHeight * 2),
               child: TextField(
                 controller: _searchController,
                 style: TextStyle(
@@ -135,27 +190,90 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                     borderSide: BorderSide(
                         color: COLORS.neutralDarkTwo.withOpacity(0.6),
                         width: SizeConfig.blockWidth * 0.1),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                     borderSide: BorderSide(
                         color: COLORS.neutralDarkTwo.withOpacity(0.6),
                         width: SizeConfig.blockWidth * 0.1),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                     borderSide: BorderSide(
                         color: COLORS.neutralDarkTwo.withOpacity(0.6),
                         width: SizeConfig.blockWidth * 0.1),
                   ),
                 ),
                 onChanged: _onSearchChanged,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 4.8,
+                  vertical: SizeConfig.blockHeight * 2),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: SizeConfig.blockWidth * 90,
+                    padding: EdgeInsets.symmetric(
+                        vertical: mapLoading
+                            ? SizeConfig.blockWidth * 3
+                            : SizeConfig.blockWidth * 1,
+                        horizontal: SizeConfig.blockWidth * 3),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                      color: COLORS.primaryTwo,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: SizeConfig.blockWidth * 5.5,
+                          color: COLORS.accent,
+                        ),
+                        SizedBox(width: SizeConfig.blockWidth * 4),
+                        Expanded(
+                          child: Text(
+                            'Professionals Near Your',
+                            style: TextStyle(
+                              color: COLORS.white,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                            softWrap: true,
+                          ),
+                        ),
+                        if (mapLoading) ...[
+                          LoadingAnimationWidget.discreteCircle(
+                            color: COLORS.primary,
+                            size: SizeConfig.blockWidth * 5,
+                          )
+                        ] else ...[
+                          Switch(
+                            value: isLiveLocationEnabled,
+                            onChanged: _toggleLiveLocation,
+                            activeColor: COLORS.primary,
+                            inactiveThumbColor: COLORS.neutralDarkOne,
+                            trackOutlineColor:
+                                const WidgetStatePropertyAll(COLORS.primaryTwo),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          )
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             // Divider(
@@ -175,9 +293,10 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                     setState(() {
                       isFetchingMore = false;
                     });
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(state.message),
-                    ));
+                    // showCustomSnackBar(
+                    //   context: context,
+                    //   message: state.message,
+                    // );
                   }
                 },
                 builder: (context, state) {
@@ -211,48 +330,40 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
         if (index < professionalsPostedWork.length) {
           final professionalData = professionalsPostedWork[index];
           return Container(
-            padding:  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*4.5,vertical: SizeConfig.blockHeight*0.5),
+            padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.blockWidth * 4.5,
+                vertical: SizeConfig.blockHeight * 0.5),
             child: buildProfessionalCard(
-                accountVerified:
-                professionalData!.isVerified!,
+                accountVerified: professionalData!.isVerified!,
                 image: professionalData!.profilePic!,
                 name: professionalData!.name!,
                 profession: professionalData.professionType!,
                 location: professionalData.city!,
-                languages: professionalData.knownLanguages!
-                    .join(", "),
+                languages: professionalData.knownLanguages!.join(", "),
                 gender: professionalData.gender!,
                 price: professionalData.charges!,
                 paymentType: professionalData.chargeType!,
-                contacted:
-                professionalData.isContacted != null,
+                contacted: professionalData.isContacted != null,
                 saved: professionalData.isSaved != null,
-                experience:
-                professionalData.experiencedYears!,
-                experienceImage:
-                'assets/images/home/work_select.png',
+                experience: professionalData.experiencedYears!,
+                experienceImage: 'assets/images/home/work_select.png',
                 genderImage: 'assets/images/home/gender.png',
-                jobTypeImage:
-                'assets/images/profile/prof.png',
-                language: professionalData.knownLanguages!
-                    .join(", "),
+                jobTypeImage: 'assets/images/profile/prof.png',
+                language: professionalData.knownLanguages!.join(", "),
                 languageImage: 'assets/images/home/speak.png',
                 onShowInterest: () {
                   if (professionalData.isContacted == null) {
-                    showInterestedBloc
-                        .add(ProfessionalContactUs(
+                    showInterestedBloc.add(ProfessionalContactUs(
                       PropId: professionalData.id!,
                       onSuccess: () {
                         setState(() {
-                          professionalData.isContacted =
-                              IsContacted(id: '');
+                          professionalData.isContacted = IsContacted(id: '');
                         });
                         makePhoneCall(professionalData.mobile!);
                       },
                       onError: () {},
                     ));
-                  }
-                  else{
+                  } else {
                     makePhoneCall(professionalData.mobile!);
                   }
                 },
@@ -261,41 +372,39 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                   shareJobDetails(
                     experience: professionalData.experiencedYears!,
                     location: professionalData.city!,
-                    jobTitle:  professionalData.professionType!,
+                    jobTitle: professionalData.professionType!,
                   );
                 },
                 onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              MultiBlocProvider(
+                          builder: (context) => MultiBlocProvider(
                                 providers: [
                                   BlocProvider(
-                                    create: (context) =>
-                                    ProfessionalBloc()
+                                    create: (context) => ProfessionalBloc()
                                       ..add(FetchProfessionalView(
-                                          professionalData
-                                              .id!)),
+                                          professionalData.id!)),
                                   ),
                                   BlocProvider(
-                                    create: (context) =>
-                                        ShowInterestedBloc(),
+                                    create: (context) => ShowInterestedBloc(),
                                   )
                                 ],
                                 child: ProfessionalViewScreen(
                                   id: professionalData.id!,
+                                  refreshPageCallback: () {
+                                    _fetchData(isNewFetch: true);
+                                  },
                                 ),
                               )));
                 },
                 savedTap: () {
-                  if(professionalData.isSaved ==null){
+                  if (professionalData.isSaved == null) {
                     showInterestedBloc.add(ProfessionalSavedUs(
                       PropId: professionalData.id!,
                       onSuccess: () {
                         setState(() {
-                          professionalData.isSaved =
-                              IsContacted(id: '');
+                          professionalData.isSaved = IsContacted(id: '');
                         });
                       },
                       onError: () {
@@ -305,14 +414,12 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                         );
                       },
                     ));
-                  }
-                  else{
+                  } else {
                     showInterestedBloc.add(ProfessionalSavedUs(
                       PropId: professionalData.id!,
                       onSuccess: () {
                         setState(() {
-                          professionalData.isSaved =
-                          null;
+                          professionalData.isSaved = null;
                         });
                       },
                       onError: () {
@@ -326,10 +433,14 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 }),
           );
         } else if (isFetchingMore) {
-          return  Center(child: SizedBox(
-              height: SizeConfig.blockWidth*5,
-              width: SizeConfig.blockWidth*5,
-              child: const CircularProgressIndicator(color: COLORS.primary,strokeWidth: 2,)));
+          return Center(
+              child: SizedBox(
+                  height: SizeConfig.blockWidth * 5,
+                  width: SizeConfig.blockWidth * 5,
+                  child: const CircularProgressIndicator(
+                    color: COLORS.primary,
+                    strokeWidth: 2,
+                  )));
         } else {
           return const SizedBox.shrink();
         }

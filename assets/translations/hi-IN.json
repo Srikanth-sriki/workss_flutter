@@ -282,7 +282,8 @@
   "Address Saved Successfully!": "पता सफलतापूर्वक सहेजा गया!",
   "Your address is saved securely for quick \naccess in future transactions.": "आपका पता भविष्य के लेन-देन के लिए सुरक्षित रूप से सहेजा गया है।",
   "Do you want to Clear?": "क्या आप इसे साफ़ करना चाहते हैं?",
-  "Do you want to Clear all Notifications?": "क्या आप सभी सूचनाओं को साफ़ करना चाहते हैं?"
+  "Do you want to Clear all Notifications?": "क्या आप सभी सूचनाओं को साफ़ करना चाहते हैं?",
+  "Address": "पता"
 }
 
 

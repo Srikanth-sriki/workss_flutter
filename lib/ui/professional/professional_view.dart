@@ -16,8 +16,9 @@ import '../profile/component.dart';
 import 'component/grid_image_card.dart';
 
 class ProfessionalViewScreen extends StatefulWidget {
+  final VoidCallback refreshPageCallback;
   final String id;
-  const ProfessionalViewScreen({super.key, required this.id});
+  const ProfessionalViewScreen({super.key, required this.id,required this.refreshPageCallback});
 
   @override
   State<ProfessionalViewScreen> createState() => _ProfessionalViewScreenState();
@@ -35,23 +36,30 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
   }
 
+  void _refreshPageAfterEdit() {
+    professionalBloc.add(FetchProfessionalView(widget.id));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0,
-        scrolledUnderElevation: 0,
-      ),
-      body: BlocConsumer<ProfessionalBloc, ProfessionalState>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          if (state is ProfessionalViewLoading || state is ProfessionalInitial) {
-            return globalLoadingWidget();
-          } else if (state is ProfessionalViewSuccess) {
-            final professional = state.professionalViewModel.professional!;
-            final similarProfessionals =
-                state.professionalViewModel.similarProfessionals!;
-            return SafeArea(
+    return BlocConsumer<ProfessionalBloc, ProfessionalState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        if (state is ProfessionalViewLoading || state is ProfessionalInitial) {
+          return globalLoadingWidget();
+        } else if (state is ProfessionalViewSuccess) {
+          final professional = state.professionalViewModel.professional!;
+          final similarProfessionals =
+          state.professionalViewModel.similarProfessionals!;
+          return Scaffold(
+            backgroundColor: COLORS.white,
+            appBar: AppBar(
+              toolbarHeight: 0,
+              scrolledUnderElevation: 0,
+              automaticallyImplyLeading: false,
+              backgroundColor: COLORS.white,
+            ),
+            body: SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -110,7 +118,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                               style: TextStyle(
                                                 color: COLORS.neutralDark,
                                                 fontSize:
-                                                    SizeConfig.blockWidth * 4,
+                                                SizeConfig.blockWidth * 4,
                                                 fontWeight: FontWeight.w500,
                                                 fontFamily: "Poppins",
                                                 overflow: TextOverflow.ellipsis,
@@ -122,10 +130,10 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                           Container(
                                             padding: EdgeInsets.symmetric(
                                                 horizontal:
-                                                    SizeConfig.blockWidth * 3,
+                                                SizeConfig.blockWidth * 3,
                                                 vertical:
-                                                    SizeConfig.blockHeight *
-                                                        0.5),
+                                                SizeConfig.blockHeight *
+                                                    0.5),
                                             decoration: BoxDecoration(
                                               color: COLORS.semanticTwo,
                                               borderRadius: BorderRadius.all(
@@ -135,9 +143,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                             ),
                                             child: Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
+                                              CrossAxisAlignment.center,
                                               children: [
                                                 Icon(
                                                   Icons.verified,
@@ -154,8 +162,8 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                   style: TextStyle(
                                                     color: COLORS.white,
                                                     fontSize:
-                                                        SizeConfig.blockWidth *
-                                                            3,
+                                                    SizeConfig.blockWidth *
+                                                        3,
                                                     fontWeight: FontWeight.w400,
                                                     fontFamily: "Poppins",
                                                   ),
@@ -168,9 +176,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                     ),
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      MainAxisAlignment.start,
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                      CrossAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.location_on_rounded,
@@ -186,7 +194,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                             style: TextStyle(
                                               color: COLORS.neutralDarkOne,
                                               fontSize:
-                                                  SizeConfig.blockWidth * 3,
+                                              SizeConfig.blockWidth * 3,
                                               fontWeight: FontWeight.w400,
                                               fontFamily: "Poppins",
                                               overflow: TextOverflow.ellipsis,
@@ -208,35 +216,38 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                             children: [
                               InkWell(
                                 onTap: (){
-                                 if(professional.isSaved == null){
-                                   showInterestedBloc.add(ProfessionalSavedUs(
-                                     PropId: professional.id!,
-                                     onSuccess: () {
-                                       setState(() {
-                                         professional.isSaved =
-                                             IsContacted(id: '');
-                                       });
-                                     },
-                                     onError: () {},
-                                   ));
-                                 }
-                                 else{
-                                   showInterestedBloc.add(ProfessionalSavedUs(
-                                     PropId: professional.id!,
-                                     onSuccess: () {
-                                       setState(() {
-                                         professional.isSaved =
-                                            null;
-                                       });
-                                     },
-                                     onError: () {
-                                       showCustomSnackBar(
-                                         context: context,
-                                         message: "Something Went wrong",
-                                       );
-                                     },
-                                   ));
-                                 }
+                                  if(professional.isSaved == null){
+                                    showInterestedBloc.add(ProfessionalSavedUs(
+                                      PropId: professional.id!,
+                                      onSuccess: () {
+                                        setState(() {
+                                          professional.isSaved =
+                                              IsContacted(id: '');
+
+                                        });
+                                        widget.refreshPageCallback();
+                                      },
+                                      onError: () {},
+                                    ));
+                                  }
+                                  else{
+                                    showInterestedBloc.add(ProfessionalSavedUs(
+                                      PropId: professional.id!,
+                                      onSuccess: () {
+                                        setState(() {
+                                          professional.isSaved =
+                                          null;
+                                        });
+                                        widget.refreshPageCallback();
+                                      },
+                                      onError: () {
+                                        showCustomSnackBar(
+                                          context: context,
+                                          message: "Something Went wrong",
+                                        );
+                                      },
+                                    ));
+                                  }
                                 },
                                 child: Image.asset(
                                   professional.isSaved != null
@@ -313,7 +324,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       registerTextCard(
                                           text: professional.knownLanguages!
@@ -324,7 +335,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                       registerTextCard(
                                           text: professional.gender!,
                                           image:
-                                              'assets/images/home/gender.png',
+                                          'assets/images/home/gender.png',
                                           color: COLORS.primary,
                                           textColor: COLORS.neutralDark),
                                     ],
@@ -466,7 +477,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                         IsContacted(id: '');
                                                     makePhoneCall(professionalData.mobile!);
                                                   });
+                                                  widget.refreshPageCallback();
                                                 },
+
                                                 onError: () {},
                                               ));
                                             }
@@ -506,6 +519,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                           ProfessionalViewScreen(
                                                             id: professionalData
                                                                 .id!,
+                                                            refreshPageCallback: _refreshPageAfterEdit,
                                                           ),
                                                         )));
                                           },
@@ -519,6 +533,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                     professionalData.isSaved =
                                                         IsContacted(id: '');
                                                   });
+                                                  widget.refreshPageCallback();
                                                 },
                                                 onError: () {
                                                   showCustomSnackBar(
@@ -536,8 +551,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                 onSuccess: () {
                                                   setState(() {
                                                     professionalData.isSaved =
-                                                       null;
+                                                    null;
                                                   });
+                                                  widget.refreshPageCallback();
                                                 },
                                                 onError: () {
                                                   showCustomSnackBar(
@@ -560,15 +576,107 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                   ),
                 ],
               ),
-            );
-          } else if (state is ProfessionalViewError) {
-            return ErrorScreen(onRetry: () {
+            ),
+            bottomNavigationBar: Container(
+              padding: EdgeInsets.symmetric(
+                  vertical: SizeConfig.blockWidth * 4,
+                  horizontal: SizeConfig.blockHeight * 4.5),
+              decoration: BoxDecoration(
+                  border: Border(
+                      top: BorderSide(
+                          color: COLORS.neutralDarkTwo,
+                          width: SizeConfig.blockWidth * 0.15))),
+              child: showContactUsButton(
+                  contacted:
+                  professional
+                      .isContacted !=
+                      null,
+                  saved: professional.isSaved != null,
+                  onShare: (){
+                    shareJobDetails(
+                      experience: professional.experiencedYears!,
+                      location: professional.city!,
+                      jobTitle:  professional.professionType!,
+                    );
+                  },
+                  savedTap: (){
+                    if(  professional.isSaved  == null){
+                      showInterestedBloc
+                          .add(ProfessionalSavedUs(
+                        PropId: professional.id!,
+                        onSuccess: () {
+                          setState(() {
+                            professional.isSaved =
+                                IsContacted(id: '');
+                          });
+                        },
+                        onError: () {
+                          showCustomSnackBar(
+                            context: context,
+                            message: "Something Went wrong",
+                          );
+
+                        },
+                      ));
+                    }
+                    else{
+                      showInterestedBloc
+                          .add(ProfessionalSavedUs(
+                        PropId: professional.id!,
+                        onSuccess: () {
+                          setState(() {
+                            professional.isSaved =
+                            null;
+                          });
+                        },
+                        onError: () {
+                          showCustomSnackBar(
+                            context: context,
+                            message: "Something Went wrong",
+                          );
+
+                        },
+                      ));
+                    }
+                  },
+
+                  onShowInterest: () {
+                    if (professional.isContacted ==
+                        null) {
+                      showInterestedBloc
+                          .add(ProfessionalContactUs(
+                        PropId: professional.id!,
+                        onSuccess: () {
+                          setState(() {
+                            professional.isContacted =
+                                IsContacted(id: '');
+                            makePhoneCall(professional.mobile!);
+                          });
+                          widget.refreshPageCallback();
+                        },
+                        onError: () {},
+                      ));
+                    }
+                    else{
+                      makePhoneCall(professional.mobile!);
+                    }
+                  }),
+            ),
+          );
+        } else if (state is ProfessionalViewError) {
+          return Scaffold(
+            backgroundColor: COLORS.white,
+            appBar: AppBar(
+              toolbarHeight: 0,
+              scrolledUnderElevation: 0,
+            ),
+            body: ErrorScreen(onRetry: () {
               professionalBloc.add(FetchProfessionalView(widget.id));
-            });
-          }
-          return Container();
-        },
-      ),
+            }),
+          );
+        }
+        return Container();
+      },
     );
   }
 }

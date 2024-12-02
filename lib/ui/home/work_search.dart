@@ -31,6 +31,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
   late ShowInterestedBloc showInterestedBloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
+  late List<HomeFetchModel> homeFetchModel;
   Timer? _debounce;
   bool isFetchingMore = false;
   int currentPage = 1;
@@ -71,7 +72,14 @@ class _WorkSearchListState extends State<WorkSearchList> {
     });
   }
 
-  void _fetchData() {
+
+
+  void _fetchData({bool isNewFetch = false}) {
+    if (isNewFetch) {
+      homeFetchModel.clear();
+      currentPage = 1;
+    }
+
     homeBloc.add(FetchHomeScreenEvent(
         page: currentPage,
         pageSize: pageSize,
@@ -82,6 +90,8 @@ class _WorkSearchListState extends State<WorkSearchList> {
         currentLongitude: currentLongitude,
         currentLatitude: currentLatitude));
   }
+
+
 
   void _loadMoreData() {
     setState(() {
@@ -341,9 +351,10 @@ class _WorkSearchListState extends State<WorkSearchList> {
                     setState(() {
                       isFetchingMore = false;
                     });
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(state.message),
-                    ));
+                    // showCustomSnackBar(
+                    //   context: context,
+                    //   message: state.message,
+                    // );
                   }
                 },
                 builder: (context, state) {
@@ -410,6 +421,8 @@ class _WorkSearchListState extends State<WorkSearchList> {
                               ],
                               child: WorkDetailsScreen(
                                 id: work.id!,
+                                refreshPageCallback: _fetchData,
+                                routeType: 'general',
                               ),
                             )));
               },

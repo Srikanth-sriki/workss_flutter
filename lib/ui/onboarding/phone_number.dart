@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
   String _errorMessage = '';
   bool _hasError = false;
-  bool buttonVisible = true;
+  bool buttonVisible = false;
   late LoginBloc loginBloc;
   bool loading = false;
   bool isChecked = false;
@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     loginBloc = BlocProvider.of<LoginBloc>(context);
-    Future<void>.delayed(const Duration(milliseconds: 300), _autoFetchNumber);
+    // Future<void>.delayed(const Duration(milliseconds: 300), _autoFetchNumber);
   }
 
   Future<void> _autoFetchNumber() async {
@@ -49,12 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final phoneWithoutCountryCode = phone.replaceFirst('+91', '');
       _phoneController.text = phoneWithoutCountryCode;
-      RegExp regex = RegExp(r"^(?:[+0]9)?\d{10}$");
-      if (regex.hasMatch(phoneWithoutCountryCode)) {
-        setState(() {
-          buttonVisible = false;
-        });
-      }
+      _validatePhoneNumber(phoneWithoutCountryCode);
     } on PlatformException catch (e) {
       print('Failed to get mobile number because of: ${e.message}');
     }
@@ -63,36 +58,32 @@ class _LoginScreenState extends State<LoginScreen> {
   void _validatePhoneNumber(String value) {
     setState(() {
       RegExp regex = RegExp(r"^[0-9]{10}$");
-      if (regex.hasMatch(value) ) {
+      if (regex.hasMatch(value)) {
         _hasError = false;
         _errorMessage = '';
-        buttonVisible = false;
       } else {
         _hasError = true;
-        buttonVisible = true;
         _errorMessage = 'Enter a valid 10-digit phone number'.tr();
       }
+      _buttonVisible(value); // Update button visibility based on validation
     });
   }
 
   void _buttonVisible(String value) {
     setState(() {
       RegExp regex = RegExp(r"^[0-9]{10}$");
-      if (regex.hasMatch(value) && isChecked) {
-        buttonVisible = false;
-      } else {
-        buttonVisible = true;
-      }
+      buttonVisible = regex.hasMatch(value) && isChecked;
     });
   }
 
   void _onGetOtpPressed() {
-    _validatePhoneNumber(_phoneController.text);
-    if (!_hasError) {
-      Config.phoneNumber = _phoneController.text;
-
-      loginBloc.add(LoginWithPhoneNumber(
-          countryCode: '91', phoneNumber: _phoneController.text));
+    if(buttonVisible) {
+      _validatePhoneNumber(_phoneController.text);
+      if (!_hasError) {
+        Config.phoneNumber = _phoneController.text;
+        loginBloc.add(LoginWithPhoneNumber(
+            countryCode: '91', phoneNumber: _phoneController.text));
+      }
     }
   }
 
@@ -113,17 +104,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         body: BlocListener<LoginBloc, LoginState>(
           listener: (context, state) {
-            print("The State is : $state");
             if (state is LoginLoading) {
               loading = true;
             } else if (state is LoginFailed) {
               loading = false;
-              showCustomSnackBar(
-                context: context,
-                message: state.message,
-              );
+              showCustomSnackBar(context: context, message: state.message);
             } else if (state is LoginSuccess) {
-              print("LoginSuccess");
               loading = false;
               Navigator.push(
                   context,
@@ -171,78 +157,75 @@ class _LoginScreenState extends State<LoginScreen> {
                       hasError: _hasError,
                       buttonVisibleChange: _buttonVisible),
                   const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Checkbox(
-
-                      side: BorderSide(
-                          color: COLORS.neutralDarkOne,
-                          width: SizeConfig.blockWidth * 0.3),
-                      checkColor: COLORS.white,
-                      activeColor: COLORS.primary,
-                      onChanged: (bool? value) {
-                      setState(() {
-                      isChecked = value!;
-
-                      });
-
-                    }, value: isChecked,
-
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isChecked = !isChecked;
-                      });
-                    },
-                    child: RichText(
-                      text: TextSpan(
-                        text: "I accept the ".tr(),
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 3.4,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",),
-                        children: [
-                          TextSpan(
-                            text: "Terms & Conditions".tr(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        side: BorderSide(
+                            color: COLORS.neutralDarkOne,
+                            width: SizeConfig.blockWidth * 0.3),
+                        checkColor: COLORS.white,
+                        activeColor: COLORS.primary,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            isChecked = value!;
+                          });
+                          _buttonVisible(_phoneController.text); // Check button visibility after checkbox change
+                        },
+                        value: isChecked,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isChecked = !isChecked;
+                          });
+                          _buttonVisible(_phoneController.text); // Update button visibility
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            text: "I accept the ".tr(),
                             style: TextStyle(
-                              color: COLORS.accent,
+                              color: COLORS.neutralDark,
                               fontSize: SizeConfig.blockWidth * 3.4,
                               fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) => TermsAndCondition(),
-                                  ),
-                                );
-                              },
+                              fontFamily: "Poppins",),
+                            children: [
+                              TextSpan(
+                                text: "Terms & Conditions".tr(),
+                                style: TextStyle(
+                                  color: COLORS.accent,
+                                  fontSize: SizeConfig.blockWidth * 3.4,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) => TermsAndCondition(),
+                                      ),
+                                    );
+                                  },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-
-
                   SizedBox(height: SizeConfig.blockHeight,),
                   customButton(
                     text: 'mobile_number_button'.tr(),
                     onPressed: _onGetOtpPressed,
                     backgroundColor: buttonVisible
-                        ? COLORS.primary.withOpacity(0.4)
-                        : COLORS.primary,
+                        ? COLORS.primary
+                        : COLORS.primary.withOpacity(0.4),
                     showIcon: false,
                     width: SizeConfig.blockWidth * 100,
                     height: SizeConfig.blockHeight * 8,
                     textColor: COLORS.white,
-                    loading: loading
+                    loading: loading,
                   ),
                 ],
               ),
@@ -252,6 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
 }
 
 class PhoneNumberInput extends StatelessWidget {

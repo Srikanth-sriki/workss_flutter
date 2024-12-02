@@ -19,8 +19,10 @@ import '../profile/component.dart';
 import 'component.dart';
 
 class WorkDetailsScreen extends StatefulWidget {
+  final VoidCallback refreshPageCallback;
   final String id;
-  const WorkDetailsScreen({super.key, required this.id});
+  final String routeType;
+  const WorkDetailsScreen({super.key, required this.id, required this.refreshPageCallback,required this.routeType});
 
   @override
   State<WorkDetailsScreen> createState() => _WorkDetailsScreenState();
@@ -56,6 +58,11 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
   }
 
+
+  void _refreshPageAfterEdit() {
+    homeBloc.add(FetchWorkSingleView(workId: widget.id));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HomeBloc, HomeState>(
@@ -79,9 +86,16 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
         if (state is FetchWorkViewLoading || state is HomeInitial) {
           return globalLoadingWidget();
         }else if (state is FetchWorkViewError) {
-          return ErrorScreen(onRetry: () {
-            homeBloc.add(FetchWorkSingleView(workId: widget.id));
-          });
+          return Scaffold(
+            backgroundColor: COLORS.white,
+            appBar: AppBar(
+              toolbarHeight: 0,
+              scrolledUnderElevation: 0,
+            ),
+            body: ErrorScreen(onRetry: () {
+              homeBloc.add(FetchWorkSingleView(workId: widget.id));
+            }),
+          );
         }
         else if (state is FetchWorkViewSuccess) {
           final singleWork = state.workViewModel.work!;
@@ -104,6 +118,8 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       Navigator.pop(context);
                     },
                   ),
+
+
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -146,6 +162,24 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                 ],
               ),
               actions: [
+                if(widget.routeType == 'posted')...[
+                  IconButton(
+                    icon:  Image.asset(
+                      'assets/images/home/share.png',
+                      width: SizeConfig.blockWidth * 5.2,
+                      height: SizeConfig.blockHeight * 5.2,
+                      fit: BoxFit.contain,
+                    ),
+                    onPressed: () {
+                      shareJobDetails(
+                        experience: singleWork.experienceLevel!,
+                        location: singleWork.location!,
+                        jobTitle:  singleWork.requiredProfession!,
+                      );
+                    },
+                  ),
+
+               ],
                 // IconButton(
                 //   icon: Icon(Icons.more_vert,
                 //       color: COLORS.black, size: SizeConfig.blockWidth * 6.5),
@@ -451,6 +485,8 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                               ],
                                               child: WorkDetailsScreen(
                                                 id: work.id!,
+                                                refreshPageCallback: _refreshPageAfterEdit,
+                                                routeType: 'general',
                                               ),
                                             )));
                               },
@@ -478,6 +514,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                                     isContacted: true,
                                                   );
                                                 });
+                                                widget.refreshPageCallback();
                                               },
                                               onError: () {
                                                 showCustomSnackBar(
@@ -487,6 +524,8 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                                 Navigator.of(context).pop();
                                               },
                                             ));
+                                            widget.refreshPageCallback();
+
                                           }
                                           else{
                                             showCustomAlertDialog(
@@ -514,7 +553,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                                   },
                                                 ));
 
-
+                                                widget.refreshPageCallback();
                                               },
                                               onNegativePressed: () {
                                                 Navigator.of(context).pop();
@@ -604,7 +643,8 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                 ),
               ),
             ),
-            bottomNavigationBar: Container(
+            bottomNavigationBar: widget.routeType != 'posted'?
+            Container(
               padding: EdgeInsets.symmetric(
                   vertical: SizeConfig.blockWidth * 4,
                   horizontal: SizeConfig.blockHeight * 4.5),
@@ -638,9 +678,11 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                 isContacted: true,
                               );
                             });
+                            widget.refreshPageCallback();
                           },
                           onError: () {},
                         ));
+
                       } else{
                         showCustomAlertDialog(
                           context: context,
@@ -656,6 +698,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                                 setState(() {
                                   singleWork.intrestShown = null;
                                 });
+                                widget.refreshPageCallback();
                                 Navigator.of(context).pop();
                               },
                               onError: () {
@@ -678,7 +721,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       showInterestBottomSheet(context);
                     }
                   }),
-            ),
+            ):null,
           );
         }
         return Container();

@@ -33,7 +33,9 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
     profileBloc = BlocProvider.of<ProfileBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
   }
-
+  void _refreshPageAfterEdit() {
+    profileBloc.add(const FetchSavedProfessionalEvent());
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,40 +45,43 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
           backgroundColor: COLORS.white,
           titleColors: COLORS.neutralDark),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: BlocListener<ProfileBloc, ProfileState>(
-            listener: (context, state) {
-              if (state is ProfileLoading || state is ProfileInitial) {
-                setState(() {
-                  loading = true;
-                  error = false;
-                });
-              } else if (state is FetchSavedProfessionalSuccess) {
-                setState(() {
-                  loading = false;
-                  error = false;
-                  professionalsPostedWork = state.professionalsPostedWork!;
-                });
-              } else if (state is FetchSavedProfessionalFailed) {
-                setState(() {
-                  loading = false;
-                  error = true;
-                });
-              }
-            },
-            child: Builder(
-              builder: (context) {
-                if (loading) {
-                  return SizedBox(
-                      height: SizeConfig.screenHeight,
-                      child: ShimmerJobCards());
-                } else if (error) {
-                  return ErrorScreen(onRetry: (){
+        child: BlocListener<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state is ProfileLoading || state is ProfileInitial) {
+              setState(() {
+                loading = true;
+                error = false;
+              });
+            } else if (state is FetchSavedProfessionalSuccess) {
+              setState(() {
+                loading = false;
+                error = false;
+                professionalsPostedWork = state.professionalsPostedWork!;
+              });
+            } else if (state is FetchSavedProfessionalFailed) {
+              setState(() {
+                loading = false;
+                error = true;
+              });
+            }
+          },
+          child: Builder(
+            builder: (context) {
+              if (loading) {
+                return SizedBox(
+                    height: SizeConfig.screenHeight,
+                    child: ShimmerJobCards());
+              } else if (error) {
+                return SizedBox(
+                  height: SizeConfig.screenHeight,
+                  child: ErrorScreen(onRetry: (){
                     profileBloc.add(const FetchSavedProfessionalEvent());
-                  });
-                } else if (!loading && !error) {
-                  return professionalsPostedWork.isNotEmpty
-                      ? Padding(
+                  }),
+                );
+              } else if (!loading && !error) {
+                return professionalsPostedWork.isNotEmpty
+                    ? SingleChildScrollView(
+                      child: Padding(
                           padding: EdgeInsets.symmetric(
                               vertical: SizeConfig.blockHeight),
                           child: ListView.builder(
@@ -114,6 +119,7 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                                           ProfessionalViewScreen(
                                                         id: professionalData
                                                             .id!,
+                                                            refreshPageCallback: _refreshPageAfterEdit,
                                                       ),
                                                     )));
                                       },
@@ -166,7 +172,13 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                         }
                                       },
                                       jobType: professionalData.professionType!,
-                                      onShare: () {},
+                                      onShare: () {
+                                        shareJobDetails(
+                                          experience: professionalData.experiencedYears!,
+                                          location: professionalData.city!,
+                                          jobTitle:  professionalData.professionType!,
+                                        );
+                                      },
                                       savedTap: () {
                                         showInterestedBloc.add(ProfessionalSavedUs(
                                           PropId: professionalData.id!,
@@ -191,16 +203,16 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                       }),
                                 );
                               }),
-                        )
-                      : SizedBox(
-                          width: SizeConfig.screenWidth,
-                          height: SizeConfig.blockHeight * 80,
-                          child: emptyComponent());
-                }
-
-                return Container();
-              },
-            ),
+                        ),
+                    )
+                    : SizedBox(
+                        width: SizeConfig.screenWidth,
+                        height: SizeConfig.blockHeight * 80,
+                        child: emptyComponent());
+              }
+        
+              return Container();
+            },
           ),
         ),
       ),

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/bloc/home/home_bloc.dart';
+import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/ui/post_work/post_work.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
@@ -23,108 +25,167 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  late ProfessionalBloc professionalBloc;
   int _selectedIndex = 0;
+
+  late final Widget _cachedProfileScreen;
 
   @override
   void initState() {
     super.initState();
-    professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (args != null && args.containsKey('selectedIndex')) {
-        setState(() {
-          _selectedIndex = args['selectedIndex'];
-        });
-      }
-    });
+
+    // Cache the Profile screen with its Bloc
+    _cachedProfileScreen = BlocProvider(
+      create: (_) => ProfileBloc()..add(const FetchProfileEvent()),
+      child: const ProfileScreen(),
+    );
   }
-
-
-  void returnHome() {
-    setState(() {
-      _selectedIndex = 0;
-    });
-  }
-
-  void returnProfile() {
-    setState(() {
-      _selectedIndex = 3;
-    });
-  }
-
-  final List<Widget> _pages = [
-    const HomeScreen(),
-    const ProfessionalsScreen(),
-    const PostWorkScreen(),
-    const ProfileScreen(),
-  ];
-
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    if(index == 1){
-      professionalBloc.add(ProfessionalListEvent(
-        page: 1,
-        pageSize: 10,
-        keyWord: "",
-        profession: "",
-        city: "",
-        gender: "",
-      ));
-    }
-
-
   }
 
-
+  Widget _getTabScreen(int index) {
+    switch (index) {
+      case 0:
+        return BlocProvider(
+          create: (_) => HomeBloc()
+            ..add(FetchHomeScreenEvent(
+                page: 1,
+                pageSize: 10,
+                keyWord: '',
+                profession: '',
+                city: '',
+                gender: '',
+                currentLongitude: '',
+                currentLatitude: '')),
+          child: const HomeScreen(),
+        );
+      case 1:
+        return BlocProvider(
+          create: (_) => ProfessionalBloc()
+            ..add(ProfessionalListEvent(
+              page: 1,
+              pageSize: 10,
+              keyWord: "",
+              profession: "",
+              city: "",
+              gender: "",
+                currentLongitude: '',
+                currentLatitude: ''
+            )),
+          child: const ProfessionalsScreen(),
+        );
+      case 2:
+        return const PostWorkScreen();
+      case 3:
+        return _cachedProfileScreen; // Use cached ProfileScreen
+      default:
+        return BlocProvider(
+          create: (_) => HomeBloc()
+            ..add(FetchHomeScreenEvent(
+                page: 1,
+                pageSize: 10,
+                keyWord: '',
+                profession: '',
+                city: '',
+                gender: '',
+                currentLongitude: '',
+                currentLatitude: '')),
+          child: const HomeScreen(),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: Container(
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex == 0) {
+          bool shouldExit = await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(backgroundColor: COLORS.white,
 
-        height:  SizeConfig.blockHeight * 10,
-        width: SizeConfig.blockWidth * 100,
-        // decoration: const BoxDecoration(
-        //   boxShadow: [
-        //     BoxShadow(
-        //       color: COLORS.black,
-        //       spreadRadius: 1,
-        //       blurRadius: 4,
-        //       offset: Offset(2, 2),
-        //     ),
-        //   ],
-        // ),
-        child: BottomNavigationBar(
+              title: Text(
+                'Exit App',
+                style: TextStyle(
+                  color: COLORS.neutralDark,
+                  fontSize: SizeConfig.blockWidth * 4.25,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Poppins",
+                ),
+              ),
+              content: Text('Are you sure you want to exit?',
+                  style: TextStyle(
+                    color: COLORS.neutralDarkOne,
+                    fontSize: SizeConfig.blockWidth * 3.6,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  )),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('Cancel',
+                      style: TextStyle(
+                        color: COLORS.primary,
+                        fontSize: SizeConfig.blockWidth * 3.8,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      )),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('Exit',
+                      style: TextStyle(
+                        color: COLORS.primary,
+                        fontSize: SizeConfig.blockWidth * 3.8,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      )),
+                ),
+              ],
+            ),
+          );
+          return shouldExit ?? false;
+        } else {
+          setState(() {
+            _selectedIndex = 0;
+          });
+          return false;
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        body: _getTabScreen(_selectedIndex), // Dynamically create the screen
+        bottomNavigationBar: BottomNavigationBar(
           items: [
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/work_01.png'),
               label: 'Works'.tr(),
-              activeIcon:
-                  bottomTabIcon(icon: 'assets/images/bottom_tab/work_select_01.png'),
+              activeIcon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/work_select_01.png'),
             ),
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop_01.png'),
               label: 'Pros'.tr(),
-              activeIcon:
-                  bottomTabIcon(icon: 'assets/images/bottom_tab/prop_select_01.png'),
+              activeIcon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/prop_select_01.png'),
             ),
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/add_post.png'),
+              icon:Image.asset(
+                'assets/images/bottom_tab/add_post.png',
+                width: SizeConfig.blockWidth * 4.2,
+                height: SizeConfig.blockWidth * 4.2,
+                fit: BoxFit.contain,color: COLORS.neutralDarkOne,
+              ),
               label: 'Post Works'.tr(),
               activeIcon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/add_post_select.png'),
             ),
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile_01.png'),
+              icon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/profile_01.png'),
               label: 'Account'.tr(),
               activeIcon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/profile_select_01.png'),
@@ -132,7 +193,7 @@ class _MainScreenState extends State<MainScreen> {
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          showUnselectedLabels: true,
+          showUnselectedLabels: true,landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
           selectedLabelStyle: TextStyle(
               color: COLORS.neutralDark,
               fontFamily: "Poppins",

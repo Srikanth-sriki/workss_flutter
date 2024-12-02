@@ -79,6 +79,21 @@ Future<void> makePhoneCall(String phoneNumber) async {
   }
 }
 
+Future<void> launchEmail() async {
+  final Uri emailUri = Uri(
+    scheme: 'mailto',
+    path: 'Packetss10@gmail.com',
+  );
+
+  if (await canLaunchUrl(emailUri)) {
+    await launchUrl(emailUri);
+  } else {
+    launch("mailto:Packetss10@gmail.com");
+    throw 'Could not launch $emailUri';
+  }
+}
+
+
 Future<void> shareJobDetails({
   required String jobTitle,
   required String experience,
@@ -98,11 +113,11 @@ Explore more exciting job opportunities with Works!
 Download Works now and take the next step in your career:
 👉 https://play.google.com/store/apps/details?id=com.workss.works_app 👈''';
 
-  final ByteData bytes = await rootBundle.load('assets/images/home/app_share.png');
+  final ByteData bytes = await rootBundle.load('assets/images/home/share-banner.png');
   final Uint8List list = bytes.buffer.asUint8List();
 
   final tempDir = await getTemporaryDirectory();
-  final file = await File('${tempDir.path}/banner.png').create();
+  final file = await File('${tempDir.path}/share-banner.png').create();
   file.writeAsBytesSync(list);
 
   // Share the job details with the image
@@ -115,7 +130,7 @@ Download Works now and take the next step in your career:
 
 
 Future<void> shareAppWithFriend() async {
-  final String appPromotionMessage = '''🚀 Discover Your Next Job Opportunity with Works! 🚀
+  const String appPromotionMessage = '''🚀 Discover Your Next Job Opportunity with Works! 🚀
 
 Works makes job hunting easy and efficient:
 🌟 Find jobs that match your skills and experience
@@ -128,12 +143,12 @@ Don’t miss out on your dream job. Download Works now and take control of your 
 ''';
 
   // Load an image from assets
-  final ByteData bytes = await rootBundle.load('assets/images/home/app_share.png');
+  final ByteData bytes = await rootBundle.load('assets/images/home/share-banner.png');
   final Uint8List imageBytes = bytes.buffer.asUint8List();
 
   // Save the image as a temporary file to share
   final tempDir = await getTemporaryDirectory();
-  final file = await File('${tempDir.path}/app_banner.png').create();
+  final file = await File('${tempDir.path}/share-banner.png').create();
   file.writeAsBytesSync(imageBytes);
 
   // Share the app promotion message along with the image

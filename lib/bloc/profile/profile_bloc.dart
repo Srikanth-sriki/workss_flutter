@@ -93,6 +93,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         Config.phoneNumber = jsonDecoded["data"]["mobile"] ?? "";
         Config.name = jsonDecoded["data"]["name"] ?? "";
+        Config.profilePic= jsonDecoded['data']['profile_pic'] ??"";
+        Config.accountVerify = jsonDecoded['data']['is_verified'] ??false;
+        Config.isRegistered =  jsonDecoded['data']['is_registered'] ??false;
+        Config.userType =jsonDecoded['data']['user_type'] ??"";
         customLog(Config.phoneNumber);
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString(LocalConstant.phoneNumber, Config.phoneNumber);
@@ -257,6 +261,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
         Config.profileCompleted = profileCompleted;
         SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        Config.phoneNumber = jsonDecoded["data"]["mobile"] ?? "";
+        Config.name = jsonDecoded["data"]["name"] ?? "";
+        Config.profilePic= jsonDecoded['data']['profile_pic'] ??"";
+        Config.accountVerify = jsonDecoded['data']['is_verified'] ??false;
+        Config.isRegistered =  jsonDecoded['data']['is_registered'] ??false;
+        Config.userType =jsonDecoded['data']['user_type'] ??"";
+        customLog(Config.phoneNumber);
+        await prefs.setString(LocalConstant.phoneNumber, Config.phoneNumber);
+        await prefs.setString(LocalConstant.name, Config.name);
         await prefs.setBool(LocalConstant.profileCompleted, profileCompleted);
         emit(EditProfileSuccess(message: message));
       } else if (jsonDecoded['status'] == false) {

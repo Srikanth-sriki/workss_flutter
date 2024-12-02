@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -7,6 +8,7 @@ import 'package:works_app/ui/profile/logout_success.dart';
 
 import '../../../bloc/authentication/authentication_bloc.dart';
 import '../../../components/global_handle.dart';
+import '../../../components/local_constant.dart';
 import '../../../global_helper/reuse_widget.dart';
 
 class LogoutBottomSheet extends StatefulWidget {
@@ -74,17 +76,20 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
                 ),
                 customButton(
                   text: 'LOGOUT'.tr(),
-                  onPressed: () {
+                  onPressed: () async{
                    // Navigator.of(context).pop();
                     // if (_formKey.currentState!.validate()) {
                     //   _submitButton();
                     // }
-                    GlobalBlocClass.authenticationBloc?.add(const AuthenticationLogoutEvent());
-                    Navigator.pop(context);
-                    Navigator.push(
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    await prefs.remove(LocalConstant.accessToken);
+                    await prefs.remove(LocalConstant.userId);
+                    await prefs.remove(LocalConstant.profileCompleted);
+                    await prefs.remove(LocalConstant.phoneNumber);
+                    await prefs.remove(LocalConstant.name);
+                    Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => const LogoutSuccess()),
+                      MaterialPageRoute(builder: (context) => const LogoutSuccess()),
                     );
                   },
                   backgroundColor: COLORS.semantic,

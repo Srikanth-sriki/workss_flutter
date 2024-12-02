@@ -244,7 +244,9 @@
   "Address Saved Successfully!": "చిరునామా విజయవంతంగా సేవ్ చేయబడింది!",
   "Your address is saved securely for quick \naccess in future transactions.": "మీ చిరునామా భవిష్యత్ లావాదేవీల కోసం సురక్షితంగా సేవ్ చేయబడింది.",
   "Do you want to Clear?": "మీరు దాన్ని క్లియర్ చేయాలనుకుంటున్నారా?",
-  "Do you want to Clear all Notifications?": "మీరు అన్ని నోటిఫికేషన్లను క్లియర్ చేయాలనుకుంటున్నారా?"
+  "Do you want to Clear all Notifications?": "మీరు అన్ని నోటిఫికేషన్లను క్లియర్ చేయాలనుకుంటున్నారా?",
+
+  "Address": "చిరునామా"
 }
 
 

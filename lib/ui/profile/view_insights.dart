@@ -38,6 +38,10 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
   }
 
+  void _refreshPageAfterEdit() {
+    profileBloc.add(FetchPostViewEvent(workId: widget.id));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -386,6 +390,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                                 ],
                                 child: ProfessionalViewScreen(
                                   id: professionalData.id!,
+                                  refreshPageCallback:_refreshPageAfterEdit ,
                                 ),
                               )));
                 },
@@ -398,26 +403,32 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                 gender: professionalData.user!.gender!,
                 price: professionalData.user!.charges!,
                 paymentType: professionalData.user!.chargeType!,
-                contacted: professionalData.isContacted!,
                 experience: professionalData.user!.experiencedYears!,
                 experienceImage: 'assets/images/home/work_select.png',
                 genderImage: 'assets/images/home/gender.png',
                 jobTypeImage: 'assets/images/profile/prof.png',
                 language: professionalData.user!.knownLanguages!.join(", "),
                 languageImage: 'assets/images/home/speak.png',
-                saved: true,
+                contacted:
+                professionalData.user!.isContacted != null,
+                saved: professionalData.user!.isSaved == null,
                 onShowInterest: () {
-                  if (professionalData.isContacted == false) {
-                    showInterestedBloc.add(ProfessionalContactUs(
+                  if (professionalData.user!.isContacted == null) {
+                    showInterestedBloc
+                        .add(ProfessionalContactUs(
                       PropId: professionalData.userId!,
                       onSuccess: () {
                         setState(() {
-                          professionalData = WorkViewDetails(isContacted: true);
+                          professionalData.user!.isContacted =
+                              IsContacted(id: '');
+                          makePhoneCall(professionalData.user!.mobile!);
                         });
-                        makePhoneCall(professionalData.user!.mobile!);
                       },
                       onError: () {},
                     ));
+                  }
+                  else{
+                    makePhoneCall(professionalData.user!.mobile!);
                   }
                 },
                 jobType: professionalData.user!.professionType!,
@@ -429,16 +440,40 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                   );
                 },
                 savedTap: () {
-                  showInterestedBloc.add(ProfessionalSavedUs(
-                    PropId: professionalData.userId!,
-                    onSuccess: () {
-                      setState(() {
-                        // professionalData.isSaved =
-                        //     IsContacted(id: '');
-                      });
-                    },
-                    onError: () {},
-                  ));
+                  if(professionalData.user!.isSaved == null){
+                    showInterestedBloc.add(ProfessionalSavedUs(
+                      PropId: professionalData.userId!,
+                      onSuccess: () {
+                        setState(() {
+                          professionalData.user!.isSaved =
+                              IsContacted(id: '');
+                        });
+                      },
+                      onError: () {
+                        showCustomSnackBar(
+                          context: context,
+                          message: "Something Went wrong",
+                        );
+                      },
+                    ));
+                  }
+                  else{
+                    showInterestedBloc.add(ProfessionalSavedUs(
+                      PropId: professionalData.userId!,
+                      onSuccess: () {
+                        setState(() {
+                          professionalData.user!.isSaved =
+                          null;
+                        });
+                      },
+                      onError: () {
+                        showCustomSnackBar(
+                          context: context,
+                          message: "Something Went wrong",
+                        );
+                      },
+                    ));
+                  }
                 }):null,
           );
         });

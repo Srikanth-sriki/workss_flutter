@@ -91,13 +91,14 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   void _validateForm() {}
 
   String? formatChargeType(String? chargeType) {
+    print(chargeType);
     switch (chargeType!.toLowerCase()) {
-      case 'hours':
-        return 'Hours';
+      case 'hourly':
+        return 'Hourly';
       case 'perday':
         return 'PerDay';
-      case 'month':
-        return 'Month';
+      case 'monthly':
+        return 'Monthly';
       default:
         return null;
     }
@@ -574,7 +575,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                   ),
                                   child: CustomDropdownButtonFormField(
                                     selectedValue: selectedCharge,
-                                    items: const [' Hourly', 'PerDay', 'Monthly'],
+                                    items: const ['Hourly', 'PerDay', 'Monthly'],
                                     onChanged: (String? newValue) {
                                       setState(() {
                                         selectedCharge = newValue;
