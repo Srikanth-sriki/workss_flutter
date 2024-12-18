@@ -82,7 +82,6 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen>
                     'assets/images/home/post_success.png',
                     width: SizeConfig.blockWidth * 100,
                     height: SizeConfig.blockWidth * 100,
-
                   ),
                 ),
               ),
