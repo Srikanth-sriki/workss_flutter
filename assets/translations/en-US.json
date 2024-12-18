@@ -250,7 +250,96 @@
   "Your address is saved securely for quick \naccess in future transactions.": "Your address is saved securely for quick \naccess in future transactions.",
   "Do you want to Clear?": "Do you want to Clear?",
   "Do you want to Clear all Notifications?": "Do you want to Clear all Notifications?",
-  "Address": "Address"
+  "Address": "Address",
+
+
+  "Chat": "Chat",
+  "Search your friends":  "Search your friends",
+  "Friends":"Friends" ,
+  "View All":"View All" ,
+  "Chat Options": "Chat Options",
+  "Create new group": "Create new group",
+  "Archived Chats":"Archived Chats" ,
+  "Turn-Off Notification":"Turn-Off Notification" ,
+  "Add Friends":"Add Friends" ,
+  "Your message":"Your message" ,
+  "Mute Notification": "Mute Notification",
+  "Unfriend":"Unfriend" ,
+  "Report":"Report" ,
+  "Block": "Block",
+  "Select Media":"Select Media" ,
+  "Members":"Members" ,
+  "Description": "Description",
+  "Admin":"Admin" ,
+  "Invite Friends":"Invite Friends" ,
+  "Remove Friends":"Remove Friends",
+  "Share Joining Link": "Share Joining Link",
+  "Archive":"Archive" ,
+  "Leave Group":  "Leave Group",
+  "Clear Chat": "Clear Chat",
+  "Report or Block":"Report or Block" ,
+  "Member Options": "Member Options",
+  "View Profile": "View Profile",
+  "Mark as admin": "Mark as admin",
+  "Message": "Message",
+  "Remove": "Remove",
+  "Send Joining Request": "Send Joining Request",
+  "INVITE": "INVITE",
+  "Select All": "Select All",
+  "Remove Members": "Remove Members",
+  "Group Icon": "Group Icon",
+  "Group Name": "Group Name",
+  "Group Description": "Group Description",
+  "Invite People":  "Invite People",
+  "Group Picture":  "Group Picture",
+  "Create Group": "Create Group",
+  "Build your own work network": "Build your own work network",
+  "Step 2":  "Step 2",
+  "Step 1": "Step 1",
+  "Select Friends":  "Select Friends",
+  "Group Created Successfully!": "Group Created Successfully!",
+  "Start connecting and collaborating now.": "Start connecting and collaborating now.",
+  "START CHAT": "START CHAT",
+  "Search by name, profession, etc.": "Search by name, profession, etc.",
+  "Add Friend": "Add Friend",
+  "Request Sent": "Request Sent",
+  "Friend Suggestion": "Friend Suggestion",
+  "Search": "Search",
+  "UNFRIEND": "UNFRIEND",
+  "ADD FRIENDS": "ADD FRIENDS",
+  "SEND MESSAGE": "SEND MESSAGE",
+  "More Options": "More Options",
+  "Send Message": "Send Message",
+  "Works Near Your": "Works Near Your",
+  "Group Options": "Group Options",
+  "REMOVE": "REMOVE",
+  "Enter group name": "Enter group name",
+  "Write group description here": "Write group description here",
+  "NEXT": "NEXT",
+  "BACK": "BACK",
+  "CREATE": "CREATE",
+  "Ex: Search": "Ex: Search",
+  "Please enter description": "Please enter description",
+  "Please enter group name": "Please enter group name"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

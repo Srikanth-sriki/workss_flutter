@@ -33,22 +33,22 @@ class FetchSavedWorkEvent extends ProfileEvent {
 
 class EditProfileAccount extends ProfileEvent {
   String name;
-  String profile_pic;
-  String user_type;
-  String email;
-  String profession_type;
-  String pincode;
-  String city;
+  dynamic profile_pic;
+  dynamic user_type;
+  dynamic email;
+  dynamic profession_type;
+  dynamic pincode;
+  dynamic city;
   List<String> known_languages;
   List<String> workImages;
-  String gender;
-  String bio;
-  String experienced_years;
-  String charges;
-  String charge_type;
+  dynamic gender;
+  dynamic bio;
+  dynamic experienced_years;
+  dynamic charges;
+  dynamic charge_type;
   String userLatitude;
   String userLongitude;
-  String age;
+  dynamic age;
 
   EditProfileAccount(
       {required this.name,

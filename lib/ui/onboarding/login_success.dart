@@ -50,35 +50,37 @@ class _LoginSuccessState extends State<LoginSuccess>
       backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: 0,
-        backgroundColor: COLORS.white,
+        backgroundColor: COLORS.primaryOne.withOpacity(0.2),
       ),
       body: SafeArea(
-        child: Container(
-          padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: SizeConfig.blockHeight * 6),
-              ScaleTransition(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: SizeConfig.blockWidth * 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    bottomLeft:
+                    Radius.circular(SizeConfig.blockWidth * 7.5),
+                    bottomRight:
+                    Radius.circular(SizeConfig.blockWidth * 7.5)),
+                color: COLORS.primaryOne.withOpacity(0.2),
+              ),
+              child: ScaleTransition(
                 scale: _scaleAnimation,
-                child: Container(
-                  width: SizeConfig.blockWidth * 80,
-                  height: SizeConfig.blockWidth * 80,
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(SizeConfig.screenWidth * 40),
-                    color: COLORS.primaryOne.withOpacity(0.5),
-                  ),
-                  child: Image.asset(
-                    'assets/images/login/login_success.png',
-                    width: SizeConfig.blockWidth * 100,
-                    height: SizeConfig.blockHeight * 50,
-                  ),
+                child: Image.asset(
+                  'assets/images/login/login_success.png',
+                  width: SizeConfig.blockWidth * 100,
+                  height: SizeConfig.blockWidth * 100,
                 ),
               ),
-              SizedBox(height: SizeConfig.blockHeight * 6),
-              ScaleTransition(
+            ),
+            SizedBox(height: SizeConfig.blockHeight * 4),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 4),
+              child: ScaleTransition(
                 scale: _scaleAnimation,
                 child: Text(
                   'Congratulations!'.tr(),
@@ -90,8 +92,12 @@ class _LoginSuccessState extends State<LoginSuccess>
                   ),
                 ),
               ),
-              SizedBox(height: SizeConfig.blockHeight),
-              ScaleTransition(
+            ),
+            SizedBox(height: SizeConfig.blockHeight),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 4),
+              child: ScaleTransition(
                 scale: _scaleAnimation,
                 child: Text(
                   'Your account has been successfully \nCreated.'.tr(),
@@ -104,25 +110,25 @@ class _LoginSuccessState extends State<LoginSuccess>
                   ),
                 ),
               ),
-              SizedBox(height: SizeConfig.blockHeight * 4.5),
-              const Spacer(),
-              Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
-                child: customButton(
-                  text: 'Explore'.tr(),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/main_screen');
-                  },
-                  backgroundColor: COLORS.primary,
-                  showIcon: false,
-                  width: SizeConfig.blockWidth * 100,
-                  height: SizeConfig.blockHeight * 8,
-                  textColor: COLORS.white,
-                ),
+            ),
+            SizedBox(height: SizeConfig.blockHeight * 4.5),
+            const Spacer(),
+            Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 9),
+              child: customButton(
+                text: 'Explore'.tr(),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/main_screen');
+                },
+                backgroundColor: COLORS.primary,
+                showIcon: false,
+                width: SizeConfig.blockWidth * 100,
+                height: SizeConfig.blockHeight * 8,
+                textColor: COLORS.white,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

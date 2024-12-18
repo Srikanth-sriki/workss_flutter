@@ -201,28 +201,28 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
       setState(() {
         imagesList = true;
       });
-    } else if (selectedCharge == '' || selectedCharge == null) {
+    } else if ((selectedCharge == '' || selectedCharge == null) && widget.profileFetch.userType == 'professional') {
     } else {
       List<String> languageSelect =
           selectedLanguage.map((lang) => lang.name).toList();
       profileBloc.add(EditProfileAccount(
         name: _enterName.text,
-        age: ageController.text,
+        age: widget.profileFetch.userType == 'professional'?ageController.text:'0',
         profile_pic: profilePicture!,
         email: _emailController.text,
         user_type: widget.profileFetch.userType!,
-        profession_type: _selectedProfession ?? '',
+        profession_type: widget.profileFetch.userType == 'professional'?_selectedProfession :null,
         pincode: pinCodeController.text,
-        city: _selectedCity ?? '',
-        gender: _selectedGender?.toLowerCase() ?? "",
-        known_languages: languageSelect,
+        city: _selectedCity!,
+        gender: widget.profileFetch.userType == 'professional'?_selectedGender?.toLowerCase():null,
+        known_languages: widget.profileFetch.userType == 'professional'?languageSelect:[],
         workImages: workImages,
         bio: bioController.text,
-        experienced_years: experienceController.text ?? "",
-        charges: chargesController.text,
-        charge_type: selectedCharge?.toLowerCase() ?? '',
-        userLongitude: longitude!,
-        userLatitude: longitude!,
+        experienced_years: widget.profileFetch.userType == 'professional'?experienceController.text :null,
+        charges: widget.profileFetch.userType == 'professional'?chargesController.text:null,
+        charge_type: widget.profileFetch.userType == 'professional'?selectedCharge?.toLowerCase() :null,
+        userLongitude: longitude??'0.0',
+        userLatitude: longitude??'0.0',
       ));
     }
   }

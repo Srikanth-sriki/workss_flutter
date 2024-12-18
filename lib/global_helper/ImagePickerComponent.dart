@@ -25,56 +25,144 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
       backgroundColor: COLORS.white,
       context: context,
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(
-                  Icons.photo_library,
-                  color: COLORS.neutralDark,
-                ),
-                title: Text('Gallery'.tr(),
-                    style: TextStyle(
-                      color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 4,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: "Poppins",
-                    )),
-                onTap: () async {
-                  XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-                  print(image);
-                  if (image != null) {
-                    widget.onImageSelected(File(image.path));
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.photo_camera,
-                  color: COLORS.neutralDark,
-                ),
-                title: Text(
-                  'Camera'.tr(),
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontSize: SizeConfig.blockWidth * 4,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",
+        return Container(
+            decoration: BoxDecoration(
+                color: COLORS.white,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+                    topRight: Radius.circular(SizeConfig.blockWidth * 5))),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: SizeConfig.blockHeight),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 5,
+                      vertical: SizeConfig.blockHeight),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Media'.tr(),
+                        style: TextStyle(
+                          color: COLORS.primaryTwo,
+                          fontSize: SizeConfig.blockWidth * 4.25,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          color: COLORS.neutralDark,
+                          size: SizeConfig.blockWidth * 6.5,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
                   ),
                 ),
-                onTap: () async {
-                  XFile? photo =
-                      await _picker.pickImage(source: ImageSource.camera);
-                  if (photo != null) {
-                    widget.onImageSelected(File(photo.path));
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
+                const Divider(
+                  color: COLORS.neutralDarkTwo,
+                ),
+                SizedBox(height: SizeConfig.blockHeight*3,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () async {
+                        XFile? photo =
+                        await _picker.pickImage(source: ImageSource.camera);
+                        if (photo != null) {
+                          widget.onImageSelected(File(photo.path));
+                        }
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: COLORS.primary,width: SizeConfig.blockWidth*0.15),
+                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                          color: COLORS.primaryOne.withOpacity(0.5),
+                        ),
+                        width: SizeConfig.blockWidth*30,
+                        height: SizeConfig.blockWidth*30,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_camera_outlined,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6.5,
+                            ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 1.5,
+                            ),
+                            Text(
+                              'Camera'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 3.8,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        XFile? image = await _picker.pickImage(
+                            source: ImageSource.gallery);
+                        print(image);
+                        if (image != null) {
+                          widget.onImageSelected(File(image.path));
+                        }
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.15),
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3),
+                          color: COLORS.primaryOne.withOpacity(0.5),
+                        ),
+                        width: SizeConfig.blockWidth * 30,
+                        height: SizeConfig.blockWidth * 30,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6.5,
+                            ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 1.5,
+                            ),
+                            Text('Gallery'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDark,
+                                  fontSize: SizeConfig.blockWidth * 3.8,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.blockHeight*3),
+              ],
+            ));
       },
     );
   }
@@ -122,68 +210,145 @@ class ImagePickerModal extends StatelessWidget {
     showModalBottomSheet(
       backgroundColor: COLORS.white,
       context: context,
-      showDragHandle: true,
+
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 10),
-                leading: Icon(
-                  Icons.photo_library,
-                  color: COLORS.black,
-                  size: SizeConfig.blockWidth * 6,
-                ),
-                title: Text(
-                  'Gallery'.tr(),
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontSize: SizeConfig.blockWidth * 4,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
+        return Container(
+            decoration: BoxDecoration(
+                color: COLORS.white,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+                    topRight: Radius.circular(SizeConfig.blockWidth * 5))),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: SizeConfig.blockHeight),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 5,
+                      vertical: SizeConfig.blockHeight),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Media'.tr(),
+                        style: TextStyle(
+                          color: COLORS.primaryTwo,
+                          fontSize: SizeConfig.blockWidth * 4.25,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          color: COLORS.neutralDark,
+                          size: SizeConfig.blockWidth * 6.5,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
                   ),
                 ),
-                onTap: () async {
-                  final pickedFile = await ImagePicker()
-                      .pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    onImageSelected(File(pickedFile.path));
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 10),
-                leading: Icon(
-                  Icons.photo_camera,
-                  color: COLORS.black,
-                  size: SizeConfig.blockWidth * 6,
+                const Divider(
+                  color: COLORS.neutralDarkTwo,
                 ),
-                title: Text(
-                  'Camera'.tr(),
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontSize: SizeConfig.blockWidth * 4,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                  ),
+                SizedBox(height: SizeConfig.blockHeight*3,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () async {
+                        final pickedFile =
+                        await ImagePicker().pickImage(source: ImageSource.camera);
+                        if (pickedFile != null) {
+                          onImageSelected(File(pickedFile.path));
+                        }
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: COLORS.primary,width: SizeConfig.blockWidth*0.15),
+                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                          color: COLORS.primaryOne.withOpacity(0.5),
+                        ),
+                        width: SizeConfig.blockWidth*30,
+                        height: SizeConfig.blockWidth*30,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_camera_outlined,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6.5,
+                            ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 1.5,
+                            ),
+                            Text(
+                              'Camera'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 3.8,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        final pickedFile = await ImagePicker()
+                            .pickImage(source: ImageSource.gallery);
+                        if (pickedFile != null) {
+                          onImageSelected(File(pickedFile.path));
+                        }
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.15),
+                          borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
+                          color: COLORS.primaryOne.withOpacity(0.5),
+                        ),
+                        width: SizeConfig.blockWidth * 30,
+                        height: SizeConfig.blockWidth * 30,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6.5,
+                            ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 1.5,
+                            ),
+                            Text('Gallery'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDark,
+                                  fontSize: SizeConfig.blockWidth * 3.8,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                onTap: () async {
-                  final pickedFile =
-                      await ImagePicker().pickImage(source: ImageSource.camera);
-                  if (pickedFile != null) {
-                    onImageSelected(File(pickedFile.path));
-                  }
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
+                SizedBox(height: SizeConfig.blockHeight*3),
+              ],
+            ));
       },
     );
   }
@@ -573,9 +738,12 @@ class _MultipleImagePickerComponentState
                 // },
                 onTap: () async {
                   try {
-                    XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                    XFile? image =
+                        await _picker.pickImage(source: ImageSource.gallery);
                     print(image!.path!);
-                    if (image != null && image.path.isNotEmpty && _displayImages.length < 3) {
+                    if (image != null &&
+                        image.path.isNotEmpty &&
+                        _displayImages.length < 3) {
                       setState(() {
                         _displayImages.add(image.path);
                       });
@@ -621,9 +789,12 @@ class _MultipleImagePickerComponentState
 
                 onTap: () async {
                   try {
-                    XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+                    XFile? photo =
+                        await _picker.pickImage(source: ImageSource.camera);
                     print(photo!.path!);
-                    if (photo != null && photo.path.isNotEmpty && _displayImages.length < 3) {
+                    if (photo != null &&
+                        photo.path.isNotEmpty &&
+                        _displayImages.length < 3) {
                       setState(() {
                         _displayImages.add(photo.path);
                       });
@@ -741,7 +912,7 @@ class _MultipleImagePickerComponentState
       width: SizeConfig.blockWidth * 40,
       padding: EdgeInsets.symmetric(
           horizontal: SizeConfig.blockWidth * 4,
-          vertical: SizeConfig.blockHeight*1.6),
+          vertical: SizeConfig.blockHeight * 1.6),
       decoration: BoxDecoration(
         color: COLORS.primaryOne.withOpacity(0.15),
         borderRadius: BorderRadius.all(
@@ -803,7 +974,8 @@ class _MultipleImagePickerComponentState
               child: Container(
                 decoration: BoxDecoration(
                   color: COLORS.primaryOne.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3),
                 ),
                 child: Center(
                   child: Image.asset(

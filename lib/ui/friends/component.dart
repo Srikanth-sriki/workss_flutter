@@ -1,0 +1,245 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/size_config.dart';
+
+import '../../global_helper/reuse_widget.dart';
+
+Widget friendSearchCards(
+    {required String image,
+    required String name,
+    required VoidCallback onTapCard,
+    required VoidCallback onTapMessage,
+    required VoidCallback onTapIcon}) {
+  return InkWell(
+    onTap: onTapCard,
+    child: Container(
+      margin: EdgeInsets.symmetric(
+        vertical: SizeConfig.blockHeight * 1,
+      ),
+      padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+        color: COLORS.primaryOne.withOpacity(0.1),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                image,
+                width: SizeConfig.blockWidth * 12,
+                height: SizeConfig.blockWidth * 12,
+              ),
+              SizedBox(width: SizeConfig.blockWidth * 2),
+              SizedBox(
+                width: SizeConfig.blockWidth * 40,
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 3.25,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Poppins",
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  // textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: onTapMessage,
+                  child: Image.asset(
+                    'assets/images/friends/message.png',
+                    width: SizeConfig.blockWidth * 6,
+                    height: SizeConfig.blockWidth * 6,
+                  ),
+                ),
+                SizedBox(width: SizeConfig.blockWidth * 4),
+                InkWell(
+                  onTap: onTapIcon,
+                  child: Icon(Icons.more_vert,
+                      color: COLORS.neutralDark,
+                      size: SizeConfig.blockWidth * 6),
+                )
+              ])
+        ],
+      ),
+    ),
+  );
+}
+
+Widget friendSearchDetailsCards({
+  required String image,
+  required String name,
+  required bool added,
+  required VoidCallback onTapCard,
+  required String disc,
+  String buttonText1 = 'Request Sent',
+  String buttonText2 = 'Add Friend',
+  bool bgFriend = true,
+  bool buttonRequired = true,
+}) {
+  return InkWell(
+    onTap: onTapCard,
+    child: Container(
+      margin: EdgeInsets.symmetric(
+        vertical: SizeConfig.blockHeight * 1,
+      ),
+      padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+        color: bgFriend ? COLORS.primaryOne.withOpacity(0.1) : COLORS.white,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                image,
+                width: SizeConfig.blockWidth * 12,
+                height: SizeConfig.blockWidth * 12,
+              ),
+              SizedBox(width: SizeConfig.blockWidth * 2),
+              SizedBox(
+                width: SizeConfig.blockWidth * 30,
+                child: Column(
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 3.5,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // textAlign: TextAlign.end,
+                    ),
+                    Text(
+                      disc,
+                      style: TextStyle(
+                        color: COLORS.neutralDarkOne,
+                        fontSize: SizeConfig.blockWidth * 3,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // textAlign: TextAlign.end,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (buttonRequired) ...[
+            customIconButton(
+                text: added ? buttonText1 : buttonText2,
+                onPressed: onTapCard,
+                width: SizeConfig.blockWidth * 32,
+                height: SizeConfig.blockHeight * 6.25,
+                backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
+                textColor: added ? COLORS.neutralDark : COLORS.white,
+                showIcon: false)
+          ]
+        ],
+      ),
+    ),
+  );
+}
+
+Widget friendChatRemoveSearchDetailsCards({
+  required String image,
+  required String name,
+  required VoidCallback onTapCard,
+  required String disc,
+}) {
+  return InkWell(
+    onTap: onTapCard,
+    child: Container(
+      margin: EdgeInsets.symmetric(
+        vertical: SizeConfig.blockHeight * 1,
+      ),
+      padding: EdgeInsets.only(
+          top: SizeConfig.blockWidth * 3,
+          bottom: SizeConfig.blockWidth * 3,
+          right: SizeConfig.blockWidth * 2,
+          left: SizeConfig.blockWidth * 2),
+      color: COLORS.white,
+      width: SizeConfig.blockWidth*75,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                image,
+                width: SizeConfig.blockWidth * 12,
+                height: SizeConfig.blockWidth * 12,
+              ),
+              SizedBox(width: SizeConfig.blockWidth * 2),
+              SizedBox(
+                width: SizeConfig.blockWidth * 25,
+                child: Column(
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 3.5,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // textAlign: TextAlign.end,
+                    ),
+                    Text(
+                      disc,
+                      style: TextStyle(
+                        color: COLORS.neutralDarkOne,
+                        fontSize: SizeConfig.blockWidth * 3,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      // textAlign: TextAlign.end,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          customIconButton(
+              text: 'Remove',
+              onPressed: onTapCard,
+              width: SizeConfig.blockWidth * 25,
+              height: SizeConfig.blockHeight * 6.25,
+              backgroundColor: COLORS.neutralDarkTwo,
+              textColor: COLORS.semantic,
+              showIcon: false)
+        ],
+      ),
+    ),
+  );
+}

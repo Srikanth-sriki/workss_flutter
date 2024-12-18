@@ -16,13 +16,14 @@ import '../profile/view_insights.dart';
 
 class PostWorkSuccessScreen extends StatefulWidget {
   final String workId;
-   const PostWorkSuccessScreen({super.key,required this.workId});
+  const PostWorkSuccessScreen({super.key, required this.workId});
 
   @override
   State<PostWorkSuccessScreen> createState() => _PostWorkSuccessScreenState();
 }
 
-class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with SingleTickerProviderStateMixin{
+class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -44,46 +45,52 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
     _animationController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushNamedAndRemoveUntil(context, '/main_screen', (route) => false);
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/main_screen', (route) => false);
         return true;
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: COLORS.white,
         appBar: AppBar(
           toolbarHeight: 0,
-          backgroundColor: COLORS.white,
+          backgroundColor: COLORS.primaryOne.withOpacity(0.2),
         ),
         body: SafeArea(
-          child: Container(
-            padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(height: SizeConfig.blockHeight * 6),
-                ScaleTransition(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: SizeConfig.blockWidth * 100,
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      bottomLeft:
+                          Radius.circular(SizeConfig.blockWidth * 6.5),
+                      bottomRight:
+                          Radius.circular(SizeConfig.blockWidth * 6.5)),
+                  color: COLORS.primaryOne.withOpacity(0.2),
+                ),
+                child: ScaleTransition(
                   scale: _scaleAnimation,
-                  child: Container(
-                    width: SizeConfig.blockWidth * 80,
-                    height: SizeConfig.blockWidth * 80,
-                    decoration: BoxDecoration(
-                      borderRadius:
-                      BorderRadius.circular(SizeConfig.screenWidth * 40),
-                      color: COLORS.primaryOne.withOpacity(0.5),
-                    ),
-                    child: Image.asset(
-                      'assets/images/home/post_success.png',
-                      width: SizeConfig.blockWidth * 100,
-                      height: SizeConfig.blockHeight * 50,
-                    ),
+                  child: Image.asset(
+                    'assets/images/home/post_success.png',
+                    width: SizeConfig.blockWidth * 100,
+                    height: SizeConfig.blockWidth * 100,
+
                   ),
                 ),
-                SizedBox(height: SizeConfig.blockHeight * 6),
-                ScaleTransition(
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 4),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 4),
+                child: ScaleTransition(
                   scale: _scaleAnimation,
                   child: Text(
                     'Work successfully posted!'.tr(),
@@ -95,11 +102,16 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
                     ),
                   ),
                 ),
-                SizedBox(height: SizeConfig.blockHeight),
-                ScaleTransition(
+              ),
+              SizedBox(height: SizeConfig.blockHeight),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 4),
+                child: ScaleTransition(
                   scale: _scaleAnimation,
                   child: Text(
-                    'You can now view insights on who showed \ninterest.'.tr(),
+                    'You can now view insights on who showed \ninterest.'
+                        .tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: COLORS.neutralDarkOne,
@@ -109,73 +121,72 @@ class _PostWorkSuccessScreenState extends State<PostWorkSuccessScreen> with Sing
                     ),
                   ),
                 ),
-                SizedBox(height: SizeConfig.blockHeight * 4.5),
-                const Spacer(),
-                Padding(
-                  padding:
-                  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
-                  child: customButton(
-                    text: 'View Insights'.tr(),
-                    onPressed: () {
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //         builder: (context) => MultiBlocProvider(
-                      //           providers: [
-                      //             BlocProvider(
-                      //               create: (context) => ProfileBloc()
-                      //                 ..add( FetchPostViewEvent(workId: widget.workId)),
-                      //             ),
-                      //             BlocProvider(
-                      //               create: (context) => ShowInterestedBloc(),
-                      //             ),
-                      //           ],
-                      //           child:  ViewInsightsScreen(id: widget.workId!,),
-                      //         )));
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 4.5),
+              const Spacer(),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 9),
+                child: customButton(
+                  text: 'View Insights'.tr(),
+                  onPressed: () {
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => MultiBlocProvider(
+                    //           providers: [
+                    //             BlocProvider(
+                    //               create: (context) => ProfileBloc()
+                    //                 ..add( FetchPostViewEvent(workId: widget.workId)),
+                    //             ),
+                    //             BlocProvider(
+                    //               create: (context) => ShowInterestedBloc(),
+                    //             ),
+                    //           ],
+                    //           child:  ViewInsightsScreen(id: widget.workId!,),
+                    //         )));
 
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                    create: (context) => ProfileBloc()
-                                      ..add(const FetchPostedEvent()),
-                                  ),
-                                ],
-                                child: const PostedWorkList(),
-                              )));
-                    },
-                    backgroundColor: COLORS.neutralDarkTwo,
-                    showIcon: false,
-                    width: SizeConfig.blockWidth * 100,
-                    height: SizeConfig.blockHeight * 8,
-                    textColor: COLORS.black,
-                  ),
-                ),
-                SizedBox(height: SizeConfig.blockHeight * 2.5),
-                Padding(
-                  padding:
-                  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
-                  child: customButton(
-                    text: 'Explore Professionals'.tr(),
-                    onPressed: () {
-                      Navigator.pushNamed(
+                    Navigator.push(
                         context,
-                        '/main_screen',
-                        arguments: {'selectedIndex': 1},
-                      );
-
-                    },
-                    backgroundColor: COLORS.primary,
-                    showIcon: false,
-                    width: SizeConfig.blockWidth * 100,
-                    height: SizeConfig.blockHeight * 8,
-                    textColor: COLORS.white,
-                  ),
+                        MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) => ProfileBloc()
+                                        ..add(const FetchPostedEvent()),
+                                    ),
+                                  ],
+                                  child: const PostedWorkList(),
+                                )));
+                  },
+                  backgroundColor: COLORS.neutralDarkTwo,
+                  showIcon: false,
+                  width: SizeConfig.blockWidth * 100,
+                  height: SizeConfig.blockHeight * 8,
+                  textColor: COLORS.black,
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 2.5),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 9),
+                child: customButton(
+                  text: 'Explore Professionals'.tr(),
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/main_screen',
+                      arguments: {'selectedIndex': 1},
+                    );
+                  },
+                  backgroundColor: COLORS.primary,
+                  showIcon: false,
+                  width: SizeConfig.blockWidth * 100,
+                  height: SizeConfig.blockHeight * 8,
+                  textColor: COLORS.white,
+                ),
+              ),
+            ],
           ),
         ),
       ),

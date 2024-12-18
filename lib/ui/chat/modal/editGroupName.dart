@@ -1,34 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:works_app/ui/profile/account_delete_success.dart';
-
-import '../../../bloc/authentication/authentication_bloc.dart';
-import '../../../components/global_handle.dart';
 import '../../../global_helper/reuse_widget.dart';
 
-class AccountDeleteBottomSheet extends StatefulWidget {
-  const AccountDeleteBottomSheet({super.key});
+class EditGroupNameModal extends StatefulWidget {
+  const EditGroupNameModal({super.key});
 
   @override
-  _AccountDeleteBottomSheetState createState() =>
-      _AccountDeleteBottomSheetState();
+  _EditGroupNameModalState createState() =>
+      _EditGroupNameModalState();
 }
 
-class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
+class _EditGroupNameModalState extends State<EditGroupNameModal> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController messageController = TextEditingController();
-  late ProfileBloc profileBloc;
+
 
   bool messageError = false;
   @override
   void initState() {
     super.initState();
-    profileBloc = BlocProvider.of<ProfileBloc>(context);
+
   }
 
   @override
@@ -58,29 +51,14 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Are you sure?'.tr(),
-                          style: TextStyle(
-                            color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 4,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                        Text(
-                          'Do you want to delete your account'.tr(),
-                          style: TextStyle(
-                            color: COLORS.neutralDarkOne,
-                            fontSize: SizeConfig.blockWidth * 3.4,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'Group Name'.tr(),
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 4,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: "Poppins",
+                      ),
                     ),
                     IconButton(
                       icon: Icon(
@@ -96,24 +74,23 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
                   color: COLORS.neutralDarkTwo,
                   thickness: SizeConfig.blockHeight * 0.15,
                 ),
-                SizedBox(
-                  height: SizeConfig.blockHeight * 2,
-                ),
+
                 buildBioTextField(
-                  label: 'Can you please share the reason with us'.tr(),
+                  label: ''.tr(),
                   controller: messageController,
-                  hintText: "Write the reason".tr(),
+                  hintText: "Enter Group Name".tr(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       setState(() => messageError = true);
-                      return 'Please enter a message'.tr();
+                      return 'Please enter Group Name'.tr();
                     }
                     setState(() => messageError = false);
                     return null;
                   },
                   error: messageError,
-                  title: 'Can you please share the reason with us'.tr(),
+                  title: ''.tr(),
                   onChanged: (value) {},
+                  maxLines: 1
                 ),
                 Container(
                   margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
@@ -134,40 +111,21 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
                           setState(() {});
                           Navigator.pop(context);
                         },
-                        backgroundColor: COLORS.primary,
+                        backgroundColor: COLORS.neutralDarkTwo,
                         showIcon: false,
                         width: SizeConfig.blockWidth * 42,
                         height: SizeConfig.blockHeight * 8,
-                        textColor: COLORS.white,
+                        textColor: COLORS.neutralDark,
                       ),
                       customButton(
-                        text: 'DELETE'.tr(),
+                        text: 'SAVE'.tr(),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            profileBloc.add(DeleteAccount(
-                                onSuccess: () {
-                                  GlobalBlocClass.authenticationBloc
-                                      ?.add(const AuthenticationLogoutEvent());
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                      const AccountDeleteSuccess(),
-                                    ),
-                                        (Route<dynamic> route) => false,
-                                  );
-                                },
-                                onError: () {
-                                  showCustomSnackBar(
-                                    context: context,
-                                    message: 'Something Went wrong',
-                                  );
-                                },
-                                reason: messageController.text));
+
                           }
 
                         },
-                        backgroundColor: COLORS.semantic,
+                        backgroundColor: COLORS.primary,
                         showIcon: false,
                         width: SizeConfig.blockWidth * 42,
                         height: SizeConfig.blockHeight * 8,

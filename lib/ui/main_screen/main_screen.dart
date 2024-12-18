@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
+import 'package:works_app/ui/chat/chat_main.dart';
 import 'package:works_app/ui/post_work/post_work.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
@@ -80,7 +81,9 @@ class _MainScreenState extends State<MainScreen> {
       case 2:
         return const PostWorkScreen();
       case 3:
-        return _cachedProfileScreen; // Use cached ProfileScreen
+        return const ChatMainScreen();
+      case 4:
+        return _cachedProfileScreen;
       default:
         return BlocProvider(
           create: (_) => HomeBloc()
@@ -182,6 +185,13 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Post Works'.tr(),
               activeIcon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/add_post_select.png'),
+            ),
+            BottomNavigationBarItem(
+              icon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/chart.png'),
+              label: 'Chat'.tr(),
+              activeIcon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/chart_select.png'),
             ),
             BottomNavigationBarItem(
               icon: bottomTabIcon(

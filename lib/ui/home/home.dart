@@ -21,6 +21,8 @@ import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/home_fetch_model.dart';
+import '../chat/addFriends.dart';
+import '../friends/friends_search.dart';
 import 'filter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -224,7 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
-                  addFriendText(textOne: 'Add Friends', textTwo: 'View All'),
+                  addFriendText(textOne: 'Add Friends', textTwo: 'View All' ,onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> const AddFriendsScreen(header: 'Friend Suggestion')));
+                  }),
                   SizedBox(
                     height: SizeConfig.blockHeight * 33,
                     child: ListView.builder(

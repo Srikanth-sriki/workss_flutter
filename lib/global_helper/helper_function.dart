@@ -3,7 +3,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+// import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image/image.dart' as img;
 import 'dart:io';
 import 'package:intl/intl.dart';
 
@@ -161,22 +162,34 @@ Don’t miss out on your dream job. Download Works now and take control of your 
 
 
 
-Future<File?> compressImage(File file) async {
-  final compressedImage = await FlutterImageCompress.compressWithFile(
-    file.absolute.path,
-    minWidth: 800,
-    minHeight: 800,
-    quality: 85, // Adjust the quality as per your requirement
-  );
+// Future<File?> compressImage(File file) async {
+//   final compressedImage = await FlutterImageCompress.compressWithFile(
+//     file.absolute.path,
+//     minWidth: 800,
+//     minHeight: 800,
+//     quality: 85, // Adjust the quality as per your requirement
+//   );
+//
+//   if (compressedImage != null) {
+//     final tempDir = Directory.systemTemp;
+//     final targetPath = "${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
+//     final compressedFile = File(targetPath).writeAsBytes(compressedImage);
+//     return compressedFile;
+//   }
+//
+//   return null;
+// }
+Future<File> compressImage(File file) async {
+  final image = img.decodeImage(file.readAsBytesSync());
+  if (image == null) return file;
 
-  if (compressedImage != null) {
-    final tempDir = Directory.systemTemp;
-    final targetPath = "${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
-    final compressedFile = File(targetPath).writeAsBytes(compressedImage);
-    return compressedFile;
-  }
+  final resizedImage = img.copyResize(image, width: 800, height: 800);
+  final compressedImage = img.encodeJpg(resizedImage, quality: 85); // Adjust quality
 
-  return null;
+  final targetPath = "${Directory.systemTemp.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
+  final compressedFile = File(targetPath)..writeAsBytesSync(compressedImage);
+
+  return compressedFile;
 }
 
 
