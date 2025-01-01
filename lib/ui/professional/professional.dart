@@ -12,11 +12,13 @@ import 'package:works_app/ui/professional/categories.dart';
 import 'package:works_app/ui/professional/professional_search.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
 import '../../bloc/notification/notification_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/category_list_modal.dart';
 import '../home/filter.dart';
 import '../home/notification_list.dart';
 import 'categories_item.dart';
@@ -35,80 +37,14 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
   bool isProfessionalLoad = true;
+  bool isCategoryLoad = true;
   int currentPage = 1;
   int pageSize = 10;
   int maxPageNumber = 1;
   String? selectedProfession = '';
   String? selectedCity = '';
   String selectedGender = '';
-  final List<Map<String, dynamic>> categoriesData = [
-    {
-      'title': 'Construction',
-      'images': 'assets/images/professions/cat1.png',
-      'pro': [
-        'Architect',
-        'Carpenter',
-        'Civil Engineer',
-        'Construction Worker',
-        'Construction engineering'
-      ]
-    },
-    {
-      'title': 'Tutors',
-      'images': 'assets/images/professions/cat2.png',
-      'pro': [
-        'Architect',
-        'Carpenter',
-        'Civil Engineer',
-        'Construction Worker',
-        'Construction engineering'
-      ]
-    },
-    {
-      'title': 'Automobile',
-      'images': 'assets/images/professions/cat3.png',
-      'pro': [
-        'Architect',
-        'Carpenter',
-        'Civil Engineer',
-        'Construction Worker',
-        'Construction engineering'
-      ]
-    },
-    {
-      'title': 'Music teacher',
-      'images': 'assets/images/professions/cat2.png',
-      'pro': [
-        'Architect',
-        'Carpenter',
-        'Civil Engineer',
-        'Construction Worker',
-        'Construction engineering'
-      ]
-    },
-    {
-      'title': 'Driver',
-      'images': 'assets/images/professions/cat1.png',
-      'pro': [
-        'Architect',
-        'Carpenter',
-        'Civil Engineer',
-        'Construction Worker',
-        'Construction engineering'
-      ]
-    },
-    {
-      'title': 'Self defense',
-      'images': 'assets/images/professions/cat3.png',
-      'pro': [
-        'Architect',
-        'Carpenter',
-        'Civil Engineer',
-        'Construction Worker',
-        'Construction engineering'
-      ]
-    },
-  ];
+  late List<CategorySub> categoriesData = [];
 
   @override
   void initState() {
@@ -147,6 +83,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         gender: "",
         currentLongitude: '',
         currentLatitude: ''));
+    professionalBloc.add(const FetchCategoryListEvent());
   }
 
   void _loadMoreData() {
@@ -217,8 +154,19 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
               isFetchingMore = false;
               isProfessionalLoad = false;
             });
-            // Optionally, show an error message
-            // showCustomSnackBar(context: context, message: state.message);
+          } else if (state is FetchCategoryListLoading) {
+            setState(() {
+              isCategoryLoad = true;
+            });
+          } else if (state is FetchCategoryListSuccess) {
+            setState(() {
+              categoriesData = state.categories;
+              isCategoryLoad = false;
+            });
+          } else if (state is FetchCategoryListFailed) {
+            setState(() {
+              isCategoryLoad = false;
+            });
           }
           setState(() {});
         },
@@ -389,24 +337,42 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                       InkWell(
                         onTap: () async {
                           final result = await showMaterialModalBottomSheet(
-                            enableDrag: true,
-                            expand: false,
-                            isDismissible: true,
-                            backgroundColor: COLORS.white,
-                            closeProgressThreshold: 0,
-                            duration: const Duration(seconds: 0),
-                            context: context,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(
-                                      SizeConfig.blockWidth * 6)),
-                            ),
-                            builder: (context) => SearchFilterBottomSheet(
-                              initialProfession: selectedProfession,
-                              initialCity: selectedCity,
-                              initialGender: selectedGender,
-                            ),
-                          );
+                              enableDrag: true,
+                              expand: false,
+                              isDismissible: true,
+                              backgroundColor: COLORS.white,
+                              closeProgressThreshold: 0,
+                              duration: const Duration(seconds: 0),
+                              context: context,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(
+                                        SizeConfig.blockWidth * 6)),
+                              ),
+                              builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) {
+                                          final bloc = InitialRegisterBloc();
+                                          bloc.add(const FetchCityEvent());
+                                          bloc.add(
+                                              const FetchChargeFeesEvent());
+                                          bloc.add(
+                                              const FetchWorkKnownLanguageProfileEvent());
+                                          return bloc;
+                                        },
+                                      ),
+                                      BlocProvider(
+                                          create: (context) => ProfessionalBloc()
+                                            ..add(
+                                                const FetchCategoryListEvent())),
+                                    ],
+                                    child: SearchFilterBottomSheet(
+                                      initialProfession: selectedProfession,
+                                      initialCity: selectedCity,
+                                      initialGender: selectedGender,
+                                    ),
+                                  ));
 
                           if (result != null) {
                             selectedProfession = result['selectedProfession'];
@@ -495,71 +461,93 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(
-                          height: SizeConfig.blockHeight * 20,
-                          child: ListView.builder(
-                              itemCount: categoriesData.length,
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: SizeConfig.blockWidth * 5,
-                                  vertical: SizeConfig.blockHeight),
-                              itemBuilder: (context, index) {
-                                return InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              CategoriesItemScreen(
-                                                  categoriesItem:
-                                                      categoriesData[index])),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(
-                                        SizeConfig.blockWidth * 3),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          width: SizeConfig.blockWidth * 18,
-                                          height: SizeConfig.blockWidth * 18,
-                                          decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                image: AssetImage(
-                                                    categoriesData[index]
-                                                        ['images']),
-                                                fit: BoxFit.contain,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      SizeConfig.blockWidth *
-                                                          20),
-                                              color: COLORS.primaryOne
-                                                  .withOpacity(0.5)),
-                                        ),
-                                        SizedBox(
-                                          height: SizeConfig.blockHeight * 0.5,
-                                        ),
-                                        Text(
-                                          categoriesData[index]['title'],
-                                          style: TextStyle(
-                                            color: COLORS.neutralDark,
-                                            fontSize: SizeConfig.blockWidth * 3,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: "Poppins",
+                        if (isCategoryLoad) ...[
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: SizeConfig.blockWidth * 6,
+                              right: SizeConfig.blockWidth * 6,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                categoryLoading(),
+                                categoryLoading(),
+                                categoryLoading(),
+                                categoryLoading()
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (!isCategoryLoad) ...[
+                          SizedBox(
+                            height: SizeConfig.blockHeight * 20,
+                            child: ListView.builder(
+                                itemCount: categoriesData.length,
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.blockWidth * 5,
+                                    vertical: SizeConfig.blockHeight),
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                CategoriesItemScreen(
+                                                    categoriesItem:
+                                                        categoriesData[index])),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.blockWidth * 3),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            width: SizeConfig.blockWidth * 18,
+                                            height: SizeConfig.blockWidth * 18,
+                                            decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: AssetImage(
+                                                      categoriesData[index]
+                                                          .image),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        SizeConfig.blockWidth *
+                                                            20),
+                                                color: COLORS.primaryOne
+                                                    .withOpacity(0.5)),
                                           ),
-                                        ),
-                                      ],
+                                          SizedBox(
+                                            height:
+                                                SizeConfig.blockHeight * 0.5,
+                                          ),
+                                          Text(
+                                            categoriesData[index].name,
+                                            style: TextStyle(
+                                              color: COLORS.neutralDark,
+                                              fontSize:
+                                                  SizeConfig.blockWidth * 3,
+                                              fontWeight: FontWeight.w500,
+                                              fontFamily: "Poppins",
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }),
-                        ),
+                                  );
+                                }),
+                          )
+                        ],
                         Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 5,

@@ -84,3 +84,21 @@ class RegisterAccountEvent extends InitialRegisterEvent {
         age
       ];
 }
+
+class FetchCityEvent extends InitialRegisterEvent {
+  const FetchCityEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class FetchChargeFeesEvent extends InitialRegisterEvent {
+  const FetchChargeFeesEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class FetchWorkKnownLanguageProfileEvent extends InitialRegisterEvent {
+  const FetchWorkKnownLanguageProfileEvent();
+  @override
+  List<Object> get props => [];
+}

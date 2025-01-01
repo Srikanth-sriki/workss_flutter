@@ -106,6 +106,62 @@ Widget professionalLoading() {
       ));
 }
 
+Widget categoryLoading() {
+  return Padding(
+      padding: EdgeInsets.only(
+          bottom: SizeConfig.blockWidth * 0.5,
+          top: SizeConfig.blockWidth * 0.5),
+      child: Shimmer(
+        color: COLORS.white,
+        colorOpacity: 0.3,
+        enabled: true,
+        direction: const ShimmerDirection.fromLTRB(),
+        child: Container(
+          height: SizeConfig.blockWidth * 18,
+          width: SizeConfig.blockWidth * 18,
+          decoration: BoxDecoration(
+            color: COLORS.primaryOne.withOpacity(0.25),
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 9),
+          ),
+        ),
+      ));
+}
+
+Widget dropDownLoader({
+  required String hintText
+}){
+  return Container(
+    width: SizeConfig.blockWidth*100,
+    height: SizeConfig.blockHeight*7.5,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+      border: Border.all(color: COLORS.neutralDarkTwo,
+        width: 1,),
+
+    ),
+    padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth*4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          hintText.tr(),
+          style: TextStyle(
+            fontWeight: FontWeight.w400,
+            fontFamily: "Poppins",
+            fontSize: SizeConfig.blockWidth * 3.2,
+            color: COLORS.neutralDarkOne,
+          ),
+        ),
+        LoadingAnimationWidget.discreteCircle(
+          color: COLORS.accent,
+          size: SizeConfig.blockWidth * 4,
+        ),
+      ],
+    ),
+  );
+}
+
 Widget emptyComponent() {
   return Center(
     child: Column(

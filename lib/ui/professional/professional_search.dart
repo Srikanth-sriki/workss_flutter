@@ -236,7 +236,7 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.location_on,
+                          Icons.location_on_rounded,
                           size: SizeConfig.blockWidth * 5.5,
                           color: COLORS.accent,
                         ),

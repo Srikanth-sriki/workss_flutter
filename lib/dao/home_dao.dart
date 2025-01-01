@@ -314,4 +314,15 @@ class HomeDao {
     customLog('Response body:${response.body.toString()}');
     return response;
   }
+  Future getCategoryList() async {
+    var url = '${Config.url}/common/categories';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog("Response body : ${response.body}");
+
+    return response;
+  }
 }

@@ -172,4 +172,22 @@ class LoginDao {
 
     return response;
   }
+
+  Future fetchCityLanguage() async {
+    var url = '${Config.url}/common/cities?search&state=';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+    return response;
+  }
+
+  Future fetchFessCharges() async {
+    var url = '${Config.url}/common/fees-types';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+    customLog('response');
+    customLog(response);
+    return response;
+  }
 }

@@ -89,6 +89,8 @@ Widget friendSearchDetailsCards({
   String buttonText2 = 'Add Friend',
   bool bgFriend = true,
   bool buttonRequired = true,
+  double width = 30,
+  double buttonWidth = 32
 }) {
   return InkWell(
     onTap: onTapCard,
@@ -116,7 +118,7 @@ Widget friendSearchDetailsCards({
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
-                width: SizeConfig.blockWidth * 30,
+                width: SizeConfig.blockWidth * width,
                 child: Column(
                   children: [
                     Text(
@@ -152,7 +154,7 @@ Widget friendSearchDetailsCards({
             customIconButton(
                 text: added ? buttonText1 : buttonText2,
                 onPressed: onTapCard,
-                width: SizeConfig.blockWidth * 32,
+                width: SizeConfig.blockWidth * buttonWidth,
                 height: SizeConfig.blockHeight * 6.25,
                 backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
                 textColor: added ? COLORS.neutralDark : COLORS.white,

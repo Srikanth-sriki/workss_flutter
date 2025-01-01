@@ -64,7 +64,6 @@ class CreatePostWorkEvent extends PostWorkEvent {
       ];
 }
 
-
 class EditPostWorkEvent extends PostWorkEvent {
   String workId;
   String requiredProfession;
@@ -96,29 +95,39 @@ class EditPostWorkEvent extends PostWorkEvent {
 
   @override
   List<Object> get props => [
-    workId,
-    requiredProfession,
-    experienceLevel,
-    gender,
-    knowLanguage,
-    location,
-    workImages,
-    workPlace,
-    isProfessionalCanCall,
-    latitude,
-    longitude,
-    description
-  ];
+        workId,
+        requiredProfession,
+        experienceLevel,
+        gender,
+        knowLanguage,
+        location,
+        workImages,
+        workPlace,
+        isProfessionalCanCall,
+        latitude,
+        longitude,
+        description
+      ];
 }
 
 class PostWorkDeleteEvent extends PostWorkEvent {
   String workID;
   VoidCallback onSuccess;
   VoidCallback onError;
-  PostWorkDeleteEvent({
-    required this.workID, required this.onSuccess,required this.onError
-  });
+  PostWorkDeleteEvent(
+      {required this.workID, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [workID,onSuccess,onError];
+  List<Object> get props => [workID, onSuccess, onError];
 }
 
+class FetchWorkPlaceEvent extends PostWorkEvent {
+  const FetchWorkPlaceEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class FetchWorkKnownLanguageEvent extends PostWorkEvent {
+  const FetchWorkKnownLanguageEvent();
+  @override
+  List<Object> get props => [];
+}

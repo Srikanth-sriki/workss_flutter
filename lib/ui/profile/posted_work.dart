@@ -12,6 +12,7 @@ import 'package:works_app/ui/profile/view_insights.dart';
 
 import '../../bloc/home/home_bloc.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
+import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
@@ -346,8 +347,20 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                           MultiBlocProvider(
                                                         providers: [
                                                           BlocProvider(
-                                                              create: (context) =>
-                                                                  PostWorkBloc()),
+                                                            create: (context) {
+                                                              final bloc = PostWorkBloc();
+                                                              bloc.add(const FetchWorkPlaceEvent());
+                                                              bloc.add(const FetchWorkKnownLanguageEvent());
+                                                              return bloc;
+                                                            },
+                                                          ),
+                                                          BlocProvider(
+                                                            create: (context) {
+                                                              final bloc = ProfessionalBloc();
+                                                              bloc.add(const FetchCategoryListEvent());
+                                                              return bloc;
+                                                            },
+                                                          ),
                                                         ],
                                                         child:
                                                             EditPostWorkScreen(

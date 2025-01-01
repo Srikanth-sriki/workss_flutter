@@ -17,6 +17,7 @@ import 'package:works_app/ui/profile/faq.dart';
 import 'package:works_app/ui/profile/location/location_create.dart';
 import 'package:works_app/ui/profile/posted_work.dart';
 import 'package:works_app/ui/profile/setting.dart';
+import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -73,7 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               profileFetch = state.profileFetch;
               Config.phoneNumber = state.profileFetch.mobile!;
               Config.name = state.profileFetch.name ?? "";
-
             });
           } else if (state is FetchProfileFailed) {
             loading = false;
@@ -85,7 +85,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-
               if (Config.isRegistered != false) ...[
                 Stack(
                   children: [
@@ -95,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           horizontal: SizeConfig.blockWidth * 5,
                           vertical: SizeConfig.blockHeight * 4),
                       margin:
-                      EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
+                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
                       child: Row(
                         children: [
                           Container(
@@ -109,9 +108,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 border: Border.all(
                                     color: COLORS.primary,
                                     width: SizeConfig.blockWidth * 0.15),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(
-                                        SizeConfig.blockWidth * 3))),
+                                borderRadius: BorderRadius.all(Radius.circular(
+                                    SizeConfig.blockWidth * 3))),
                           ),
                           SizedBox(width: SizeConfig.blockWidth * 6),
                           Column(
@@ -155,22 +153,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => MultiBlocProvider(
-                                          providers: [
-                                            BlocProvider(
-                                              create: (context) =>
-                                                  ProfileBloc(),
-                                            ),
-                                            BlocProvider(
-                                              create: (context) =>
-                                                  InitialRegisterBloc(),
-                                            )
-                                          ],
-                                          child: EditProfileRegisterForm(
-                                            refreshPageCallback:
-                                            _refreshPageAfterEdit,
-                                            profileFetch: profileFetch,
-                                          ),
-                                        )));
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      ProfileBloc(),
+                                                ),
+                                                BlocProvider(
+                                                  create: (context) {
+                                                    final bloc =
+                                                        InitialRegisterBloc();
+                                                    bloc.add(
+                                                        const FetchCityEvent());
+                                                    bloc.add(
+                                                        const FetchChargeFeesEvent());
+                                                    bloc.add(
+                                                        const FetchWorkKnownLanguageProfileEvent());
+                                                    return bloc;
+                                                  },
+                                                ),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ProfessionalBloc()
+                                                          ..add(
+                                                              const FetchCategoryListEvent())),
+                                              ],
+                                              child: EditProfileRegisterForm(
+                                                refreshPageCallback:
+                                                    _refreshPageAfterEdit,
+                                                profileFetch: profileFetch,
+                                              ),
+                                            )));
                               },
                               child: Container(
                                 width: SizeConfig.blockWidth * 8,
@@ -205,8 +217,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             color: COLORS.semanticTwo,
                             borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(
-                                    SizeConfig.blockWidth * 4)),
+                                bottomLeft:
+                                    Radius.circular(SizeConfig.blockWidth * 4)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 )
               ] else ...[
-                if(loading == true && Config.isRegistered == false)...[
+                if (loading == true && Config.isRegistered == false) ...[
                   Shimmer.fromColors(
                     baseColor: COLORS.primary.withOpacity(0.8),
                     highlightColor: COLORS.primary.withOpacity(0.5),
@@ -245,11 +257,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: EdgeInsets.symmetric(
                           horizontal: SizeConfig.blockWidth * 5,
                           vertical: SizeConfig.blockHeight * 4),
-                      margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
+                      margin:
+                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
                       decoration: BoxDecoration(
                         color: COLORS.primaryOne.withOpacity(0.25),
                         borderRadius:
-                        BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                       ),
                       child: Row(
                         children: [
@@ -293,8 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   )
-                ]
-                else...[
+                ] else ...[
                   Container(
                     color: COLORS.primaryTwo,
                     width: SizeConfig.screenWidth,
@@ -330,15 +342,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (BuildContext context) =>
-                                    const SelectUserType()),
+                                        const SelectUserType()),
                               );
                             })
                       ],
                     ),
                   )
                 ]
-
-
               ],
               Expanded(
                 child: ListView(

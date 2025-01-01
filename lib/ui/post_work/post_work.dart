@@ -14,12 +14,15 @@ import 'package:works_app/ui/profile/component.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:works_app/ui/profile/location/location_list_modal.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
+import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../components/size_config.dart';
 import '../../dao/get_user_location.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/dropdown.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/dropDown_modal.dart';
 
 class PostWorkScreen extends StatefulWidget {
   const PostWorkScreen({super.key});
@@ -31,6 +34,7 @@ class PostWorkScreen extends StatefulWidget {
 class _PostWorkScreenState extends State<PostWorkScreen> {
   late PostWorkBloc postWorkBloc;
   late ProfileBloc profileBloc;
+  late ProfessionalBloc professionalBloc;
   final _formKey = GlobalKey<FormState>();
   final controller = MultiSelectController<Language>();
   final TextEditingController bioController = TextEditingController();
@@ -54,17 +58,12 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   bool addressError = false;
   String addressId = '';
   String addressSelected = 'Select work location';
-
-  var items = [
-    DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
-    DropdownItem(label: 'Kannada', value: Language(name: 'Kannada', id: 2)),
-    DropdownItem(label: 'Hindi', value: Language(name: 'Hindi', id: 3)),
-    DropdownItem(label: 'Tamil', value: Language(name: 'Tamil', id: 4)),
-    DropdownItem(label: 'Telugu', value: Language(name: 'Telugu', id: 5)),
-    DropdownItem(label: 'Gujarati', value: Language(name: 'Gujarati', id: 6)),
-    DropdownItem(label: 'Malayalam', value: Language(name: 'Malayalam', id: 7)),
-    DropdownItem(label: 'Marathi', value: Language(name: 'Marathi', id: 8)),
-  ];
+  bool workPlaceLoading = false;
+  bool knowLanguageLoading = true;
+  List<String> dropdownWorkPlaceItem = [];
+  List<DropdownItem<Language>> knownLanguageItems = [];
+  bool professionalTypesLoading = true;
+  List<String> professionalTypesItem = [];
 
   void _validateForm() {
     if (_selectedProfession != null &&
@@ -108,6 +107,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     super.initState();
     postWorkBloc = BlocProvider.of<PostWorkBloc>(context);
     profileBloc = BlocProvider.of<ProfileBloc>(context);
+    professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
   }
 
   void _submitButton() {
@@ -115,26 +115,22 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
       setState(() {
         imagesList = true;
       });
-    }
-    else  if (_experienceLevel == null) {
+    } else if (_experienceLevel == null) {
       showCustomSnackBar(
         context: context,
         message: "Please select experience level",
       );
-    }
-    else  if (_selectedGender == null) {
+    } else if (_selectedGender == null) {
       showCustomSnackBar(
         context: context,
         message: "Please select gender",
       );
-    }
-    else  if (addressSelected.isEmpty) {
+    } else if (addressSelected.isEmpty) {
       showCustomSnackBar(
         context: context,
         message: "Please select work address",
       );
-    }
-    else {
+    } else {
       List<String> languageSelect =
           selectedLanguage.map((lang) => lang.name).toList();
       postWorkBloc.add(CreatePostWorkEvent(
@@ -142,7 +138,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
           experienceLevel: _experienceLevel!.toLowerCase(),
           gender: _selectedGender!.toLowerCase(),
           knowLanguage: languageSelect,
-          location: addressSelected??'',
+          location: addressSelected ?? '',
           workPlace: _selectedWorkPlace!.toLowerCase(),
           workImages: workImages,
           isProfessionalCanCall: isChecked,
@@ -172,8 +168,6 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     }
     return await Geolocator.getCurrentPosition();
   }
-
-
 
   @override
   void dispose() {
@@ -266,49 +260,99 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
             ),
           ),
           body: SafeArea(
-            child: BlocListener<PostWorkBloc, PostWorkState>(
-              listener: (context, state) {
-                if (state is PostWorkLoading) {
-                  loading = true;
-                } else if (state is UploadMultipleImageSuccess) {
-                  loading = false;
-                  workImages.add(state.filePath);
-                } else if (state is UploadImageFailed) {
-                  loading = false;
-                  showCustomSnackBar(
-                    context: context,
-                    message: state.message,
-                  );
-                } else if (state is PostWorkSuccess) {
-                  loading = false;
-                  // showCustomSnackBar(
-                  //     context: context,
-                  //     message: state.message,
-                  //     backgroundColor: COLORS.semanticTwo);
-                  FocusScopeNode currentFocus = FocusScope.of(context);
-                  if (!currentFocus.hasPrimaryFocus) {
-                    currentFocus.unfocus();
-                  }
-                  clearData();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => PostWorkSuccessScreen(
-                        workId: state.workId,
-                      ),
-                    ),
-                  );
-                } else if (state is PostWorkFailed) {
-                  setState(() {
-                    loading = false;
-                  });
-                  showCustomSnackBar(
-                    context: context,
-                    message: state.message,
-                  );
-                }
-                setState(() {});
-              },
+            child: MultiBlocListener(
+              listeners: [
+                BlocListener<PostWorkBloc, PostWorkState>(
+                  listener: (context, state) {
+                    if (state is PostWorkLoading) {
+                      loading = true;
+                    } else if (state is UploadMultipleImageSuccess) {
+                      loading = false;
+                      workImages.add(state.filePath);
+                    } else if (state is UploadImageFailed) {
+                      loading = false;
+                      showCustomSnackBar(
+                        context: context,
+                        message: state.message,
+                      );
+                    } else if (state is PostWorkSuccess) {
+                      loading = false;
+                      // showCustomSnackBar(
+                      //     context: context,
+                      //     message: state.message,
+                      //     backgroundColor: COLORS.semanticTwo);
+                      FocusScopeNode currentFocus = FocusScope.of(context);
+                      if (!currentFocus.hasPrimaryFocus) {
+                        currentFocus.unfocus();
+                      }
+                      clearData();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              PostWorkSuccessScreen(
+                            workId: state.workId,
+                          ),
+                        ),
+                      );
+                    } else if (state is PostWorkFailed) {
+                      setState(() {
+                        loading = false;
+                      });
+                      showCustomSnackBar(
+                        context: context,
+                        message: state.message,
+                      );
+                    } else if (state is FetchDropDownLoading) {
+                      setState(() {
+                        workPlaceLoading = true;
+                        knowLanguageLoading = true;
+                      });
+                    } else if (state is FetchDropDownSuccess) {
+                      setState(() {
+                        workPlaceLoading = false;
+                        dropdownWorkPlaceItem = state.dropDownItems
+                            .map((item) => item.place)
+                            .toList();
+                      });
+                    } else if (state is FetchKnownLanguageSuccess) {
+                      setState(() {
+                        knownLanguageItems =
+                            state.dropDownItems.asMap().entries.map((entry) {
+                          int index = entry.key + 1;
+                          var item = entry.value;
+                          return DropdownItem(
+                              label: item.language,
+                              value: Language(name: item.language, id: index));
+                        }).toList();
+                        knowLanguageLoading = false;
+                      });
+                    }
+                    setState(() {});
+                  },
+                ),
+                BlocListener<ProfessionalBloc, ProfessionalState>(
+                  listener: (context, state) {
+                    if (state is FetchCategoryListLoading) {
+                      setState(() {
+                        professionalTypesLoading = true;
+                      });
+                    } else if (state is FetchCategoryListSuccess) {
+                      setState(() {
+                        professionalTypesItem =
+                            state.categories.map((item) => item.name).toList();
+
+                        professionalTypesLoading = false;
+                      });
+                    } else if (state is FetchCategoryListFailed) {
+                      setState(() {
+                        professionalTypesLoading = false;
+                      });
+                    }
+                    setState(() {});
+                  },
+                ),
+              ],
               child: SingleChildScrollView(
                 child: Container(
                   width: SizeConfig.screenWidth,
@@ -318,26 +362,28 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildDropdown(
-                          label: 'Professional/Worker Required'.tr(),
-                          hintText: 'Select Profession'.tr(),
-                          items: [
-                            'Technology',
-                            'Healthcare',
-                            'Finance',
-                            'Education',
-                          ],
-                          onChanged: (value) => setState(() {
-                            _selectedProfession = value;
-                            _validateForm();
-                          }),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select your profession'.tr();
-                            }
-                            return null;
-                          },
-                        ),
+                        if (!professionalTypesLoading) ...[
+                          buildDropdown(
+                            label: 'Professional/Worker Required'.tr(),
+                            hintText: 'Select Profession'.tr(),
+                            items: professionalTypesItem,
+                            onChanged: (value) => setState(() {
+                              _selectedProfession = value;
+                              _validateForm();
+                            }),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your profession'.tr();
+                              }
+                              return null;
+                            },
+                          )
+                        ] else ...[
+                          SizedBox(height: SizeConfig.blockHeight),
+                          registerText(
+                              text: 'Professional/Worker Required'.tr()),
+                          dropDownLoader(hintText: 'profession_type')
+                        ],
                         buildDynamicRadioSelection(
                           title: 'Experience Level'.tr(),
                           options: [
@@ -370,101 +416,107 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 1),
                         registerText(text: 'known_language'.tr()),
-                        MultiDropdown<Language>(
-                          items: items,
-                          controller: controller,
-                          enabled: true,
-                          searchEnabled: false,
-                          closeOnBackButton: true,
-                          dropdownDecoration: DropdownDecoration(
-                              maxHeight: SizeConfig.blockHeight * 30,
-                              elevation: SizeConfig.blockWidth * 5,
-                              marginTop: SizeConfig.blockHeight,
-                              backgroundColor: COLORS.white),
-                          chipDecoration: ChipDecoration(
-                              backgroundColor: COLORS.primary.withOpacity(0.05),
-                              wrap: true,
-                              labelStyle: TextStyle(
-                                  color: COLORS.primary,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: "Poppins",
-                                  fontSize: SizeConfig.blockWidth * 3.25),
-                              runSpacing: 8,
-                              spacing: 10,
-                              borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 2),
-                              deleteIcon: Icon(
-                                Icons.clear,
-                                color: COLORS.black,
-                                size: SizeConfig.blockWidth * 4,
-                              )),
-                          fieldDecoration: FieldDecoration(
-                            labelStyle: TextStyle(
-                              color: COLORS.neutralDarkTwo,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                              fontSize: SizeConfig.blockWidth * 3.2,
-                            ),
-                            animateSuffixIcon: true,
-                            padding: EdgeInsets.only(
-                              top: SizeConfig.blockHeight * 2.2,
-                              bottom: SizeConfig.blockHeight * 2.2,
-                              left: SizeConfig.blockWidth * 4,
-                              right: SizeConfig.blockWidth * 3,
-                            ),
-                            hintText: 'Select Languages'.tr(),
-                            hintStyle: TextStyle(
-                              color: COLORS.neutralDarkOne,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                              fontSize: SizeConfig.blockWidth * 3.2,
-                            ),
-                            suffixIcon: Icon(
-                              Icons.keyboard_arrow_down_outlined,
-                              color: COLORS.accent,
-                              size: SizeConfig.blockWidth * 6,
-                            ),
-                            backgroundColor: COLORS.white,
-                            showClearIcon: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 4),
-                              borderSide: const BorderSide(
-                                  color: COLORS.neutralDarkTwo),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 4),
-                              borderSide: const BorderSide(
-                                color: COLORS.neutralDarkTwo,
+                        if (!knowLanguageLoading) ...[
+                          MultiDropdown<Language>(
+                            items: knownLanguageItems,
+                            controller: controller,
+                            enabled: true,
+                            searchEnabled: false,
+                            closeOnBackButton: true,
+                            dropdownDecoration: DropdownDecoration(
+                                maxHeight: SizeConfig.blockHeight * 30,
+                                elevation: SizeConfig.blockWidth * 5,
+                                marginTop: SizeConfig.blockHeight,
+                                backgroundColor: COLORS.white),
+                            chipDecoration: ChipDecoration(
+                                backgroundColor:
+                                    COLORS.primary.withOpacity(0.05),
+                                wrap: true,
+                                labelStyle: TextStyle(
+                                    color: COLORS.primary,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Poppins",
+                                    fontSize: SizeConfig.blockWidth * 3.25),
+                                runSpacing: 8,
+                                spacing: 10,
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 2),
+                                deleteIcon: Icon(
+                                  Icons.clear,
+                                  color: COLORS.black,
+                                  size: SizeConfig.blockWidth * 4,
+                                )),
+                            fieldDecoration: FieldDecoration(
+                              // labelStyle: TextStyle(
+                              //   color: COLORS.accent,
+                              //   fontWeight: FontWeight.w400,
+                              //   fontFamily: "Poppins",
+                              //   fontSize: SizeConfig.blockWidth * 3.2,
+                              // ),
+                              animateSuffixIcon: true,
+                              padding: EdgeInsets.only(
+                                // top: SizeConfig.blockHeight * 2.2,
+                                // bottom: SizeConfig.blockHeight * 2.2,
+                                left: SizeConfig.blockWidth * 4,
+                                right: SizeConfig.blockWidth * 3,
+                              ),
+                              hintText: 'Select Languages'.tr(),
+                              hintStyle: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                                fontSize: SizeConfig.blockWidth * 3.2,
+                              ),
+                              suffixIcon: Icon(
+                                Icons.keyboard_arrow_down_outlined,
+                                color: COLORS.accent,
+                                size: SizeConfig.blockWidth * 6,
+                              ),
+                              backgroundColor: COLORS.white,
+                              showClearIcon: true,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 4),
+                                borderSide: const BorderSide(
+                                    color: COLORS.neutralDarkTwo),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 4),
+                                borderSide: const BorderSide(
+                                  color: COLORS.neutralDarkTwo,
+                                ),
                               ),
                             ),
-                          ),
-                          dropdownItemDecoration: DropdownItemDecoration(
-                            backgroundColor: COLORS.white,
-                            textColor: COLORS.neutralDark,
-                            selectedIcon: Icon(
-                              Icons.check,
-                              color: COLORS.accent,
-                              size: SizeConfig.blockWidth * 5,
+                            dropdownItemDecoration: DropdownItemDecoration(
+                              backgroundColor: COLORS.white,
+                              textColor: COLORS.neutralDark,
+                              selectedIcon: Icon(
+                                Icons.check,
+                                color: COLORS.accent,
+                                size: SizeConfig.blockWidth * 5,
+                              ),
+                              selectedTextColor: COLORS.neutralDark,
+                              disabledTextColor: COLORS.neutralDark,
+                              disabledIcon:
+                                  Icon(Icons.lock, color: Colors.grey.shade300),
                             ),
-                            selectedTextColor: COLORS.neutralDark,
-                            disabledTextColor: COLORS.neutralDark,
-                            disabledIcon:
-                                Icon(Icons.lock, color: Colors.grey.shade300),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select a language'.tr();
-                            }
-                            return null;
-                          },
-                          onSelectionChange: (selectedItems) {
-                            selectedLanguage = selectedItems;
-                            debugPrint("OnSelectionChange: $selectedItems");
-                            _validateForm();
-                          },
-                        ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a language'.tr();
+                              }
+                              return null;
+                            },
+                            onSelectionChange: (selectedItems) {
+                              selectedLanguage = selectedItems;
+                              debugPrint("OnSelectionChange: $selectedItems");
+                              _validateForm();
+                            },
+                          )
+                        ],
+                        if (knowLanguageLoading) ...[
+                          dropDownLoader(hintText: 'Select Languages')
+                        ],
                         SizedBox(height: SizeConfig.blockHeight * 1.5),
                         registerText(text: 'Work Address'),
                         InkWell(
@@ -486,12 +538,13 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                   ..add(const AddressLocationListEvent()),
                                 child: AddressListModalBottomSheet(
                                   selectedAddressId: addressId,
-                                  onAddressSelected: (id, address,latitudeAdd,longitudeAdd) {
+                                  onAddressSelected:
+                                      (id, address, latitudeAdd, longitudeAdd) {
                                     setState(() {
                                       addressId = id;
                                       addressSelected = address;
                                       latitude = latitudeAdd;
-                                      longitude =longitudeAdd;
+                                      longitude = longitudeAdd;
                                     });
                                   },
                                 ),
@@ -499,23 +552,32 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                             );
                           },
                           child: Container(
-                            width: SizeConfig.blockWidth*100,
-                            height: SizeConfig.blockHeight*7.5,
+                            width: SizeConfig.blockWidth * 100,
+                            height: SizeConfig.blockHeight * 7.5,
                             alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight,horizontal: SizeConfig.blockWidth*3.5),
+                            padding: EdgeInsets.symmetric(
+                                vertical: SizeConfig.blockHeight,
+                                horizontal: SizeConfig.blockWidth * 3.5),
                             decoration: BoxDecoration(
-                              border: Border.all(width: SizeConfig.blockWidth*0.2,color: COLORS.neutralDarkTwo),
-                              borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3.5)
-                            ),
-                            child: Text(addressSelected.tr(),
-                            style: TextStyle(
-                              color: addressSelected == 'Select work location'?COLORS.neutralDarkOne:COLORS.neutralDark,
-
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                              fontSize: addressSelected == 'Select work location'?SizeConfig.blockWidth * 3.2:SizeConfig.blockWidth * 3.5,
-
-                            ),textAlign: TextAlign.center,
+                                border: Border.all(
+                                    width: SizeConfig.blockWidth * 0.2,
+                                    color: COLORS.neutralDarkTwo),
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3.5)),
+                            child: Text(
+                              addressSelected.tr(),
+                              style: TextStyle(
+                                color: addressSelected == 'Select work location'
+                                    ? COLORS.neutralDarkOne
+                                    : COLORS.neutralDark,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                                fontSize:
+                                    addressSelected == 'Select work location'
+                                        ? SizeConfig.blockWidth * 3.2
+                                        : SizeConfig.blockWidth * 3.5,
+                              ),
+                              textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -545,10 +607,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                         buildDropdown(
                           label: 'Work Place'.tr(),
                           hintText: 'Ex : Home, Bank, etc'.tr(),
-                          items: [
-                            'Office',
-                            'Home',
-                          ],
+                          items: dropdownWorkPlaceItem,
                           onChanged: (value) => setState(() {
                             _selectedWorkPlace = value;
                             _validateForm();

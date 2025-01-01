@@ -60,3 +60,26 @@ class ProfessionalViewError extends ProfessionalState {
   @override
   List<Object> get props => [message];
 }
+
+class FetchCategoryListSuccess extends ProfessionalState {
+  final List<CategorySub> categories;
+
+  FetchCategoryListSuccess({required this.categories});
+
+  @override
+  List<Object> get props => [categories];
+}
+
+
+class FetchCategoryListLoading extends ProfessionalState {
+  const FetchCategoryListLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class FetchCategoryListFailed extends ProfessionalState {
+  String message;
+  FetchCategoryListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

@@ -3,22 +3,25 @@ import 'dart:io';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:works_app/dao/get_user_location.dart';
 import 'package:works_app/ui/onboarding/login_success.dart';
 import 'package:works_app/ui/onboarding/phone_number.dart';
 import 'package:works_app/ui/profile/component.dart';
+import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/dropdown.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-
 
 class Language {
   final String name;
@@ -53,6 +56,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final controller = MultiSelectController<Language>();
   List<File> _selectedImages = [];
   late InitialRegisterBloc initialRegisterBloc;
+  late ProfessionalBloc professionalBloc;
   late String profilePicture;
   String? selectedYears;
   String? selectedCharges;
@@ -70,7 +74,7 @@ class _RegisterFormState extends State<RegisterForm> {
   String? selectedValue;
   String? _selectedGender;
   String? selectedExperence = 'Year';
-  String? selectedCharge = 'PerDay';
+  String? selectedCharge = 'Per Day';
   List<Language> selectedLanguage = [];
   bool isSubmitButtonEnabled = false;
   bool imagesList = false;
@@ -79,38 +83,16 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _isLoadingMap = false;
   String? latitude = "0.0";
   String? longitude = "0.0";
-
-  // var items = [
-  //   DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
-  //   DropdownItem(label: 'Spanish', value: Language(name: 'Spanish', id: 2)),
-  //   DropdownItem(label: 'French', value: Language(name: 'French', id: 3)),
-  //   DropdownItem(label: 'German', value: Language(name: 'German', id: 4)),
-  //   DropdownItem(label: 'Chinese', value: Language(name: 'Chinese', id: 5)),
-  //   DropdownItem(label: 'Japanese', value: Language(name: 'Japanese', id: 6)),
-  //   DropdownItem(label: 'Korean', value: Language(name: 'Korean', id: 7)),
-  //   DropdownItem(label: 'Hindi', value: Language(name: 'Hindi', id: 8)),
-  // ];
-
-  var items = [
-    DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
-    DropdownItem(label: 'Kannada', value: Language(name: 'Kannada', id: 2)),
-    DropdownItem(label: 'Hindi', value: Language(name: 'Hindi', id: 3)),
-    DropdownItem(label: 'Tamil', value: Language(name: 'Tamil', id: 4)),
-    DropdownItem(label: 'Telugu', value: Language(name: 'Telugu', id: 5)),
-    DropdownItem(label: 'Gujarati', value: Language(name: 'Gujarati', id: 6)),
-    DropdownItem(label: 'Malayalam', value: Language(name: 'Malayalam', id: 7)),
-    DropdownItem(label: 'Marathi', value: Language(name: 'Marathi', id: 8)),
-  ];
+  bool cityLoading = true;
+  List<String> dropdownCityItem = [];
+  bool feesChargesLoading = true;
+  List<String> feesChargesItem = [];
+  bool knowLanguageLoading = true;
+  List<DropdownItem<Language>> knownLanguageItems = [];
+  bool professionalTypesLoading = true;
+  List<String> professionalTypesItem = [];
 
   void _validateForm() {
-    print(isSubmitButtonEnabled);
-    print(widget.userType != 'jobs');
-    print(_enterName.text.isNotEmpty);
-    print(pinCodeController.text.isNotEmpty);
-    print(profilePicture.isNotEmpty);
-    print(workImages.isNotEmpty);
-    print(_selectedCity!.isNotEmpty);
-
     if (widget.userType != 'jobs' &&
         _enterName.text.isNotEmpty &&
         _selectedCity != null &&
@@ -160,8 +142,7 @@ class _RegisterFormState extends State<RegisterForm> {
       setState(() {
         imagesList = true;
       });
-    }
-    else {
+    } else {
       if (isSubmitButtonEnabled == true) {
         List<String> languageSelect =
             selectedLanguage.map((lang) => lang.name).toList();
@@ -200,7 +181,6 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
-
   void _onImagesSelected(List<File> images) {
     setState(() {
       _selectedImages = images;
@@ -231,9 +211,8 @@ class _RegisterFormState extends State<RegisterForm> {
     super.initState();
     profilePicture = "";
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
-    print(Config.accessToken);
+    professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
   }
-
 
   String? _onPinCodeChanged(String? value) {
     if (value != null && value.length == 6) {
@@ -249,9 +228,6 @@ class _RegisterFormState extends State<RegisterForm> {
     return null;
   }
 
-
-
-
   @override
   void dispose() {
     _enterName.dispose();
@@ -262,27 +238,6 @@ class _RegisterFormState extends State<RegisterForm> {
     ageController.dispose();
     super.dispose();
   }
-
-  // Future<Position> _determinePosition() async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     return Future.error('Location services are disabled.');
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       return Future.error('Location permissions are denied');
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     return Future.error(
-  //         'Location permissions are permanently denied, we cannot request permissions.');
-  //   }
-  //   return await Geolocator.getCurrentPosition();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -298,45 +253,116 @@ class _RegisterFormState extends State<RegisterForm> {
         appBar: customAppBar(
             context: context, onSkipPressed: () {}, skipVisible: true),
         body: SafeArea(
-          child: BlocListener<InitialRegisterBloc, InitialRegisterState>(
-            listener: (context, state) {
-              if (state is InitialRegisterLoading) {
-                loading = true;
-              } else if (state is UploadImageSuccess) {
-                loading = false;
-                profilePicture = state.filePath;
-              } else if (state is UploadMultipleImageSuccess) {
-                loading = false;
-                workImages.add(state.filePath);
-              } else if (state is UploadImageFailed) {
-                loading = false;
-                showCustomSnackBar(
-                  context: context,
-                  message: state.message,
-                );
-              } else if (state is InitialRegisterFailed) {
-                loading = false;
-                showCustomSnackBar(
-                  context: context,
-                  message: state.message,
-                );
-              } else if (state is InitialRegisterSuccess) {
-                setState(() {
-                  loading = false;
-                });
-                // showCustomSnackBar(
-                //     context: context,
-                //     message: "Registered Successfully",
-                //     backgroundColor: COLORS.semanticTwo);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => const LoginSuccess(),
-                  ),
-                );
-              }
-              setState(() {});
-            },
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<InitialRegisterBloc, InitialRegisterState>(
+                listener: (context, state) {
+                  if (state is InitialRegisterLoading) {
+                    loading = true;
+                  } else if (state is UploadImageSuccess) {
+                    loading = false;
+                    profilePicture = state.filePath;
+                  } else if (state is UploadMultipleImageSuccess) {
+                    loading = false;
+                    workImages.add(state.filePath);
+                  } else if (state is UploadImageFailed) {
+                    loading = false;
+                    showCustomSnackBar(
+                      context: context,
+                      message: state.message,
+                    );
+                  } else if (state is InitialRegisterFailed) {
+                    loading = false;
+                    showCustomSnackBar(
+                      context: context,
+                      message: state.message,
+                    );
+                  } else if (state is InitialRegisterSuccess) {
+                    setState(() {
+                      loading = false;
+                    });
+                    // showCustomSnackBar(
+                    //     context: context,
+                    //     message: "Registered Successfully",
+                    //     backgroundColor: COLORS.semanticTwo);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => const LoginSuccess(),
+                      ),
+                    );
+                  } else if (state is FetchCityLoading) {
+                    setState(() {
+                      cityLoading = true;
+                    });
+                  } else if (state is FetchChargeFeesLoading) {
+                    setState(() {
+                      feesChargesLoading = true;
+                    });
+                  } else if (state is FetchCitySuccess) {
+                    setState(() {
+                      dropdownCityItem =
+                          state.dropDownItems.map((item) => item.city).toList();
+                      cityLoading = false;
+                    });
+                  } else if (state is FetchCityFailed) {
+                    setState(() {
+                      cityLoading = false;
+                    });
+                  } else if (state is FetchChargeFeesSuccess) {
+                    setState(() {
+                      feesChargesItem = state.fetchChargeFeesItems
+                          .map((item) => item.type)
+                          .toList();
+                      feesChargesLoading = false;
+                    });
+                  } else if (state is FetchChargeFeesFailed) {
+                    setState(() {
+                      feesChargesLoading = false;
+                    });
+                  }
+                  if (state is FetchDropDownLoading) {
+                    setState(() {
+                      knowLanguageLoading = true;
+                    });
+                  } else if (state is FetchKnownLanguageSuccess) {
+                    setState(() {
+                      knownLanguageItems =
+                          state.dropDownItems.asMap().entries.map((entry) {
+                        int index = entry.key + 1;
+                        var item = entry.value;
+                        return DropdownItem(
+                            label: item.language,
+                            value: Language(name: item.language, id: index));
+                      }).toList();
+                      knowLanguageLoading = false;
+                    });
+                  }
+                  setState(() {});
+                },
+              ),
+              BlocListener<ProfessionalBloc, ProfessionalState>(
+                listener: (context, state) {
+                  if (state is FetchCategoryListLoading) {
+                    setState(() {
+                      professionalTypesLoading = true;
+                    });
+                  } else if (state is FetchCategoryListSuccess) {
+                    setState(() {
+                      professionalTypesItem =
+                          state.categories.map((item) => item.name).toList();
+
+                      professionalTypesLoading = false;
+                    });
+                  } else if (state is FetchCategoryListFailed) {
+                    setState(() {
+                      professionalTypesLoading = false;
+                    });
+                  }
+                  setState(() {});
+                },
+              ),
+            ],
             child: SingleChildScrollView(
               child: Container(
                   width: SizeConfig.screenWidth,
@@ -386,34 +412,6 @@ class _RegisterFormState extends State<RegisterForm> {
                               _validateForm();
                             },
                             title: 'email'.tr()),
-                        // buildTextField(
-                        //     label: 'Pincode',
-                        //     controller: pinCodeController,
-                        //     hintText: "Enter your pincode".tr(),
-                        //     validator: (value) {
-                        //       if (value == null || value.isEmpty) {
-                        //         setState(() => pinError = true);
-                        //         return 'Please enter a pincode'.tr();
-                        //       }
-                        //       setState(() => pinError = false);
-                        //       return null;
-                        //     },
-                        //     onTap: () async {
-                        //       // Ask for the current location
-                        //       try {
-                        //         Position position = await _determinePosition();
-                        //         print('Current location: Lat: ${position.latitude}, Long: ${position.longitude}');
-                        //         // You can also reverse geocode to get the pincode from lat/long
-                        //       } catch (e) {
-                        //         print('Failed to get location: $e');
-                        //         // Handle error
-                        //       }
-                        //     },
-                        //     error: pinError,
-                        //     onChanged: (value) {
-                        //       _validateForm();
-                        //     },
-                        //     title: 'Pincode'.tr()),
                         buildTextField(
                           label: 'Pincode',
                           inputNameType: TextInputType.phone,
@@ -426,8 +424,7 @@ class _RegisterFormState extends State<RegisterForm> {
                             if (value == null || value.isEmpty) {
                               setState(() => pinError = true);
                               return 'Please enter a pincode'.tr();
-                            }
-                            else if (value!.length != 6) {
+                            } else if (value!.length != 6) {
                               setState(() => pinError = true);
                               return 'Please enter valid pincode'.tr();
                             }
@@ -447,18 +444,16 @@ class _RegisterFormState extends State<RegisterForm> {
                               : null,
                           onTap: () async {},
                           error: pinError,
-                          onChanged: (value){
+                          onChanged: (value) {
                             _onPinCodeChanged(value);
                             return null;
                           },
                           title: 'Pincode'.tr(),
-
                         ),
-
                         buildDropdown(
                           label: 'city'.tr(),
                           hintText: 'Select your city'.tr(),
-                          items: ['Mysore', 'Bangalore', 'Mangalore', 'Mandy'],
+                          items: dropdownCityItem,
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
                             _validateForm();
@@ -472,26 +467,25 @@ class _RegisterFormState extends State<RegisterForm> {
                         ),
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          buildDropdown(
-                            label: 'profession_type'.tr(),
-                            hintText: 'Select your Profession'.tr(),
-                            items: [
-                              'Technology',
-                              'Healthcare',
-                              'Finance',
-                              'Education'
-                            ],
-                            onChanged: (value) => setState(() {
-                              _selectedProfession = value;
-                              _validateForm();
-                            }),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select your profession'.tr();
-                              }
-                              return null;
-                            },
-                          ),
+                          if (!professionalTypesLoading) ...[
+                            buildDropdown(
+                              label: 'profession_type'.tr(),
+                              hintText: 'Select your Profession'.tr(),
+                              items: professionalTypesItem,
+                              onChanged: (value) => setState(() {
+                                _selectedProfession = value;
+                                _validateForm();
+                              }),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select your profession'.tr();
+                                }
+                                return null;
+                              },
+                            )
+                          ] else ...[
+                            dropDownLoader(hintText: 'profession_type')
+                          ],
                         ],
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
@@ -500,7 +494,10 @@ class _RegisterFormState extends State<RegisterForm> {
                               hintText: "Experience".tr(),
                               controller: experienceController,
                               inputType: TextInputType.number,
-                              maxLength: 3,
+                              maxLength: 2,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               onChanged: (value) {
                                 _validateForm();
                               },
@@ -516,44 +513,6 @@ class _RegisterFormState extends State<RegisterForm> {
                               errorMessage: '',
                               suffix: true,
                               prefix: false,
-                              // suffixIcon: Row(
-                              //   mainAxisSize: MainAxisSize.min,
-                              //   children: [
-                              //     Container(
-                              //       decoration: BoxDecoration(
-                              //         color: COLORS.neutralDarkTwo,
-                              //         border: Border(
-                              //           right: BorderSide(
-                              //             width: SizeConfig.blockWidth * 0.1,
-                              //             color: COLORS.neutralDarkTwo,
-                              //           ),
-                              //         ),
-                              //       ),
-                              //       height: SizeConfig.blockHeight * 5,
-                              //       width: SizeConfig.blockWidth * 0.4,
-                              //       margin: EdgeInsets.symmetric(
-                              //           horizontal: SizeConfig.blockWidth * 1),
-                              //     ),
-                              //     Container(
-                              //       constraints: BoxConstraints(
-                              //         maxWidth: SizeConfig.blockWidth *
-                              //             30, // Add constraints
-                              //       ),
-                              //       child: CustomDropdownButtonFormField(
-                              //         selectedValue: selectedExperence,
-                              //         items: const ['Year', 'Month'],
-                              //         onChanged: (String? newValue) {
-                              //           setState(() {
-                              //             selectedExperence = newValue;
-                              //           });
-                              //         },
-                              //         hintText: 'Select Duration',
-                              //         iconSize: SizeConfig.blockWidth * 6,
-                              //         iconColor: COLORS.accent,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
                               hasError: yearError),
                           SizedBox(height: SizeConfig.blockHeight),
                         ],
@@ -563,6 +522,10 @@ class _RegisterFormState extends State<RegisterForm> {
                             hintText: "Charges".tr(),
                             controller: chargesController,
                             inputType: TextInputType.number,
+                            maxLength: 7,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             onChanged: (value) {
                               _validateForm();
                             },
@@ -595,25 +558,38 @@ class _RegisterFormState extends State<RegisterForm> {
                                   margin: EdgeInsets.symmetric(
                                       horizontal: SizeConfig.blockWidth * 1),
                                 ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: SizeConfig.blockWidth *
-                                        30, // Add constraints
+                                if (feesChargesLoading) ...[
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: SizeConfig.blockWidth * 4),
+                                    child:
+                                        LoadingAnimationWidget.discreteCircle(
+                                      color: COLORS.accent,
+                                      size: SizeConfig.blockWidth * 4,
+                                    ),
+                                  )
+                                ],
+                                if (!feesChargesLoading) ...[
+                                  Container(
+                                    constraints: BoxConstraints(
+                                      maxWidth: SizeConfig.blockWidth *
+                                          30, // Add constraints
+                                    ),
+                                    child: CustomDropdownButtonFormField(
+                                      selectedValue: selectedCharge,
+                                      items: feesChargesItem,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedCharge = newValue;
+                                          _validateForm();
+                                        });
+                                      },
+                                      hintText: 'Select Duration',
+                                      iconSize: SizeConfig.blockWidth * 6,
+                                      iconColor: COLORS.accent,
+                                    ),
                                   ),
-                                  child: CustomDropdownButtonFormField(
-                                    selectedValue: selectedCharge,
-                                    items: const [' Hourly', 'PerDay', 'Monthly'],
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        selectedCharge = newValue;
-                                        _validateForm();
-                                      });
-                                    },
-                                    hintText: 'Select Duration',
-                                    iconSize: SizeConfig.blockWidth * 6,
-                                    iconColor: COLORS.accent,
-                                  ),
-                                ),
+                                ]
                               ],
                             ),
                             prefixIcon: Container(
@@ -665,8 +641,12 @@ class _RegisterFormState extends State<RegisterForm> {
                           registerText(text: 'Age'.tr()),
                           normalTextField(
                               hintText: "Enter your age".tr(),
-                              controller: ageController,maxLength: 2,
+                              controller: ageController,
+                              maxLength: 2,
                               inputType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               onChanged: (value) {
                                 _validateForm();
                               },
@@ -717,96 +697,101 @@ class _RegisterFormState extends State<RegisterForm> {
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
                           registerText(text: 'known_language'.tr()),
-                          MultiDropdown<Language>(
-                            items: items,
-                            controller: controller,
-                            enabled: true,
-                            searchEnabled: false,
-                            closeOnBackButton: true,
-                            dropdownDecoration: DropdownDecoration(
-                                maxHeight: SizeConfig.blockHeight * 30,
-                                elevation: SizeConfig.blockWidth * 5,
-                                marginTop: SizeConfig.blockHeight,
-                                backgroundColor: COLORS.white),
-                            chipDecoration: ChipDecoration(
-                                backgroundColor:
-                                    COLORS.primary.withOpacity(0.05),
-                                wrap: true,
-                                labelStyle: TextStyle(
-                                    color: COLORS.primary,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: "Poppins",
-                                    fontSize: SizeConfig.blockWidth * 3.25),
-                                runSpacing: 8,
-                                spacing: 10,
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 2),
-                                deleteIcon: Icon(
-                                  Icons.clear,
-                                  color: COLORS.black,
-                                  size: SizeConfig.blockWidth * 4,
-                                )),
-                            fieldDecoration: FieldDecoration(
-                              animateSuffixIcon: true,
-                              padding: EdgeInsets.only(
-                                top: SizeConfig.blockHeight * 2.2,
-                                bottom: SizeConfig.blockHeight * 2.2,
-                                left: SizeConfig.blockWidth * 4,
-                                right: SizeConfig.blockWidth * 3,
-                              ),
-                              suffixIcon: Icon(
-                                Icons.keyboard_arrow_down_outlined,
-                                color: COLORS.accent,
-                                size: SizeConfig.blockWidth * 6,
-                              ),
-                              hintText: 'Select Languages'.tr(),
-                              hintStyle: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                                fontSize: SizeConfig.blockWidth * 3.2,
-                              ),
-                              backgroundColor: COLORS.white,
-                              showClearIcon: true,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 4),
-                                borderSide: const BorderSide(
-                                    color: COLORS.neutralDarkTwo),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 4),
-                                borderSide: const BorderSide(
-                                  color: COLORS.neutralDarkTwo,
+                          if (!knowLanguageLoading) ...[
+                            MultiDropdown<Language>(
+                              items: knownLanguageItems,
+                              controller: controller,
+                              enabled: true,
+                              searchEnabled: false,
+                              closeOnBackButton: true,
+                              dropdownDecoration: DropdownDecoration(
+                                  maxHeight: SizeConfig.blockHeight * 30,
+                                  elevation: SizeConfig.blockWidth * 5,
+                                  marginTop: SizeConfig.blockHeight,
+                                  backgroundColor: COLORS.white),
+                              chipDecoration: ChipDecoration(
+                                  backgroundColor:
+                                      COLORS.primary.withOpacity(0.05),
+                                  wrap: true,
+                                  labelStyle: TextStyle(
+                                      color: COLORS.primary,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: "Poppins",
+                                      fontSize: SizeConfig.blockWidth * 3.25),
+                                  runSpacing: 8,
+                                  spacing: 10,
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 2),
+                                  deleteIcon: Icon(
+                                    Icons.clear,
+                                    color: COLORS.black,
+                                    size: SizeConfig.blockWidth * 4,
+                                  )),
+                              fieldDecoration: FieldDecoration(
+                                animateSuffixIcon: true,
+                                padding: EdgeInsets.only(
+                                  top: SizeConfig.blockHeight * 2.2,
+                                  bottom: SizeConfig.blockHeight * 2.2,
+                                  left: SizeConfig.blockWidth * 4,
+                                  right: SizeConfig.blockWidth * 3,
+                                ),
+                                suffixIcon: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                  color: COLORS.accent,
+                                  size: SizeConfig.blockWidth * 6,
+                                ),
+                                hintText: 'Select Languages'.tr(),
+                                hintStyle: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                  fontSize: SizeConfig.blockWidth * 3.2,
+                                ),
+                                backgroundColor: COLORS.white,
+                                showClearIcon: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 4),
+                                  borderSide: const BorderSide(
+                                      color: COLORS.neutralDarkTwo),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 4),
+                                  borderSide: const BorderSide(
+                                    color: COLORS.neutralDarkTwo,
+                                  ),
                                 ),
                               ),
-                            ),
-                            dropdownItemDecoration: DropdownItemDecoration(
-                              backgroundColor: COLORS.white,
-                              textColor: COLORS.neutralDark,
-                              selectedIcon: Icon(
-                                Icons.check,
-                                color: COLORS.accent,
-                                size: SizeConfig.blockWidth * 5,
+                              dropdownItemDecoration: DropdownItemDecoration(
+                                backgroundColor: COLORS.white,
+                                textColor: COLORS.neutralDark,
+                                selectedIcon: Icon(
+                                  Icons.check,
+                                  color: COLORS.accent,
+                                  size: SizeConfig.blockWidth * 5,
+                                ),
+                                selectedTextColor: COLORS.neutralDark,
+                                disabledTextColor: COLORS.neutralDark,
+                                disabledIcon: Icon(Icons.lock,
+                                    color: Colors.grey.shade300),
                               ),
-                              selectedTextColor: COLORS.neutralDark,
-                              disabledTextColor: COLORS.neutralDark,
-                              disabledIcon:
-                                  Icon(Icons.lock, color: Colors.grey.shade300),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select a language'.tr();
-                              }
-                              return null;
-                            },
-                            onSelectionChange: (selectedItems) {
-                              selectedLanguage = selectedItems;
-                              debugPrint("OnSelectionChange: $selectedItems");
-                              _validateForm();
-                            },
-                          ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select a language'.tr();
+                                }
+                                return null;
+                              },
+                              onSelectionChange: (selectedItems) {
+                                selectedLanguage = selectedItems;
+                                debugPrint("OnSelectionChange: $selectedItems");
+                                _validateForm();
+                              },
+                            )
+                          ],
+                          if (knowLanguageLoading) ...[
+                            dropDownLoader(hintText: 'Select Languages')
+                          ]
                         ],
                         SizedBox(
                           height: SizeConfig.blockHeight * 2.5,

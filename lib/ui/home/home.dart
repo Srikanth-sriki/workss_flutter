@@ -15,6 +15,9 @@ import 'package:works_app/ui/home/work_details.dart';
 import 'package:works_app/ui/home/work_search.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
 import '../../bloc/notification/notification_bloc.dart';
+import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
@@ -226,9 +229,17 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
-                  addFriendText(textOne: 'Add Friends', textTwo: 'View All' ,onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=> const AddFriendsScreen(header: 'Friend Suggestion')));
-                  }),
+                  addFriendText(
+                      textOne: 'Add Friends',
+                      textTwo: 'View All',
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    const AddFriendsScreen(
+                                        header: 'Friend Suggestion')));
+                      }),
                   SizedBox(
                     height: SizeConfig.blockHeight * 33,
                     child: ListView.builder(
@@ -237,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, index) {
                           return addFriendCard(
-                              added: index % 2 == 0?true:false,
+                              added: index % 2 == 0 ? true : false,
                               image: 'assets/images/home/dumy1.png',
                               name: 'Julia Vandervort-Will');
                         }),
@@ -602,23 +613,39 @@ class _HomeScreenState extends State<HomeScreen> {
               InkWell(
                 onTap: () async {
                   final result = await showMaterialModalBottomSheet(
-                    enableDrag: true,
-                    expand: false,
-                    isDismissible: true,
-                    backgroundColor: COLORS.white,
-                    closeProgressThreshold: 0,
-                    duration: const Duration(seconds: 0),
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(SizeConfig.blockWidth * 6)),
-                    ),
-                    builder: (context) => SearchFilterBottomSheet(
-                      initialProfession: selectedProfession,
-                      initialCity: selectedCity,
-                      initialGender: selectedGender,
-                    ),
-                  );
+                      enableDrag: true,
+                      expand: false,
+                      isDismissible: true,
+                      backgroundColor: COLORS.white,
+                      closeProgressThreshold: 0,
+                      duration: const Duration(seconds: 0),
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(SizeConfig.blockWidth * 6)),
+                      ),
+                      builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) {
+                                  final bloc = InitialRegisterBloc();
+                                  bloc.add(const FetchCityEvent());
+                                  bloc.add(const FetchChargeFeesEvent());
+                                  bloc.add(
+                                      const FetchWorkKnownLanguageProfileEvent());
+                                  return bloc;
+                                },
+                              ),
+                              BlocProvider(
+                                  create: (context) => ProfessionalBloc()
+                                    ..add(const FetchCategoryListEvent())),
+                            ],
+                            child: SearchFilterBottomSheet(
+                              initialProfession: selectedProfession,
+                              initialCity: selectedCity,
+                              initialGender: selectedGender,
+                            ),
+                          ));
 
                   if (result != null) {
                     selectedProfession = result['selectedProfession'];

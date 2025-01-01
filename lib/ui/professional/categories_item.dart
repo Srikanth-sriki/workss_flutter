@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/category_list_modal.dart';
 
 class CategoriesItemScreen extends StatefulWidget {
-  final Map<String, dynamic> categoriesItem;
+  final CategorySub categoriesItem;
   const CategoriesItemScreen({super.key, required this.categoriesItem});
 
   @override
@@ -45,7 +46,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
     return Scaffold(
       backgroundColor: COLORS.white,
       appBar: CustomAppBar(
-          title: widget.categoriesItem['title'],
+          title: widget.categoriesItem.name,
           backgroundColor: COLORS.primaryOne.withOpacity(0.15),
           borderColor: false,
           titleColors: COLORS.neutralDark),
@@ -62,7 +63,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                     bottomLeft: Radius.circular(SizeConfig.blockWidth * 8),
                     bottomRight: Radius.circular(SizeConfig.blockWidth * 8))),
             child: Image.asset(
-              widget.categoriesItem['images'],
+              widget.categoriesItem.image,
               width: SizeConfig.blockWidth * 100,
               height: SizeConfig.blockHeight * 50,
               fit: BoxFit.contain,
@@ -74,7 +75,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                 horizontal: SizeConfig.blockWidth * 6.5,
                 vertical: SizeConfig.blockHeight),
             child: Text(
-              widget.categoriesItem['title'],
+              widget.categoriesItem.name,
               style: TextStyle(
                 color: COLORS.primary,
                 fontSize: SizeConfig.blockWidth * 4.5,
@@ -86,14 +87,14 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
           ),
           Expanded(
               child: ListView.builder(
-                  itemCount: widget.categoriesItem['pro'].length,
+                  itemCount: widget.categoriesItem.professionalSubCategories.length,
                   shrinkWrap: true,
                   scrollDirection: Axis.vertical,
                   padding: EdgeInsets.symmetric(
                       horizontal: SizeConfig.blockWidth * 6,
                       vertical: SizeConfig.blockHeight * 2.5),
                   itemBuilder: (context, index) {
-                    var item = widget.categoriesItem['pro'];
+                    var item = widget.categoriesItem.professionalSubCategories[index];
                     return InkWell(
                       onTap: () {},
                       child: Container(
@@ -109,7 +110,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                                     color: COLORS.neutralDarkTwo,
                                     width: SizeConfig.blockWidth * 0.15))),
                         child: Text(
-                          item[index],
+                          item.name,
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             color: COLORS.neutralDark,

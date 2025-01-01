@@ -25,7 +25,7 @@ class PostWorkFailed extends PostWorkState {
 class PostWorkSuccess extends PostWorkState {
   String message;
   String workId;
-  PostWorkSuccess({required this.message,required this.workId});
+  PostWorkSuccess({required this.message, required this.workId});
   @override
   List<Object> get props => [];
 }
@@ -37,14 +37,12 @@ class UploadMultipleImageSuccess extends PostWorkState {
   List<Object> get props => [filePath];
 }
 
-
 class UploadImageFailed extends PostWorkState {
   String message;
   UploadImageFailed({required this.message});
   @override
   List<Object> get props => [message];
 }
-
 
 class EditPostWorkFailed extends PostWorkState {
   String message;
@@ -59,7 +57,6 @@ class EditPostWorkSuccess extends PostWorkState {
   @override
   List<Object> get props => [];
 }
-
 
 class DeletePostWorkFailed extends PostWorkState {
   String message;
@@ -80,3 +77,38 @@ class DeletePostWorkLoading extends PostWorkState {
   @override
   List<Object> get props => [];
 }
+
+class FetchDropDownFailed extends PostWorkState {
+  String message;
+  FetchDropDownFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class FetchDropDownSuccess extends PostWorkState {
+  final List<DropDownData> dropDownItems;
+  final String message;
+
+  FetchDropDownSuccess({required this.dropDownItems, required this.message});
+
+  @override
+  List<Object> get props => [dropDownItems, message];
+}
+
+class FetchKnownLanguageSuccess extends PostWorkState {
+  final List<KnownLanguageData> dropDownItems;
+  final String message;
+
+  FetchKnownLanguageSuccess(
+      {required this.dropDownItems, required this.message});
+
+  @override
+  List<Object> get props => [dropDownItems, message];
+}
+
+class FetchDropDownLoading extends PostWorkState {
+  const FetchDropDownLoading();
+  @override
+  List<Object> get props => [];
+}
+

@@ -38,3 +38,10 @@ class FetchProfessionalView extends ProfessionalEvent {
   @override
   List<Object> get props => [professionalId];
 }
+
+
+class FetchCategoryListEvent extends ProfessionalEvent {
+  const FetchCategoryListEvent();
+  @override
+  List<Object> get props => [];
+}

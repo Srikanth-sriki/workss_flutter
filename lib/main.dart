@@ -29,7 +29,6 @@ import 'bloc/authentication/authentication_bloc.dart';
 import 'bloc/home/home_bloc.dart';
 import 'bloc/login/login_bloc.dart';
 import 'bloc/post_work/post_work_bloc.dart';
-import 'bloc/register_account/initial_register_bloc.dart';
 import 'bloc/show_interested/show_interested_bloc.dart';
 import 'components/config.dart';
 import 'components/global_handle.dart';
@@ -37,14 +36,14 @@ import 'firebase/events.dart';
 import 'firebase/locator.dart';
 import 'firebase/notification.dart';
 
-
 AndroidNotificationChannel channel = const AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title
     importance: Importance.high,
     playSound: true);
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
@@ -59,8 +58,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   print("Handling a background message: ${message.messageId}");
 }
-
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,8 +83,10 @@ Future<void> main() async {
   //
   // // Firebase Messaging setup
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
 
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -134,10 +133,10 @@ Future<LatLng> fetchInitialLocation() async {
   return LatLng(12.9716, 77.5946);
 }
 
-
 class MyApp extends StatefulWidget {
-
-  const MyApp({Key? key,}) : super(key: key);
+  const MyApp({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -152,9 +151,8 @@ class _MyAppState extends State<MyApp> {
     print('-----------------------------check notification');
     getMessage(context);
     analyticsService.logScreenEvent('main_screen');
-     initializeNotifications(context);
+    initializeNotifications(context);
   }
-
 
   ///permission for notifications
   void requestPermission() async {
@@ -172,15 +170,18 @@ class _MyAppState extends State<MyApp> {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       print('User granted permission');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
       print('User granted provisional permission');
     } else {
       print('User declined or has not accepted permission');
     }
   }
+
   //Function for notification handling
-  void getMessage(BuildContext context) async{
-    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+  void getMessage(BuildContext context) async {
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
       alert: true,
       announcement: false,
       badge: true,
@@ -190,12 +191,11 @@ class _MyAppState extends State<MyApp> {
       sound: true,
     );
 
-    FirebaseMessaging.instance.getToken().then((value)  {
-      final String apnId=value!;
+    FirebaseMessaging.instance.getToken().then((value) {
+      final String apnId = value!;
       print("Fcm token:....... $apnId");
       Config.fcmToken = apnId;
     });
-
   }
 
   @override
@@ -206,7 +206,7 @@ class _MyAppState extends State<MyApp> {
     ));
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    return  OverlaySupport.global(
+    return OverlaySupport.global(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         localizationsDelegates: context.localizationDelegates,
@@ -225,12 +225,11 @@ class _MyAppState extends State<MyApp> {
         ),
         routes: {
           "/authentication": (context) => BlocProvider(
-            create: (context) =>
-            AuthenticationBloc()..add(const InitializeApp()),
-            child: const Authentication(),
-          ),
-          "/main_screen": (context) => MultiBlocProvider(
-              providers: [
+                create: (context) =>
+                    AuthenticationBloc()..add(const InitializeApp()),
+                child: const Authentication(),
+              ),
+          "/main_screen": (context) => MultiBlocProvider(providers: [
                 BlocProvider(
                     create: (context) => HomeBloc()
                       ..add(FetchHomeScreenEvent(
@@ -242,14 +241,37 @@ class _MyAppState extends State<MyApp> {
                           currentLongitude: '',
                           currentLatitude: '',
                           gender: ''))),
-                BlocProvider(create: (context) => ProfessionalBloc()),
-                BlocProvider(create: (context) => ProfileBloc()..add(const FetchProfileEvent())),
+                BlocProvider(
+                  create: (context) {
+                    final bloc = PostWorkBloc();
+                    bloc.add(const FetchWorkPlaceEvent());
+                    bloc.add(const FetchWorkKnownLanguageEvent());
+                    return bloc;
+                  },
+                ),
+                BlocProvider(
+                  create: (context) {
+                    final bloc = ProfessionalBloc();
+                    bloc.add(const FetchCategoryListEvent());
+                    return bloc;
+                  },
+                ),
+                BlocProvider(
+                    create: (context) =>
+                        ProfileBloc()..add(const FetchProfileEvent())),
                 BlocProvider(create: (context) => ShowInterestedBloc()),
-                BlocProvider(create: (context) => PostWorkBloc(),),
-                BlocProvider(create: (context) => ShowInterestedBloc(),),
-              ],
-              child: const MainScreen()
-          ),
+                BlocProvider(
+                  create: (context) {
+                    final bloc = PostWorkBloc();
+                    bloc.add(const FetchWorkPlaceEvent());
+                    bloc.add(const FetchWorkKnownLanguageEvent());
+                    return bloc;
+                  },
+                ),
+                BlocProvider(
+                  create: (context) => ShowInterestedBloc(),
+                ),
+              ], child: const MainScreen()),
         },
       ),
     );
@@ -295,11 +317,9 @@ class _AuthenticationState extends State<Authentication> {
             ], child: const LoginScreen());
           }
           if (state is AuthenticationProfileRequired) {
-            print("auth profile ------------");
             return const SelectUserType();
           }
           if (state is AuthenticationHomeScreen) {
-            print("auth home ");
             return MultiBlocProvider(providers: [
               BlocProvider(
                   create: (context) => HomeBloc()
@@ -312,11 +332,29 @@ class _AuthenticationState extends State<Authentication> {
                         currentLongitude: '',
                         currentLatitude: '',
                         gender: ''))),
-              BlocProvider(create: (context) => ProfessionalBloc()),
-              BlocProvider(create: (context) => ProfileBloc()..add(const FetchProfileEvent())),
+              BlocProvider(
+                create: (context) {
+                  final bloc = ProfessionalBloc();
+                  bloc.add(const FetchCategoryListEvent());
+                  return bloc;
+                },
+              ),
+              // BlocProvider(create: (context) => ProfessionalBloc()),
+              BlocProvider(
+                  create: (context) =>
+                      ProfileBloc()..add(const FetchProfileEvent())),
               BlocProvider(create: (context) => ShowInterestedBloc()),
-              BlocProvider(create: (context) => PostWorkBloc(),),
-              BlocProvider(create: (context) => ShowInterestedBloc(),),
+              BlocProvider(
+                create: (context) {
+                  final bloc = PostWorkBloc();
+                  bloc.add(const FetchWorkPlaceEvent());
+                  bloc.add(const FetchWorkKnownLanguageEvent());
+                  return bloc;
+                },
+              ),
+              BlocProvider(
+                create: (context) => ShowInterestedBloc(),
+              ),
             ], child: const MainScreen());
           }
           return MultiBlocProvider(providers: [

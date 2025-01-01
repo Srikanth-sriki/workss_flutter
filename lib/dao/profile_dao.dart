@@ -298,4 +298,24 @@ class ProfileDao {
     customLog('Response body:${response.body.toString()}');
     return response;
   }
+
+  Future fetchWorkPlace() async {
+    var url = '${Config.url}/common/work-places';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+   // customLog("Response Status Code : ${response.body.toString()}");
+    return response;
+  }
+
+  Future fetchKnownLanguage() async {
+    var url = '${Config.url}/common/known-languages';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+    return response;
+  }
+
+
+
 }

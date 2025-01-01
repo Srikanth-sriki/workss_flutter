@@ -1,24 +1,23 @@
 import 'dart:io';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/dao/get_user_location.dart';
 import 'package:works_app/models/fetch_profile_model.dart';
-import 'package:works_app/ui/onboarding/login_success.dart';
-import 'package:works_app/ui/onboarding/phone_number.dart';
 import 'package:works_app/ui/profile/component.dart';
+import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/dropdown.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geolocator/geolocator.dart';
+
 
 class Language {
   final String name;
@@ -48,6 +47,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   final _formKey = GlobalKey<FormState>();
   late ProfileBloc profileBloc;
   late InitialRegisterBloc initialRegisterBloc;
+  late ProfessionalBloc professionalBloc;
   bool loading = false;
   final TextEditingController _enterName = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -87,21 +87,37 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   String? latitude = "0.0";
   String? longitude = "0.0";
   String? profilePicture = "";
+  bool cityLoading = true;
+  List<String> dropdownCityItem = [];
+  bool feesChargesLoading = true;
+  List<String> feesChargesItem = [];
+  bool knowLanguageLoading = true;
+  List<DropdownItem<Language>> knownLanguageItems = [];
+  bool professionalTypesLoading = true;
+  List<String> professionalTypesItem = [];
 
-  void _validateForm() {}
+  void _validateForm(){}
 
-  String? formatChargeType(String? chargeType) {
-    print(chargeType);
-    switch (chargeType!.toLowerCase()) {
-      case 'hourly':
-        return 'Hourly';
-      case 'perday':
-        return 'PerDay';
-      case 'monthly':
-        return 'Monthly';
-      default:
-        return null;
-    }
+  // String? formatChargeType(String? chargeType) {
+  //   print(chargeType);
+  //   switch (chargeType!.toLowerCase()) {
+  //     case 'hourly':
+  //       return 'Hourly';
+  //     case 'perday':
+  //       return 'Per Day';
+  //     case 'monthly':
+  //       return 'Monthly';
+  //     default:
+  //       return null;
+  //   }
+  // }
+
+  String capitalizeWords(String input) {
+    if (input.isEmpty) return input;
+    return input
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
   }
 
   @override
@@ -109,6 +125,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
+    professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     controller = MultiSelectController<Language>();
     initialData();
   }
@@ -144,18 +161,11 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
           ? convertLanguages(widget.profileFetch.knownLanguages!)
           : [];
       selectedCharge = widget.profileFetch.userType == 'professional'
-          ? formatChargeType(widget.profileFetch.chargeType!)
+          ? capitalizeWords(widget.profileFetch.chargeType!)
           : null;
+
       print(selectedCharge);
-      print("selectedCharge");
-      print(widget.profileFetch.chargeType);
-      print(formatChargeType(widget.profileFetch.chargeType!));
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        List<DropdownItem<Language>> item = items;
-        controller.setItems(item);
-        controller.selectWhere((item) =>
-            widget.profileFetch.knownLanguages!.contains(item.value.name));
-      });
+      print(widget.profileFetch.chargeType!);
     }
   }
 
@@ -168,16 +178,17 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     });
   }
 
-  var items = [
-    DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
-    DropdownItem(label: 'Kannada', value: Language(name: 'Kannada', id: 2)),
-    DropdownItem(label: 'Hindi', value: Language(name: 'Hindi', id: 3)),
-    DropdownItem(label: 'Tamil', value: Language(name: 'Tamil', id: 4)),
-    DropdownItem(label: 'Telugu', value: Language(name: 'Telugu', id: 5)),
-    DropdownItem(label: 'Gujarati', value: Language(name: 'Gujarati', id: 6)),
-    DropdownItem(label: 'Malayalam', value: Language(name: 'Malayalam', id: 7)),
-    DropdownItem(label: 'Marathi', value: Language(name: 'Marathi', id: 8)),
-  ];
+  void knownLanguageUpdate(){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      List<DropdownItem<Language>> item = knownLanguageItems;
+      controller.setItems(item);
+      controller.selectWhere((item) =>
+          widget.profileFetch.knownLanguages!.contains(item.value.name));
+    });
+    selectedLanguage = convertLanguages(widget.profileFetch.knownLanguages!);
+    print(selectedLanguage);
+
+  }
 
   List<DropdownItem<Language>> convertLanguagesToDropdownItems(
       List<String> knownLanguages) {
@@ -312,6 +323,56 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                     message: state.message,
                   );
                 }
+                else if (state is FetchCityLoading) {
+                  setState(() {
+                    cityLoading = true;
+                  });
+                } else if (state is FetchChargeFeesLoading) {
+                  setState(() {
+                    feesChargesLoading = true;
+                  });
+                } else if (state is FetchCitySuccess) {
+                  setState(() {
+                    dropdownCityItem =
+                        state.dropDownItems.map((item) => item.city).toList();
+                    cityLoading = false;
+                  });
+                } else if (state is FetchCityFailed) {
+                  setState(() {
+                    cityLoading = false;
+                  });
+                } else if (state is FetchChargeFeesSuccess) {
+                  setState(() {
+                    feesChargesItem = state.fetchChargeFeesItems
+                        .map((item) => item.type)
+                        .toList();
+                    feesChargesLoading = false;
+                  });
+                } else if (state is FetchChargeFeesFailed) {
+                  setState(() {
+                    feesChargesLoading = false;
+                  });
+                }
+                if (state is FetchDropDownLoading) {
+                  setState(() {
+                    knowLanguageLoading = true;
+                  });
+                } else if (state is FetchKnownLanguageSuccess) {
+                  setState(() {
+                    knownLanguageItems =
+                        state.dropDownItems.asMap().entries.map((entry) {
+                          int index = entry.key + 1;
+                          var item = entry.value;
+                          return DropdownItem(
+                              label: item.language,
+                              value: Language(name: item.language, id: index));
+                        }).toList();
+                    knowLanguageLoading = false;
+                    knownLanguageUpdate();
+                  });
+                }
+
+
                 setState(() {});
               },
             ),
@@ -330,9 +391,31 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                     message: state.message,
                   );
                 }
+
                 setState(() {});
               },
-            )
+            ),
+            BlocListener<ProfessionalBloc, ProfessionalState>(
+              listener: (context, state) {
+                if (state is FetchCategoryListLoading) {
+                  setState(() {
+                    professionalTypesLoading = true;
+                  });
+                } else if (state is FetchCategoryListSuccess) {
+                  setState(() {
+                    professionalTypesItem =
+                        state.categories.map((item) => item.name).toList();
+
+                    professionalTypesLoading = false;
+                  });
+                } else if (state is FetchCategoryListFailed) {
+                  setState(() {
+                    professionalTypesLoading = false;
+                  });
+                }
+                setState(() {});
+              },
+            ),
           ],
           child: SafeArea(
             child: SingleChildScrollView(
@@ -430,7 +513,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           label: 'city'.tr(),
                           value: _selectedCity,
                           hintText: 'Select your city'.tr(),
-                          items: ['Mysore', 'Bangalore', 'Mangalore', 'Mandy'],
+                          items: dropdownCityItem,
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
                             _validateForm();
@@ -444,27 +527,24 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         ),
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          buildDropdown(
-                            value: _selectedProfession,
-                            label: 'profession_type'.tr(),
-                            hintText: 'Select your Profession'.tr(),
-                            items: [
-                              'Technology',
-                              'Healthcare',
-                              'Finance',
-                              'Education'
-                            ],
-                            onChanged: (value) => setState(() {
-                              _selectedProfession = value;
-                              _validateForm();
-                            }),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select your profession'.tr();
-                              }
-                              return null;
-                            },
-                          ),
+                if (!professionalTypesLoading) ...[
+                  buildDropdown(
+                    value: _selectedProfession,
+                    label: 'profession_type'.tr(),
+                    hintText: 'Select your Profession'.tr(),
+                    items: professionalTypesItem,
+                    onChanged: (value) => setState(() {
+                      _selectedProfession = value;
+                      _validateForm();
+                    }),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select your profession'.tr();
+                      }
+                      return null;
+                    },
+                  )
+                ],
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
@@ -472,7 +552,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           normalTextField(
                               hintText: "Experience".tr(),
                               controller: experienceController,
-                              maxLength: 3,
+                              maxLength: 2,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               inputType: TextInputType.number,
                               onChanged: (value) {
                                 _validateForm();
@@ -489,44 +572,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               errorMessage: '',
                               suffix: false,
                               prefix: false,
-                              // suffixIcon: Row(
-                              //   mainAxisSize: MainAxisSize.min,
-                              //   children: [
-                              //     Container(
-                              //       decoration: BoxDecoration(
-                              //         color: COLORS.neutralDarkTwo,
-                              //         border: Border(
-                              //           right: BorderSide(
-                              //             width: SizeConfig.blockWidth * 0.1,
-                              //             color: COLORS.neutralDarkTwo,
-                              //           ),
-                              //         ),
-                              //       ),
-                              //       height: SizeConfig.blockHeight * 5,
-                              //       width: SizeConfig.blockWidth * 0.4,
-                              //       margin: EdgeInsets.symmetric(
-                              //           horizontal: SizeConfig.blockWidth * 1),
-                              //     ),
-                              //     Container(
-                              //       constraints: BoxConstraints(
-                              //         maxWidth: SizeConfig.blockWidth *
-                              //             30, // Add constraints
-                              //       ),
-                              //       child: CustomDropdownButtonFormField(
-                              //         selectedValue: selectedExperence,
-                              //         items: const ['Year', 'Month'],
-                              //         onChanged: (String? newValue) {
-                              //           setState(() {
-                              //             selectedExperence = newValue;
-                              //           });
-                              //         },
-                              //         hintText: 'Select Duration',
-                              //         iconSize: SizeConfig.blockWidth * 6,
-                              //         iconColor: COLORS.accent,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
+
                               hasError: yearError),
                           SizedBox(height: SizeConfig.blockHeight),
                         ],
@@ -536,6 +582,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             hintText: "Charges".tr(),
                             controller: chargesController,
                             inputType: TextInputType.number,
+                            maxLength: 7,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             onChanged: (value) {
                               _validateForm();
                             },
@@ -568,24 +618,37 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                   margin: EdgeInsets.symmetric(
                                       horizontal: SizeConfig.blockWidth * 1),
                                 ),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: SizeConfig.blockWidth *
-                                        30, // Add constraints
-                                  ),
-                                  child: CustomDropdownButtonFormField(
-                                    selectedValue: selectedCharge,
-                                    items: const ['Hourly', 'PerDay', 'Monthly'],
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        selectedCharge = newValue;
-                                      });
-                                    },
-                                    hintText: 'Select Duration',
-                                    iconSize: SizeConfig.blockWidth * 6,
-                                    iconColor: COLORS.accent,
-                                  ),
-                                ),
+                                if (feesChargesLoading) ...[
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: SizeConfig.blockWidth * 4),
+                                    child:
+                                    LoadingAnimationWidget.discreteCircle(
+                                      color: COLORS.accent,
+                                      size: SizeConfig.blockWidth * 4,
+                                    ),
+                                  )
+                                ],
+                                    if (!feesChargesLoading) ...[
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: SizeConfig.blockWidth *
+                                              30, // Add constraints
+                                        ),
+                                        child: CustomDropdownButtonFormField(
+                                          selectedValue: selectedCharge,
+                                          items: feesChargesItem,
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedCharge = newValue;
+                                            });
+                                          },
+                                          hintText: 'Select Duration',
+                                          iconSize: SizeConfig.blockWidth * 6,
+                                          iconColor: COLORS.accent,
+                                        ),
+                                      )
+                                    ],
                               ],
                             ),
                             prefixIcon: Container(
@@ -640,6 +703,9 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               controller: ageController,
                               inputType: TextInputType.number,
                               maxLength: 2,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               onChanged: (value) {
                                 _validateForm();
                               },
@@ -690,96 +756,101 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
                           registerText(text: 'known_language'.tr()),
-                          MultiDropdown<Language>(
-                            items: items,
-                            controller: controller,
-                            enabled: true,
-                            searchEnabled: false,
-                            closeOnBackButton: true,
-                            dropdownDecoration: DropdownDecoration(
-                                maxHeight: SizeConfig.blockHeight * 30,
-                                elevation: SizeConfig.blockWidth * 5,
-                                marginTop: SizeConfig.blockHeight,
-                                backgroundColor: COLORS.white),
-                            chipDecoration: ChipDecoration(
-                                backgroundColor:
-                                    COLORS.primary.withOpacity(0.05),
-                                wrap: true,
-                                labelStyle: TextStyle(
-                                    color: COLORS.primary,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: "Poppins",
-                                    fontSize: SizeConfig.blockWidth * 3.25),
-                                runSpacing: 8,
-                                spacing: 10,
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 2),
-                                deleteIcon: Icon(
-                                  Icons.clear,
-                                  color: COLORS.black,
-                                  size: SizeConfig.blockWidth * 4,
-                                )),
-                            fieldDecoration: FieldDecoration(
-                              animateSuffixIcon: true,
-                              padding: EdgeInsets.only(
-                                top: SizeConfig.blockHeight * 2.2,
-                                bottom: SizeConfig.blockHeight * 2.2,
-                                left: SizeConfig.blockWidth * 4,
-                                right: SizeConfig.blockWidth * 3,
-                              ),
-                              suffixIcon: Icon(
-                                Icons.keyboard_arrow_down_outlined,
-                                color: COLORS.accent,
-                                size: SizeConfig.blockWidth * 6,
-                              ),
-                              hintText: 'Select Languages'.tr(),
-                              hintStyle: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                                fontSize: SizeConfig.blockWidth * 3.2,
-                              ),
-                              backgroundColor: COLORS.white,
-                              showClearIcon: true,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 4),
-                                borderSide: const BorderSide(
-                                    color: COLORS.neutralDarkTwo),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 4),
-                                borderSide: const BorderSide(
-                                  color: COLORS.neutralDarkTwo,
+                          if (!knowLanguageLoading) ...[
+                            MultiDropdown<Language>(
+                              items: knownLanguageItems,
+                              controller: controller,
+                              enabled: true,
+                              searchEnabled: false,
+                              closeOnBackButton: true,
+                              dropdownDecoration: DropdownDecoration(
+                                  maxHeight: SizeConfig.blockHeight * 30,
+                                  elevation: SizeConfig.blockWidth * 5,
+                                  marginTop: SizeConfig.blockHeight,
+                                  backgroundColor: COLORS.white),
+                              chipDecoration: ChipDecoration(
+                                  backgroundColor:
+                                  COLORS.primary.withOpacity(0.05),
+                                  wrap: true,
+                                  labelStyle: TextStyle(
+                                      color: COLORS.primary,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: "Poppins",
+                                      fontSize: SizeConfig.blockWidth * 3.25),
+                                  runSpacing: 8,
+                                  spacing: 10,
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 2),
+                                  deleteIcon: Icon(
+                                    Icons.clear,
+                                    color: COLORS.black,
+                                    size: SizeConfig.blockWidth * 4,
+                                  )),
+                              fieldDecoration: FieldDecoration(
+                                animateSuffixIcon: true,
+                                padding: EdgeInsets.only(
+                                  top: SizeConfig.blockHeight * 2.2,
+                                  bottom: SizeConfig.blockHeight * 2.2,
+                                  left: SizeConfig.blockWidth * 4,
+                                  right: SizeConfig.blockWidth * 3,
+                                ),
+                                suffixIcon: Icon(
+                                  Icons.keyboard_arrow_down_outlined,
+                                  color: COLORS.accent,
+                                  size: SizeConfig.blockWidth * 6,
+                                ),
+                                hintText: 'Select Languages'.tr(),
+                                hintStyle: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                  fontSize: SizeConfig.blockWidth * 3.2,
+                                ),
+                                backgroundColor: COLORS.white,
+                                showClearIcon: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 4),
+                                  borderSide: const BorderSide(
+                                      color: COLORS.neutralDarkTwo),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 4),
+                                  borderSide: const BorderSide(
+                                    color: COLORS.neutralDarkTwo,
+                                  ),
                                 ),
                               ),
-                            ),
-                            dropdownItemDecoration: DropdownItemDecoration(
-                              backgroundColor: COLORS.white,
-                              textColor: COLORS.neutralDark,
-                              selectedIcon: Icon(
-                                Icons.check,
-                                color: COLORS.accent,
-                                size: SizeConfig.blockWidth * 5,
+                              dropdownItemDecoration: DropdownItemDecoration(
+                                backgroundColor: COLORS.white,
+                                textColor: COLORS.neutralDark,
+                                selectedIcon: Icon(
+                                  Icons.check,
+                                  color: COLORS.accent,
+                                  size: SizeConfig.blockWidth * 5,
+                                ),
+                                selectedTextColor: COLORS.neutralDark,
+                                disabledTextColor: COLORS.neutralDark,
+                                disabledIcon:
+                                Icon(Icons.lock, color: Colors.grey.shade300),
                               ),
-                              selectedTextColor: COLORS.neutralDark,
-                              disabledTextColor: COLORS.neutralDark,
-                              disabledIcon:
-                                  Icon(Icons.lock, color: Colors.grey.shade300),
-                            ),
-                            validator: (value) {
-                              if (selectedLanguage.isEmpty) {
-                                return 'Please select a language'.tr();
-                              }
-                              return null;
-                            },
-                            onSelectionChange: (selectedItems) {
-                              selectedLanguage = selectedItems;
-                              debugPrint("OnSelectionChange: $selectedItems");
-                              _validateForm();
-                            },
-                          ),
+                              validator: (value) {
+                                if (selectedLanguage.isEmpty) {
+                                  return 'Please select a language'.tr();
+                                }
+                                return null;
+                              },
+                              onSelectionChange: (selectedItems) {
+                                selectedLanguage = selectedItems;
+                                debugPrint("OnSelectionChange: $selectedItems");
+                                _validateForm();
+                              },
+                            )
+                          ],
+                          if (knowLanguageLoading) ...[
+                            dropDownLoader(hintText: 'Select Languages')
+                          ]
                         ],
                         SizedBox(
                           height: SizeConfig.blockHeight * 2.5,

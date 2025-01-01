@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:works_app/dao/home_dao.dart';
+import 'package:works_app/models/category_list_modal.dart';
 import 'package:works_app/models/professionals_list_model.dart';
 
 import '../../helper/custom_log.dart';
@@ -21,6 +22,9 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
     });
     on<FetchProfessionalView>((event, emit) async {
       await mapFetchProfessionalViewWorkEvent(event, emit);
+    });
+    on<FetchCategoryListEvent>((event, emit) async {
+      await mapFetchCategoryList(event, emit);
     });
   }
 
@@ -100,4 +104,29 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
       emit(const ProfessionalViewError("Something Went wrong"));
     }
   }
+
+  Future<void> mapFetchCategoryList(
+      FetchCategoryListEvent event, Emitter<ProfessionalState> emit) async {
+    try {
+      emit(const FetchCategoryListLoading());
+      var response = await homeDao.getCategoryList();
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+        if (jsonDecoded['status'] == true) {
+          FetchCategoryModalData categoryData =
+          FetchCategoryModalData.fromJson(jsonDecoded);
+
+          emit(FetchCategoryListSuccess(categories: categoryData.data));
+        } else {
+          emit(FetchCategoryListFailed(
+              message: jsonDecoded["message"] ?? "Failed to fetch data"));
+        }
+      } else {
+        emit(FetchCategoryListFailed(message: "Error: ${response.statusCode}"));
+      }
+    } catch (error) {
+      emit(FetchCategoryListFailed(message: "Something went wrong: $error"));
+    }
+  }
+
 }

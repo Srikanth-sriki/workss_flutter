@@ -13,9 +13,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/ui/chat/chat_profile_view.dart';
+import 'package:works_app/ui/chat/modal/delete_leave_group.dart';
 import 'package:works_app/ui/chat/remove_friends.dart';
 
 import '../../bloc/profile/profile_bloc.dart';
@@ -25,6 +27,8 @@ import '../profile/notification.dart';
 import 'component.dart';
 import 'chat_wave_form.dart';
 import 'invite_friends.dart';
+import 'modal/markas_admin_modal.dart';
+import 'modal/report_or_block.dart';
 
 class ChatViewScreen extends StatefulWidget {
   const ChatViewScreen({super.key});
@@ -273,8 +277,66 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                             onTap: () => print('Add Friends clicked'),
                           ),
                           BottomSheetItem(
+                            title: 'Delete Group',
+                            onTap: () => {
+                              showMaterialModalBottomSheet(
+                                enableDrag: true,
+                                expand: false,
+                                isDismissible: true,
+                                backgroundColor: COLORS.white,
+                                context: context,
+                                closeProgressThreshold: 0,
+                                duration: const Duration(seconds: 0),
+                                useRootNavigator: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                builder: (context) => const DeleteGroupModal(
+                                  buttonText: 'DELETE',
+                                  header:
+                                      'Are you sure you want to \n delete the group?',
+                                ),
+                              ),
+                            },
+                          ),
+                          BottomSheetItem(
                             title: 'Leave Group',
-                            onTap: () => print('Turn-Off Notification clicked'),
+                            onTap: () => {
+                              // showMaterialModalBottomSheet(
+                              //   enableDrag: true,
+                              //   expand: false,
+                              //   isDismissible: true,
+                              //   backgroundColor: COLORS.white,
+                              //   context: context,
+                              //   closeProgressThreshold: 0,
+                              //   duration: const Duration(seconds: 0),
+                              //   useRootNavigator: true,
+                              //   shape: const RoundedRectangleBorder(
+                              //     borderRadius: BorderRadius.vertical(
+                              //         top: Radius.circular(20)),
+                              //   ),
+                              //   builder: (context) =>
+                              //   const DeleteGroupModal(
+                              //     buttonText: 'Are you sure you want to \nleave the group?',header: 'LEAVE',
+                              //   ),
+                              // ),
+                              showMaterialModalBottomSheet(
+                                enableDrag: true,
+                                expand: false,
+                                isDismissible: true,
+                                backgroundColor: COLORS.white,
+                                context: context,
+                                closeProgressThreshold: 0,
+                                duration: const Duration(seconds: 0),
+                                useRootNavigator: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                builder: (context) => const MarkasAdminModal(),
+                              ),
+                            },
                           ),
                           BottomSheetItem(
                             title: 'Clear Chat',
@@ -282,8 +344,25 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                           ),
                           BottomSheetItem(
                             title: 'Report or Block',
-                            onTap: () => print('Add Friends clicked'),
-                          ),
+                            onTap: () => {
+                              showMaterialModalBottomSheet(
+                                enableDrag: true,
+                                expand: false,
+                                isDismissible: true,
+                                backgroundColor: COLORS.white,
+                                context: context,
+                                closeProgressThreshold: 0,
+                                duration: const Duration(seconds: 0),
+                                useRootNavigator: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                builder: (context) =>
+                                    const ReportOrBlockModal(),
+                              ),
+                            },
+                          )
                         ],
                       );
                     },
@@ -316,7 +395,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       //     appDirectory: appDirectory,
                       //   ),
 
-                      SentMessage(
+                      const SentMessage(
                         message: "Hello this is cool",
                         key: null,
                         isSentByMe: true,
@@ -324,7 +403,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         audioShow: false,
                         textShow: false,
                         imageShow: true,
-                        imageUrl: 'https://via.placeholder.com/150',
+                        imageUrl: 'https://www.imgcorporations.com/images/home-pages/storm.jpg',
                       ),
                       ReceivedMessage(
                         message:
@@ -409,7 +488,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   }),
                   child: Container(
                     padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-                    height: SizeConfig.blockHeight * 8.5,
+                    height: SizeConfig.blockHeight * 8,
                     decoration: BoxDecoration(
                         color: COLORS.primaryOne.withOpacity(0.35),
                         borderRadius:
@@ -431,6 +510,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                           duration: const Duration(milliseconds: 200),
                           child: Container(
                             width: SizeConfig.blockWidth * 90,
+                            height: SizeConfig.blockHeight * 8,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
                                   SizeConfig.blockWidth * 3),
@@ -488,6 +568,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                           ),
                         )
                       : Container(
+                          height: SizeConfig.blockHeight * 8,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(
                                 SizeConfig.blockWidth * 3.25),
@@ -505,7 +586,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                 child: TextField(
                                   controller: _messageController,
                                   style: TextStyle(
-                                    color: COLORS.neutralDarkOne,
+                                    color: COLORS.neutralDark,
                                     fontSize: SizeConfig.blockWidth * 3.25,
                                     fontWeight: FontWeight.w400,
                                     fontFamily: "Poppins",
@@ -554,7 +635,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                     ),
                                   ),
                                   maxLines:
-                                      null, // Allow the field to grow with multiple lines
+                                      null,
                                   minLines: 1, // Start with 1 line
                                   expands:
                                       false, // Don't make it fill all available space, but grow as needed

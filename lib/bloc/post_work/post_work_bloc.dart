@@ -6,16 +6,19 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:works_app/helper/custom_log.dart';
 import '../../dao/home_dao.dart';
-
+import '../../dao/profile_dao.dart';
+import '../../models/dropDown_modal.dart';
 
 part 'post_work_event.dart';
 part 'post_work_state.dart';
 
 class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
   late HomeDao homeDao;
+  late ProfileDao profileDao;
 
   PostWorkBloc() : super(PostWorkInitial()) {
     homeDao = HomeDao();
+    profileDao = ProfileDao();
 
     on<CreatePostWorkEvent>((event, emit) async {
       await mapPostWorkAccountEvent(event, emit);
@@ -29,6 +32,14 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
 
     on<PostWorkDeleteEvent>((event, emit) async {
       await mapDeletePostWorkEvent(event, emit);
+    });
+
+    on<FetchWorkPlaceEvent>((event, emit) async {
+      await mapFetchWorkPlace(event, emit);
+    });
+
+    on<FetchWorkKnownLanguageEvent>((event, emit) async {
+      await mapFetchKnownLanguagePlace(event, emit);
     });
 
   }
@@ -56,10 +67,10 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-        String workId = jsonDecoded["data"] ["id"];
+        String workId = jsonDecoded["data"]["id"];
         customLog(workId);
 
-        emit(PostWorkSuccess(message: message,workId: workId));
+        emit(PostWorkSuccess(message: message, workId: workId));
       } else {
         String message = jsonDecoded["message"];
         emit(PostWorkFailed(message: message));
@@ -88,6 +99,7 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       emit(UploadImageFailed(message: "Something Went Wrong"));
     }
   }
+
   Future<void> mapEditPostWorkAccountEvent(
       EditPostWorkEvent event, Emitter<PostWorkState> emit) async {
     try {
@@ -145,6 +157,58 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       emit(DeletePostWorkFailed(message: "Something went wrong"));
     }
   }
+
+  Future<void> mapFetchWorkPlace(
+      FetchWorkPlaceEvent event, Emitter<PostWorkState> emit) async {
+    try {
+      emit(const FetchDropDownLoading());
+      var response = await profileDao.fetchWorkPlace();
+      customLog(response);
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+        if (jsonDecoded['status'] == true) {
+          FetchDropDown fetchDropDown = FetchDropDown.fromJson(jsonDecoded);
+          emit(FetchDropDownSuccess(
+            dropDownItems: fetchDropDown.data,
+            message: fetchDropDown.message,
+          ));
+        } else {
+          emit(FetchDropDownFailed(
+              message: jsonDecoded["message"] ?? "Failed to fetch data"));
+        }
+      } else {
+        emit(FetchDropDownFailed(message: "Error: ${response.statusCode}"));
+      }
+    } catch (error) {
+      emit(FetchDropDownFailed(message: "Something went wrong: $error"));
+    }
+  }
+
+  Future<void> mapFetchKnownLanguagePlace(
+      FetchWorkKnownLanguageEvent event, Emitter<PostWorkState> emit) async {
+    try {
+      emit(const FetchDropDownLoading());
+      var response = await profileDao.fetchKnownLanguage();
+      customLog(response);
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+        if (jsonDecoded['status'] == true) {
+          FetchKnownLanguageDropDown fetchKnownLanguageDropDown = FetchKnownLanguageDropDown.fromJson(jsonDecoded);
+          emit(FetchKnownLanguageSuccess(
+            dropDownItems: fetchKnownLanguageDropDown.data,
+            message: fetchKnownLanguageDropDown.message,
+          ));
+        } else {
+          emit(FetchDropDownFailed(
+              message: jsonDecoded["message"] ?? "Failed to fetch data"));
+        }
+      } else {
+        emit(FetchDropDownFailed(message: "Error: ${response.statusCode}"));
+      }
+    } catch (error) {
+      emit(FetchDropDownFailed(message: "Something went wrong: $error"));
+    }
+  }
 }
-
-

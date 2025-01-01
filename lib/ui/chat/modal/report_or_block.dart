@@ -4,24 +4,21 @@ import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../global_helper/reuse_widget.dart';
 
-class EditGroupDescriptionModal extends StatefulWidget {
-  const EditGroupDescriptionModal({super.key});
+class ReportOrBlockModal extends StatefulWidget {
+  const ReportOrBlockModal({super.key});
 
   @override
-  _EditGroupDescriptionModalState createState() =>
-      _EditGroupDescriptionModalState();
+  _ReportOrBlockModalState createState() => _ReportOrBlockModalState();
 }
 
-class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
+class _ReportOrBlockModalState extends State<ReportOrBlockModal> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController messageController = TextEditingController();
-
 
   bool messageError = false;
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -52,7 +49,7 @@ class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Group Description'.tr(),
+                      'Report or Block'.tr(),
                       style: TextStyle(
                         color: COLORS.neutralDark,
                         fontSize: SizeConfig.blockWidth * 4,
@@ -74,24 +71,22 @@ class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
                   color: COLORS.neutralDarkTwo,
                   thickness: SizeConfig.blockHeight * 0.15,
                 ),
-
                 buildBioTextField(
-                  label: ''.tr(),
-                  controller: messageController,
-                  hintText: "Enter Group Description".tr(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      setState(() => messageError = true);
-                      return 'Please enter Group Description'.tr();
-                    }
-                    setState(() => messageError = false);
-                    return null;
-                  },
-                  error: messageError,
-                  title: ''.tr(),
-                  onChanged: (value) {},
-                    maxLines: 5
-                ),
+                    label: ''.tr(),
+                    controller: messageController,
+                    hintText: "Write a reason for report or block group".tr(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        setState(() => messageError = true);
+                        return 'Please enter reason'.tr();
+                      }
+                      setState(() => messageError = false);
+                      return null;
+                    },
+                    error: messageError,
+                    title: ''.tr(),
+                    onChanged: (value) {},
+                    maxLines: 5),
                 Container(
                   margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
                   padding: EdgeInsets.only(
@@ -118,12 +113,9 @@ class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
                         textColor: COLORS.neutralDark,
                       ),
                       customButton(
-                        text: 'SAVE'.tr(),
+                        text: 'REPORT GROUP'.tr(),
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-
-                          }
-
+                          if (_formKey.currentState!.validate()) {}
                         },
                         backgroundColor: COLORS.primary,
                         showIcon: false,

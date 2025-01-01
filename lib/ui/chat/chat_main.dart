@@ -180,7 +180,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                 horizontal: SizeConfig.blockWidth * 4.5,
                               ),
                               child: addFriendText(
-                                  textOne: 'Friends', textTwo: 'View All', onTap: () {}),
+                                  textOne: 'Friends', textTwo: 'View All', onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => FriendsSearchList(),));
+                              }),
                             ),
                             SizedBox(
                               height: SizeConfig.blockHeight * 18,
@@ -236,7 +238,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                 right: SizeConfig.blockHeight * 4,
                 child: FloatingActionButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FriendsSearchList(),));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AddFriendsScreen(header: 'Add Friend'),));
                   },
                   backgroundColor: COLORS.primary,
                   child: Image.asset('assets/images/chat/add_friend.png',

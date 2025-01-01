@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:works_app/models/category_list_modal.dart';
 import 'package:works_app/ui/professional/categories_item.dart';
 
 import '../../components/colors.dart';
@@ -7,7 +8,7 @@ import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 
 class CategoriesScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> categoriesData;
+  final List<CategorySub> categoriesData;
   const CategoriesScreen({super.key, required this.categoriesData});
 
   @override
@@ -52,10 +53,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           padding: EdgeInsets.symmetric(
                               vertical: SizeConfig.blockHeight * 2.5,
                               horizontal: SizeConfig.blockWidth * 5),
+                          decoration: BoxDecoration(
+                            color: COLORS.primaryOne.withOpacity(0.2),
+                            borderRadius: BorderRadius.all(Radius.circular(SizeConfig.blockWidth*4))
+                          ),
                           margin: EdgeInsets.symmetric(
                               vertical: SizeConfig.blockHeight),
                           width: SizeConfig.blockWidth * 100,
-                          color: COLORS.primaryOne.withOpacity(0.2),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -68,7 +72,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                 decoration: BoxDecoration(
                                     image: DecorationImage(
                                       image: AssetImage(widget
-                                          .categoriesData[index]['images']),
+                                          .categoriesData[index].image),
                                       fit: BoxFit.contain,
                                     ),
                                     borderRadius: BorderRadius.circular(
@@ -79,7 +83,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                 height: SizeConfig.blockHeight * 0.5,
                               ),
                               Text(
-                                widget.categoriesData[index]['title'],
+                                widget.categoriesData[index].name,
                                 style: TextStyle(
                                   color: COLORS.neutralDark,
                                   fontSize: SizeConfig.blockWidth * 3.6,
