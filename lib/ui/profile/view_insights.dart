@@ -8,6 +8,7 @@ import 'package:works_app/global_helper/loading_placeholder/work_insight.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
@@ -386,7 +387,8 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                                   BlocProvider(
                                     create: (context) =>
                                         ShowInterestedBloc(),
-                                  )
+                                  ),
+                                  BlocProvider(create:(context)=>ReportPostBloc() )
                                 ],
                                 child: ProfessionalViewScreen(
                                   id: professionalData.id!,

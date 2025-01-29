@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/config.dart';
 import '../../components/size_config.dart';
@@ -72,8 +73,6 @@ class _WorkSearchListState extends State<WorkSearchList> {
     });
   }
 
-
-
   void _fetchData({bool isNewFetch = false}) {
     if (isNewFetch) {
       homeFetchModel.clear();
@@ -90,8 +89,6 @@ class _WorkSearchListState extends State<WorkSearchList> {
         currentLongitude: currentLongitude,
         currentLatitude: currentLatitude));
   }
-
-
 
   void _loadMoreData() {
     setState(() {
@@ -131,7 +128,6 @@ class _WorkSearchListState extends State<WorkSearchList> {
         print(currentLatitude);
         _fetchData();
       });
-
     } else {
       print("Location permission not granted");
     }
@@ -225,22 +221,22 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           size: SizeConfig.blockWidth * 5,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 3.25),
                           borderSide: BorderSide(
                               color: COLORS.neutralDarkTwo.withOpacity(0.6),
                               width: SizeConfig.blockWidth * 0.1),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 3.25),
                           borderSide: BorderSide(
                               color: COLORS.neutralDarkTwo.withOpacity(0.6),
                               width: SizeConfig.blockWidth * 0.1),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 3.25),
                           borderSide: BorderSide(
                               color: COLORS.neutralDarkTwo.withOpacity(0.6),
                               width: SizeConfig.blockWidth * 0.1),
@@ -417,7 +413,9 @@ class _WorkSearchListState extends State<WorkSearchList> {
                                 ),
                                 BlocProvider(
                                   create: (context) => ShowInterestedBloc(),
-                                )
+                                ),
+                                BlocProvider(
+                                    create: (context) => ReportPostBloc())
                               ],
                               child: WorkDetailsScreen(
                                 id: work.id!,

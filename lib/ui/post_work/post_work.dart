@@ -108,6 +108,13 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     postWorkBloc = BlocProvider.of<PostWorkBloc>(context);
     profileBloc = BlocProvider.of<ProfileBloc>(context);
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
+    _fetchData();
+  }
+
+  void _fetchData(){
+    professionalBloc.add(const FetchCategoryListEvent());
+    postWorkBloc.add(const FetchWorkKnownLanguageEvent());
+    postWorkBloc.add(const FetchWorkPlaceEvent());
   }
 
   void _submitButton() {
@@ -362,28 +369,22 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (!professionalTypesLoading) ...[
-                          buildDropdown(
-                            label: 'Professional/Worker Required'.tr(),
-                            hintText: 'Select Profession'.tr(),
-                            items: professionalTypesItem,
-                            onChanged: (value) => setState(() {
-                              _selectedProfession = value;
-                              _validateForm();
-                            }),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select your profession'.tr();
-                              }
-                              return null;
-                            },
-                          )
-                        ] else ...[
-                          SizedBox(height: SizeConfig.blockHeight),
-                          registerText(
-                              text: 'Professional/Worker Required'.tr()),
-                          dropDownLoader(hintText: 'profession_type')
-                        ],
+                        buildDropdown(
+                          label: 'Professional/Worker Required'.tr(),
+                          hintText: 'Select Profession'.tr(),
+                          items: professionalTypesItem,
+                          onChanged: (value) => setState(() {
+                            _selectedProfession = value;
+                            _validateForm();
+                          }),
+                          itemLoading: professionalTypesLoading,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select your profession'.tr();
+                            }
+                            return null;
+                          },
+                        ),
                         buildDynamicRadioSelection(
                           title: 'Experience Level'.tr(),
                           options: [
@@ -454,9 +455,10 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                               //   fontSize: SizeConfig.blockWidth * 3.2,
                               // ),
                               animateSuffixIcon: true,
+                              borderRadius: SizeConfig.blockWidth*4,
                               padding: EdgeInsets.only(
-                                // top: SizeConfig.blockHeight * 2.2,
-                                // bottom: SizeConfig.blockHeight * 2.2,
+                                top: SizeConfig.blockHeight * 2.7,
+                                bottom: SizeConfig.blockHeight * 2.7,
                                 left: SizeConfig.blockWidth * 4,
                                 right: SizeConfig.blockWidth * 3,
                               ),
@@ -550,7 +552,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                 ),
                               ),
                             );
-                          },
+                          },  borderRadius: BorderRadius.circular(
+                            SizeConfig.blockWidth * 3.5),
                           child: Container(
                             width: SizeConfig.blockWidth * 100,
                             height: SizeConfig.blockHeight * 7.5,
@@ -618,6 +621,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                             }
                             return null;
                           },
+                          itemLoading: workPlaceLoading,
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 0.5),
                         _buildBioTextField(

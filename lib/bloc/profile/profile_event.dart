@@ -97,11 +97,11 @@ class FetchPostViewEvent extends ProfileEvent {
   @override
   List<Object> get props => [];
 }
-
+typedef CallbackWithMessage = void Function(String message);
 class DeleteAccount extends ProfileEvent {
   String reason;
-  VoidCallback onSuccess;
-  VoidCallback onError;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
   DeleteAccount(
       {required this.onSuccess, required this.onError, required this.reason});
   @override

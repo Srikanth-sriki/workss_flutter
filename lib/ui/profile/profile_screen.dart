@@ -183,7 +183,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 profileFetch: profileFetch,
                                               ),
                                             )));
-                              },
+                              },  borderRadius: BorderRadius.all(
+        Radius.circular(
+            SizeConfig.blockWidth * 2)),
                               child: Container(
                                 width: SizeConfig.blockWidth * 8,
                                 height: SizeConfig.blockWidth * 8,

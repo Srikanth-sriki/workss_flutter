@@ -39,3 +39,4 @@ class FetchWorkSingleView extends HomeEvent {
   @override
   List<Object> get props => [workId];
 }
+

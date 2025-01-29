@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../dao/friends_dao.dart';
 import '../../dao/home_dao.dart';
 
 part 'show_interested_event.dart';
@@ -13,8 +14,10 @@ part 'show_interested_state.dart';
 class ShowInterestedBloc
     extends Bloc<ShowInterestedEvent, ShowInterestedState> {
   late HomeDao homeDao;
+  late FriendsDao friendsDao;
   ShowInterestedBloc() : super(ShowInterestedInitial()) {
     homeDao = HomeDao();
+    friendsDao = FriendsDao();
     on<SaveInterestedWork>((event, emit) async {
       await mapInterestedPropertyEvent(event, emit);
     });
@@ -25,6 +28,22 @@ class ShowInterestedBloc
 
     on<ProfessionalSavedUs>((event, emit) async {
       await mapProfessionalSavedUsEvent(event, emit);
+    });
+
+    on<AddFriendEvent>((event, emit) async {
+      await mapAddFriendsEvent(event, emit);
+    });
+
+    on<AcceptRequestFriendsEvent>((event, emit) async {
+      await mapAcceptRequestEvent(event, emit);
+    });
+
+    on<RejectRequestFriendsEvent>((event, emit) async {
+      await mapRejectRequestEvent(event, emit);
+    });
+
+    on<UnfriendsEvent>((event, emit) async {
+      await mapUnfriendEvent(event, emit);
     });
   }
 
@@ -100,6 +119,117 @@ class ShowInterestedBloc
       }
     } catch (error) {
       emit(ProfessionalSavedFailed(message: "Something went wrong"));
+    }
+  }
+  
+  ///----------------------------------------------------------------------------------/////
+
+
+
+  Future<void> mapAddFriendsEvent(
+      AddFriendEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const WorkInterestedLoading());
+      var response =
+      await friendsDao.addFriends(userId: event.userId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(AddFriendSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(AddFriendFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(AddFriendFailed(message: message));
+      }
+    } catch (error) {
+      emit(AddFriendFailed(message: "Something went wrong"));
+    }
+  }
+
+
+
+  Future<void> mapAcceptRequestEvent(
+      AcceptRequestFriendsEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const WorkInterestedLoading());
+      var response =
+      await friendsDao.acceptRequestFriend(id: event.id);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(AcceptRequestFriendsSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(AcceptRequestFriendsFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(AcceptRequestFriendsFailed(message: message));
+      }
+    } catch (error) {
+      emit(AcceptRequestFriendsFailed(message: "Something went wrong"));
+    }
+  }
+
+
+
+  Future<void> mapRejectRequestEvent(
+      RejectRequestFriendsEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const WorkInterestedLoading());
+      var response =
+      await friendsDao.rejectRequestFriends(id: event.id);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(RejectRequestFriendsSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(RejectRequestFriendsFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(RejectRequestFriendsFailed(message: message));
+      }
+    } catch (error) {
+      emit(RejectRequestFriendsFailed(message: "Something went wrong"));
+    }
+  }
+
+
+
+
+  Future<void> mapUnfriendEvent(
+      UnfriendsEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const WorkInterestedLoading());
+      var response =
+      await friendsDao.unfriends(friendId: event.friendId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(UnfriendsSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(UnfriendsFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(UnfriendsFailed(message: message));
+      }
+    } catch (error) {
+      emit(UnfriendsFailed(message: "Something went wrong"));
     }
   }
 }

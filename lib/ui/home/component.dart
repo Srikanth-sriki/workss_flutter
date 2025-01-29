@@ -188,7 +188,7 @@ Widget addFriendText({required String textOne, required String textTwo,required 
         textAlign: TextAlign.end,
       ),
       InkWell(
-        onTap: onTap,
+        onTap: onTap, borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.2),
         child: Container(
           padding: EdgeInsets.all(SizeConfig.blockWidth * 2.25),
           decoration: BoxDecoration(

@@ -319,15 +319,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-        event.onSuccess();
+        event.onSuccess(message);
         emit(DeleteAccountSuccess(message: message));
       } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(DeleteAccountFailed(message: message));
       } else {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(DeleteAccountFailed(message: message));
       }
     } catch (error) {

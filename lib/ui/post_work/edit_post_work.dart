@@ -351,29 +351,23 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (!professionalTypesLoading) ...[
-                          buildDropdown(
-                            value: _selectedProfession,
-                            label: 'Professional/Worker Required'.tr(),
-                            hintText: 'Select Profession'.tr(),
-                            items: professionalTypesItem,
-                            onChanged: (value) => setState(() {
-                              _selectedProfession = value;
-                              _validateForm();
-                            }),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select your profession'.tr();
-                              }
-                              return null;
-                            },
-                          )
-                        ] else ...[
-                          SizedBox(height: SizeConfig.blockHeight),
-                          registerText(
-                              text: 'Professional/Worker Required'.tr()),
-                          dropDownLoader(hintText: 'profession_type')
-                        ],
+                        buildDropdown(
+                          value: _selectedProfession,
+                          label: 'Professional/Worker Required'.tr(),
+                          hintText: 'Select Profession'.tr(),
+                          items: professionalTypesItem,
+                          onChanged: (value) => setState(() {
+                            _selectedProfession = value;
+                            _validateForm();
+                          }),
+                          itemLoading:professionalTypesLoading ,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select your profession'.tr();
+                            }
+                            return null;
+                          },
+                        ),
 
                         buildDynamicRadioSelection(
                           options: [
@@ -430,9 +424,10 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                                   size: SizeConfig.blockWidth * 4,
                                 )),
                             fieldDecoration: FieldDecoration(
+                              borderRadius:  SizeConfig.blockWidth * 4,
                               padding: EdgeInsets.only(
-                                top: SizeConfig.blockHeight * 2.2,
-                                bottom: SizeConfig.blockHeight * 2.2,
+                                top: SizeConfig.blockHeight * 2.7,
+                                bottom: SizeConfig.blockHeight * 2.7,
                                 left: SizeConfig.blockWidth * 4,
                                 right: SizeConfig.blockWidth * 3,
                               ),
@@ -524,7 +519,8 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                                 ),
                               ),
                             );
-                          },
+                          },  borderRadius: BorderRadius.circular(
+                            SizeConfig.blockWidth * 3.5),
                           child: Container(
                             width: SizeConfig.blockWidth * 100,
                             height: SizeConfig.blockHeight * 7.5,
@@ -586,6 +582,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                             _selectedWorkPlace = value;
                             _validateForm();
                           }),
+                          itemLoading: workPlaceLoading,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please select work place'.tr();

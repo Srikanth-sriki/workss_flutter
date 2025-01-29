@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
@@ -9,6 +10,7 @@ import 'package:works_app/ui/profile/account_delete_success.dart';
 
 import '../../../bloc/authentication/authentication_bloc.dart';
 import '../../../components/global_handle.dart';
+import '../../../components/local_constant.dart';
 import '../../../global_helper/reuse_widget.dart';
 
 class AccountDeleteBottomSheet extends StatefulWidget {
@@ -106,14 +108,14 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       setState(() => messageError = true);
-                      return 'Please enter a message'.tr();
+                      return 'Please enter reason'.tr();
                     }
                     setState(() => messageError = false);
                     return null;
                   },
                   error: messageError,
                   title: 'Can you please share the reason with us'.tr(),
-                  onChanged: (value) {},
+                  onChanged: (value) {},maxLines: 6
                 ),
                 Container(
                   margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
@@ -145,19 +147,30 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             profileBloc.add(DeleteAccount(
-                                onSuccess: () {
-                                  GlobalBlocClass.authenticationBloc
-                                      ?.add(const AuthenticationLogoutEvent());
-                                  Navigator.pushAndRemoveUntil(
+                                onSuccess: (message) async{
+                                  // GlobalBlocClass.authenticationBloc
+                                  //     ?.add(const AuthenticationLogoutEvent());
+                                  // Navigator.pushAndRemoveUntil(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) =>
+                                  //     const AccountDeleteSuccess(),
+                                  //   ),
+                                  //       (Route<dynamic> route) => false,
+                                  // );
+                                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  await prefs.remove(LocalConstant.accessToken);
+                                  await prefs.remove(LocalConstant.userId);
+                                  await prefs.remove(LocalConstant.profileCompleted);
+                                  await prefs.remove(LocalConstant.phoneNumber);
+                                  await prefs.remove(LocalConstant.name);
+                                  Navigator.pushReplacement(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                      const AccountDeleteSuccess(),
-                                    ),
-                                        (Route<dynamic> route) => false,
+                                    MaterialPageRoute(builder: (context) => const AccountDeleteSuccess()),
                                   );
                                 },
-                                onError: () {
+                                onError: (message) {
+                                  Navigator.pop(context);
                                   showCustomSnackBar(
                                     context: context,
                                     message: 'Something Went wrong',

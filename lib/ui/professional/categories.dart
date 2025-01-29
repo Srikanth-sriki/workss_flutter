@@ -5,6 +5,7 @@ import 'package:works_app/ui/professional/categories_item.dart';
 
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
 
 class CategoriesScreen extends StatefulWidget {
@@ -49,14 +50,16 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                             widget.categoriesData[index])),
                           );
                         },
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(SizeConfig.blockWidth * 4)),
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                              vertical: SizeConfig.blockHeight * 2.5,
+                              vertical: SizeConfig.blockHeight * 2,
                               horizontal: SizeConfig.blockWidth * 5),
                           decoration: BoxDecoration(
-                            color: COLORS.primaryOne.withOpacity(0.2),
-                            borderRadius: BorderRadius.all(Radius.circular(SizeConfig.blockWidth*4))
-                          ),
+                              color: COLORS.primaryOne.withOpacity(0.2),
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(SizeConfig.blockWidth * 4))),
                           margin: EdgeInsets.symmetric(
                               vertical: SizeConfig.blockHeight),
                           width: SizeConfig.blockWidth * 100,
@@ -65,30 +68,39 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Container(
-                                width: SizeConfig.blockWidth * 20,
-                                height: SizeConfig.blockWidth * 20,
+                                width: SizeConfig.blockWidth * 18,
+                                height: SizeConfig.blockWidth * 18,
                                 margin: EdgeInsets.only(
                                     right: SizeConfig.blockWidth * 4),
                                 decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: AssetImage(widget
-                                          .categoriesData[index].image),
+                                  shape: BoxShape.circle,
+                                  color: COLORS.primaryOne.withOpacity(0.5),
+                                ),
+                                child: Center(
+                                  child: AspectRatio(
+                                    aspectRatio: 1 / 1.5,
+                                    child: Image.network(
+                                      widget.categoriesData[index].image,
                                       fit: BoxFit.contain,
                                     ),
-                                    borderRadius: BorderRadius.circular(
-                                        SizeConfig.blockWidth * 20),
-                                    color: COLORS.primaryOne.withOpacity(0.5)),
+                                  ),
+                                ),
                               ),
                               SizedBox(
                                 height: SizeConfig.blockHeight * 0.5,
                               ),
-                              Text(
-                                widget.categoriesData[index].name,
-                                style: TextStyle(
-                                  color: COLORS.neutralDark,
-                                  fontSize: SizeConfig.blockWidth * 3.6,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: "Poppins",
+                              SizedBox(
+                                width: SizeConfig.blockWidth * 55,
+                                child: Text(
+                                  capitalizeEachWord(
+                                      widget.categoriesData[index].name),
+                                  softWrap: true,
+                                  style: TextStyle(
+                                    color: COLORS.neutralDark,
+                                    fontSize: SizeConfig.blockWidth * 3.6,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Poppins",
+                                  ),
                                 ),
                               ),
                             ],

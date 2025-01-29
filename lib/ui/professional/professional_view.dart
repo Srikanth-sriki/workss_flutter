@@ -2,14 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/readmore_text.dart';
+import '../../global_helper/report_post.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/professional_view_model.dart';
 import '../profile/component.dart';
@@ -27,6 +30,7 @@ class ProfessionalViewScreen extends StatefulWidget {
 class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
   late ProfessionalBloc professionalBloc;
   late ShowInterestedBloc showInterestedBloc;
+  late ReportPostBloc reportPostBloc;
   final bool saved = false;
 
   @override
@@ -34,11 +38,14 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
     super.initState();
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    reportPostBloc =BlocProvider.of<ReportPostBloc>(context);
   }
 
   void _refreshPageAfterEdit() {
     professionalBloc.add(FetchProfessionalView(widget.id));
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -267,12 +274,47 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               ),
                               IconButton(
                                 icon: Icon(Icons.more_vert,
-                                    color: COLORS.black,
-                                    size: SizeConfig.blockWidth * 6.5),
-                                onPressed: () {
+                                    color: COLORS.black, size: SizeConfig.blockWidth * 6.5),
+                                onPressed: () async {
+                                  final result = await showMaterialModalBottomSheet(
+                                      enableDrag: true,
+                                      expand: false,
+                                      isDismissible: true,
+                                      backgroundColor: COLORS.white,
+                                      closeProgressThreshold: 0,
+                                      duration: const Duration(seconds: 0),
+                                      context: context,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(SizeConfig.blockWidth * 6)),
+                                      ),
+                                      builder: (context) => const ReportPostsBottomSheet(
+                                        message: '',
+                                      ));
 
+                                  if (result != null) {
+                                    setState(() {
+                                      reportPostBloc.add(ReportProfessionalEvent(
+                                        reason: result['message']!,
+                                        userId: professional.id!,
+                                        onSuccess: (message) {
+                                          showCustomSnackBar(
+                                              context: context,
+                                              message: message,backgroundColor: COLORS.neutralDarkOne
+                                          );
+                                        },
+                                        onError: (message) {
+                                          showCustomSnackBar(
+                                            context: context,
+                                            message: message,
+                                          );
+                                        },
+                                      ));
+                                    });
+
+                                  }
                                 },
-                              )
+                              ),
                             ]),
                       ],
                     ),
@@ -513,7 +555,8 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                             BlocProvider(
                                                               create: (context) =>
                                                                   ShowInterestedBloc(),
-                                                            )
+                                                            ),
+                                                            BlocProvider(create:(context)=>ReportPostBloc() )
                                                           ],
                                                           child:
                                                           ProfessionalViewScreen(

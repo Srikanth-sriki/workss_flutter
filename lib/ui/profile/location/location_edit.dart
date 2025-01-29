@@ -239,7 +239,8 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                       left: 0,
                       right: 0,
                       child: InkWell(
-                        onTap: _getCurrentLocation,
+                        onTap: _getCurrentLocation, borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3),
                         child: Container(
                           width: SizeConfig.blockWidth * 40,
                           margin: EdgeInsets.symmetric(

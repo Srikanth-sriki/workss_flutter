@@ -30,11 +30,18 @@ Widget friendSearchCards(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                image,
-                width: SizeConfig.blockWidth * 12,
-                height: SizeConfig.blockWidth * 12,
+              Container(
+                width: SizeConfig.blockWidth * 15,
+                height: SizeConfig.blockWidth * 15,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(image),
+                      fit: BoxFit.fill,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(
+                        SizeConfig.blockWidth * 3))),
               ),
+
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
                 width: SizeConfig.blockWidth * 40,
@@ -111,15 +118,23 @@ Widget friendSearchDetailsCards({
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                image,
+              Container(
                 width: SizeConfig.blockWidth * 12,
                 height: SizeConfig.blockWidth * 12,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(image),
+                      fit: BoxFit.fill,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(
+                        SizeConfig.blockWidth * 2.5))),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
                 width: SizeConfig.blockWidth * width,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       name,

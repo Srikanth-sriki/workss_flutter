@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
+import 'package:works_app/bloc/report_post_bloc.dart';
 import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/global_helper/popup.dart';
@@ -229,30 +230,30 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
-                  addFriendText(
-                      textOne: 'Add Friends',
-                      textTwo: 'View All',
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    const AddFriendsScreen(
-                                        header: 'Friend Suggestion')));
-                      }),
-                  SizedBox(
-                    height: SizeConfig.blockHeight * 33,
-                    child: ListView.builder(
-                        itemCount: 8,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return addFriendCard(
-                              added: index % 2 == 0 ? true : false,
-                              image: 'assets/images/home/dumy1.png',
-                              name: 'Julia Vandervort-Will');
-                        }),
-                  ),
+                  // addFriendText(
+                  //     textOne: 'Add Friends',
+                  //     textTwo: 'View All',
+                  //     onTap: () {
+                  //       Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (BuildContext context) =>
+                  //                   const AddFriendsScreen(
+                  //                       header: 'Friend Suggestion')));
+                  //     }),
+                  // SizedBox(
+                  //   height: SizeConfig.blockHeight * 33,
+                  //   child: ListView.builder(
+                  //       itemCount: 8,
+                  //       shrinkWrap: true,
+                  //       scrollDirection: Axis.horizontal,
+                  //       itemBuilder: (context, index) {
+                  //         return addFriendCard(
+                  //             added: index % 2 == 0 ? true : false,
+                  //             image: 'assets/images/home/dumy1.png',
+                  //             name: 'Julia Vandervort-Will');
+                  //       }),
+                  // ),
                   SizedBox(height: SizeConfig.blockHeight * 2),
                   Padding(
                     padding:
@@ -295,7 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     BlocProvider(
                                       create: (context) => ShowInterestedBloc(),
-                                    )
+                                    ),
+                                    BlocProvider(create: (context)=>ReportPostBloc())
                                   ],
                                   child: WorkDetailsScreen(
                                     id: work.id!,
@@ -494,11 +496,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   routeType: 'homo',
                                 )),
                       );
-                    },
+                    },borderRadius: BorderRadius.circular(
+                      SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-                      margin:
-                          EdgeInsets.only(right: SizeConfig.blockWidth * 2.8),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(
                               SizeConfig.blockWidth * 2.5),
@@ -511,6 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  SizedBox(width: SizeConfig.blockWidth * 2.8,),
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -525,7 +527,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                     child: const NotificationListScreen(),
                                   )));
-                    },
+                    },borderRadius: BorderRadius.circular(
+                      SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
@@ -576,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                                 child: const WorkSearchList(),
                               )));
-                },
+                },borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                 child: Container(
                   width: SizeConfig.blockWidth * 72,
                   height: SizeConfig.blockHeight * 8,
@@ -657,7 +660,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       selectedGender,
                     );
                   }
-                },
+                }, borderRadius:
+              BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                 child: Container(
                   padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
                   height: SizeConfig.blockHeight * 8,

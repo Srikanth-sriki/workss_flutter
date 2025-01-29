@@ -216,6 +216,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   String? _onPinCodeChanged(String? value) {
     if (value != null && value.length == 6) {
+      FocusScope.of(context).unfocus();
       getLatLngFromPinCode(value).then((latLng) {
         setState(() {
           latitude = latLng['lat']?.toString();
@@ -458,6 +459,7 @@ class _RegisterFormState extends State<RegisterForm> {
                             _selectedCity = value;
                             _validateForm();
                           }),
+                          itemLoading: cityLoading,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please select your city'.tr();
@@ -467,25 +469,22 @@ class _RegisterFormState extends State<RegisterForm> {
                         ),
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          if (!professionalTypesLoading) ...[
-                            buildDropdown(
-                              label: 'profession_type'.tr(),
-                              hintText: 'Select your Profession'.tr(),
-                              items: professionalTypesItem,
-                              onChanged: (value) => setState(() {
-                                _selectedProfession = value;
-                                _validateForm();
-                              }),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please select your profession'.tr();
-                                }
-                                return null;
-                              },
-                            )
-                          ] else ...[
-                            dropDownLoader(hintText: 'profession_type')
-                          ],
+                          buildDropdown(
+                            label: 'profession_type'.tr(),
+                            hintText: 'Select your Profession'.tr(),
+                            items: professionalTypesItem,
+                            onChanged: (value) => setState(() {
+                              _selectedProfession = value;
+                              _validateForm();
+                            }),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your profession'.tr();
+                              }
+                              return null;
+                            },
+                            itemLoading: professionalTypesLoading,
+                          )
                         ],
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
@@ -729,9 +728,10 @@ class _RegisterFormState extends State<RegisterForm> {
                                   )),
                               fieldDecoration: FieldDecoration(
                                 animateSuffixIcon: true,
+                                borderRadius:  SizeConfig.blockWidth * 4,
                                 padding: EdgeInsets.only(
-                                  top: SizeConfig.blockHeight * 2.2,
-                                  bottom: SizeConfig.blockHeight * 2.2,
+                                  top: SizeConfig.blockHeight * 2.7,
+                                  bottom: SizeConfig.blockHeight * 2.7,
                                   left: SizeConfig.blockWidth * 4,
                                   right: SizeConfig.blockWidth * 3,
                                 ),
@@ -812,7 +812,7 @@ class _RegisterFormState extends State<RegisterForm> {
                             onChanged: (value) {
                               _validateForm();
                             },
-                            title: 'Bio'.tr()),
+                            title: 'Bio'.tr(),),
                         MultipleImagePickerComponent(
                           onImagesSelected: _onImagesSelected,
                           error: imagesList,
@@ -1064,7 +1064,7 @@ class _RegisterFormState extends State<RegisterForm> {
             prefix: false,
             errorMessage: '',
             hasError: error,
-            maxLines: 8),
+            maxLines: 6),
       ],
     );
   }

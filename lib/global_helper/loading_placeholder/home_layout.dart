@@ -27,15 +27,15 @@ class ShimmerJobCards extends StatelessWidget {
             return Padding(
                 padding: EdgeInsets.only(bottom: SizeConfig.blockWidth * 4),
                 child: Shimmer(
-                  color: COLORS.primary.withOpacity(0.1),
-                  colorOpacity: 0.3,
+                  color: COLORS.primary.withOpacity(0.05),
+                  colorOpacity: 0.15,
                   enabled: true,
-                  direction: const ShimmerDirection.fromLTRB(),
+                  direction: const ShimmerDirection.fromRightToLeft(),duration: Duration(seconds: 10),
                   child: Container(
                     height: SizeConfig.blockHeight * 25,
                     width: SizeConfig.blockWidth * 100,
                     decoration: BoxDecoration(
-                      color: COLORS.primaryOne.withOpacity(0.25),
+                      color: COLORS.primaryOne.withOpacity(0.15),
                       borderRadius:
                           BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                     ),
@@ -61,6 +61,8 @@ class ShimmerJobCards extends StatelessWidget {
     );
   }
 }
+
+
 
 Widget globalLoadingWidget() {
   return Scaffold(
@@ -185,6 +187,54 @@ Widget emptyComponent() {
           ),
         ),
       ],
+    ),
+  );
+}
+
+
+Widget friendsListLoading() {
+  return   Expanded(
+    child: Padding(
+      padding: EdgeInsets.only(
+          left: SizeConfig.blockWidth * 4,
+          right: SizeConfig.blockWidth * 4,
+          top: SizeConfig.blockWidth * 2),
+      child: ListView.builder(
+        shrinkWrap: true,
+        // physics: NeverScrollableScrollPhysics(),
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return Padding(
+              padding: EdgeInsets.only(bottom: SizeConfig.blockWidth * 4),
+              child: Shimmer(
+                color: COLORS.primary.withOpacity(0.05),
+                colorOpacity: 0.15,
+                enabled: true,
+                direction: const ShimmerDirection.fromRightToLeft(),duration: const Duration(seconds: 10),
+                child: Container(
+                  height: SizeConfig.blockHeight * 9,
+                  width: SizeConfig.blockWidth * 100,
+                  decoration: BoxDecoration(
+                    color: COLORS.primaryOne.withOpacity(0.15),
+                  ),
+                ),
+              )
+    
+            // Shimmer.fromColors(
+            //   baseColor: Colors.grey[300]!,
+            //   highlightColor: Colors.grey[100]!,
+            //   child: Container(
+            //     height: SizeConfig.blockHeight*24,
+            //     decoration: BoxDecoration(
+            //       borderRadius: BorderRadius.circular(SizeConfig.blockWidth*4),
+            //       color: Colors.grey,
+            //     ),
+            //     padding: EdgeInsets.all(SizeConfig.blockWidth*4),
+            //   ),
+            // ),
+          );
+        },
+      ),
     ),
   );
 }

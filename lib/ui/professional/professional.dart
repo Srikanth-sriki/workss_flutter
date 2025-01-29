@@ -13,6 +13,7 @@ import 'package:works_app/ui/professional/professional_search.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
 import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
@@ -210,11 +211,11 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                         )),
                               );
                             },
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 2.5),
                             child: Container(
                               padding:
                                   EdgeInsets.all(SizeConfig.blockWidth * 3),
-                              margin: EdgeInsets.only(
-                                  right: SizeConfig.blockWidth * 2.8),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                       SizeConfig.blockWidth * 2.5),
@@ -227,6 +228,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                               ),
                             ),
                           ),
+                          SizedBox(width:  SizeConfig.blockWidth * 2.8,),
                           InkWell(
                             onTap: () {
                               Navigator.push(
@@ -245,6 +247,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 const NotificationListScreen(),
                                           )));
                             },
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 2.5),
                             child: Container(
                               padding:
                                   EdgeInsets.all(SizeConfig.blockWidth * 3),
@@ -301,6 +305,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                         child: const ProfessionalSearchList(),
                                       )));
                         },
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                         child: Container(
                           width: SizeConfig.blockWidth * 72,
                           height: SizeConfig.blockHeight * 8,
@@ -384,7 +390,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                               selectedGender,
                             );
                           }
-                        },
+                        },borderRadius: BorderRadius.circular(
+                          SizeConfig.blockWidth * 2.5),splashColor: COLORS.white.withOpacity(0.2),
                         child: Container(
                           padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
                           height: SizeConfig.blockHeight * 8,
@@ -466,6 +473,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             padding: EdgeInsets.only(
                               left: SizeConfig.blockWidth * 6,
                               right: SizeConfig.blockWidth * 6,
+                              top:SizeConfig.blockHeight*3
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -514,31 +522,38 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                             width: SizeConfig.blockWidth * 18,
                                             height: SizeConfig.blockWidth * 18,
                                             decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: AssetImage(
-                                                      categoriesData[index]
-                                                          .image),
+                                              shape: BoxShape.circle,
+                                              color: COLORS.primaryOne
+                                                  .withOpacity(0.5),
+                                            ),
+                                            child: Center(
+                                              child: AspectRatio(
+                                                aspectRatio: 1 / 1.25,
+                                                child: Image.network(
+                                                  categoriesData[index].image,
                                                   fit: BoxFit.contain,
                                                 ),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        SizeConfig.blockWidth *
-                                                            20),
-                                                color: COLORS.primaryOne
-                                                    .withOpacity(0.5)),
+                                              ),
+                                            ),
                                           ),
                                           SizedBox(
                                             height:
                                                 SizeConfig.blockHeight * 0.5,
                                           ),
-                                          Text(
-                                            categoriesData[index].name,
-                                            style: TextStyle(
-                                              color: COLORS.neutralDark,
-                                              fontSize:
-                                                  SizeConfig.blockWidth * 3,
-                                              fontWeight: FontWeight.w500,
-                                              fontFamily: "Poppins",
+                                          SizedBox(
+                                            width: SizeConfig.blockWidth * 18,
+                                            child: Text(
+                                              capitalizeEachWord(
+                                                  categoriesData[index].name),
+                                              style: TextStyle(
+                                                color: COLORS.neutralDark,
+                                                fontSize:
+                                                    SizeConfig.blockWidth * 3,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: "Poppins",
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              maxLines: 1,
                                             ),
                                           ),
                                         ],
@@ -667,7 +682,10 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                             BlocProvider(
                                                               create: (context) =>
                                                                   ShowInterestedBloc(),
-                                                            )
+                                                            ),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ReportPostBloc())
                                                           ],
                                                           child:
                                                               ProfessionalViewScreen(

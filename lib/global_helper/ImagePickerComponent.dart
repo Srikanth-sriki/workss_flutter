@@ -78,7 +78,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                           widget.onImageSelected(File(photo.path));
                         }
                         Navigator.of(context).pop();
-                      },
+                      },borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -122,7 +122,8 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                           widget.onImageSelected(File(image.path));
                         }
                         Navigator.of(context).pop();
-                      },
+                      }, borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -265,7 +266,7 @@ class ImagePickerModal extends StatelessWidget {
                           onImageSelected(File(pickedFile.path));
                         }
                         Navigator.of(context).pop();
-                      },
+                      }, borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -308,7 +309,7 @@ class ImagePickerModal extends StatelessWidget {
                           onImageSelected(File(pickedFile.path));
                         }
                         Navigator.of(context).pop();
-                      },
+                      }, borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -356,7 +357,9 @@ class ImagePickerModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _showPicker(context),
+      onTap: () => _showPicker(context), borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(SizeConfig.blockWidth * 3.5),
+        bottomRight: Radius.circular(SizeConfig.blockWidth * 3.5)),
       child: Container(
         width: SizeConfig.blockWidth * 10,
         height: SizeConfig.blockWidth * 10,
@@ -698,119 +701,291 @@ class _MultipleImagePickerComponentState
     _displayImages = List<String>.from(widget.defaultImages);
   }
 
-  void _showPicker(BuildContext context) {
+  // void _showPicker(BuildContext context) {
+  //   showModalBottomSheet(
+  //     backgroundColor: COLORS.white,
+  //     context: context,
+  //     showDragHandle: true,
+  //     builder: (BuildContext context) {
+  //       return SafeArea(
+  //         child: Wrap(
+  //           children: <Widget>[
+  //             ListTile(
+  //               dense: true,
+  //               contentPadding: EdgeInsets.symmetric(
+  //                   horizontal: SizeConfig.blockWidth * 10),
+  //               leading: Icon(
+  //                 Icons.photo_library,
+  //                 color: COLORS.black,
+  //                 size: SizeConfig.blockWidth * 6,
+  //               ),
+  //               title: Text(
+  //                 'Gallery'.tr(),
+  //                 style: TextStyle(
+  //                   color: COLORS.neutralDark,
+  //                   fontWeight: FontWeight.w400,
+  //                   fontFamily: "Poppins",
+  //                   fontSize: SizeConfig.blockWidth * 4.1,
+  //                 ),
+  //               ),
+  //               // onTap: () async {
+  //               //   XFile? image =
+  //               //       await _picker.pickImage(source: ImageSource.gallery);
+  //               //   if (image != null && _displayImages.length < 3) {
+  //               //     setState(() {
+  //               //       _displayImages.add(image.path);
+  //               //     });
+  //               //     _updateSelectedImages();
+  //               //   }
+  //               //   Navigator.of(context).pop();
+  //               // },
+  //               onTap: () async {
+  //                 try {
+  //                   XFile? image =
+  //                       await _picker.pickImage(source: ImageSource.gallery);
+  //                   print(image!.path!);
+  //                   if (image != null &&
+  //                       image.path.isNotEmpty &&
+  //                       _displayImages.length < 3) {
+  //                     setState(() {
+  //                       _displayImages.add(image.path);
+  //                     });
+  //                     _updateSelectedImages();
+  //                   } else {
+  //                     print('Invalid image path or selection canceled');
+  //                   }
+  //                   Navigator.of(context).pop();
+  //                 } catch (e) {
+  //                   print('Error picking image: $e');
+  //                 }
+  //               },
+  //             ),
+  //             ListTile(
+  //               dense: true,
+  //               contentPadding: EdgeInsets.symmetric(
+  //                   horizontal: SizeConfig.blockWidth * 10),
+  //               leading: Icon(
+  //                 Icons.photo_camera,
+  //                 color: COLORS.black,
+  //                 size: SizeConfig.blockWidth * 6,
+  //               ),
+  //               title: Text(
+  //                 'Camera'.tr(),
+  //                 style: TextStyle(
+  //                   color: COLORS.neutralDark,
+  //                   fontWeight: FontWeight.w400,
+  //                   fontFamily: "Poppins",
+  //                   fontSize: SizeConfig.blockWidth * 4.1,
+  //                 ),
+  //               ),
+  //               // onTap: () async {
+  //               //   XFile? photo =
+  //               //       await _picker.pickImage(source: ImageSource.camera);
+  //               //   if (photo != null && _displayImages.length < 3) {
+  //               //     setState(() {
+  //               //       _displayImages.add(photo.path);
+  //               //     });
+  //               //     _updateSelectedImages();
+  //               //   }
+  //               //   Navigator.of(context).pop();
+  //               // },
+  //
+  //               onTap: () async {
+  //                 try {
+  //                   XFile? photo =
+  //                       await _picker.pickImage(source: ImageSource.camera);
+  //                   print(photo!.path!);
+  //                   if (photo != null &&
+  //                       photo.path.isNotEmpty &&
+  //                       _displayImages.length < 3) {
+  //                     setState(() {
+  //                       _displayImages.add(photo.path);
+  //                     });
+  //                     _updateSelectedImages();
+  //                   } else {
+  //                     print('Invalid image path or selection canceled');
+  //                   }
+  //                   Navigator.of(context).pop();
+  //                 } catch (e) {
+  //                   print('Error picking image: $e');
+  //                 }
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+  void _showPicker(context) {
     showModalBottomSheet(
       backgroundColor: COLORS.white,
       context: context,
-      showDragHandle: true,
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 10),
-                leading: Icon(
-                  Icons.photo_library,
-                  color: COLORS.black,
-                  size: SizeConfig.blockWidth * 6,
-                ),
-                title: Text(
-                  'Gallery'.tr(),
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                    fontSize: SizeConfig.blockWidth * 4.1,
+        return Container(
+            decoration: BoxDecoration(
+                color: COLORS.white,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+                    topRight: Radius.circular(SizeConfig.blockWidth * 5))),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: SizeConfig.blockHeight),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 5,
+                      vertical: SizeConfig.blockHeight),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Media'.tr(),
+                        style: TextStyle(
+                          color: COLORS.primaryTwo,
+                          fontSize: SizeConfig.blockWidth * 4.25,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          color: COLORS.neutralDark,
+                          size: SizeConfig.blockWidth * 6.5,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
                   ),
                 ),
-                // onTap: () async {
-                //   XFile? image =
-                //       await _picker.pickImage(source: ImageSource.gallery);
-                //   if (image != null && _displayImages.length < 3) {
-                //     setState(() {
-                //       _displayImages.add(image.path);
-                //     });
-                //     _updateSelectedImages();
-                //   }
-                //   Navigator.of(context).pop();
-                // },
-                onTap: () async {
-                  try {
-                    XFile? image =
-                        await _picker.pickImage(source: ImageSource.gallery);
-                    print(image!.path!);
-                    if (image != null &&
-                        image.path.isNotEmpty &&
-                        _displayImages.length < 3) {
-                      setState(() {
-                        _displayImages.add(image.path);
-                      });
-                      _updateSelectedImages();
-                    } else {
-                      print('Invalid image path or selection canceled');
-                    }
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    print('Error picking image: $e');
-                  }
-                },
-              ),
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 10),
-                leading: Icon(
-                  Icons.photo_camera,
-                  color: COLORS.black,
-                  size: SizeConfig.blockWidth * 6,
+                const Divider(
+                  color: COLORS.neutralDarkTwo,
                 ),
-                title: Text(
-                  'Camera'.tr(),
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                    fontSize: SizeConfig.blockWidth * 4.1,
-                  ),
-                ),
-                // onTap: () async {
-                //   XFile? photo =
-                //       await _picker.pickImage(source: ImageSource.camera);
-                //   if (photo != null && _displayImages.length < 3) {
-                //     setState(() {
-                //       _displayImages.add(photo.path);
-                //     });
-                //     _updateSelectedImages();
-                //   }
-                //   Navigator.of(context).pop();
-                // },
+                SizedBox(height: SizeConfig.blockHeight*3,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    InkWell(
 
-                onTap: () async {
-                  try {
-                    XFile? photo =
-                        await _picker.pickImage(source: ImageSource.camera);
-                    print(photo!.path!);
-                    if (photo != null &&
-                        photo.path.isNotEmpty &&
-                        _displayImages.length < 3) {
-                      setState(() {
-                        _displayImages.add(photo.path);
-                      });
-                      _updateSelectedImages();
-                    } else {
-                      print('Invalid image path or selection canceled');
-                    }
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    print('Error picking image: $e');
-                  }
-                },
-              ),
-            ],
-          ),
-        );
+                      onTap: () async {
+                        try {
+                          XFile? photo =
+                          await _picker.pickImage(source: ImageSource.camera);
+                          print(photo!.path!);
+                          if (photo.path.isNotEmpty &&
+                              _displayImages.length < 3) {
+                            setState(() {
+                              _displayImages.add(photo.path);
+                            });
+                            _updateSelectedImages();
+                          } else {
+                            print('Invalid image path or selection canceled');
+                          }
+                          Navigator.of(context).pop();
+                        } catch (e) {
+                          print('Error picking image: $e');
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: COLORS.primary,width: SizeConfig.blockWidth*0.15),
+                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                          color: COLORS.primaryOne.withOpacity(0.5),
+                        ),
+                        width: SizeConfig.blockWidth*30,
+                        height: SizeConfig.blockWidth*30,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_camera_outlined,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6.5,
+                            ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 2,
+                            ),
+                            Text(
+                              'Camera'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 3.5,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        try {
+                          XFile? image =
+                          await _picker.pickImage(source: ImageSource.gallery);
+                          print(image!.path!);
+                          if (image.path.isNotEmpty &&
+                              _displayImages.length < 3) {
+                            setState(() {
+                              _displayImages.add(image.path);
+                            });
+                            _updateSelectedImages();
+                          } else {
+                            print('Invalid image path or selection canceled');
+                          }
+                          Navigator.of(context).pop();
+                        } catch (e) {
+                          print('Error picking image: $e');
+                        }
+                      },
+                      borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 3),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.15),
+                          borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
+                          color: COLORS.primaryOne.withOpacity(0.5),
+                        ),
+                        width: SizeConfig.blockWidth * 30,
+                        height: SizeConfig.blockWidth * 30,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.photo_library_outlined,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6.5,
+                            ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 2,
+                            ),
+                            Text('Gallery'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDark,
+                                  fontSize: SizeConfig.blockWidth * 3.5,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.blockHeight*3),
+              ],
+            ));
       },
     );
   }
@@ -871,8 +1046,11 @@ class _MultipleImagePickerComponentState
   Widget _buildEmptyImagePicker(BuildContext context) {
     return InkWell(
       onTap: () {
+        FocusScope.of(context).unfocus();
         _showPicker(context);
-      },
+      },    borderRadius: BorderRadius.all(
+      Radius.circular(SizeConfig.blockWidth * 3),
+    ),
       child: Container(
         width: SizeConfig.blockWidth * 100,
         height: SizeConfig.blockHeight * 26,

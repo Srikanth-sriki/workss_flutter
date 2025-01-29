@@ -18,7 +18,6 @@ import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 
-
 class Language {
   final String name;
   final int id;
@@ -96,7 +95,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   bool professionalTypesLoading = true;
   List<String> professionalTypesItem = [];
 
-  void _validateForm(){}
+  void _validateForm() {}
 
   // String? formatChargeType(String? chargeType) {
   //   print(chargeType);
@@ -178,7 +177,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     });
   }
 
-  void knownLanguageUpdate(){
+  void knownLanguageUpdate() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       List<DropdownItem<Language>> item = knownLanguageItems;
       controller.setItems(item);
@@ -187,7 +186,6 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     });
     selectedLanguage = convertLanguages(widget.profileFetch.knownLanguages!);
     print(selectedLanguage);
-
   }
 
   List<DropdownItem<Language>> convertLanguagesToDropdownItems(
@@ -212,28 +210,43 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
       setState(() {
         imagesList = true;
       });
-    } else if ((selectedCharge == '' || selectedCharge == null) && widget.profileFetch.userType == 'professional') {
+    } else if ((selectedCharge == '' || selectedCharge == null) &&
+        widget.profileFetch.userType == 'professional') {
     } else {
       List<String> languageSelect =
           selectedLanguage.map((lang) => lang.name).toList();
       profileBloc.add(EditProfileAccount(
         name: _enterName.text,
-        age: widget.profileFetch.userType == 'professional'?ageController.text:'0',
+        age: widget.profileFetch.userType == 'professional'
+            ? ageController.text
+            : '0',
         profile_pic: profilePicture!,
         email: _emailController.text,
         user_type: widget.profileFetch.userType!,
-        profession_type: widget.profileFetch.userType == 'professional'?_selectedProfession :null,
+        profession_type: widget.profileFetch.userType == 'professional'
+            ? _selectedProfession
+            : null,
         pincode: pinCodeController.text,
         city: _selectedCity!,
-        gender: widget.profileFetch.userType == 'professional'?_selectedGender?.toLowerCase():null,
-        known_languages: widget.profileFetch.userType == 'professional'?languageSelect:[],
+        gender: widget.profileFetch.userType == 'professional'
+            ? _selectedGender?.toLowerCase()
+            : null,
+        known_languages: widget.profileFetch.userType == 'professional'
+            ? languageSelect
+            : [],
         workImages: workImages,
         bio: bioController.text,
-        experienced_years: widget.profileFetch.userType == 'professional'?experienceController.text :null,
-        charges: widget.profileFetch.userType == 'professional'?chargesController.text:null,
-        charge_type: widget.profileFetch.userType == 'professional'?selectedCharge?.toLowerCase() :null,
-        userLongitude: longitude??'0.0',
-        userLatitude: longitude??'0.0',
+        experienced_years: widget.profileFetch.userType == 'professional'
+            ? experienceController.text
+            : null,
+        charges: widget.profileFetch.userType == 'professional'
+            ? chargesController.text
+            : null,
+        charge_type: widget.profileFetch.userType == 'professional'
+            ? selectedCharge?.toLowerCase()
+            : null,
+        userLongitude: longitude ?? '0.0',
+        userLatitude: longitude ?? '0.0',
       ));
     }
   }
@@ -322,8 +335,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                     context: context,
                     message: state.message,
                   );
-                }
-                else if (state is FetchCityLoading) {
+                } else if (state is FetchCityLoading) {
                   setState(() {
                     cityLoading = true;
                   });
@@ -361,17 +373,16 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   setState(() {
                     knownLanguageItems =
                         state.dropDownItems.asMap().entries.map((entry) {
-                          int index = entry.key + 1;
-                          var item = entry.value;
-                          return DropdownItem(
-                              label: item.language,
-                              value: Language(name: item.language, id: index));
-                        }).toList();
+                      int index = entry.key + 1;
+                      var item = entry.value;
+                      return DropdownItem(
+                          label: item.language,
+                          value: Language(name: item.language, id: index));
+                    }).toList();
                     knowLanguageLoading = false;
                     knownLanguageUpdate();
                   });
                 }
-
 
                 setState(() {});
               },
@@ -469,15 +480,14 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         buildTextField(
                           label: 'Pincode',
                           inputNameType: TextInputType.phone,
-                          controller: pinCodeController,maxLength: 6,
-
+                          controller: pinCodeController,
+                          maxLength: 6,
                           hintText: "Enter your pincode".tr(),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               setState(() => pinError = true);
                               return 'Please enter a pincode'.tr();
-                            }
-                            else if (value!.length != 6) {
+                            } else if (value!.length != 6) {
                               setState(() => pinError = true);
                               return 'Please enter valid pincode'.tr();
                             }
@@ -514,6 +524,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           value: _selectedCity,
                           hintText: 'Select your city'.tr(),
                           items: dropdownCityItem,
+                          itemLoading: cityLoading,
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
                             _validateForm();
@@ -527,24 +538,22 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         ),
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                if (!professionalTypesLoading) ...[
-                  buildDropdown(
-                    value: _selectedProfession,
-                    label: 'profession_type'.tr(),
-                    hintText: 'Select your Profession'.tr(),
-                    items: professionalTypesItem,
-                    onChanged: (value) => setState(() {
-                      _selectedProfession = value;
-                      _validateForm();
-                    }),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select your profession'.tr();
-                      }
-                      return null;
-                    },
-                  )
-                ],
+                          buildDropdown(
+                            value: _selectedProfession,
+                            label: 'profession_type'.tr(),
+                            hintText: 'Select your Profession'.tr(),
+                            items: professionalTypesItem,itemLoading: professionalTypesLoading,
+                            onChanged: (value) => setState(() {
+                              _selectedProfession = value;
+                              _validateForm();
+                            }),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your profession'.tr();
+                              }
+                              return null;
+                            },
+                          )
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
@@ -572,7 +581,6 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               errorMessage: '',
                               suffix: false,
                               prefix: false,
-
                               hasError: yearError),
                           SizedBox(height: SizeConfig.blockHeight),
                         ],
@@ -623,32 +631,32 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                     padding: EdgeInsets.symmetric(
                                         horizontal: SizeConfig.blockWidth * 4),
                                     child:
-                                    LoadingAnimationWidget.discreteCircle(
+                                        LoadingAnimationWidget.discreteCircle(
                                       color: COLORS.accent,
                                       size: SizeConfig.blockWidth * 4,
                                     ),
                                   )
                                 ],
-                                    if (!feesChargesLoading) ...[
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: SizeConfig.blockWidth *
-                                              30, // Add constraints
-                                        ),
-                                        child: CustomDropdownButtonFormField(
-                                          selectedValue: selectedCharge,
-                                          items: feesChargesItem,
-                                          onChanged: (String? newValue) {
-                                            setState(() {
-                                              selectedCharge = newValue;
-                                            });
-                                          },
-                                          hintText: 'Select Duration',
-                                          iconSize: SizeConfig.blockWidth * 6,
-                                          iconColor: COLORS.accent,
-                                        ),
-                                      )
-                                    ],
+                                if (!feesChargesLoading) ...[
+                                  Container(
+                                    constraints: BoxConstraints(
+                                      maxWidth: SizeConfig.blockWidth *
+                                          30, // Add constraints
+                                    ),
+                                    child: CustomDropdownButtonFormField(
+                                      selectedValue: selectedCharge,
+                                      items: feesChargesItem,
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedCharge = newValue;
+                                        });
+                                      },
+                                      hintText: 'Select Duration',
+                                      iconSize: SizeConfig.blockWidth * 6,
+                                      iconColor: COLORS.accent,
+                                    ),
+                                  )
+                                ],
                               ],
                             ),
                             prefixIcon: Container(
@@ -770,7 +778,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                   backgroundColor: COLORS.white),
                               chipDecoration: ChipDecoration(
                                   backgroundColor:
-                                  COLORS.primary.withOpacity(0.05),
+                                      COLORS.primary.withOpacity(0.05),
                                   wrap: true,
                                   labelStyle: TextStyle(
                                       color: COLORS.primary,
@@ -788,9 +796,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                   )),
                               fieldDecoration: FieldDecoration(
                                 animateSuffixIcon: true,
+                                borderRadius:  SizeConfig.blockWidth * 4,
                                 padding: EdgeInsets.only(
-                                  top: SizeConfig.blockHeight * 2.2,
-                                  bottom: SizeConfig.blockHeight * 2.2,
+                                  top: SizeConfig.blockHeight * 2.7,
+                                  bottom: SizeConfig.blockHeight * 2.7,
                                   left: SizeConfig.blockWidth * 4,
                                   right: SizeConfig.blockWidth * 3,
                                 ),
@@ -832,8 +841,8 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                 ),
                                 selectedTextColor: COLORS.neutralDark,
                                 disabledTextColor: COLORS.neutralDark,
-                                disabledIcon:
-                                Icon(Icons.lock, color: Colors.grey.shade300),
+                                disabledIcon: Icon(Icons.lock,
+                                    color: Colors.grey.shade300),
                               ),
                               validator: (value) {
                                 if (selectedLanguage.isEmpty) {
@@ -871,7 +880,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             onChanged: (value) {
                               _validateForm();
                             },
-                            title: 'Bio'.tr()),
+                            title: 'Bio'.tr(),maxLines: 6),
                         MultipleImagePickerComponent(
                           onImagesSelected: _onImagesSelected,
                           error: imagesList,
@@ -904,7 +913,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                 backgroundColor: COLORS.neutralDarkTwo,
                 showIcon: false,
                 width: SizeConfig.blockWidth * 42,
-                height: SizeConfig.blockHeight * 8,
+                height: SizeConfig.blockHeight * 7.5,
                 textColor: COLORS.black,
               ),
               customButton(
@@ -917,7 +926,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   backgroundColor: COLORS.primary,
                   showIcon: false,
                   width: SizeConfig.blockWidth * 42,
-                  height: SizeConfig.blockHeight * 8,
+                  height: SizeConfig.blockHeight * 7.5,
                   textColor: COLORS.white,
                   loading: loading)
             ],

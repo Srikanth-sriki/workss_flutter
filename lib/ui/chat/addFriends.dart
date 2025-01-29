@@ -130,12 +130,12 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                             image: 'assets/images/home/dumy1.png',
                             name: 'Julia Vandervort-Will',
                             onTapCard: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FriendsDetailsScreen(),
-                                ),
-                              );
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => FriendsDetailsScreen(),
+                              //   ),
+                              // );
                             },
                             added: index % 2 == 0 ? true : false,
                             disc: 'Mathematics Tutor',

@@ -544,7 +544,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   // horizontal: SizeConfig.blockWidth*3),
                                 ),
                                 InkWell(
-                                  onTap: _startOrStopRecording,
+                                  onTap: _startOrStopRecording, borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 10),
                                   child: Container(
                                     width: SizeConfig.blockWidth * 10,
                                     height: SizeConfig.blockWidth * 10,

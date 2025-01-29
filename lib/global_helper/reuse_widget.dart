@@ -206,7 +206,12 @@ InputDecoration textFieldDecoration(
       fontSize: SizeConfig.blockWidth * 3.2,
     ),
     prefixIcon: prefix ? prefixIcon : null,
-    suffixIcon: suffix ? suffixIcon : null,
+    suffixIcon: suffix ? suffixIcon : null,errorStyle: TextStyle(
+    color: COLORS.semantic,
+    fontWeight: FontWeight.w400,
+    fontFamily: "Poppins",
+    fontSize: SizeConfig.blockWidth * 3,
+  ),
   );
 }
 
@@ -667,7 +672,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       )
           : null,
       title: Text(
-        title.tr(),
+        capitalizeEachWord(title).tr(),
         style: TextStyle(
           color: titleColors,
           fontSize: SizeConfig.blockWidth * 4.25,
@@ -780,7 +785,7 @@ Widget buildProfessionalCard(
                         SizedBox(
                           width:SizeConfig.blockWidth*60,
                           child: Text(
-                            name,
+                            capitalizeEachWord(name),
                             style: TextStyle(
                               color: COLORS.neutralDark,
                               fontSize: SizeConfig.blockWidth * 3.8,
@@ -1272,7 +1277,7 @@ void showCustomSnackBar({
       message.tr(),
       style: TextStyle(
         color: COLORS.neutralDark,
-        fontSize: SizeConfig.blockWidth * 3.25,
+        fontSize: SizeConfig.blockWidth * 3.2,
         fontWeight: FontWeight.w500,
         fontFamily: "Poppins",
       ),

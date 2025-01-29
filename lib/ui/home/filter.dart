@@ -141,56 +141,44 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             SizedBox(
               height: SizeConfig.blockHeight,
             ),
-            if (!professionalTypesLoading) ...[
-              buildDropdown(
-                label: 'profession_type'.tr(),
-                hintText: 'Select your Profession'.tr(),
-                items: professionalTypesItem,
-                onChanged: (value) => setState(() {
-                  selectedProfession = value;
-                }),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select your profession'.tr();
-                  }
-                  return null;
-                },
-                value: selectedProfession != null &&
-                        professionalTypesItem.contains(selectedProfession)
-                    ? selectedProfession
-                    : null, // Ensure value is valid
-              )
-            ] else ...[
-              SizedBox(height: SizeConfig.blockHeight),
-              registerText(text: 'profession_type'.tr()),
-              dropDownLoader(hintText: 'profession_type')
-            ],
-            if (!cityLoading) ...[
-              buildDropdown(
-                label: 'city'.tr(),
-                hintText: 'Select your city'.tr(),
-                items: dropdownCityItem,
-                onChanged: (value) => setState(() {
-                  selectedCity = value;
-                }),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select your city'.tr();
-                  }
-                  return null;
-                },
-                value: selectedCity != null &&
-                        dropdownCityItem.contains(selectedCity)
-                    ? selectedCity
-                    : null, // Ensure value is valid
-              )
-            ] else ...[
-              SizedBox(
-                height: SizeConfig.blockHeight * 2,
-              ),
-              registerText(text: 'city'.tr()),
-              dropDownLoader(hintText: 'Select your city')
-            ],
+            buildDropdown(
+              label: 'profession_type'.tr(),
+              hintText: 'Select your Profession'.tr(),
+              items: professionalTypesItem,
+              onChanged: (value) => setState(() {
+                selectedProfession = value;
+              }),
+              itemLoading: professionalTypesLoading,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please select your profession'.tr();
+                }
+                return null;
+              },
+              value: selectedProfession != null &&
+                  professionalTypesItem.contains(selectedProfession)
+                  ? selectedProfession
+                  : null, // Ensure value is valid
+            ),
+            buildDropdown(
+              label: 'city'.tr(),
+              hintText: 'Select your city'.tr(),
+              items: dropdownCityItem,
+              onChanged: (value) => setState(() {
+                selectedCity = value;
+              }),
+              itemLoading: cityLoading,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please select your city'.tr();
+                }
+                return null;
+              },
+              value: selectedCity != null &&
+                  dropdownCityItem.contains(selectedCity)
+                  ? selectedCity
+                  : null, // Ensure value is valid
+            ),
             buildGenderSelection(
               groupValue: selectedGender,
               onChanged: (value) {

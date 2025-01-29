@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/profile/component.dart';
+
+import 'helper_function.dart';
 
 class CustomDropdownButtonFormField extends StatelessWidget {
   final String? selectedValue;
@@ -100,6 +103,7 @@ Widget buildDropdown({
   required void Function(String?) onChanged,
   required String? Function(String?) validator,
   String?value,
+  bool? itemLoading = false,
 }) {
   final TextEditingController textEditingController = TextEditingController();
   List<String> filteredItems = items;
@@ -174,7 +178,7 @@ Widget buildDropdown({
             .map((item) => DropdownMenuItem<String>(
           value: item,
           child: Text(
-            item,
+            capitalizeEachWord(item),
             style: TextStyle(
               fontSize: SizeConfig.blockWidth * 3.5,
               color: COLORS.neutralDark,
@@ -187,7 +191,12 @@ Widget buildDropdown({
         onChanged: onChanged,
         validator: validator,
         iconStyleData: IconStyleData(
-          icon: Icon(
+          icon: itemLoading!?
+          LoadingAnimationWidget.discreteCircle(
+            color: COLORS.accent,
+            size: SizeConfig.blockWidth * 4,
+          ):
+          Icon(
             Icons.keyboard_arrow_down_outlined,
             color: COLORS.accent,
             size: SizeConfig.blockWidth * 6,

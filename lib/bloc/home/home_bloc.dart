@@ -94,4 +94,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(const FetchWorkViewError("Something Went wrong"));
     }
   }
+
+
 }

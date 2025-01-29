@@ -141,9 +141,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 closeProgressThreshold: 0,
                                 duration: const Duration(seconds: 0),
                                 useRootNavigator: true,
-                                shape: const RoundedRectangleBorder(
+                                shape:  RoundedRectangleBorder(
                                   borderRadius:
-                                  BorderRadius.vertical(top: Radius.circular(20)),
+                                  BorderRadius.vertical(top: Radius.circular(SizeConfig.blockWidth*3.5)),
                                 ),
                                 builder: (context) => const EditGroupNameModal(),
                               );
@@ -201,9 +201,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                           closeProgressThreshold: 0,
                           duration: const Duration(seconds: 0),
                           useRootNavigator: true,
-                          shape: const RoundedRectangleBorder(
+                          shape:  RoundedRectangleBorder(
                             borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
+                            BorderRadius.vertical(top: Radius.circular(SizeConfig.blockWidth*3.5)),
                           ),
                           builder: (context) => const EditGroupDescriptionModal(),
                         );

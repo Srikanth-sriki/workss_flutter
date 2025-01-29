@@ -8,6 +8,7 @@ import 'package:works_app/ui/profile/component.dart';
 
 import '../../bloc/home/home_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/helper_function.dart';
@@ -135,7 +136,8 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                                                       BlocProvider(
                                                         create: (context) =>
                                                             ShowInterestedBloc(),
-                                                      )
+                                                      ),
+                                                      BlocProvider(create: (context)=>ReportPostBloc())
                                                     ],
                                                     child: WorkDetailsScreen(
                                                       id: profile.id!,

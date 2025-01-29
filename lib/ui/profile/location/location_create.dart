@@ -223,7 +223,8 @@ class _AddressScreenState extends State<AddressScreen> {
                           left: 0,
                           right: 0,
                           child: InkWell(
-                            onTap: _getCurrentLocation,
+                            onTap: _getCurrentLocation, borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 3),
                             child: Container(
                               width: SizeConfig.blockWidth * 40,
                               margin: EdgeInsets.symmetric(
@@ -428,7 +429,7 @@ class _AddressScreenState extends State<AddressScreen> {
                                       "Write instructions to reach out you"
                                           .tr(),
                                   validator: (value) {},
-                                  maxLines: 5,
+                                  maxLines: 4,
                                   error: false,
                                   title: 'Instructions'.tr(),
                                   onChanged: (value) {}),
