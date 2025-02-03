@@ -13,6 +13,7 @@ import 'package:works_app/ui/chat/create_chat_group.dart';
 import 'package:works_app/ui/friends/friends_search.dart';
 
 import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../friends/friends_details.dart';
 import '../home/component.dart';
@@ -101,9 +102,21 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                AddFriendsScreen(header: 'Add Friend'),
-                          ))
+                              builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => FriendsBloc()
+                                          ..add(FetchFriendsAddListEvent(
+                                              page: 1,
+                                              pageSize: 10,
+                                              keyWord: '')),
+                                      ),
+                                      BlocProvider(
+                                          create: (context) =>
+                                              ShowInterestedBloc())
+                                    ],
+                                    child: const AddFriendsScreen(header: 'Add Friend'),
+                                  )))
                     },
                   ),
                 ],
@@ -208,6 +221,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                     pageSize: 10,
                                                     keyWord: '')),
                                             ),
+                                            BlocProvider(
+                                                create: (context) =>
+                                                    ShowInterestedBloc())
                                           ],
                                           child: FriendsSearchListScreen(),
                                         )));
@@ -269,9 +285,21 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            AddFriendsScreen(header: 'Add Friend'),
-                      ));
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => FriendsBloc()
+                                  ..add(FetchFriendsAddListEvent(
+                                      page: 1,
+                                      pageSize: 10,
+                                      keyWord: '')),
+                              ),
+                              BlocProvider(
+                                  create: (context) =>
+                                      ShowInterestedBloc())
+                            ],
+                            child: const AddFriendsScreen(header: 'Add Friend'),
+                          )));
                 },
                 backgroundColor: COLORS.primary,
                 child: Image.asset(

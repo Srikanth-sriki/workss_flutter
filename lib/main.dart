@@ -1,4 +1,7 @@
 import 'dart:ui';
+import 'dart:io';
+import 'package:http/io_client.dart';
+
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -59,6 +62,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
 }
 
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -100,7 +111,7 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
   // LatLng initialLocation = await fetchInitialLocation();
 
-  // Start the app
+  HttpOverrides.global = MyHttpOverrides();
   runApp(
     EasyLocalization(
       supportedLocales: const [

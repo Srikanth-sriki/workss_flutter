@@ -19,6 +19,7 @@ class LoginDao {
 
     final response = await http.post(Uri.parse(url),
         headers: Config.headers(), body: jsonEncode(body));
+    customLog("Response Status Code : ${response}");
 
     return response;
   }

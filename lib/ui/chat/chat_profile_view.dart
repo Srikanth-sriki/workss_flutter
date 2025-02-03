@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/chat/addFriends.dart';
@@ -11,6 +12,8 @@ import 'package:works_app/ui/chat/modal/editGroupDescripation.dart';
 import 'package:works_app/ui/chat/modal/editGroupName.dart';
 import 'package:works_app/ui/chat/remove_friends.dart';
 
+import '../../bloc/friends/friends_bloc.dart';
+import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -288,7 +291,24 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                       children: [
                         InkWell(
                           onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => AddFriendsScreen(header: 'Add Friend'),));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => FriendsBloc()
+                                            ..add(FetchFriendsAddListEvent(
+                                                page: 1,
+                                                pageSize: 10,
+                                                keyWord: '')),
+                                        ),
+                                        BlocProvider(
+                                            create: (context) =>
+                                                ShowInterestedBloc())
+                                      ],
+                                      child: const AddFriendsScreen(header: 'Add Friend'),
+                                    )));
                           },
                           child: Icon(
                             Icons.add_circle_outline,
@@ -301,7 +321,24 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                         ),
                         InkWell(
                           onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => AddFriendsScreen(header: 'Friend Suggestion'),));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => FriendsBloc()
+                                            ..add(FetchFriendsAddListEvent(
+                                                page: 1,
+                                                pageSize: 10,
+                                                keyWord: '')),
+                                        ),
+                                        BlocProvider(
+                                            create: (context) =>
+                                                ShowInterestedBloc())
+                                      ],
+                                      child: const AddFriendsScreen(header: 'Friend Suggestion'),
+                                    )));
                           },
                           child: Icon(
                             Icons.search,

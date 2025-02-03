@@ -28,3 +28,18 @@ class FetchFriendsSingleView extends FriendsEvent {
   @override
   List<Object> get props => [friendId];
 }
+
+
+
+class FetchFriendsAddListEvent extends FriendsEvent {
+  int page;
+  int pageSize;
+  String keyWord;
+  FetchFriendsAddListEvent({
+    required this.page,
+    required this.pageSize,
+    required this.keyWord,
+  });
+  @override
+  List<Object> get props => [page, pageSize, keyWord];
+}

@@ -184,7 +184,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                 added: index % 2 == 0 ? true : false,
                                 disc: 'Mathematics Tutor',
                                 buttonText1: 'Cancel',
-                                buttonText2: 'Invite',
+                                buttonText2: 'Invite', onTapButtonCard: (){},
                                 bgFriend: false),
                             Divider(
                               color: COLORS.neutralDarkTwo,
@@ -233,7 +233,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                     disc: 'Mathematics Tutor',
                                     buttonText1: 'Cancel',
                                     buttonText2: 'Invite',
-                                    bgFriend: false,
+                                    bgFriend: false, onTapButtonCard: (){},
                                     buttonRequired: false),
                               ],
                             ),

@@ -22,14 +22,16 @@ class FriendsSearchListScreen extends StatefulWidget {
   const FriendsSearchListScreen({super.key});
 
   @override
-  State<FriendsSearchListScreen> createState() => _FriendsSearchListScreenState();
+  State<FriendsSearchListScreen> createState() =>
+      _FriendsSearchListScreenState();
 }
 
 class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
   late FriendsBloc friendsBloc;
+  late ShowInterestedBloc showInterestedBloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  late  List<Friend> friends;
+  late List<Friend> friends;
   Timer? _debounce;
   String searchKeyword = "";
   bool isFetchingMore = false;
@@ -41,9 +43,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
   void initState() {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
+    showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent &&
+              _scrollController.position.maxScrollExtent &&
           !isFetchingMore &&
           currentPage < maxPageNumber) {
         _loadMoreData();
@@ -92,11 +95,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
     _debounce?.cancel();
     super.dispose();
   }
+
   void _refreshPageAfterEdit() {
     _fetchData();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -109,118 +111,124 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
       ),
       body: SafeArea(
           child: Stack(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 4.5,
-                      vertical: SizeConfig.blockHeight * 2,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            style: TextStyle(
-                              color: COLORS.neutralDarkOne,
-                              fontSize: SizeConfig.blockWidth * 3.25,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                            ),
-                            cursorColor: COLORS.black,
-                            decoration: InputDecoration(
-                              fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              filled: true,
-                              hintText: 'Ex: Search'.tr(),
-                              hintStyle: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3.25,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: COLORS.neutralDarkOne,
-                                size: SizeConfig.blockWidth * 5,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                                borderSide: BorderSide(
-                                    color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                                    width: SizeConfig.blockWidth * 0.1),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                                borderSide: BorderSide(
-                                    color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                                    width: SizeConfig.blockWidth * 0.1),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                                borderSide: BorderSide(
-                                    color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                                    width: SizeConfig.blockWidth * 0.1),
-                              ),
-                            ),
-                            onChanged: _onSearchChanged,
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 4.5,
+                  vertical: SizeConfig.blockHeight * 2,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.25,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        cursorColor: COLORS.black,
+                        decoration: InputDecoration(
+                          fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                          focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                          filled: true,
+                          hintText: 'Ex: Search'.tr(),
+                          hintStyle: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.25,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: COLORS.neutralDarkOne,
+                            size: SizeConfig.blockWidth * 5,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.25),
+                            borderSide: BorderSide(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.25),
+                            borderSide: BorderSide(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.25),
+                            borderSide: BorderSide(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1),
                           ),
                         ),
-                      ],
+                        onChanged: _onSearchChanged,
+                      ),
                     ),
-                  ),
-                  Divider(
-                    color: COLORS.neutralDarkTwo,
-                    height: SizeConfig.blockHeight,
-                  ),
-                  BlocConsumer<FriendsBloc, FriendsState>(
-                    listener: (context, state) {
-                      if (state is FriendsListSuccess) {
-                        setState(() {
-                          friends = state.friendsSearchList;
-                          print(state.friendsSearchList);
-                          isFetchingMore = false;
-                          maxPageNumber = state.maxPageNumber;
-                        });
-                      } else if (state is FriendsListFailed) {
-                        setState(() {
-                          isFetchingMore = false;
-                        });
-                      }
-                    },
-                    builder: (context, state) {
-                      if (state is FriendsListLoading && currentPage == 1) {
-                        return  friendsListLoading();
-                      } else if (state is FriendsListSuccess) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 4.5,
-                            vertical: SizeConfig.blockHeight * 0.2,
-                          ),
-                          child: ListView.builder(
-                              itemCount: state.friendsSearchList.length,
-                              shrinkWrap: true,
-                              scrollDirection: Axis.vertical,
-                              itemBuilder: (context, index) {
-                                return friendSearchCards(
-                                  image: state.friendsSearchList[index].friends.profilePic,
-                                  name: state.friendsSearchList[index].friends.name,
-                                  onTapCard: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MultiBlocProvider(
+                  ],
+                ),
+              ),
+              Divider(
+                color: COLORS.neutralDarkTwo,
+                height: SizeConfig.blockHeight,
+              ),
+              BlocConsumer<FriendsBloc, FriendsState>(
+                listener: (context, state) {
+                  if (state is FriendsListSuccess) {
+                    setState(() {
+                      friends = state.friendsSearchList;
+                      print(state.friendsSearchList);
+                      isFetchingMore = false;
+                      maxPageNumber = state.maxPageNumber;
+                    });
+                  } else if (state is FriendsListFailed) {
+                    setState(() {
+                      isFetchingMore = false;
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  if (state is FriendsListLoading && currentPage == 1) {
+                    return friendsListLoading();
+                  } else if (state is FriendsListSuccess) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5,
+                        vertical: SizeConfig.blockHeight * 0.2,
+                      ),
+                      child: ListView.builder(
+                          itemCount: state.friendsSearchList.length,
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            return friendSearchCards(
+                              image: state
+                                  .friendsSearchList[index].friends.profilePic,
+                              name: state.friendsSearchList[index].friends.name,
+                              onTapCard: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
                                               providers: [
                                                 BlocProvider(
                                                   create: (context) {
                                                     final bloc = FriendsBloc();
-                                                    bloc.add(FetchFriendsSingleView(friendId: state.friendsSearchList[index].userId));
+                                                    bloc.add(
+                                                        FetchFriendsSingleView(
+                                                            friendId: state
+                                                                .friendsSearchList[
+                                                                    index]
+                                                                .friendId));
                                                     return bloc;
                                                   },
                                                 ),
@@ -228,77 +236,120 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                                   create: (context) =>
                                                       ShowInterestedBloc(),
                                                 ),
-                                                BlocProvider(create:(context)=>ReportPostBloc() )
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ReportPostBloc()),
+                                                BlocProvider(create: (context)=>ShowInterestedBloc())
                                               ],
                                               child: FriendsDetailsScreen(
-                                                refreshPageCallback: _refreshPageAfterEdit,
-                                                id: state.friendsSearchList[index].userId,
-
+                                                refreshPageCallback:
+                                                    _refreshPageAfterEdit,
+                                                id: state
+                                                    .friendsSearchList[index]
+                                                    .friendId,
                                               ),
                                             )));
-
-                                  },
-                                  onTapIcon: () {
-                                    showDynamicBottomSheet(
-                                      context,
-                                      'More Options',
-                                      [
-                                        BottomSheetItem(
-                                          title: 'Send Message',
-                                          onTap: () => {},
-                                        ),
-                                        BottomSheetItem(
-                                          title: 'Unfriend',
-                                          onTap: () => {},
-                                        ),
-                                        BottomSheetItem(
-                                          title: 'Report',
-                                          onTap: () => {},
-                                        ),
-                                        BottomSheetItem(
-                                          title: 'Block',
-                                          onTap: () => {},
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                  onTapMessage: () {},
+                              },
+                              onTapIcon: () {
+                                showDynamicBottomSheet(
+                                  context,
+                                  'More Options',
+                                  [
+                                    BottomSheetItem(
+                                      title: 'Send Message',
+                                      onTap: () => {},
+                                    ),
+                                    BottomSheetItem(
+                                      title: 'Unfriend',
+                                      onTap: () => {
+                                        showInterestedBloc.add(UnfriendsEvent(
+                                            friendId: state
+                                                .friendsSearchList[index]
+                                                .userId,
+                                            onSuccess: (message) {
+                                              setState(() {
+                                                friends.removeWhere((friend) =>
+                                                    friend.userId ==
+                                                    state
+                                                        .friendsSearchList[
+                                                            index]
+                                                        .userId);
+                                              });
+                                              Navigator.of(context).pop({});
+                                              showCustomSnackBar(
+                                                  context: context,
+                                                  message:
+                                                      "Successfully unfriended!",
+                                                  backgroundColor:
+                                                      COLORS.semanticTwo);
+                                            },
+                                            onError: (message) {
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                              );
+                                            }))
+                                      },
+                                    ),
+                                    BottomSheetItem(
+                                      title: 'Report',
+                                      onTap: () => {},
+                                    ),
+                                    BottomSheetItem(
+                                      title: 'Block',
+                                      onTap: () => {},
+                                    ),
+                                  ],
                                 );
-                              }),
-                        );
-                      } else if (state is FriendsListFailed) {
-                        return ErrorScreen(onRetry: () {
-                          _fetchData();
-                        });
-                      }
-                      return Container();
-
-                    },
-                  )
-                ],
-              ),
-              Positioned(
-                bottom: SizeConfig.blockHeight * 2.5,
-                right: SizeConfig.blockHeight * 4,
-                child: FloatingActionButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                AddFriendsScreen(header: 'Add Friend'),
-                          ));
-                    },
-                    backgroundColor: COLORS.primary,
-                    child: Image.asset(
-                      'assets/images/chat/add_friend.png',
-                      width: SizeConfig.blockWidth * 6.5,
-                      height: SizeConfig.blockWidth * 6.5,
-                      fit: BoxFit.contain,
-                    )),
+                              },
+                              onTapMessage: () {},
+                            );
+                          }),
+                    );
+                  } else if (state is FriendsListFailed) {
+                    return ErrorScreen(onRetry: () {
+                      _fetchData();
+                    });
+                  }
+                  return Container();
+                },
               )
             ],
-          )),
+          ),
+          Positioned(
+            bottom: SizeConfig.blockHeight * 2.5,
+            right: SizeConfig.blockHeight * 4,
+            child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => FriendsBloc()
+                                  ..add(FetchFriendsAddListEvent(
+                                      page: 1,
+                                      pageSize: 10,
+                                      keyWord: '')),
+                              ),
+                              BlocProvider(
+                                  create: (context) =>
+                                      ShowInterestedBloc())
+                            ],
+                            child: const AddFriendsScreen(header: 'Add Friend'),
+                          )));
+                },
+                backgroundColor: COLORS.primary,
+                child: Image.asset(
+                  'assets/images/chat/add_friend.png',
+                  width: SizeConfig.blockWidth * 6.5,
+                  height: SizeConfig.blockWidth * 6.5,
+                  fit: BoxFit.contain,
+                )),
+          )
+        ],
+      )),
     );
   }
 }

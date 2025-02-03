@@ -135,15 +135,15 @@ class ShowInterestedBloc
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-        event.onSuccess();
+        event.onSuccess(message);
         emit(AddFriendSuccess(message: message));
       } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(AddFriendFailed(message: message));
       } else {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(AddFriendFailed(message: message));
       }
     } catch (error) {
@@ -162,15 +162,15 @@ class ShowInterestedBloc
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-        event.onSuccess();
+        event.onSuccess(message);
         emit(AcceptRequestFriendsSuccess(message: message));
       } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(AcceptRequestFriendsFailed(message: message));
       } else {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(AcceptRequestFriendsFailed(message: message));
       }
     } catch (error) {
@@ -189,15 +189,15 @@ class ShowInterestedBloc
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-        event.onSuccess();
+        event.onSuccess(message);
         emit(RejectRequestFriendsSuccess(message: message));
       } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(RejectRequestFriendsFailed(message: message));
       } else {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(RejectRequestFriendsFailed(message: message));
       }
     } catch (error) {
@@ -217,15 +217,15 @@ class ShowInterestedBloc
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
-        event.onSuccess();
+        event.onSuccess(message);
         emit(UnfriendsSuccess(message: message));
       } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(UnfriendsFailed(message: message));
       } else {
         String message = jsonDecoded["message"];
-        event.onError();
+        event.onError(message);
         emit(UnfriendsFailed(message: message));
       }
     } catch (error) {

@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:works_app/dao/friends_dao.dart';
 import 'package:works_app/models/friends/friends_search_list_modal.dart';
 import 'package:works_app/models/friends/friends_view_modal.dart';
+import 'package:works_app/models/friends/global_search_list_modal.dart';
 
 import '../../helper/custom_log.dart';
 
@@ -22,6 +23,9 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     on<FetchFriendsSingleView>((event, emit) async {
       await mapFetchFriendsViewWorkEvent(event, emit);
     });
+    on<FetchFriendsAddListEvent>((event, emit) async {
+      await mapAddSearchFriendsListEvent(event, emit);
+    });
   }
 
   Future<void> mapFriendsListEvent(
@@ -35,8 +39,6 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
           page: event.page, pageSize: event.pageSize, keyWord: event.keyWord);
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
-
-
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
@@ -54,7 +56,8 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
         if (event.page > 1) {
           final currentState = state;
           if (currentState is FriendsListSuccess) {
-            friendsList = List.from(currentState.friendsSearchList)..addAll(friendsList);
+            friendsList = List.from(currentState.friendsSearchList)
+              ..addAll(friendsList);
           }
         }
 
@@ -63,14 +66,13 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
           maxPageNumber: maxPageNumber,
           maxPageSize: maxPageSize,
         ));
-
       } else {
         emit(FriendsListFailed(message: jsonDecoded["message"] ?? 'Error'));
-        customLog(jsonDecoded["message"] );
+        customLog(jsonDecoded["message"]);
       }
     } catch (error) {
       emit(FriendsListFailed(message: "Something went wrong"));
-      customLog('jsonDecoded["message"]' );
+      customLog('jsonDecoded["message"]');
     }
   }
 
@@ -96,4 +98,47 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     }
   }
 
+  Future<void> mapAddSearchFriendsListEvent(
+      FetchFriendsAddListEvent event, Emitter<FriendsState> emit) async {
+    try {
+      if (event.page == 1) {
+        emit(const FriendsListLoading());
+      }
+      var response = await friendsDao.fetchAddFriendsChatSearchList(
+          page: event.page, pageSize: event.pageSize, keyWord: event.keyWord);
+
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        // int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"]??0;
+        // int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"]??0;
+
+        List<SearchFriendLists> searchFriendLists = [];
+        for (var i in jsonDecoded["data"]) {
+          searchFriendLists.add(SearchFriendLists.fromJson(i));
+        }
+
+
+        if (event.page > 1) {
+          final currentState = state;
+          if (currentState is FriendsListSuccess) {
+            searchFriendLists = List.from(currentState.friendsSearchList)
+              ..addAll(searchFriendLists);
+          }
+        }
+
+        emit(FriendsAddListSuccess(
+          searchFriendLists: searchFriendLists,
+          maxPageNumber: 1,
+          maxPageSize: 1,
+        ));
+      } else {
+        emit(FriendsAddListFailed(message: jsonDecoded["message"] ?? 'Error'));
+        customLog(jsonDecoded["message"]);
+      }
+    } catch (error) {
+      emit(FriendsAddListFailed(message: "Something went wrong"));
+    }
+  }
 }

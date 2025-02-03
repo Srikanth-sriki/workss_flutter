@@ -52,7 +52,7 @@ class _MarkAsAdminListState extends State<MarkAsAdminList> {
                         name: 'Julia Vandervort-Will',
                         onTapCard: () {},
                         added: index % 2 == 0 ? true : false,
-                        disc: 'Mathematics Tutor',
+                        disc: 'Mathematics Tutor', onTapButtonCard: (){},
                         bgFriend: true,
                         buttonText1: 'Marked as admin',buttonWidth: 40,width: 25,
                         buttonText2: 'Mark as admin');

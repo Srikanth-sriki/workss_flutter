@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 
@@ -38,10 +40,9 @@ Widget friendSearchCards(
                       image: NetworkImage(image),
                       fit: BoxFit.fill,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(
-                        SizeConfig.blockWidth * 3))),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(SizeConfig.blockWidth * 3))),
               ),
-
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
                 width: SizeConfig.blockWidth * 40,
@@ -97,7 +98,9 @@ Widget friendSearchDetailsCards({
   bool bgFriend = true,
   bool buttonRequired = true,
   double width = 30,
-  double buttonWidth = 32
+  double buttonWidth = 32,
+  required VoidCallback onTapButtonCard,
+  bool sendMessageButtonRequired = false
 }) {
   return InkWell(
     onTap: onTapCard,
@@ -126,8 +129,8 @@ Widget friendSearchDetailsCards({
                       image: NetworkImage(image),
                       fit: BoxFit.fill,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(
-                        SizeConfig.blockWidth * 2.5))),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(SizeConfig.blockWidth * 2.5))),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
@@ -168,12 +171,51 @@ Widget friendSearchDetailsCards({
           if (buttonRequired) ...[
             customIconButton(
                 text: added ? buttonText1 : buttonText2,
-                onPressed: onTapCard,
+                onPressed: onTapButtonCard,
                 width: SizeConfig.blockWidth * buttonWidth,
                 height: SizeConfig.blockHeight * 6.25,
                 backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
                 textColor: added ? COLORS.neutralDark : COLORS.white,
                 showIcon: false)
+          ],
+          if (sendMessageButtonRequired) ...[
+          SizedBox(
+            width: SizeConfig.blockWidth * buttonWidth,
+            height: SizeConfig.blockHeight * 6.25,
+            child: TouchRippleEffect(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+              rippleColor: Colors.white60,
+              child: InkWell(
+                onTap: onTapButtonCard,
+                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+                child: Container(
+                  width: SizeConfig.blockWidth * buttonWidth,
+
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      color: COLORS.white,
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 2),
+                      border: Border.all(
+                          color: COLORS.neutralDark,
+                          width: SizeConfig.blockWidth * 0.3)),
+                  padding: EdgeInsets.symmetric(
+                    // vertical: SizeConfig.blockHeight*2,
+                    horizontal: SizeConfig.blockWidth * 4,
+                  ),
+                  child: Text(
+                    'Messaage'.tr(),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.5,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          )
           ]
         ],
       ),
@@ -199,7 +241,7 @@ Widget friendChatRemoveSearchDetailsCards({
           right: SizeConfig.blockWidth * 2,
           left: SizeConfig.blockWidth * 2),
       color: COLORS.white,
-      width: SizeConfig.blockWidth*75,
+      width: SizeConfig.blockWidth * 75,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,

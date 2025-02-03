@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class Config {
-  static String url = "http://13.127.193.213/api";
+  static String url = "https://13.127.193.213/api";
   static String accessToken = '';
   static String id = '';
   static bool profileCompleted = false;

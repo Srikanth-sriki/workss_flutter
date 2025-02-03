@@ -20,6 +20,21 @@ class FriendsDao {
     return response;
   }
 
+  Future fetchAddFriendsChatSearchList({
+    required int page,
+    required int pageSize,
+    required String keyWord,
+  }) async {
+    var url =
+        '${Config.url}/user/friend/search?search=$keyWord';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
   Future fetchFriendsView({
     required String id,
   }) async {

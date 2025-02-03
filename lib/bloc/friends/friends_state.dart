@@ -61,3 +61,26 @@ class FetchFriendsViewError extends FriendsState {
   @override
   List<Object> get props => [message];
 }
+
+
+
+class FriendsAddListFailed extends FriendsState {
+  String message;
+
+  FriendsAddListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class FriendsAddListSuccess extends FriendsState {
+  List<SearchFriendLists> searchFriendLists = [];
+  int maxPageNumber;
+  int maxPageSize;
+
+  FriendsAddListSuccess(
+      {required this.searchFriendLists,
+        required this.maxPageNumber,
+        required this.maxPageSize});
+  @override
+  List<Object> get props => [searchFriendLists,maxPageSize,maxPageNumber];
+}
