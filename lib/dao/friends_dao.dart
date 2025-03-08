@@ -106,4 +106,20 @@ class FriendsDao {
     customLog("Response Status Code : ${response.body}");
     return response;
   }
+
+
+  Future fetchFriendsRequestList({
+    required int page,
+    required int pageSize,
+    required String keyWord,
+  }) async {
+    var url =
+        '${Config.url}/user/friend/request-list?page=$page&page_size=$pageSize&search=$keyWord';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
 }

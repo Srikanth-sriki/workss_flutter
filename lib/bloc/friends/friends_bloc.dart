@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:works_app/dao/friends_dao.dart';
+import 'package:works_app/models/friends/friendsRequestList.dart';
 import 'package:works_app/models/friends/friends_search_list_modal.dart';
 import 'package:works_app/models/friends/friends_view_modal.dart';
 import 'package:works_app/models/friends/global_search_list_modal.dart';
@@ -25,6 +26,10 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
     });
     on<FetchFriendsAddListEvent>((event, emit) async {
       await mapAddSearchFriendsListEvent(event, emit);
+    });
+
+    on<FetchFriendsRequestListEvent>((event, emit) async {
+      await mapFriendsRequestListEvent(event, emit);
     });
   }
 
@@ -109,16 +114,14 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
-
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
-        // int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"]??0;
-        // int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"]??0;
+        int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
+        int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"];
 
         List<SearchFriendLists> searchFriendLists = [];
-        for (var i in jsonDecoded["data"]) {
+        for (var i in jsonDecoded["data"]["users"]) {
           searchFriendLists.add(SearchFriendLists.fromJson(i));
         }
-
 
         if (event.page > 1) {
           final currentState = state;
@@ -139,6 +142,53 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
       }
     } catch (error) {
       emit(FriendsAddListFailed(message: "Something went wrong"));
+    }
+  }
+
+  Future<void> mapFriendsRequestListEvent(
+      FetchFriendsRequestListEvent event, Emitter<FriendsState> emit) async {
+    try {
+      if (event.page == 1) {
+        emit(const FriendsListLoading());
+      }
+
+      var response = await friendsDao.fetchFriendsRequestList(
+          page: event.page, pageSize: event.pageSize, keyWord: event.keyWord);
+
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      print('object');
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        print('object1111111111111');
+        int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
+        int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"];
+        print('object1233333333333333333333322222222222222222222111');
+        List<RequestFriendsList> friendsList = [];
+        for (var i in jsonDecoded["data"]["friendRequests"]) {
+          friendsList.add(RequestFriendsList.fromJson(i));
+        }
+        print('object1222222222222222222222111');
+        if (event.page > 1) {
+          final currentState = state;
+          if (currentState is FriendsRequestListSuccess) {
+            friendsList = List.from(currentState.friendsSearchList)
+              ..addAll(friendsList);
+          }
+        }
+
+        emit(FriendsRequestListSuccess(
+          friendsSearchList: friendsList,
+          maxPageNumber: maxPageNumber,
+          maxPageSize: maxPageSize,
+        ));
+      } else {
+        emit(FriendsRequestListFailed(
+            message: jsonDecoded["message"] ?? 'Error'));
+        customLog(jsonDecoded["message"]);
+      }
+    } catch (error) {
+      emit(FriendsRequestListFailed(message: "Something went wrong"));
+      customLog('jsonDecoded["message"]');
     }
   }
 }

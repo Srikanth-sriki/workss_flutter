@@ -270,10 +270,16 @@ Widget friendViewCard({required String image,required String name,}){
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset(
-          image,
+        Container(
           width: SizeConfig.blockWidth * 15.5,
           height: SizeConfig.blockWidth * 15.5,
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(image),
+                fit: BoxFit.fill,
+              ),
+              borderRadius: BorderRadius.all(
+                  Radius.circular(SizeConfig.blockWidth * 3))),
         ),
         SizedBox(height: SizeConfig.blockHeight*0.8),
         Text(

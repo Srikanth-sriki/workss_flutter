@@ -11,6 +11,7 @@ import 'package:works_app/ui/friends/component.dart';
 import 'package:works_app/ui/friends/friends_details.dart';
 
 import '../../bloc/friends/friends_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../models/friends/global_search_list_modal.dart';
@@ -210,12 +211,40 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                             image: searchFriendLists[index].profilePic,
                             name: searchFriendLists[index].name,
                             onTapCard: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => FriendsDetailsScreen(),
-                              //   ),
-                              // );
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) {
+                                              final bloc = FriendsBloc();
+                                              bloc.add(
+                                                  FetchFriendsSingleView(
+                                                      friendId: state
+                                                          .searchFriendLists[
+                                                      index]
+                                                          .id));
+                                              return bloc;
+                                            },
+                                          ),
+                                          BlocProvider(
+                                            create: (context) =>
+                                                ShowInterestedBloc(),
+                                          ),
+                                          BlocProvider(
+                                              create: (context) =>
+                                                  ReportPostBloc()),
+                                          BlocProvider(create: (context)=>ShowInterestedBloc())
+                                        ],
+                                        child: FriendsDetailsScreen(
+                                          refreshPageCallback:
+                                          _refreshPageAfterEdit,
+                                          id: state
+                                              .searchFriendLists[index]
+                                              .id,
+                                        ),
+                                      )));
                             },
                             added: searchFriendLists[index].friendRequestSent !=
                                     null

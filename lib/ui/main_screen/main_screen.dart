@@ -8,6 +8,7 @@ import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/ui/chat/chat_main.dart';
 import 'package:works_app/ui/post_work/post_work.dart';
 
+import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
@@ -81,7 +82,13 @@ class _MainScreenState extends State<MainScreen> {
       case 2:
         return const PostWorkScreen();
       case 3:
-        return const ChatMainScreen();
+        return  BlocProvider(
+  create: (context) => FriendsBloc()..add(FetchFriendsListEvent(
+      page: 1,
+      pageSize: 10,
+      keyWord: '')),
+  child: const ChatMainScreen(),
+);
       case 4:
         return _cachedProfileScreen;
       default:

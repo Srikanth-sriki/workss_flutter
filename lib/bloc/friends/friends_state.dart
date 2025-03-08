@@ -84,3 +84,26 @@ class FriendsAddListSuccess extends FriendsState {
   @override
   List<Object> get props => [searchFriendLists,maxPageSize,maxPageNumber];
 }
+
+
+class FriendsRequestListFailed extends FriendsState {
+  String message;
+
+  FriendsRequestListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class FriendsRequestListSuccess extends FriendsState {
+  List<RequestFriendsList> friendsSearchList = [];
+  int maxPageNumber;
+  int maxPageSize;
+
+  FriendsRequestListSuccess(
+      {required this.friendsSearchList,
+        required this.maxPageNumber,
+        required this.maxPageSize});
+  @override
+  List<Object> get props => [friendsSearchList,maxPageSize,maxPageNumber];
+}
+

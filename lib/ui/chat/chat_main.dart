@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,10 @@ import 'package:works_app/ui/chat/create_chat_group.dart';
 import 'package:works_app/ui/friends/friends_search.dart';
 
 import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
-import '../friends/friends_details.dart';
+import '../../models/friends/friends_search_list_modal.dart';
 import '../home/component.dart';
 import '../profile/notification.dart';
 import 'addFriends.dart';
@@ -28,10 +30,21 @@ class ChatMainScreen extends StatefulWidget {
 }
 
 class _ChatMainScreenState extends State<ChatMainScreen> {
+  late FriendsBloc friendsBloc;
+  List<Friend> friends = [];
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool isFriendsListLoad = true;
   Timer? _debounce;
   String searchKeyword = "";
+  
+  
+  @override
+  
+  void initState(){
+    super.initState();
+    friendsBloc = BlocProvider.of<FriendsBloc>(context);
+  }
 
   void _onSearchChanged(String keyword) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -126,7 +139,25 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
         ],
         showLeadingIcon: false,
       ),
-      body: SafeArea(
+      body: BlocListener<FriendsBloc, FriendsState>(
+        listener: (context, state) {
+          if(state is FriendsListLoading){
+            setState(() {
+              isFriendsListLoad = true;
+            });
+          }
+          if (state is FriendsListSuccess) {
+            setState(() {
+              friends = state.friendsSearchList;
+              isFriendsListLoad = false;
+            });
+          } else if (state is FriendsListFailed) {
+            setState(() {
+              isFriendsListLoad = false;
+            });
+          }
+        },
+  child: SafeArea(
           child: Stack(
         children: [
           Column(
@@ -201,51 +232,56 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: SizeConfig.blockHeight),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 4.5,
+                    if(!isFriendsListLoad && friends.length > 0)...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.blockWidth * 4.5,
+                        ),
+                        child: addFriendText(
+                            textOne: 'Friends',
+                            textTwo: 'View All',
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => FriendsBloc()
+                                              ..add(FetchFriendsListEvent(
+                                                  page: 1,
+                                                  pageSize: 10,
+                                                  keyWord: '')),
+                                          ),
+                                          BlocProvider(
+                                              create: (context) =>
+                                                  ReportPostBloc()),
+                                          BlocProvider(
+                                              create: (context) =>
+                                                  ShowInterestedBloc())
+                                        ],
+                                        child: FriendsSearchListScreen(),
+                                      )));
+                            }),
                       ),
-                      child: addFriendText(
-                          textOne: 'Friends',
-                          textTwo: 'View All',
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
-                                          providers: [
-                                            BlocProvider(
-                                              create: (context) => FriendsBloc()
-                                                ..add(FetchFriendsListEvent(
-                                                    page: 1,
-                                                    pageSize: 10,
-                                                    keyWord: '')),
-                                            ),
-                                            BlocProvider(
-                                                create: (context) =>
-                                                    ShowInterestedBloc())
-                                          ],
-                                          child: FriendsSearchListScreen(),
-                                        )));
-                          }),
-                    ),
-                    SizedBox(
-                      height: SizeConfig.blockHeight * 18,
-                      child: ListView.builder(
-                          itemCount: 8,
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 2.5),
-                          itemBuilder: (context, index) {
-                            return friendViewCard(
-                                image: 'assets/images/home/dumy1.png',
-                                name: 'Julia Vandervort-Will');
-                          }),
-                    ),
-                    const Divider(
-                      color: COLORS.neutralDarkTwo,
-                    ),
+                      SizedBox(
+                        height: SizeConfig.blockHeight * 18,
+                        child: ListView.builder(
+                            itemCount: min(friends.length, 8),
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: SizeConfig.blockWidth * 2.5),
+                            itemBuilder: (context, index) {
+                              return friendViewCard(
+                                  image: friends[index].friends.profilePic,
+                                  name: friends[index].friends.name);
+                            }),
+                      ),
+                      const Divider(
+                        color: COLORS.neutralDarkTwo,
+                      ),
+                    ],
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: SizeConfig.blockWidth * 4.5,
@@ -311,6 +347,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
           )
         ],
       )),
+),
     );
   }
 }

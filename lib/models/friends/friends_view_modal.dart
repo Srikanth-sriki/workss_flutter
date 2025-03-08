@@ -105,22 +105,24 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) => User(
     id: json["id"],
-    code: json["code"],
-    countryCode: json["country_code"],
-    mobile: json["mobile"],
-    name: json["name"],
-    profilePic: json["profile_pic"],
-    bio: json["bio"],
-    userType: json["user_type"],
-    professionType: json["profession_type"],
-    city: json["city"],
-    experiencedYears: json["experienced_years"],
-    knownLanguages: List<String>.from(json["known_languages"].map((x) => x)),
-    gender: json["gender"],
+    code: json["code"]??"",
+    countryCode: json["country_code"]??"",
+    mobile: json["mobile"]??"",
+    name: json["name"]??"",
+    profilePic: json["profile_pic"]??"",
+    bio: json["bio"]??"",
+    userType: json["user_type"]??"",
+    professionType: json["profession_type"]??"",
+    city: json["city"]??"",
+    experiencedYears: json["experienced_years"]??"",
+    knownLanguages: json["known_languages"] != null
+        ? List<String>.from(json["known_languages"].map((x) => x))
+        : [],
+    gender: json["gender"]??"",
     age: json["age"]?.toString()??'',
     workImages: List<String>.from(json["work_images"].map((x) => x)),
-    charges: json["charges"],
-    chargeType: json["charge_type"],
+    charges: json["charges"]??"",
+    chargeType: json["charge_type"]??"",
     isVerified: json["is_verified"],
     isFriend: json["isFriend"] != null
         ? IsFriend.fromJson(json["isFriend"]):null,
@@ -286,14 +288,14 @@ class FriendUser {
 }
 
 class FriendRequestSent {
-  String id;
-  String userId;
+  String? id;
+  String? userId;
   String? senderId;
   String? friendId;
 
   FriendRequestSent({
-    required this.id,
-    required this.userId,
+    this.id,
+    this.userId,
     this.senderId,
     this.friendId,
   });

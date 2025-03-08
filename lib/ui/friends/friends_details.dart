@@ -3,10 +3,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/bloc/friends/friends_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/report_post.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/models/friends/friends_view_modal.dart';
 import 'package:works_app/ui/profile/component.dart';
@@ -40,7 +42,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
   late List<FriendDataList> friendList;
   List<FriendDataList> filteredFriendList = [];
   final bool saved = false;
-  String usertype = "Professional";
+  late String usertype;
   bool verified = true;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -205,6 +207,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
               friendView = state.friendData.user;
               friendList = state.friendData.friends;
               filteredFriendList = state.friendData.friends;
+              usertype = friendView.userType;
             });
           }
         },
@@ -215,396 +218,598 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
             friendView = state.friendData.user;
             friendList = state.friendData.friends;
             return SafeArea(
-                child: CustomScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              shrinkWrap: true,
-              controller: _scrollController,
-              slivers: [
-                SliverAppBar(
-                  floating: false,
-                  pinned: false,
-                  backgroundColor: COLORS.white,
-                  forceMaterialTransparency: true,
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: 0,
-                  elevation: 0,
-                  expandedHeight: SizeConfig.blockHeight * 90,
-                  flexibleSpace: FlexibleSpaceBar(
-                    // collapseMode: CollapseMode.pin,
-                    background: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 2.5,
-                            vertical: SizeConfig.blockHeight,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 2.5,
+                        vertical: SizeConfig.blockHeight,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.arrow_back_ios,
+                                  color: COLORS.black,
+                                  size: SizeConfig.blockWidth * 4.5,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
                               Row(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.arrow_back_ios,
-                                      color: COLORS.black,
-                                      size: SizeConfig.blockWidth * 4.5,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: SizeConfig.blockWidth * 12,
-                                        height: SizeConfig.blockWidth * 12,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: COLORS.primary,
-                                            width: SizeConfig.blockWidth * 0.2,
-                                          ),
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                              friendView
-                                                  .profilePic, // Replace with actual profilePic
-                                            ),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            SizeConfig.blockWidth * 2,
-                                          ),
-                                        ),
+                                  Container(
+                                    width: SizeConfig.blockWidth * 12,
+                                    height: SizeConfig.blockWidth * 12,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: COLORS.primary,
+                                        width: SizeConfig.blockWidth * 0.2,
                                       ),
-                                      SizedBox(
-                                          width: SizeConfig.blockWidth * 2),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          friendView
+                                              .profilePic, // Replace with actual profilePic
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        SizeConfig.blockWidth * 2,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                      width: SizeConfig.blockWidth * 2),
+                                  Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
                                         children: [
-                                          Row(
-                                            children: [
-                                              SizedBox(
-                                                width: friendView.isVerified
-                                                    ? SizeConfig.blockWidth * 15
-                                                    : SizeConfig.blockWidth *
-                                                        45,
-                                                child: Text(
-                                                  friendView.name,
-                                                  style: TextStyle(
-                                                    color: COLORS.neutralDark,
-                                                    fontSize:
-                                                        SizeConfig.blockWidth *
-                                                            4,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: "Poppins",
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  maxLines: 1,
+                                          SizedBox(
+                                            width: friendView.isVerified
+                                                ? SizeConfig.blockWidth * 15
+                                                : SizeConfig.blockWidth *
+                                                45,
+                                            child: Text(
+                                              friendView.name,
+                                              style: TextStyle(
+                                                color: COLORS.neutralDark,
+                                                fontSize:
+                                                SizeConfig.blockWidth *
+                                                    4,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: "Poppins",
+                                                overflow:
+                                                TextOverflow.ellipsis,
+                                              ),
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                          if (friendView.isVerified && friendView.userType == 'professional')
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal:
+                                                SizeConfig.blockWidth *
+                                                    1.5,
+                                                vertical:
+                                                SizeConfig.blockHeight *
+                                                    0.5,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: COLORS.semanticTwo,
+                                                borderRadius:
+                                                BorderRadius.circular(
+                                                  SizeConfig.blockWidth *
+                                                      3.8,
                                                 ),
                                               ),
-                                              if (friendView.isVerified)
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal:
-                                                        SizeConfig.blockWidth *
-                                                            1.5,
-                                                    vertical:
-                                                        SizeConfig.blockHeight *
-                                                            0.5,
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.verified,
+                                                    color: COLORS.white,
+                                                    size: SizeConfig
+                                                        .blockWidth *
+                                                        3.5,
                                                   ),
-                                                  decoration: BoxDecoration(
-                                                    color: COLORS.semanticTwo,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                      SizeConfig.blockWidth *
-                                                          3.8,
+                                                  SizedBox(
+                                                    width: SizeConfig
+                                                        .blockWidth *
+                                                        1.5,
+                                                  ),
+                                                  Text(
+                                                    'Verified'.tr(),
+                                                    style: TextStyle(
+                                                      color: COLORS.white,
+                                                      fontSize: SizeConfig
+                                                          .blockWidth *
+                                                          3,
+                                                      fontWeight:
+                                                      FontWeight.w400,
+                                                      fontFamily: "Poppins",
                                                     ),
                                                   ),
-                                                  child: Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.verified,
-                                                        color: COLORS.white,
-                                                        size: SizeConfig
-                                                                .blockWidth *
-                                                            3.5,
-                                                      ),
-                                                      SizedBox(
-                                                        width: SizeConfig
-                                                                .blockWidth *
-                                                            1.5,
-                                                      ),
-                                                      Text(
-                                                        'Verified'.tr(),
-                                                        style: TextStyle(
-                                                          color: COLORS.white,
-                                                          fontSize: SizeConfig
-                                                                  .blockWidth *
-                                                              3,
-                                                          fontWeight:
-                                                              FontWeight.w400,
-                                                          fontFamily: "Poppins",
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                            ],
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.location_on_rounded,
+                                            color: COLORS.accent,
+                                            size:
+                                            SizeConfig.blockWidth * 3.5,
                                           ),
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.location_on_rounded,
-                                                color: COLORS.accent,
-                                                size:
-                                                    SizeConfig.blockWidth * 3.5,
+                                          SizedBox(
+                                              width: SizeConfig.blockWidth *
+                                                  1),
+                                          SizedBox(
+                                            width:
+                                            SizeConfig.blockWidth * 40,
+                                            child: Text(
+                                              friendView.city,
+                                              style: TextStyle(
+                                                color:
+                                                COLORS.neutralDarkOne,
+                                                fontSize:
+                                                SizeConfig.blockWidth *
+                                                    3,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: "Poppins",
+                                                overflow:
+                                                TextOverflow.ellipsis,
                                               ),
-                                              SizedBox(
-                                                  width: SizeConfig.blockWidth *
-                                                      1),
-                                              SizedBox(
-                                                width:
-                                                    SizeConfig.blockWidth * 40,
-                                                child: Text(
-                                                  friendView.city,
-                                                  style: TextStyle(
-                                                    color:
-                                                        COLORS.neutralDarkOne,
-                                                    fontSize:
-                                                        SizeConfig.blockWidth *
-                                                            3,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontFamily: "Poppins",
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  maxLines: 1,
-                                                ),
-                                              ),
-                                            ],
+                                              maxLines: 1,
+                                            ),
                                           ),
                                         ],
                                       ),
                                     ],
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  InkWell(
-                                    onTap: () {
-                                      if (friendView.isSaved == null) {
-                                        showInterestedBloc
-                                            .add(ProfessionalSavedUs(
-                                          PropId: friendView.id!,
-                                          onSuccess: () {
-                                            setState(() {
-                                              friendView.isSaved =
-                                                  IsContacted(id: '');
-                                            });
-                                            widget.refreshPageCallback();
-                                          },
-                                          onError: () {},
-                                        ));
-                                      } else {
-                                        showInterestedBloc
-                                            .add(ProfessionalSavedUs(
-                                          PropId: friendView.id!,
-                                          onSuccess: () {
-                                            setState(() {
-                                              friendView.isSaved = null;
-                                            });
-                                          },
-                                          onError: () {
-                                            showCustomSnackBar(
-                                              context: context,
-                                              message: "Something Went wrong",
-                                            );
-                                          },
-                                        ));
-                                      }
-                                    },
-                                    child: Image.asset(
-                                      friendView.isSaved != null
-                                          ? 'assets/images/professions/bookmarked.png'
-                                          : 'assets/images/profile/bookmark.png',
-                                      width: friendView.isSaved != null
-                                          ? SizeConfig.blockWidth * 5.25
-                                          : SizeConfig.blockWidth * 4.25,
-                                      height: friendView.isSaved != null
-                                          ? SizeConfig.blockHeight * 5.25
-                                          : SizeConfig.blockHeight * 4.25,
-                                      fit: BoxFit.contain,
-                                      color: friendView.isSaved != null
-                                          ? COLORS.accent
-                                          : COLORS.neutralDarkOne,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.more_vert,
-                                      color: COLORS.black,
-                                      size: SizeConfig.blockWidth * 6.5,
-                                    ),
-                                    onPressed: () {
-                                      showDynamicBottomSheet(
-                                        context,
-                                        'More Options',
-                                        [
-                                          BottomSheetItem(
-                                            title: 'Send Message',
-                                            onTap: () => {},
-                                          ),
-                                          BottomSheetItem(
-                                            title: 'Unfriend',
-                                            onTap: () => {},
-                                          ),
-                                          BottomSheetItem(
-                                            title: 'Report',
-                                            onTap: () => {},
-                                          ),
-                                          BottomSheetItem(
-                                            title: 'Block',
-                                            onTap: () => {},
-                                          ),
-                                        ],
-                                      );
-                                    },
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                        ),
-                        const Divider(
-                          color: COLORS.neutralDarkTwo,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 5,
-                            vertical: SizeConfig.blockHeight,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
-                              registerTextCard(
-                                  text: friendView.professionType,
-                                  image: 'assets/images/home/home.png',
-                                  color: COLORS.neutralDark,
-                                  textColor: COLORS.neutralDarkOne),
-                              registerTextCard(
-                                  text: friendView.experiencedYears,
-                                  image: 'assets/images/home/work_select.png',
-                                  color: COLORS.neutralDark,
-                                  textColor: COLORS.neutralDarkOne),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: SizeConfig.blockWidth * 55,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        registerTextCard(
-                                            text: friendView.knownLanguages!
-                                                .join(", "),
-                                            image:
-                                                'assets/images/home/speak.png',
-                                            color: COLORS.neutralDark,
-                                            textColor: COLORS.neutralDarkOne),
-                                        registerTextCard(
-                                            text: friendView.gender,
-                                            image:
-                                                'assets/images/home/gender.png',
-                                            color: COLORS.neutralDark,
-                                            textColor: COLORS.neutralDarkOne),
-                                      ],
-                                    ),
+                              if(friendView.userType == 'professional')...[
+                                InkWell(
+                                  onTap: () {
+                                    if (friendView.isSaved == null) {
+                                      showInterestedBloc
+                                          .add(ProfessionalSavedUs(
+                                        PropId: friendView.id!,
+                                        onSuccess: () {
+                                          setState(() {
+                                            friendView.isSaved =
+                                                IsContacted(id: '');
+                                          });
+                                          widget.refreshPageCallback();
+                                        },
+                                        onError: () {},
+                                      ));
+                                    } else {
+                                      showInterestedBloc
+                                          .add(ProfessionalSavedUs(
+                                        PropId: friendView.id!,
+                                        onSuccess: () {
+                                          setState(() {
+                                            friendView.isSaved = null;
+                                          });
+                                        },
+                                        onError: () {
+                                          showCustomSnackBar(
+                                            context: context,
+                                            message: "Something Went wrong",
+                                          );
+                                        },
+                                      ));
+                                    }
+                                  },
+                                  child: Image.asset(
+                                    friendView.isSaved != null
+                                        ? 'assets/images/professions/bookmarked.png'
+                                        : 'assets/images/profile/bookmark.png',
+                                    width: friendView.isSaved != null
+                                        ? SizeConfig.blockWidth * 5.25
+                                        : SizeConfig.blockWidth * 4.25,
+                                    height: friendView.isSaved != null
+                                        ? SizeConfig.blockHeight * 5.25
+                                        : SizeConfig.blockHeight * 4.25,
+                                    fit: BoxFit.contain,
+                                    color: friendView.isSaved != null
+                                        ? COLORS.accent
+                                        : COLORS.neutralDarkOne,
                                   ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        formatPrice(friendView.charges),
-                                        style: TextStyle(
-                                            color: COLORS.neutralDark,
-                                            fontSize:
-                                                SizeConfig.blockWidth * 4.8,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: "Poppins",
-                                            height:
-                                                SizeConfig.blockHeight * 0.2),
+                                )
+                              ]
+                             ,
+                              IconButton(
+                                icon: Icon(
+                                  Icons.more_vert,
+                                  color: COLORS.black,
+                                  size: SizeConfig.blockWidth * 6.5,
+                                ),
+                                onPressed: () {
+                                  showDynamicBottomSheet(
+                                    context,
+                                    'More Options',
+                                    [
+                                      BottomSheetItem(
+                                        title: 'Send Message',
+                                        onTap: () => {},
                                       ),
-                                      Text(
-                                        capitalizeEachWord(
-                                            friendView.chargeType),
-                                        style: TextStyle(
-                                          color: COLORS.neutralDarkOne,
-                                          fontSize: SizeConfig.blockWidth * 2.8,
-                                          fontWeight: FontWeight.w400,
-                                          fontFamily: "Poppins",
-                                        ),
+                                      BottomSheetItem(
+                                        title: 'Unfriend',
+                                        onTap: () => {
+                                          showInterestedBloc.add(UnfriendsEvent(
+                                              friendId: friendView
+                                                  .id,
+                                              onSuccess: (message) {
+                                                setState(() {
+                                                  friendView.isFriend = null;
+                                                  widget.refreshPageCallback();
+                                                });
+                                                Navigator.of(context).pop({});
+                                                showCustomSnackBar(
+                                                    context: context,
+                                                    message:
+                                                    "Successfully unfriended!",
+                                                    backgroundColor:
+                                                    COLORS.semanticTwo);
+                                              },
+                                              onError: (message) {
+                                                showCustomSnackBar(
+                                                  context: context,
+                                                  message: message,
+                                                );
+                                              }))
+                                        },
+                                      ),
+                                      BottomSheetItem(
+                                        title: 'Report',
+                                        onTap: () async {
+                                          final result = await showMaterialModalBottomSheet(
+                                              enableDrag: true,
+                                              expand: false,
+                                              isDismissible: true,
+                                              backgroundColor: COLORS.white,
+                                              closeProgressThreshold: 0,
+                                              duration: const Duration(seconds: 0),
+                                              context: context,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.vertical(
+                                                    top: Radius.circular(SizeConfig.blockWidth * 6)),
+                                              ),
+                                              builder: (context) => const ReportPostsBottomSheet(
+                                                message: '',
+                                              ));
+
+                                          if (result != null) {
+                                            setState(() {
+                                              reportPostBloc.add(ReportProfessionalEvent(
+                                                reason: result['message']!,
+                                                userId: friendView
+                                                    .id,
+                                                onSuccess: (message) {
+                                                  showCustomSnackBar(
+                                                      context: context,
+                                                      message: message,backgroundColor: COLORS.neutralDarkOne
+                                                  );
+                                                },
+                                                onError: (message) {
+                                                  showCustomSnackBar(
+                                                    context: context,
+                                                    message: message,
+                                                  );
+                                                },
+                                              ));
+                                            });
+
+                                          }
+                                        },
+                                      ),
+                                      BottomSheetItem(
+                                        title: 'Block',
+                                        onTap: () => {},
                                       ),
                                     ],
-                                  )
-                                ],
+                                  );
+                                },
                               ),
-                              SizedBox(height: SizeConfig.blockHeight * 2),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment:
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      color: COLORS.neutralDarkTwo,
+                    ),
+                    Expanded(child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.blockWidth * 5,
+                              vertical: SizeConfig.blockHeight,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if(friendView.userType == 'professional')...[
+                                  registerTextCard(
+                                      text: friendView.professionType,
+                                      image: 'assets/images/home/home.png',
+                                      color: COLORS.neutralDark,
+                                      textColor: COLORS.neutralDarkOne),
+                                  registerTextCard(
+                                      text: friendView.experiencedYears,
+                                      image: 'assets/images/home/work_select.png',
+                                      color: COLORS.neutralDark,
+                                      textColor: COLORS.neutralDarkOne),
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: SizeConfig.blockWidth * 55,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            registerTextCard(
+                                                text: friendView.knownLanguages!
+                                                    .join(", "),
+                                                image:
+                                                'assets/images/home/speak.png',
+                                                color: COLORS.neutralDark,
+                                                textColor: COLORS.neutralDarkOne),
+                                            registerTextCard(
+                                                text: friendView.gender,
+                                                image:
+                                                'assets/images/home/gender.png',
+                                                color: COLORS.neutralDark,
+                                                textColor: COLORS.neutralDarkOne),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            formatPrice(friendView.charges),
+                                            style: TextStyle(
+                                                color: COLORS.neutralDark,
+                                                fontSize:
+                                                SizeConfig.blockWidth * 4.8,
+                                                fontWeight: FontWeight.w600,
+                                                fontFamily: "Poppins",
+                                                height:
+                                                SizeConfig.blockHeight * 0.2),
+                                          ),
+                                          Text(
+                                            capitalizeEachWord(
+                                                friendView.chargeType),
+                                            style: TextStyle(
+                                              color: COLORS.neutralDarkOne,
+                                              fontSize: SizeConfig.blockWidth * 2.8,
+                                              fontWeight: FontWeight.w400,
+                                              fontFamily: "Poppins",
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(height: SizeConfig.blockHeight * 2),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
-                                children: [
+                                    children: [
+                                      TouchRippleEffect(
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 2.5),
+                                        rippleColor: Colors.white60,
+                                        child: InkWell(
+                                          onTap: () {
+                                            if( friendView.isFriend == null){
+                                              showInterestedBloc.add(AddFriendEvent(
+                                                  userId: friendView.id,
+                                                  onSuccess: (message) {
+                                                    setState(() {
+                                                      friendView.isFriend =
+                                                          IsFriend(
+                                                              userId: friendView.id, id: '',friendId: '');
+                                                      friendView.friendRequestSent = FriendRequestSent(
+                                                        id:  friendView.id,
+                                                      );
+                                                    });
+                                                  },
+                                                  onError: (message) {
+                                                    showCustomSnackBar(
+                                                      context: context,
+                                                      message: message,
+                                                    );
+                                                  }));
+                                            }
+                                            else{
+                                              showInterestedBloc.add(UnfriendsEvent(
+                                                  friendId: friendView.id,
+                                                  onSuccess: (message) {
+                                                    setState(() {
+                                                      friendView.isFriend = null;
+                                                      friendView.friendRequestSent = null;
+                                                      widget.refreshPageCallback();
+                                                    });
+                                                    showCustomSnackBar(
+                                                        context: context,
+                                                        message:
+                                                        "Successfully unfriended!",
+                                                        backgroundColor:
+                                                        COLORS.semanticTwo);
+                                                  },
+                                                  onError: (message) {
+                                                    showCustomSnackBar(
+                                                      context: context,
+                                                      message: message,
+                                                    );
+                                                  }));
+                                            }
+
+                                          },
+                                          borderRadius: BorderRadius.circular(
+                                              SizeConfig.blockWidth * 2.5),
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            width: SizeConfig.blockWidth * 42,
+                                            height: SizeConfig.blockHeight * 7.25,
+                                            decoration: BoxDecoration(
+                                              color: COLORS.white,
+                                              border:
+                                              Border.all(color: COLORS.primary),
+                                              borderRadius: BorderRadius.circular(
+                                                  SizeConfig.blockWidth * 2.5),
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: SizeConfig.blockHeight * 2,
+                                              horizontal: SizeConfig.blockWidth * 4,
+                                            ),
+                                            child: Text(
+                                              friendView.isFriend != null
+                                                  ? 'UNFRIEND'.tr():
+                                              friendView.friendRequestSent != null?'REQUEST SENT'.tr()
+                                                  : 'ADD FRIEND'.tr(),
+                                              style: TextStyle(
+                                                color: COLORS.primary,
+                                                fontSize:
+                                                SizeConfig.blockWidth * 3.8,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: "Poppins",
+                                              ),
+                                              overflow: TextOverflow.clip,
+                                              softWrap: true,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      customButton(
+                                        text: friendView.isContacted == null
+                                            ? 'CONTACT'.tr()
+                                            : 'CONTACTED'.tr(),
+                                        onPressed: () {
+                                          if (friendView.isContacted == null) {
+                                            showInterestedBloc
+                                                .add(ProfessionalContactUs(
+                                              PropId: friendView.id!,
+                                              onSuccess: () {
+                                                setState(() {
+                                                  friendView
+                                                      .isContacted =
+                                                      IsContacted(id: '');
+                                                  makePhoneCall(
+                                                      friendView
+                                                          .mobile!);
+                                                });
+                                              },
+                                              onError: () {},
+                                            ));
+                                          } else {
+                                            makePhoneCall(friendView.mobile!);
+                                          }
+                                        },
+                                        backgroundColor: COLORS.primary,
+                                        showIcon: false,
+                                        width: SizeConfig.blockWidth * 42,
+                                        height: SizeConfig.blockHeight * 8,
+                                        textColor: COLORS.white,
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(height: SizeConfig.blockHeight * 2),
+                                ]
+                                else...[
                                   TouchRippleEffect(
                                     borderRadius: BorderRadius.circular(
                                         SizeConfig.blockWidth * 2.5),
                                     rippleColor: Colors.white60,
                                     child: InkWell(
                                       onTap: () {
-                                        showInterestedBloc.add(UnfriendsEvent(
-                                            friendId: friendView.id,
-                                            onSuccess: (message) {
-                                              setState(() {
-                                                friendView.isFriend = null;
-                                                widget.refreshPageCallback();
-                                              });
-                                              showCustomSnackBar(
+                                        if( friendView.isFriend == null){
+                                          showInterestedBloc.add(AddFriendEvent(
+                                              userId: friendView.id,
+                                              onSuccess: (message) {
+                                                setState(() {
+                                                  friendView.isFriend =
+                                                      IsFriend(
+                                                        userId: friendView.id, id: '',friendId: '');
+                                                  friendView.friendRequestSent = FriendRequestSent(
+                                                    id:  friendView.id,
+                                                  );
+                                                });
+                                              },
+                                              onError: (message) {
+                                                showCustomSnackBar(
                                                   context: context,
-                                                  message:
-                                                      "Successfully unfriended!",
-                                                  backgroundColor:
-                                                      COLORS.semanticTwo);
-                                            },
-                                            onError: (message) {
-                                              showCustomSnackBar(
-                                                context: context,
-                                                message: message,
-                                              );
-                                            }));
+                                                  message: message,
+                                                );
+                                              }));
+                                        }
+                                        else{
+                                          showInterestedBloc.add(UnfriendsEvent(
+                                              friendId: friendView.id,
+                                              onSuccess: (message) {
+                                                setState(() {
+                                                  friendView.isFriend = null;
+                                                  friendView.friendRequestSent = null;
+                                                  widget.refreshPageCallback();
+                                                });
+                                                showCustomSnackBar(
+                                                    context: context,
+                                                    message:
+                                                    "Successfully unfriended!",
+                                                    backgroundColor:
+                                                    COLORS.semanticTwo);
+                                              },
+                                              onError: (message) {
+                                                showCustomSnackBar(
+                                                  context: context,
+                                                  message: message,
+                                                );
+                                              }));
+                                        }
+
                                       },
                                       borderRadius: BorderRadius.circular(
                                           SizeConfig.blockWidth * 2.5),
                                       child: Container(
                                         alignment: Alignment.center,
-                                        width: SizeConfig.blockWidth * 42,
+                                        width: SizeConfig.blockWidth * 100,
                                         height: SizeConfig.blockHeight * 7.25,
                                         decoration: BoxDecoration(
                                           color: COLORS.white,
                                           border:
-                                              Border.all(color: COLORS.primary),
+                                          Border.all(color: COLORS.primary),
                                           borderRadius: BorderRadius.circular(
                                               SizeConfig.blockWidth * 2.5),
                                         ),
@@ -614,12 +819,13 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                         ),
                                         child: Text(
                                           friendView.isFriend != null
-                                              ? 'UNFRIEND'.tr()
-                                              : 'ADD FRIEND',
+                                              ? 'UNFRIEND'.tr():
+                                          friendView.friendRequestSent != null?'REQUEST SENT'.tr()
+                                              : 'ADD FRIEND'.tr(),
                                           style: TextStyle(
                                             color: COLORS.primary,
                                             fontSize:
-                                                SizeConfig.blockWidth * 3.8,
+                                            SizeConfig.blockWidth * 3.8,
                                             fontWeight: FontWeight.w500,
                                             fontFamily: "Poppins",
                                           ),
@@ -629,167 +835,120 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                       ),
                                     ),
                                   ),
-                                  customButton(
-                                    text: friendView.isContacted == null
-                                        ? 'CONTACT'.tr()
-                                        : 'CONTACTED'.tr(),
-                                    onPressed: () {
-                                      if (friendView.isContacted == null) {
-                                        // showInterestedBloc
-                                        //     .add(ProfessionalContactUs(
-                                        //   PropId: professionalData.id!,
-                                        //   onSuccess: () {
-                                        //     setState(() {
-                                        //       professionalData
-                                        //           .isContacted =
-                                        //           IsContacted(id: '');
-                                        //       makePhoneCall(
-                                        //           professionalData
-                                        //               .mobile!);
-                                        //     });
-                                        //   },
-                                        //   onError: () {},
-                                        // ));
-                                      } else {
-                                        makePhoneCall(friendView.mobile!);
-                                      }
-                                    },
-                                    backgroundColor: COLORS.primary,
-                                    showIcon: false,
-                                    width: SizeConfig.blockWidth * 42,
-                                    height: SizeConfig.blockHeight * 8,
-                                    textColor: COLORS.white,
-                                  )
+                                  SizedBox(height: SizeConfig.blockHeight * 2),
+                                  const Divider(
+                                    color: COLORS.neutralDarkTwo,
+                                  ),
+                                  SizedBox(height: SizeConfig.blockHeight * 2),
                                 ],
-                              ),
-                              SizedBox(height: SizeConfig.blockHeight * 2),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                    bottom: SizeConfig.blockHeight * 0.5),
-                                child: Text(
-                                  'Bio'.tr(),
-                                  style: TextStyle(
-                                    color: COLORS.neutralDarkOne,
-                                    fontSize: SizeConfig.blockWidth * 3.4,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: "Poppins",
+
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: SizeConfig.blockHeight * 0.5),
+                                  child: Text(
+                                    'Bio'.tr(),
+                                    style: TextStyle(
+                                      color: COLORS.neutralDarkOne,
+                                      fontSize: SizeConfig.blockWidth * 3.4,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: "Poppins",
+                                    ),
                                   ),
                                 ),
-                              ),
-                              ReadMoreText(
-                                text: friendView.bio,
-                              ),
-                              const Divider(
-                                color: COLORS.neutralDarkTwo,
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                    bottom: SizeConfig.blockHeight * 0.5),
-                                child: Text(
-                                  'Gallery'.tr(),
-                                  style: TextStyle(
-                                    color: COLORS.neutralDarkOne,
-                                    fontSize: SizeConfig.blockWidth * 3.6,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: "Poppins",
+                                ReadMoreText(
+                                  text: friendView.bio,
+                                ),
+                                const Divider(
+                                  color: COLORS.neutralDarkTwo,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: SizeConfig.blockHeight * 0.5),
+                                  child: Text(
+                                    'Gallery'.tr(),
+                                    style: TextStyle(
+                                      color: COLORS.neutralDarkOne,
+                                      fontSize: SizeConfig.blockWidth * 3.6,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: "Poppins",
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: SizeConfig.blockHeight),
-                              DynamicGridExample(
-                                imageUrls: friendView.workImages,
-                              ),
-                            ],
+                                SizedBox(height: SizeConfig.blockHeight),
+                                DynamicGridExample(
+                                  imageUrls: friendView.workImages,
+                                ),
+                              ],
+                            ),
                           ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SearchBarDelegate(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      color: COLORS.white,
-                      padding: EdgeInsets.symmetric(
-                        vertical: SizeConfig.blockHeight,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.blockWidth * 5,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Friends',
-                              style: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3.8,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.blockWidth * 5,
+                              vertical: SizeConfig.blockHeight*2
                             ),
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  clickOnSearch = true;
-                                  _openSearchModal(context);
-                                });
-                              },
-                              child: Icon(
-                                Icons.search,
-                                color: COLORS.neutralDarkOne,
-                                size: SizeConfig.blockWidth * 6,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Friends',
+                                  style: TextStyle(
+                                    color: COLORS.neutralDarkOne,
+                                    fontSize: SizeConfig.blockWidth * 3.8,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      clickOnSearch = true;
+                                      _openSearchModal(context);
+                                    });
+                                  },
+                                  child: Icon(
+                                    Icons.search,
+                                    color: COLORS.neutralDarkOne,
+                                    size: SizeConfig.blockWidth * 6,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                          ),
 
-                //  const SliverToBoxAdapter(
-                //   child: Divider(
-                //     color: COLORS.neutralDarkTwo,
-                //   ),
-                // ),
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: friendList.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.blockWidth * 5,
+                                  ),
+                                  child: friendSearchDetailsCards(
+                                    image: friendList[index].user.profilePic,
+                                    name: friendList[index].user.name,
+                                    onTapCard: () {
+                                      // Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //     builder: (context) => FriendsDetailsScreen(),
+                                      //   ),
+                                      // );
+                                    },
+                                    onTapButtonCard: () {},
+                                    added: friendList[index].user.friendRequestSent != null
+                                        ? true
+                                        : false,
+                                    disc: friendList[index].user.professionType,
+                                  ),
+                                );
+                              })
+                        ],
+                      ),
+                    ))
 
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 5,
-                      ),
-                      child: friendSearchDetailsCards(
-                        image: friendList[index].user.profilePic,
-                        name: friendList[index].user.name,
-                        onTapCard: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => FriendsDetailsScreen(),
-                          //   ),
-                          // );
-                        },
-                        onTapButtonCard: () {},
-                        added: friendList[index].user.friendRequestSent != null
-                            ? true
-                            : false,
-                        disc: friendList[index].user.professionType,
-                      ),
-                    );
-                  },
-                      childCount: friendList.length,
-                      addAutomaticKeepAlives: true,
-                      addRepaintBoundaries: true,
-                      addSemanticIndexes: true),
-                ),
-              ],
-            ));
+                  ],
+                ));
           } else if (state is FetchFriendsViewError) {
             return Scaffold(
               backgroundColor: COLORS.white,

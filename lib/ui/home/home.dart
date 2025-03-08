@@ -15,6 +15,7 @@ import 'package:works_app/ui/home/notification_list.dart';
 import 'package:works_app/ui/home/work_details.dart';
 import 'package:works_app/ui/home/work_search.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
+import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
@@ -297,7 +298,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     BlocProvider(
                                       create: (context) => ShowInterestedBloc(),
                                     ),
-                                    BlocProvider(create: (context)=>ReportPostBloc())
+                                    BlocProvider(
+                                        create: (context) => ReportPostBloc())
                                   ],
                                   child: WorkDetailsScreen(
                                     id: work.id!,
@@ -496,8 +498,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   routeType: 'homo',
                                 )),
                       );
-                    },borderRadius: BorderRadius.circular(
-                      SizeConfig.blockWidth * 2.5),
+                    },
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
@@ -512,7 +515,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(width: SizeConfig.blockWidth * 2.8,),
+                  SizedBox(
+                    width: SizeConfig.blockWidth * 2.8,
+                  ),
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -524,11 +529,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                         create: (context) => NotificationBloc()
                                           ..add(const FetchNotificationList()),
                                       ),
+                                      BlocProvider(
+                                          create: (context) => FriendsBloc()
+                                            ..add(FetchFriendsRequestListEvent(
+                                                page: 1,
+                                                pageSize: 10,
+                                                keyWord: '')))
                                     ],
                                     child: const NotificationListScreen(),
                                   )));
-                    },borderRadius: BorderRadius.circular(
-                      SizeConfig.blockWidth * 2.5),
+                    },
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
@@ -579,7 +591,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                                 child: const WorkSearchList(),
                               )));
-                },borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                },
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                 child: Container(
                   width: SizeConfig.blockWidth * 72,
                   height: SizeConfig.blockHeight * 8,
@@ -660,8 +674,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       selectedGender,
                     );
                   }
-                }, borderRadius:
-              BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                },
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                 child: Container(
                   padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
                   height: SizeConfig.blockHeight * 8,

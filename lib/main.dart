@@ -29,6 +29,7 @@ import 'package:works_app/ui/onboarding/splash_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'bloc/authentication/authentication_bloc.dart';
+import 'bloc/friends/friends_bloc.dart';
 import 'bloc/home/home_bloc.dart';
 import 'bloc/login/login_bloc.dart';
 import 'bloc/post_work/post_work_bloc.dart';
@@ -282,6 +283,13 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider(
                   create: (context) => ShowInterestedBloc(),
                 ),
+            BlocProvider(
+              create: (context) => FriendsBloc()
+                ..add(FetchFriendsListEvent(
+                    page: 1,
+                    pageSize: 10,
+                    keyWord: '')),
+            ),
               ], child: const MainScreen()),
         },
       ),
@@ -365,6 +373,13 @@ class _AuthenticationState extends State<Authentication> {
               ),
               BlocProvider(
                 create: (context) => ShowInterestedBloc(),
+              ),
+              BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(FetchFriendsListEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: '')),
               ),
             ], child: const MainScreen());
           }

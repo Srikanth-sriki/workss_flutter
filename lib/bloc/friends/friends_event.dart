@@ -43,3 +43,16 @@ class FetchFriendsAddListEvent extends FriendsEvent {
   @override
   List<Object> get props => [page, pageSize, keyWord];
 }
+
+class FetchFriendsRequestListEvent extends FriendsEvent {
+  int page;
+  int pageSize;
+  String keyWord;
+  FetchFriendsRequestListEvent({
+    required this.page,
+    required this.pageSize,
+    required this.keyWord,
+  });
+  @override
+  List<Object> get props => [page, pageSize, keyWord];
+}

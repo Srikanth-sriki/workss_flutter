@@ -52,7 +52,7 @@ Widget friendSearchCards(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.25,
                     fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",
+                    fontFamily: "Poppins",overflow: TextOverflow.ellipsis,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

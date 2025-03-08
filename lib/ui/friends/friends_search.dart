@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/ImagePickerComponent.dart';
@@ -15,6 +16,7 @@ import 'package:works_app/ui/friends/friends_details.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
+import '../../global_helper/report_post.dart';
 import '../chat/addFriends.dart';
 import '../chat/component.dart';
 
@@ -29,6 +31,7 @@ class FriendsSearchListScreen extends StatefulWidget {
 class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
   late FriendsBloc friendsBloc;
   late ShowInterestedBloc showInterestedBloc;
+  late ReportPostBloc reportPostBloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   late List<Friend> friends;
@@ -44,6 +47,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    reportPostBloc =BlocProvider.of<ReportPostBloc>(context);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -293,7 +297,45 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                     ),
                                     BottomSheetItem(
                                       title: 'Report',
-                                      onTap: () => {},
+                                      onTap: () async {
+                                        final result = await showMaterialModalBottomSheet(
+                                            enableDrag: true,
+                                            expand: false,
+                                            isDismissible: true,
+                                            backgroundColor: COLORS.white,
+                                            closeProgressThreshold: 0,
+                                            duration: const Duration(seconds: 0),
+                                            context: context,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.vertical(
+                                                  top: Radius.circular(SizeConfig.blockWidth * 6)),
+                                            ),
+                                            builder: (context) => const ReportPostsBottomSheet(
+                                              message: '',
+                                            ));
+
+                                        if (result != null) {
+                                          setState(() {
+                                            reportPostBloc.add(ReportProfessionalEvent(
+                                              reason: result['message']!,
+                                              userId: state.friendsSearchList[index].id!,
+                                              onSuccess: (message) {
+                                                showCustomSnackBar(
+                                                    context: context,
+                                                    message: message,backgroundColor: COLORS.neutralDarkOne
+                                                );
+                                              },
+                                              onError: (message) {
+                                                showCustomSnackBar(
+                                                  context: context,
+                                                  message: message,
+                                                );
+                                              },
+                                            ));
+                                          });
+
+                                        }
+                                      },
                                     ),
                                     BottomSheetItem(
                                       title: 'Block',
