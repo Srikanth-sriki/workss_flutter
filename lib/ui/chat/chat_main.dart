@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/friends/friends_bloc.dart';
+import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/chat/archived_chats.dart';
@@ -13,10 +14,13 @@ import 'package:works_app/ui/chat/component.dart';
 import 'package:works_app/ui/chat/create_chat_group.dart';
 import 'package:works_app/ui/friends/friends_search.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
+import '../../models/chat/charts_list_modal.dart';
 import '../../models/friends/friends_search_list_modal.dart';
 import '../home/component.dart';
 import '../profile/notification.dart';
@@ -31,19 +35,21 @@ class ChatMainScreen extends StatefulWidget {
 
 class _ChatMainScreenState extends State<ChatMainScreen> {
   late FriendsBloc friendsBloc;
+  late ChartBloc chartBloc;
   List<Friend> friends = [];
+  List<ChatList> chatList = [];
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isFriendsListLoad = true;
+  bool isChatListLoading = true;
   Timer? _debounce;
   String searchKeyword = "";
-  
-  
+
   @override
-  
-  void initState(){
+  void initState() {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
   }
 
   void _onSearchChanged(String keyword) {
@@ -53,6 +59,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
         searchKeyword = keyword;
       });
     });
+  }
+
+  void _refreshPageAfterEdit() {
+    // _fetchData();
   }
 
   @override
@@ -78,8 +88,15 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CreateGroupScreen(),
-                          ))
+                              builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => ChartBloc(),
+                                      ),
+                                      BlocProvider(create: (context) =>InitialRegisterBloc())
+                                    ],
+                                    child: const CreateGroupScreen(),
+                                  )))
                     },
                   ),
                   BottomSheetItem(
@@ -128,7 +145,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                           create: (context) =>
                                               ShowInterestedBloc())
                                     ],
-                                    child: const AddFriendsScreen(header: 'Add Friend'),
+                                    child: const AddFriendsScreen(
+                                        header: 'Add Friend'),
                                   )))
                     },
                   ),
@@ -139,215 +157,259 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
         ],
         showLeadingIcon: false,
       ),
-      body: BlocListener<FriendsBloc, FriendsState>(
-        listener: (context, state) {
-          if(state is FriendsListLoading){
-            setState(() {
-              isFriendsListLoad = true;
-            });
-          }
-          if (state is FriendsListSuccess) {
-            setState(() {
-              friends = state.friendsSearchList;
-              isFriendsListLoad = false;
-            });
-          } else if (state is FriendsListFailed) {
-            setState(() {
-              isFriendsListLoad = false;
-            });
-          }
-        },
-  child: SafeArea(
-          child: Stack(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                    left: SizeConfig.blockWidth * 4.5,
-                    top: SizeConfig.blockHeight * 2,
-                    right: SizeConfig.blockWidth * 4.5,
-                    bottom: SizeConfig.blockHeight),
-                child: TextField(
-                  controller: _searchController,
-                  style: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.25,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                  ),
-                  cursorColor: COLORS.black,
-                  decoration: InputDecoration(
-                    fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                    focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                    filled: true,
-                    hintText: 'Search your friends'.tr(),
-                    hintStyle: TextStyle(
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<FriendsBloc, FriendsState>(
+            listener: (context, state) {
+              if (state is FriendsListLoading) {
+                setState(() {
+                  isFriendsListLoad = true;
+                });
+              } else if (state is FriendsListSuccess) {
+                setState(() {
+                  friends = state.friendsSearchList;
+                  isFriendsListLoad = false;
+                });
+              } else if (state is FriendsListFailed) {
+                setState(() {
+                  isFriendsListLoad = false;
+                });
+              }
+            },
+          ),
+          BlocListener<ChartBloc, ChartState>(
+            listener: (context, state) {
+              if (state is ChartListLoading) {
+                setState(() {
+                  isChatListLoading = true;
+                });
+              } else if (state is ChartListSuccess) {
+                setState(() {
+                  chatList = state.chatList;
+                  isChatListLoading = false;
+                });
+              } else if (state is ChartListFailed) {
+                setState(() {
+                  isChatListLoading = false;
+                });
+              }
+            },
+          ),
+        ],
+        child: SafeArea(
+            child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: SizeConfig.blockWidth * 4.5,
+                      top: SizeConfig.blockHeight * 2,
+                      right: SizeConfig.blockWidth * 4.5,
+                      bottom: SizeConfig.blockHeight),
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
                       color: COLORS.neutralDarkOne,
                       fontSize: SizeConfig.blockWidth * 3.25,
                       fontWeight: FontWeight.w400,
                       fontFamily: "Poppins",
                     ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: COLORS.neutralDarkOne,
-                      size: SizeConfig.blockWidth * 5,
+                    cursorColor: COLORS.black,
+                    decoration: InputDecoration(
+                      fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      filled: true,
+                      hintText: 'Search your friends'.tr(),
+                      hintStyle: TextStyle(
+                        color: COLORS.neutralDarkOne,
+                        fontSize: SizeConfig.blockWidth * 3.25,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: COLORS.neutralDarkOne,
+                        size: SizeConfig.blockWidth * 5,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        borderSide: BorderSide(
+                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                            width: SizeConfig.blockWidth * 0.1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        borderSide: BorderSide(
+                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                            width: SizeConfig.blockWidth * 0.1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        borderSide: BorderSide(
+                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                            width: SizeConfig.blockWidth * 0.1),
+                      ),
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                      borderSide: BorderSide(
-                          color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                          width: SizeConfig.blockWidth * 0.1),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                      borderSide: BorderSide(
-                          color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                          width: SizeConfig.blockWidth * 0.1),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                      borderSide: BorderSide(
-                          color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                          width: SizeConfig.blockWidth * 0.1),
-                    ),
+                    onChanged: _onSearchChanged,
                   ),
-                  onChanged: _onSearchChanged,
                 ),
-              ),
-              const Divider(
-                color: COLORS.neutralDarkTwo,
-              ),
-              Expanded(
-                  child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: SizeConfig.blockHeight),
-                    if(!isFriendsListLoad && friends.length > 0)...[
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.blockWidth * 4.5,
+                const Divider(
+                  color: COLORS.neutralDarkTwo,
+                ),
+                Expanded(
+                    child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _scrollController,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: SizeConfig.blockHeight),
+                      if (!isFriendsListLoad && friends.isNotEmpty) ...[
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 4.5,
+                          ),
+                          child: addFriendText(
+                              textOne: 'Friends',
+                              textTwo: 'View All',
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      FriendsBloc()
+                                                        ..add(
+                                                            FetchFriendsListEvent(
+                                                                page: 1,
+                                                                pageSize: 10,
+                                                                keyWord: '')),
+                                                ),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ReportPostBloc()),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ShowInterestedBloc())
+                                              ],
+                                              child: FriendsSearchListScreen(),
+                                            )));
+                              }),
                         ),
-                        child: addFriendText(
-                            textOne: 'Friends',
-                            textTwo: 'View All',
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider(
-                                            create: (context) => FriendsBloc()
-                                              ..add(FetchFriendsListEvent(
-                                                  page: 1,
-                                                  pageSize: 10,
-                                                  keyWord: '')),
-                                          ),
-                                          BlocProvider(
-                                              create: (context) =>
-                                                  ReportPostBloc()),
-                                          BlocProvider(
-                                              create: (context) =>
-                                                  ShowInterestedBloc())
-                                        ],
-                                        child: FriendsSearchListScreen(),
-                                      )));
-                            }),
-                      ),
-                      SizedBox(
-                        height: SizeConfig.blockHeight * 18,
-                        child: ListView.builder(
-                            itemCount: min(friends.length, 8),
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: SizeConfig.blockWidth * 2.5),
-                            itemBuilder: (context, index) {
-                              return friendViewCard(
-                                  image: friends[index].friends.profilePic,
-                                  name: friends[index].friends.name);
-                            }),
-                      ),
-                      const Divider(
-                        color: COLORS.neutralDarkTwo,
-                      ),
+                        SizedBox(
+                          height: SizeConfig.blockHeight * 18,
+                          child: ListView.builder(
+                              itemCount: min(friends.length, 8),
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 2.5),
+                              itemBuilder: (context, index) {
+                                return friendViewCard(
+                                    image: friends[index].friends.profilePic,
+                                    name: friends[index].friends.name);
+                              }),
+                        ),
+                        const Divider(
+                          color: COLORS.neutralDarkTwo,
+                        ),
+                      ],
+                      if (!isChatListLoading && chatList.isNotEmpty) ...[
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 4.5,
+                            vertical: SizeConfig.blockHeight * 0.2,
+                          ),
+                          child: ListView.builder(
+                              itemCount: chatList.length,
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              scrollDirection: Axis.vertical,
+                              itemBuilder: (context, index) {
+                                return chartSearchCards(
+                                    image: chatList[index].picture!,
+                                    name: chatList[index].name!,
+                                    onTapCard: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => MultiBlocProvider(
+                                                providers: [
+                                                  BlocProvider(
+                                                    create: (context) =>
+                                                    ChartBloc()
+                                                      ..add(
+                                                          FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatList[index].chatId!)),
+                                                  ),
+                                                  BlocProvider(create: (context) => InitialRegisterBloc())
+
+                                                ],
+                                                child: ChatViewScreen(refreshPageCallback: _refreshPageAfterEdit,chatViewProfile: chatList[index],),
+                                              )));
+                                    },
+                                    message:
+                                        chatList[index].latestMessage != null
+                                            ? chatList[index]
+                                                .latestMessage!
+                                                .content!
+                                            : "",
+                                    count: chatList[index].unreadCount!,
+                                    isGroup: chatList[index].isGroup!,
+                                    date: formatChatDate(
+                                        chatList[index].updatedAt!));
+                              }),
+                        )
+                      ]
                     ],
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 4.5,
-                        vertical: SizeConfig.blockHeight * 0.2,
-                      ),
-                      child: ListView.builder(
-                          itemCount: 5,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          scrollDirection: Axis.vertical,
-                          itemBuilder: (context, index) {
-                            return chartSearchCards(
-                                image: 'assets/images/home/dumy1.png',
-                                name: 'Julia Vandervort-Will',
-                                onTapCard: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatViewScreen(),
-                                      ));
-                                },
-                                message: 'Lorem ipsum dolor sit',
-                                count: '2',
-                                date: '23 JUN 2024');
-                          }),
-                    )
-                  ],
-                ),
-              )),
-            ],
-          ),
-          Positioned(
-            bottom: SizeConfig.blockHeight * 2.5,
-            right: SizeConfig.blockHeight * 4,
-            child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MultiBlocProvider(
-                            providers: [
-                              BlocProvider(
-                                create: (context) => FriendsBloc()
-                                  ..add(FetchFriendsAddListEvent(
-                                      page: 1,
-                                      pageSize: 10,
-                                      keyWord: '')),
-                              ),
-                              BlocProvider(
-                                  create: (context) =>
-                                      ShowInterestedBloc())
-                            ],
-                            child: const AddFriendsScreen(header: 'Add Friend'),
-                          )));
-                },
-                backgroundColor: COLORS.primary,
-                child: Image.asset(
-                  'assets/images/chat/add_friend.png',
-                  width: SizeConfig.blockWidth * 6.5,
-                  height: SizeConfig.blockWidth * 6.5,
-                  fit: BoxFit.contain,
+                  ),
                 )),
-          )
-        ],
-      )),
-),
+              ],
+            ),
+            Positioned(
+              bottom: SizeConfig.blockHeight * 2.5,
+              right: SizeConfig.blockHeight * 4,
+              child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) => FriendsBloc()
+                                        ..add(FetchFriendsAddListEvent(
+                                            page: 1,
+                                            pageSize: 10,
+                                            keyWord: '')),
+                                    ),
+                                    BlocProvider(
+                                        create: (context) =>
+                                            ShowInterestedBloc())
+                                  ],
+                                  child: const AddFriendsScreen(
+                                      header: 'Add Friend'),
+                                )));
+                  },
+                  backgroundColor: COLORS.primary,
+                  child: Image.asset(
+                    'assets/images/chat/add_friend.png',
+                    width: SizeConfig.blockWidth * 6.5,
+                    height: SizeConfig.blockWidth * 6.5,
+                    fit: BoxFit.contain,
+                  )),
+            )
+          ],
+        )),
+      ),
     );
   }
 }

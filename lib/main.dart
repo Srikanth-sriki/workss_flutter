@@ -29,6 +29,7 @@ import 'package:works_app/ui/onboarding/splash_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'bloc/authentication/authentication_bloc.dart';
+import 'bloc/chart/chart_bloc.dart';
 import 'bloc/friends/friends_bloc.dart';
 import 'bloc/home/home_bloc.dart';
 import 'bloc/login/login_bloc.dart';
@@ -290,6 +291,7 @@ class _MyAppState extends State<MyApp> {
                     pageSize: 10,
                     keyWord: '')),
             ),
+            BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
               ], child: const MainScreen()),
         },
       ),
@@ -381,6 +383,7 @@ class _AuthenticationState extends State<Authentication> {
                       pageSize: 10,
                       keyWord: '')),
               ),
+              BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
             ], child: const MainScreen());
           }
           return MultiBlocProvider(providers: [

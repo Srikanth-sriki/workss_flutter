@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/ui/chat/group_create_success.dart';
 
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -21,13 +24,30 @@ class CreateGroupScreen extends StatefulWidget {
 
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
+  late ChartBloc chartBloc;
+  late InitialRegisterBloc initialRegisterBloc;
+  late String profilePicture;
   final TextEditingController groupName = TextEditingController();
   final TextEditingController groupDescription = TextEditingController();
   bool groupNameError = false;
   bool groupDescriptionError = false;
   bool isSubmitButtonEnabled = false;
   bool groupStepOne = false;
+  bool inviteMemberListLoading = true;
+  bool groupCreateLoad = false;
   File? _profileImage;
+
+  @override
+  void initState() {
+    super.initState();
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+    profilePicture = "";
+    initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
+  }
+
+  void fetchInviteList() {
+    //chartBloc.add(InviteMemberChartEvent(page: page, pageSize: pageSize, groupId: groupId, keyWord: keyWord))
+  }
 
   void _validateForm() {
     if (groupName.text.isNotEmpty && groupDescription.text.isNotEmpty) {
@@ -38,12 +58,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   void _submitButton() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (BuildContext context) => GroupCreateSuccess(),
-      ),
-    );
+    chartBloc.add(ChartGroupCreateEvent(
+        picture: profilePicture,
+        name: groupName.text,
+        description: groupDescription.text,
+        invitedUsers: []));
   }
 
   @override
@@ -98,7 +117,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   decoration: BoxDecoration(
                       color: COLORS.primaryOne.withOpacity(0.5),
                       borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 2.5)),
+                      BorderRadius.circular(SizeConfig.blockWidth * 2.5)),
                   child: Text(
                     groupStepOne ? 'Step 2'.tr() : 'Step 1'.tr(),
                     style: TextStyle(
@@ -113,7 +132,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             ),
             Padding(
               padding:
-                  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 7),
+              EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 7),
               child: Text(
                 'Build your own work network'.tr(),
                 style: TextStyle(
@@ -127,10 +146,66 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
           ],
         ),
       ),
-      body: SafeArea(
-          child: groupStepOne != true
-              ? SingleChildScrollView(
-                  child: Container(
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ChartBloc, ChartState>(
+            listener: (context, state) {
+              if (state is InviteMemberLoading) {
+                setState(() {
+                  inviteMemberListLoading = true;
+                });
+              }
+              if (state is InviteMemberSuccess) {
+                setState(() {
+                  inviteMemberListLoading = false;
+                });
+              } else if (state is InviteMemberFailed) {
+                setState(() {
+                  inviteMemberListLoading = false;
+                });
+              } else if (state is ChartListLoading) {
+                setState(() {
+                  groupCreateLoad = true;
+                });
+              } else if (state is ChartGroupCreateSuccess) {
+                setState(() {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (
+                          BuildContext context) => const GroupCreateSuccess(),
+                    ),
+                  );
+                  groupCreateLoad = false;
+                });
+              } else if (state is ChartGroupCreateFailed) {
+                setState(() {
+                  groupCreateLoad = false;
+                  showCustomSnackBar(
+                    context: context,
+                    message: state.message,
+                  );
+                });
+              }
+            },
+          ),
+          BlocListener<InitialRegisterBloc, InitialRegisterState>(
+            listener: (context, state) {
+              if (state is UploadImageSuccess) {
+                profilePicture = state.filePath;
+              }  else if (state is UploadImageFailed) {
+                showCustomSnackBar(
+                  context: context,
+                  message: state.message,
+                );
+              }
+            },
+          ),
+        ],
+        child: SafeArea(
+            child: groupStepOne != true
+                ? SingleChildScrollView(
+                child: Container(
                   width: SizeConfig.screenWidth,
                   padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
                   child: Form(
@@ -164,10 +239,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     setState(
-                                        () => groupDescriptionError = true);
+                                            () => groupDescriptionError = true);
                                     return 'Please enter description'.tr();
                                   }
-                                  setState(() => groupDescriptionError = false);
+                                  setState(
+                                          () => groupDescriptionError = false);
                                   return null;
                                 },
                                 error: groupDescriptionError,
@@ -177,59 +253,59 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                 title: 'Group Description'.tr()),
                           ])),
                 ))
-              : Container(
-                  width: SizeConfig.screenWidth,
-                  padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
-                  child: Column(
+                : Container(
+              width: SizeConfig.screenWidth,
+              padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Select Friends',
-                            style: TextStyle(
-                              color: COLORS.neutralDarkOne,
-                              fontSize: SizeConfig.blockWidth * 3.8,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              setState(() {});
-                            },
-                            child: Icon(
-                              Icons.search,
-                              color: COLORS.neutralDarkOne,
-                              size: SizeConfig.blockWidth * 6,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Select Friends',
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.8,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
                       ),
-                      SizedBox(
-                        height: SizeConfig.blockHeight * 1.5,
+                      InkWell(
+                        onTap: () {
+                          setState(() {});
+                        },
+                        child: Icon(
+                          Icons.search,
+                          color: COLORS.neutralDarkOne,
+                          size: SizeConfig.blockWidth * 6,
+                        ),
                       ),
-                      Expanded(
-                        child: ListView.builder(
-                            itemCount: 5,
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            itemBuilder: (context, index) {
-                              return createGroupInviteCard(
-                                image: 'assets/images/home/dumy1.png',
-                                name: 'Julia Vandervort-Will',
-                                onTapCard: () {},
-                                added: index % 2 == 0 ? true : false,
-                                disc: 'Mathematics Tutor'
-                              );
-                            }),
-                      )
                     ],
                   ),
-                )),
+                  SizedBox(
+                    height: SizeConfig.blockHeight * 1.5,
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                        itemCount: 5,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemBuilder: (context, index) {
+                          return createGroupInviteCard(
+                              image: 'assets/images/home/dumy1.png',
+                              name: 'Julia Vandervort-Will',
+                              onTapCard: () {},
+                              added: index % 2 == 0 ? true : false,
+                              disc: 'Mathematics Tutor');
+                        }),
+                  )
+                ],
+              ),
+            )),
+      ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 2),
         decoration: BoxDecoration(
@@ -271,34 +347,35 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 height: SizeConfig.blockHeight * 8,
                 textColor: COLORS.white,
               )
-            ] else ...[
-              customButton(
-                text: 'BACK'.tr(),
-                onPressed: () {
-                  setState(() {
-                    groupStepOne = false;
-                  });
-                },
-                backgroundColor: COLORS.neutralDarkTwo,
-                showIcon: false,
-                width: SizeConfig.blockWidth * 42,
-                height: SizeConfig.blockHeight * 8,
-                textColor: COLORS.black,
-              ),
-              customButton(
-                text: 'CREATE'.tr(),
-                onPressed: () {
-                  _submitButton();
-                },
-                backgroundColor: isSubmitButtonEnabled
-                    ? COLORS.primary
-                    : COLORS.primary.withOpacity(0.4),
-                showIcon: false,
-                width: SizeConfig.blockWidth * 42,
-                height: SizeConfig.blockHeight * 8,
-                textColor: COLORS.white,
-              )
-            ]
+            ] else
+              ...[
+                customButton(
+                  text: 'BACK'.tr(),
+                  onPressed: () {
+                    setState(() {
+                      groupStepOne = false;
+                    });
+                  },
+                  backgroundColor: COLORS.neutralDarkTwo,
+                  showIcon: false,
+                  width: SizeConfig.blockWidth * 42,
+                  height: SizeConfig.blockHeight * 8,
+                  textColor: COLORS.black,
+                ),
+                customButton(
+                  text: 'CREATE'.tr(),
+                  onPressed: () {
+                    _submitButton();
+                  },
+                  backgroundColor: isSubmitButtonEnabled
+                      ? COLORS.primary
+                      : COLORS.primary.withOpacity(0.4),
+                  showIcon: false,
+                  width: SizeConfig.blockWidth * 42,
+                  height: SizeConfig.blockHeight * 8,
+                  textColor: COLORS.white,
+                )
+              ]
           ],
         ),
       ),
@@ -313,58 +390,58 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         registerText(text: 'Group Picture'.tr()),
         _profileImage == null
             ? ImagePickerComponent(
+          onImageSelected: (File image) {
+            setState(() {
+              _profileImage = image;
+              initialRegisterBloc
+                  .add(UploadImageEvent(imagePath: _profileImage!));
+            });
+          },
+        )
+            : Stack(
+          children: [
+            Container(
+              height: SizeConfig.blockWidth * 32,
+              width: SizeConfig.blockWidth * 34,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                    color: COLORS.primary,
+                    width: 1.2,
+                  ),
+                  image: DecorationImage(
+                    image: FileImage(
+                      File(_profileImage!.path),
+                    ),
+                    fit: BoxFit.fill,
+                  ),
+                  borderRadius:
+                  BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: ImagePickerModal(
                 onImageSelected: (File image) {
                   setState(() {
-                    print(image);
                     _profileImage = image;
                   });
                 },
-              )
-            : Stack(
-                children: [
-                  Container(
-                    height: SizeConfig.blockWidth * 32,
-                    width: SizeConfig.blockWidth * 34,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: COLORS.primary,
-                          width: 1.2,
-                        ),
-                        image: DecorationImage(
-                          image: FileImage(
-                            File(_profileImage!.path),
-                          ),
-                          fit: BoxFit.fill,
-                        ),
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: ImagePickerModal(
-                      onImageSelected: (File image) {
-                        setState(() {
-                          _profileImage = image;
-                        });
-                      },
-                    ),
-                  )
-                ],
               ),
+            )
+          ],
+        ),
         SizedBox(height: SizeConfig.blockHeight * 3),
       ],
     );
   }
 
-  Widget _buildTextField(
-      {required String label,
-      required TextEditingController controller,
-      required String hintText,
-      required String? Function(String?) validator,
-      required String? Function(String?) onChanged,
-      required bool error,
-      required String title}) {
+  Widget _buildTextField({required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required String? Function(String?) validator,
+    required String? Function(String?) onChanged,
+    required bool error,
+    required String title}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -384,14 +461,13 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
-  Widget _buildBioTextField(
-      {required String label,
-      required TextEditingController controller,
-      required String hintText,
-      required String? Function(String?) validator,
-      required String? Function(String?) onChanged,
-      required bool error,
-      required String title}) {
+  Widget _buildBioTextField({required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required String? Function(String?) validator,
+    required String? Function(String?) onChanged,
+    required bool error,
+    required String title}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

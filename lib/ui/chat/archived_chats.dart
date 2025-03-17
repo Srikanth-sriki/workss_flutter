@@ -37,13 +37,14 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
               return chartSearchCards(
                   image: 'assets/images/home/dumy1.png',
                   name: 'Julia Vandervort-Will',
+                  isGroup: true,
                   onTapCard: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ChatViewScreen(),
-                        ));
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) =>
+                    //           ChatViewScreen(),
+                    //     ));
                   },
                   message: 'Lorem ipsum dolor sit',
                   count: '2',

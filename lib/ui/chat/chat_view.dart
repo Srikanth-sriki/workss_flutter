@@ -13,16 +13,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
+import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/ui/chat/chat_profile_view.dart';
 import 'package:works_app/ui/chat/modal/delete_leave_group.dart';
 import 'package:works_app/ui/chat/remove_friends.dart';
 
 import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
+import '../../global_helper/helper_function.dart';
+import '../../global_helper/reuse_widget.dart';
+import '../../models/chat/charts_list_modal.dart';
+import '../../models/chat/chat_view_modal.dart';
+import '../../models/chat/chat_view_pro_modal.dart';
 import '../profile/notification.dart';
 import 'component.dart';
 import 'chat_wave_form.dart';
@@ -31,30 +41,54 @@ import 'modal/markas_admin_modal.dart';
 import 'modal/report_or_block.dart';
 
 class ChatViewScreen extends StatefulWidget {
-  const ChatViewScreen({super.key});
+  final VoidCallback refreshPageCallback;
+  final ChatList chatViewProfile;
+  const ChatViewScreen(
+      {super.key,
+      required this.refreshPageCallback,
+      required this.chatViewProfile});
 
   @override
   State<ChatViewScreen> createState() => _ChatViewScreenState();
 }
 
 class _ChatViewScreenState extends State<ChatViewScreen> {
+  late ChartBloc chartBloc;
+  late InitialRegisterBloc initialRegisterBloc;
+  List<ChatView> chatView = [];
+  ChatViewGroupInfo chatViewGroupInfo = ChatViewGroupInfo();
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController _messageController = TextEditingController();
   late final RecorderController recorderController;
   final ImagePicker _picker = ImagePicker();
+  bool isChartViewLoading = true;
   String? path;
   String? musicFile;
   bool isRecording = false;
   bool isRecordingCompleted = false;
   bool isLoading = true;
   File? _profileImage;
-  String profilePic = '';
+  String profilePicture = '';
   late Directory appDirectory;
+  int currentPage = 1;
+  int pageSize = 10;
+  int maxPageNumber = 1;
+  bool isFetchingMore = false;
 
   @override
   void initState() {
     super.initState();
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+    initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
     _getDir();
     _initialiseControllers();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _loadMoreData();
+      }
+    });
   }
 
   void _getDir() async {
@@ -70,6 +104,22 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       ..androidOutputFormat = AndroidOutputFormat.mpeg4
       ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
       ..sampleRate = 44100;
+  }
+
+  void _fetchData() {
+    chartBloc.add(FetchChartViewEvent(
+      page: currentPage,
+      pageSize: pageSize,
+      chatId: widget.chatViewProfile.chatId!,
+    ));
+  }
+
+  void _loadMoreData() {
+    if (!isFetchingMore && currentPage < maxPageNumber) {
+      setState(() => isFetchingMore = true);
+      currentPage++;
+      _fetchData();
+    }
   }
 
   void _pickFile() async {
@@ -99,9 +149,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           isRecordingCompleted = true;
           debugPrint(path);
           debugPrint("Recorded file size: ${File(path!).lengthSync()}");
+          chartBloc.add(UploadFileEvent(filePath: File(path!)));
         }
       } else {
-        await recorderController.record(path: path); // Path is optional
+        await recorderController.record(path: path);
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -116,6 +167,19 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     if (isRecording) recorderController.refresh();
   }
 
+  void onSendMessage() {
+    chartBloc.add(ChartSendMessageEvent(
+      chatId: widget.chatViewProfile.chatId!,
+      content: _messageController.text,
+      messageType: _messageController.text.isEmpty ? 'media' : "text",
+      fileName: _messageController.text.isEmpty ? '' : null,
+      fileUrl: _messageController.text.isEmpty ? '' : null,
+      fileType: _messageController.text.isEmpty ? '' : null,
+      fileSize: _messageController.text.isEmpty ? '' : null,
+    ));
+    _messageController.clear();
+  }
+
   void _onMessageChanged(String keyword) {}
   @override
   Widget build(BuildContext context) {
@@ -128,334 +192,494 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: COLORS.white,
       ),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 2.5,
-                  vertical: SizeConfig.blockHeight * 1.5),
-              decoration: BoxDecoration(
-                  border: Border(
-                      bottom: BorderSide(
-                          color: COLORS.neutralDarkTwo,
-                          width: SizeConfig.blockHeight * 0.15))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ChartBloc, ChartState>(listener: (context, state) {
+            if (state is ChatViewLoading && currentPage == 1) {
+              setState(() {
+                isChartViewLoading = true;
+                isFetchingMore = true;
+              });
+            } else if (state is ChatViewSuccess) {
+              setState(() {
+                isChartViewLoading = false;
+                isFetchingMore = false;
+                maxPageNumber = state.maxPageNumber;
+                chatViewGroupInfo = state.chatViewGroupInfo;
+
+
+                if (currentPage == 1) {
+                  chatView = state.chatView;
+                } else {
+                  for (var newChat in state.chatView) {
+                    var existingChat = chatView.firstWhere(
+                      (chat) => chat.date == newChat.date,
+                      orElse: () => ChatView(date: newChat.date, messages: []),
+                    );
+
+                    if (existingChat.messages.isEmpty) {
+                      chatView.add(newChat);
+                    } else {
+                      final newMessages = newChat.messages
+                          .where(
+                            (newMessage) => !existingChat.messages.any(
+                              (existingMessage) =>
+                                  existingMessage.id == newMessage.id,
+                            ),
+                          )
+                          .toList();
+
+                      existingChat.messages.addAll(newMessages);
+                    }
+                  }
+                }
+              });
+            } else if (state is ChatViewFailed) {
+              setState(() {
+                isChartViewLoading = false;
+                isFetchingMore = false;
+              });
+            } else if(state is UploadFileSuccess){
+              chartBloc.add(ChartSendMessageEvent(
+                chatId: widget.chatViewProfile.chatId!,
+                content: 'media',
+                messageType:'media',
+                fileName: state.filePath.split('/').last,
+                fileUrl: state.filePath,
+                fileType: 'audio',
+                fileSize: '1mb',
+              ));
+            }
+            else if(state is UploadFileFailed){
+              setState(() {
+                isChartViewLoading = false;
+                isFetchingMore = false;
+              });
+            }
+          }),
+          BlocListener<InitialRegisterBloc, InitialRegisterState>(
+            listener: (context, state) {
+              if (state is UploadImageSuccess) {
+                setState(() {
+                  profilePicture = state.filePath;
+
+                  chartBloc.add(ChartSendMessageEvent(
+                    chatId: widget.chatViewProfile.chatId!,
+                    content: 'media',
+                    messageType:'media',
+                    fileName: profilePicture.split('/').last,
+                    fileUrl: profilePicture,
+                    fileType: 'image',
+                    fileSize: '1mb',
+                  ));
+                });
+              } else if (state is UploadImageFailed) {
+                showCustomSnackBar(
+                  context: context,
+                  message: state.message,
+                );
+              }
+            },
+          ),
+        ],
+        child: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if(!isChartViewLoading)...[
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 2.5,
+                      vertical: SizeConfig.blockHeight * 1.5),
+                  decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color: COLORS.neutralDarkTwo,
+                              width: SizeConfig.blockHeight * 0.15))),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios,
-                            color: COLORS.black,
-                            size: SizeConfig.blockWidth * 4.5),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) =>
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.arrow_back_ios,
+                                color: COLORS.black,
+                                size: SizeConfig.blockWidth * 4.5),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
                                   const ChatProfileViewScreen(),
-                            ),
-                          );
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: SizeConfig.blockWidth * 12,
-                              height: SizeConfig.blockWidth * 12,
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: COLORS.primary,
-                                    width: SizeConfig.blockWidth * 0.3,
-                                  ),
-                                  image: const DecorationImage(
-                                      image: NetworkImage(
-                                        'https://via.placeholder.com/150',
-                                      ),
-                                      fit: BoxFit.cover),
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(
-                                          SizeConfig.blockWidth * 3))),
-                            ),
-                            SizedBox(width: SizeConfig.blockWidth * 2),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                                ),
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SizedBox(
-                                  width: SizeConfig.blockWidth * 45,
-                                  child: Text('Angie',
-                                      style: TextStyle(
-                                        color: COLORS.neutralDark,
-                                        fontSize: SizeConfig.blockWidth * 3.8,
-                                        fontWeight: FontWeight.w400,
-                                        fontFamily: "Poppins",
-                                        overflow: TextOverflow.ellipsis,
+                                Container(
+                                  width: SizeConfig.blockWidth * 12,
+                                  height: SizeConfig.blockWidth * 12,
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: COLORS.primary,
+                                        width: SizeConfig.blockWidth * 0.3,
                                       ),
-                                      maxLines: 1),
+                                      image: DecorationImage(
+                                          image: NetworkImage(
+                                            widget.chatViewProfile.picture!
+                                                .isEmpty
+                                                ? 'https://via.placeholder.com/150'
+                                                : chatViewGroupInfo.picture!,
+                                          ),
+                                          fit: BoxFit.cover),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(
+                                              SizeConfig.blockWidth * 3))),
                                 ),
-                                SizedBox(
-                                  width: SizeConfig.blockWidth * 45,
-                                  child: Text('Lorem ipsum dolor sit',
-                                      style: TextStyle(
-                                        color: COLORS.neutralDarkOne,
-                                        fontSize: SizeConfig.blockWidth * 3.25,
-                                        fontWeight: FontWeight.w400,
-                                        fontFamily: "Poppins",
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      maxLines: 1),
+                                SizedBox(width: SizeConfig.blockWidth * 2),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: SizeConfig.blockWidth * 45,
+                                      child: Text(chatViewGroupInfo.name!,
+                                          style: TextStyle(
+                                            color: COLORS.neutralDark,
+                                            fontSize: SizeConfig.blockWidth * 3.8,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: "Poppins",
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          maxLines: 1),
+                                    ),
+                                    SizedBox(
+                                      width: SizeConfig.blockWidth * 45,
+                                      child: Text(
+                                          chatViewGroupInfo.description!,
+                                          style: TextStyle(
+                                            color: COLORS.neutralDarkOne,
+                                            fontSize:
+                                            SizeConfig.blockWidth * 3.25,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: "Poppins",
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          maxLines: 1),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: COLORS.black,
-                      size: SizeConfig.blockWidth * 6.5,
-                    ),
-                    onPressed: () {
-                      showDynamicBottomSheet(
-                        context,
-                        'Chat Options',
-                        [
-                          BottomSheetItem(
-                            title: 'Mute Notification',
-                            onTap: () => {},
                           ),
-                          BottomSheetItem(
-                            title: 'Unfriend',
-                            onTap: () => {},
-                          ),
-                          BottomSheetItem(
-                            title: 'Invite Friends',
-                            onTap: () => {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const InviteFriendsList(),
-                                  ))
-                            },
-                          ),
-                          BottomSheetItem(
-                            title: 'Remove People',
-                            onTap: () => {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RemoveFriendsChat(),
-                                  ))
-                            },
-                          ),
-                          BottomSheetItem(
-                              title: 'Share Joining Link', onTap: () => {}),
-                          BottomSheetItem(
-                            title: 'Archive',
-                            onTap: () => {},
-                          ),
-                          BottomSheetItem(
-                            title: 'Mute Notification',
-                            onTap: () => print('Add Friends clicked'),
-                          ),
-                          BottomSheetItem(
-                            title: 'Delete Group',
-                            onTap: () => {
-                              showMaterialModalBottomSheet(
-                                enableDrag: true,
-                                expand: false,
-                                isDismissible: true,
-                                backgroundColor: COLORS.white,
-                                context: context,
-                                closeProgressThreshold: 0,
-                                duration: const Duration(seconds: 0),
-                                useRootNavigator: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
-                                ),
-                                builder: (context) => const DeleteGroupModal(
-                                  buttonText: 'DELETE',
-                                  header:
-                                      'Are you sure you want to \n delete the group?',
-                                ),
-                              ),
-                            },
-                          ),
-                          BottomSheetItem(
-                            title: 'Leave Group',
-                            onTap: () => {
-                              // showMaterialModalBottomSheet(
-                              //   enableDrag: true,
-                              //   expand: false,
-                              //   isDismissible: true,
-                              //   backgroundColor: COLORS.white,
-                              //   context: context,
-                              //   closeProgressThreshold: 0,
-                              //   duration: const Duration(seconds: 0),
-                              //   useRootNavigator: true,
-                              //   shape: const RoundedRectangleBorder(
-                              //     borderRadius: BorderRadius.vertical(
-                              //         top: Radius.circular(20)),
-                              //   ),
-                              //   builder: (context) =>
-                              //   const DeleteGroupModal(
-                              //     buttonText: 'Are you sure you want to \nleave the group?',header: 'LEAVE',
-                              //   ),
-                              // ),
-                              showMaterialModalBottomSheet(
-                                enableDrag: true,
-                                expand: false,
-                                isDismissible: true,
-                                backgroundColor: COLORS.white,
-                                context: context,
-                                closeProgressThreshold: 0,
-                                duration: const Duration(seconds: 0),
-                                useRootNavigator: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
-                                ),
-                                builder: (context) => const MarkasAdminModal(),
-                              ),
-                            },
-                          ),
-                          BottomSheetItem(
-                            title: 'Clear Chat',
-                            onTap: () => print('Add Friends clicked'),
-                          ),
-                          BottomSheetItem(
-                            title: 'Report or Block',
-                            onTap: () => {
-                              showMaterialModalBottomSheet(
-                                enableDrag: true,
-                                expand: false,
-                                isDismissible: true,
-                                backgroundColor: COLORS.white,
-                                context: context,
-                                closeProgressThreshold: 0,
-                                duration: const Duration(seconds: 0),
-                                useRootNavigator: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
-                                ),
-                                builder: (context) =>
-                                    const ReportOrBlockModal(),
-                              ),
-                            },
-                          )
                         ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: SizeConfig.blockHeight * 2,
-                    right: SizeConfig.blockWidth * 1.5,
-                    left: SizeConfig.blockWidth * 1.5,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // if (isRecordingCompleted)
-                      //   WaveBubble(
-                      //     path: path,
-                      //     isSender: true,
-                      //     appDirectory: appDirectory,
-                      //   ),
-                      // if (musicFile != null)
-                      //   WaveBubble(
-                      //     path: musicFile,
-                      //     isSender: true,
-                      //     appDirectory: appDirectory,
-                      //   ),
-
-                      const SentMessage(
-                        message: "Hello this is cool",
-                        key: null,
-                        isSentByMe: true,
-                        time: '2:20pm',
-                        audioShow: false,
-                        textShow: false,
-                        imageShow: true,
-                        imageUrl: 'https://www.imgcorporations.com/images/home-pages/storm.jpg',
                       ),
-                      ReceivedMessage(
-                        message:
-                            "I am great how are you doing. It while when we talked.",
-                        isSentByMe: true,
-                        imageUrl: 'https://via.placeholder.com/150',
-                        time: '2:30pm',
-                        sendName: 'By Laurence Kilback',
-                        audioShow: true,
-                        textShow: false,
-                        imageShow: false,
-                        audioWidget: isRecordingCompleted
-                            ? WaveBubble(
-                                path: path,
-                                isSender: true,
-                                appDirectory: appDirectory,
+                      IconButton(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: COLORS.black,
+                          size: SizeConfig.blockWidth * 6.5,
+                        ),
+                        onPressed: () {
+                          showDynamicBottomSheet(
+                            context,
+                            'Chat Options',
+                            [
+                              BottomSheetItem(
+                                title: 'Mute Notification',
+                                onTap: () => {},
+                              ),
+                              BottomSheetItem(
+                                title: 'Unfriend',
+                                onTap: () => {},
+                              ),
+                              BottomSheetItem(
+                                title: 'Invite Friends',
+                                onTap: () => {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                        const InviteFriendsList(),
+                                      ))
+                                },
+                              ),
+                              BottomSheetItem(
+                                title: 'Remove People',
+                                onTap: () => {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                        const RemoveFriendsChat(),
+                                      ))
+                                },
+                              ),
+                              BottomSheetItem(
+                                  title: 'Share Joining Link', onTap: () => {}),
+                              BottomSheetItem(
+                                title: 'Archive',
+                                onTap: () => {},
+                              ),
+                              BottomSheetItem(
+                                title: 'Mute Notification',
+                                onTap: () => print('Add Friends clicked'),
+                              ),
+                              BottomSheetItem(
+                                title: 'Delete Group',
+                                onTap: () => {
+                                  showMaterialModalBottomSheet(
+                                    enableDrag: true,
+                                    expand: false,
+                                    isDismissible: true,
+                                    backgroundColor: COLORS.white,
+                                    context: context,
+                                    closeProgressThreshold: 0,
+                                    duration: const Duration(seconds: 0),
+                                    useRootNavigator: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
+                                    ),
+                                    builder: (context) => const DeleteGroupModal(
+                                      buttonText: 'DELETE',
+                                      header:
+                                      'Are you sure you want to \n delete the group?',
+                                    ),
+                                  ),
+                                },
+                              ),
+                              BottomSheetItem(
+                                title: 'Leave Group',
+                                onTap: () => {
+                                  // showMaterialModalBottomSheet(
+                                  //   enableDrag: true,
+                                  //   expand: false,
+                                  //   isDismissible: true,
+                                  //   backgroundColor: COLORS.white,
+                                  //   context: context,
+                                  //   closeProgressThreshold: 0,
+                                  //   duration: const Duration(seconds: 0),
+                                  //   useRootNavigator: true,
+                                  //   shape: const RoundedRectangleBorder(
+                                  //     borderRadius: BorderRadius.vertical(
+                                  //         top: Radius.circular(20)),
+                                  //   ),
+                                  //   builder: (context) =>
+                                  //   const DeleteGroupModal(
+                                  //     buttonText: 'Are you sure you want to \nleave the group?',header: 'LEAVE',
+                                  //   ),
+                                  // ),
+                                  showMaterialModalBottomSheet(
+                                    enableDrag: true,
+                                    expand: false,
+                                    isDismissible: true,
+                                    backgroundColor: COLORS.white,
+                                    context: context,
+                                    closeProgressThreshold: 0,
+                                    duration: const Duration(seconds: 0),
+                                    useRootNavigator: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
+                                    ),
+                                    builder: (context) =>
+                                    const MarkasAdminModal(),
+                                  ),
+                                },
+                              ),
+                              BottomSheetItem(
+                                title: 'Clear Chat',
+                                onTap: () => print('Add Friends clicked'),
+                              ),
+                              BottomSheetItem(
+                                title: 'Report or Block',
+                                onTap: () => {
+                                  showMaterialModalBottomSheet(
+                                    enableDrag: true,
+                                    expand: false,
+                                    isDismissible: true,
+                                    backgroundColor: COLORS.white,
+                                    context: context,
+                                    closeProgressThreshold: 0,
+                                    duration: const Duration(seconds: 0),
+                                    useRootNavigator: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(20)),
+                                    ),
+                                    builder: (context) =>
+                                    const ReportOrBlockModal(),
+                                  ),
+                                },
                               )
-                            : null,
-                      ),
-                      SentMessage(
-                        message: "How are you",
-                        key: null,
-                        isSentByMe: false,
-                        time: '3:20pm',
-                        audioShow: false,
-                        textShow: true,
-                        imageShow: false,
-                        imageUrl: 'https://via.placeholder.com/150',
-                      ),
-                      SentMessage(
-                        message: "How are you",
-                        imageUrl: 'https://via.placeholder.com/150',
-                        key: null,
-                        isSentByMe: true,
-                        time: '3:20pm',
-                        audioShow: true,
-                        textShow: false,
-                        imageShow: false,
-                        audioWidget: isRecordingCompleted
-                            ? WaveBubble(
-                                path: path,
-                                isSender: true,
-                                appDirectory: appDirectory,
-                              )
-                            : null,
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
-              ),
-            )
-          ],
+                Expanded(
+                  child: Padding(
+                      padding: EdgeInsets.only(
+                        top: SizeConfig.blockHeight * 2,
+                        right: SizeConfig.blockWidth * 1.5,
+                        left: SizeConfig.blockWidth * 1.5,
+                      ),
+                      child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: chatView.length + (isFetchingMore ? 1 : 0),
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          reverse: true,
+                          itemBuilder: (context, index) {
+                            if (index == chatView.length) {
+                              return isFetchingMore
+                                  ? Center(
+                                child:
+                                LoadingAnimationWidget.discreteCircle(
+                                  color: COLORS.primary,
+                                  // secondRingColor: COLORS.semanticTwo,
+                                  // thirdRingColor: COLORS.accent,
+                                  size: SizeConfig.blockHeight * 3.5,
+                                ),
+                              )
+                                  : SizedBox.shrink();
+                            }
+                            ChatView chatDate = chatView[index];
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: SizeConfig.blockHeight,top:SizeConfig.blockHeight),
+                                  child: Text(
+                                    chatDate.date,
+                                    style: TextStyle(
+                                      color: COLORS.neutralDarkOne,
+                                      fontSize: SizeConfig.blockWidth * 3.25,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: "Poppins",
+                                    ),
+                                  ),
+                                ),
+
+                                ListView.builder(
+                                  itemCount: chatDate.messages.length,
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  reverse: true,
+                                  itemBuilder: (context, msgIndex) {
+                                    Message message = chatDate.messages[msgIndex];
+                                    return Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        if (message.senderId == Config.id) ...[
+                                          SendMessage(
+                                            message: message.content!,
+                                            key: null,
+                                            isSeenByMe: true,
+                                            time: formatTime(
+                                                message.updatedAt!.toString()),
+                                            audioShow: message.type == 'media' &&
+                                                message
+                                                    .messageMedia!.isNotEmpty &&
+                                                message.messageMedia![0]
+                                                    .fileType ==
+                                                    "audio",
+                                            textShow: message.type == 'text',
+                                            imageShow: message.type == 'media' &&
+                                                message
+                                                    .messageMedia!.isNotEmpty &&
+                                                message.messageMedia![0]
+                                                    .fileType ==
+                                                    "image",
+                                            imageUrl:
+                                            message.messageMedia!.isNotEmpty
+                                                ? message
+                                                .messageMedia![0].fileUrl!
+                                                : '',
+                                            audioWidget: WaveBubble(
+                                              audioUrl:
+                                              message.messageMedia!.isNotEmpty
+                                                  ? message.messageMedia![0]
+                                                  .fileUrl!
+                                                  : '',
+                                              isSender: true,
+                                            ),
+                                          )
+                                        ] else ...[
+                                          ReceivedMessage(
+                                              message: message.content!,
+                                              key: null,
+                                              isSeenByMe: true,
+                                              time: formatTime(
+                                                  message.updatedAt!.toString()),
+                                              audioShow: message.type ==
+                                                  'media' &&
+                                                  message
+                                                      .messageMedia!.isNotEmpty &&
+                                                  message.messageMedia![0]
+                                                      .fileType ==
+                                                      "audio",
+                                              textShow: message.type == 'text',
+                                              imageShow: message.type ==
+                                                  'media' &&
+                                                  message
+                                                      .messageMedia!.isNotEmpty &&
+                                                  message.messageMedia![0]
+                                                      .fileType ==
+                                                      "image",
+                                              imageUrl:
+                                              message.messageMedia!.isNotEmpty
+                                                  ? message.messageMedia![0]
+                                                  .fileUrl!
+                                                  : '',
+                                              audioWidget: WaveBubble(
+                                                audioUrl: message
+                                                    .messageMedia!.isNotEmpty
+                                                    ? message
+                                                    .messageMedia![0].fileUrl!
+                                                    : '',
+                                                isSender: true,
+                                              ),
+                                              sendName: message.sender!.name!)
+                                        ],
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          })),
+                )
+              ]
+              else...[
+                SizedBox(
+                  width: SizeConfig.blockWidth*90,
+                  height: SizeConfig.blockHeight*90,
+                  child:  globalLoadingWidget(),
+                )
+
+              ]
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
@@ -483,7 +707,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   onTap: () => _showPicker(context, (File image) {
                     setState(() {
                       _profileImage = image;
-                      profilePic = '';
+                      profilePicture = '';
+                      initialRegisterBloc
+                          .add(UploadImageEvent(imagePath: _profileImage!));
                     });
                   }),
                   child: Container(
@@ -544,8 +770,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   // horizontal: SizeConfig.blockWidth*3),
                                 ),
                                 InkWell(
-                                  onTap: _startOrStopRecording, borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 10),
+                                  onTap: _startOrStopRecording,
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 10),
                                   child: Container(
                                     width: SizeConfig.blockWidth * 10,
                                     height: SizeConfig.blockWidth * 10,
@@ -635,8 +862,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       ),
                                     ),
                                   ),
-                                  maxLines:
-                                      null,
+                                  maxLines: null,
                                   minLines: 1, // Start with 1 line
                                   expands:
                                       false, // Don't make it fill all available space, but grow as needed
@@ -649,7 +875,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                 child: InkWell(
                                   onTap: _messageController.text.isEmpty
                                       ? _startOrStopRecording
-                                      : _refreshWave,
+                                      : onSendMessage,
                                   child: _messageController.text.isEmpty
                                       ? Image.asset(
                                           'assets/images/chat/message.png',

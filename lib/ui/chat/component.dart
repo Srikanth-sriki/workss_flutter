@@ -16,6 +16,7 @@ Widget chartSearchCards({
   required String message,
   required String date,
   required String count,
+  required bool isGroup,
 }) {
   return TouchRippleEffect(
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
@@ -41,11 +42,25 @@ Widget chartSearchCards({
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  image,
-                  width: SizeConfig.blockWidth * 14,
-                  height: SizeConfig.blockWidth * 14,
-                ),
+                if(image.isNotEmpty)...[
+                  Image.network(
+                    image,
+                    width: SizeConfig.blockWidth * 14,
+                    height: SizeConfig.blockWidth * 14,
+                  )
+                ]
+                else...[
+                  Container(
+                    width: SizeConfig.blockWidth * 14,
+                    height: SizeConfig.blockWidth * 14,
+                    decoration: BoxDecoration(
+                      color: COLORS.neutralDarkTwo,
+                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3)
+                    ),
+                    child: Icon(isGroup?Icons.people:Icons.person,color: COLORS.neutralDark,size: SizeConfig.blockWidth*7,),
+                  )
+                ]
+               ,
                 SizedBox(width: SizeConfig.blockWidth * 3),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -66,21 +81,23 @@ Widget chartSearchCards({
                         // textAlign: TextAlign.end,
                       ),
                     ),
-                    SizedBox(
-                      width: SizeConfig.blockWidth * 40,
-                      child: Text(
-                        message,
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Poppins",
+                    if(message.isEmpty)...[
+                      SizedBox(
+                        width: SizeConfig.blockWidth * 40,
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: "Poppins",
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // textAlign: TextAlign.end,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        // textAlign: TextAlign.end,
-                      ),
-                    ),
+                      )
+                    ],
                   ],
                 ),
               ],
@@ -102,27 +119,29 @@ Widget chartSearchCards({
                   // textAlign: TextAlign.end,
                 ),
                 SizedBox(height: SizeConfig.blockHeight),
-                Container(
-                  alignment: Alignment.center,
-                  width: SizeConfig.blockWidth * 4,
-                  height: SizeConfig.blockWidth * 4,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        SizeConfig.blockWidth * 4,
+                if(count !='0' )...[
+                  Container(
+                    alignment: Alignment.center,
+                    width: SizeConfig.blockWidth * 4,
+                    height: SizeConfig.blockWidth * 4,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                          SizeConfig.blockWidth * 4,
+                        ),
+                        color: COLORS.accent),
+                    child: Text(
+                      count,
+                      style: TextStyle(
+                        color: COLORS.white,
+                        fontSize: SizeConfig.blockWidth * 2.5,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: "Poppins",
                       ),
-                      color: COLORS.accent),
-                  child: Text(
-                    count,
-                    style: TextStyle(
-                      color: COLORS.white,
-                      fontSize: SizeConfig.blockWidth * 2.5,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: "Poppins",
-                    ),
 
-                    // textAlign: TextAlign.end,
-                  ),
-                ),
+                      // textAlign: TextAlign.end,
+                    ),
+                  )
+                ],
               ],
             ),
           ],
@@ -695,8 +714,8 @@ class Triangle extends CustomPainter {
   }
 }
 
-class SentMessage extends StatelessWidget {
-  final bool isSentByMe;
+class SendMessage extends StatelessWidget {
+  final bool isSeenByMe;
   final String message;
   final String time;
   final bool isRead;
@@ -705,10 +724,10 @@ class SentMessage extends StatelessWidget {
   final bool audioShow;
   final Widget? audioWidget;
   final String imageUrl;
-  const SentMessage(
+  const SendMessage(
       {required super.key,
       required this.message,
-      required this.isSentByMe,
+      required this.isSeenByMe,
       required this.time,
       required this.imageShow,
       required this.textShow,
@@ -728,7 +747,7 @@ class SentMessage extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
             decoration: BoxDecoration(
-              color: COLORS.primaryOne.withOpacity(0.9),
+              color: COLORS.neutralDarkTwo.withOpacity(0.9),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(SizeConfig.blockWidth * 3),
                 bottomLeft: Radius.circular(SizeConfig.blockWidth * 3),
@@ -790,7 +809,7 @@ class SentMessage extends StatelessWidget {
                         width: SizeConfig.blockWidth * 1.5,
                       ),
                       Image.asset(
-                        isSentByMe
+                        isSeenByMe
                             ? 'assets/images/chat/read_done.png'
                             : 'assets/images/chat/read.png',
                         width: SizeConfig.blockWidth * 3.5,
@@ -807,7 +826,7 @@ class SentMessage extends StatelessWidget {
           alignment: Alignment.center,
           transform: Matrix4.rotationX(math.pi),
           child: CustomPaint(
-            painter: Triangle(COLORS.primaryOne.withOpacity(0.9)),
+            painter: Triangle(COLORS.neutralDarkTwo.withOpacity(0.9)),
           ),
         ),
         // CustomPaint(painter: Triangle(Colors.grey[300]!),),
@@ -815,11 +834,11 @@ class SentMessage extends StatelessWidget {
     ));
 
     return Padding(
-      padding: EdgeInsets.only(right: 18.0, left: 50, top: 5, bottom: 5),
+      padding: EdgeInsets.only(right: SizeConfig.blockWidth*5, left: SizeConfig.blockWidth*20, top: SizeConfig.blockWidth*1.5, bottom: SizeConfig.blockWidth*1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          SizedBox(height: 30),
+          SizedBox(height: SizeConfig.blockHeight*4),
           messageTextGroup,
         ],
       ),
@@ -828,7 +847,7 @@ class SentMessage extends StatelessWidget {
 }
 
 class ReceivedMessage extends StatelessWidget {
-  final bool isSentByMe;
+  final bool isSeenByMe;
   final String message;
   final String time;
   final String sendName;
@@ -840,7 +859,7 @@ class ReceivedMessage extends StatelessWidget {
   const ReceivedMessage({
     super.key,
     required this.message,
-    required this.isSentByMe,
+    required this.isSeenByMe,
     required this.time,
     required this.sendName,
     required this.imageShow,
@@ -854,30 +873,30 @@ class ReceivedMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final messageTextGroup = Flexible(
         child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Transform(
           alignment: Alignment.center,
           transform: Matrix4.rotationX(math.pi),
           child: CustomPaint(
-            painter: Triangle(Colors.grey[300]!),
+            painter: Triangle(COLORS.primaryOne.withOpacity(0.5),),
           ),
         ),
         Flexible(
           child: Container(
-            padding: EdgeInsets.all(14),
+            padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(18),
-                topLeft: Radius.circular(18),
-                bottomRight: Radius.circular(18),
-              ),
+              color: COLORS.primaryOne.withOpacity(0.5),
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(SizeConfig.blockWidth * 3),
+                  topLeft: Radius.circular(SizeConfig.blockWidth * 3),
+                  bottomRight: Radius.circular(SizeConfig.blockWidth * 3),
+                ),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (textShow) ...[
                   Text(
@@ -887,7 +906,7 @@ class ReceivedMessage extends StatelessWidget {
                       fontSize: SizeConfig.blockWidth * 3.25,
                       fontWeight: FontWeight.w400,
                       fontFamily: "Poppins",
-                    ),
+                    ),softWrap: true,
                   )
                 ],
                 if (imageShow) ...[
@@ -909,18 +928,23 @@ class ReceivedMessage extends StatelessWidget {
                 ],
                 if (audioShow && audioWidget != null) ...[audioWidget!],
                 Row(
+
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      capitalizeFirstLetter(sendName),
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+                    Flexible(
+                      child: Text(
+                        capitalizeFirstLetter(sendName),
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    SizedBox(width: SizeConfig.blockWidth * 2), // Space between name and time
                     Text(
                       time.toUpperCase(),
                       style: TextStyle(
@@ -940,7 +964,7 @@ class ReceivedMessage extends StatelessWidget {
     ));
 
     return Padding(
-      padding: EdgeInsets.only(right: 50.0, left: 18, top: 5, bottom: 5),
+      padding: EdgeInsets.only(right: SizeConfig.blockWidth*20, left: SizeConfig.blockWidth*5, top: SizeConfig.blockWidth*1.5, bottom: SizeConfig.blockWidth*1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[

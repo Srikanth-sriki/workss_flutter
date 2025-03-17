@@ -1,7 +1,10 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../components/config.dart';
+import 'package:http_parser/http_parser.dart';
+import '../global_helper/helper_function.dart';
 import '../helper/custom_log.dart';
 
 class FriendsDao {
@@ -122,4 +125,160 @@ class FriendsDao {
     customLog("Response Status Code : ${response.statusCode}");
     return response;
   }
+
+  Future fetchChartList() async {
+    var url = '${Config.url}/user/chat/list';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.body}");
+    return response;
+  }
+
+  Future createGroupChat({
+    required String picture,
+    required String name,
+    required String description,
+    required List<dynamic> invitedUsers,
+  }) async {
+    var url = '${Config.url}/user/chat/create-group';
+    Map<String, dynamic> body = {
+      "picture": picture,
+      "name": name,
+      "description": description,
+      "invitedUsers": invitedUsers,};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog("Response Status Code : ${response.body}");
+    return response;
+  }
+
+  Future editGroupChatProfile({
+    required String id,
+    required String picture,
+    required String name,
+    required String description,
+  }) async {
+    var url = '${Config.url}/user/chat/edit-group';
+    Map<String, dynamic> body = {
+      "picture": picture,
+      "name": name,
+      "description": description,
+      "id": id,};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    return response;
+  }
+
+  Future fetchInviteMemberList({
+    required int page,
+    required int pageSize,
+    required String groupId,
+    required String keyWord,
+  }) async {
+    var url =
+        '${Config.url}/user/chat/invite-people?chatId=$groupId&search=$keyWord&page=$page&page_size=$pageSize';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future fetchChatView({
+    required int page,
+    required int pageSize,
+    required String chatId,
+  }) async {
+    var url =
+        '${Config.url}/user/chat/view?chatId=$chatId&page=$page&page_size=$pageSize';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+  Future sendMessageChat({
+    required String chatId,
+    required String content,
+    required String messageType,
+     String? fileName,
+     String? fileUrl,
+     String? fileType,
+     String? fileSize,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId,
+      "content": content,
+      "messageType": messageType,
+      "mediaFiles": [
+        {
+          "fileName": fileName,
+          "fileUrl": fileUrl,
+          "fileType": fileType,
+          "fileSize": fileSize,
+        }
+      ],
+    };
+    var url = '${Config.url}/user/chat/send-message';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
+
+  Future uploadFile({required File imagePath}) async {
+    var url = '${Config.url}/user/chat/upload-file';
+
+    try {
+      File? compressedImage = await compressImage(imagePath);
+      if (compressedImage == null) {
+        customLog("Image compression failed");
+        return;
+      }
+
+      var request = http.MultipartRequest("POST", Uri.parse(url));
+      request.headers.addAll({
+        HttpHeaders.contentTypeHeader: "multipart/form-data",
+        HttpHeaders.authorizationHeader: "Bearer ${Config.accessToken}",
+      });
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          await compressedImage.readAsBytes(),
+          filename: 'image.mp3',
+          contentType: MediaType('mp3', 'mp4'),
+        ),
+      );
+
+      var streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      customLog('Response status:${response.statusCode}');
+      customLog('Response body of upload:${response.body.toString()}');
+
+      return response;
+    } catch (error) {
+      customLog("The error of Upload Mci : $error");
+    }
+  }
 }
+
+
+
+

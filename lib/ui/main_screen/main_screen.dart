@@ -8,6 +8,7 @@ import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/ui/chat/chat_main.dart';
 import 'package:works_app/ui/post_work/post_work.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
@@ -68,27 +69,26 @@ class _MainScreenState extends State<MainScreen> {
         return BlocProvider(
           create: (_) => ProfessionalBloc()
             ..add(ProfessionalListEvent(
-              page: 1,
-              pageSize: 10,
-              keyWord: "",
-              profession: "",
-              city: "",
-              gender: "",
+                page: 1,
+                pageSize: 10,
+                keyWord: "",
+                profession: "",
+                city: "",
+                gender: "",
                 currentLongitude: '',
-                currentLatitude: ''
-            )),
+                currentLatitude: '')),
           child: const ProfessionalsScreen(),
         );
       case 2:
         return const PostWorkScreen();
       case 3:
-        return  BlocProvider(
-  create: (context) => FriendsBloc()..add(FetchFriendsListEvent(
-      page: 1,
-      pageSize: 10,
-      keyWord: '')),
-  child: const ChatMainScreen(),
-);
+        return MultiBlocProvider(providers: [
+          BlocProvider(
+              create: (context) => FriendsBloc()
+                ..add(
+                    FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+          BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
+        ], child: const ChatMainScreen());
       case 4:
         return _cachedProfileScreen;
       default:
@@ -115,8 +115,8 @@ class _MainScreenState extends State<MainScreen> {
         if (_selectedIndex == 0) {
           bool shouldExit = await showDialog(
             context: context,
-            builder: (context) => AlertDialog(backgroundColor: COLORS.white,
-
+            builder: (context) => AlertDialog(
+              backgroundColor: COLORS.white,
               title: Text(
                 'Exit App',
                 style: TextStyle(
@@ -183,19 +183,19 @@ class _MainScreenState extends State<MainScreen> {
                   icon: 'assets/images/bottom_tab/prop_select_01.png'),
             ),
             BottomNavigationBarItem(
-              icon:Image.asset(
+              icon: Image.asset(
                 'assets/images/bottom_tab/add_post.png',
                 width: SizeConfig.blockWidth * 4.2,
                 height: SizeConfig.blockWidth * 4.2,
-                fit: BoxFit.contain,color: COLORS.neutralDarkOne,
+                fit: BoxFit.contain,
+                color: COLORS.neutralDarkOne,
               ),
               label: 'Post Works'.tr(),
               activeIcon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/add_post_select.png'),
             ),
             BottomNavigationBarItem(
-              icon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/chart.png'),
+              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/chart.png'),
               label: 'Chat'.tr(),
               activeIcon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/chart_select.png'),
@@ -210,7 +210,8 @@ class _MainScreenState extends State<MainScreen> {
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          showUnselectedLabels: true,landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
+          showUnselectedLabels: true,
+          landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
           selectedLabelStyle: TextStyle(
               color: COLORS.neutralDark,
               fontFamily: "Poppins",

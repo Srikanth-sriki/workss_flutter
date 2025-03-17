@@ -211,3 +211,27 @@ void openMap(double latitude, double longitude) async {
     throw 'Could not open the map.';
   }
 }
+
+String formatChatDate(DateTime date) {
+  DateTime now = DateTime.now();
+  DateTime today = DateTime(now.year, now.month, now.day);
+  DateTime yesterday = today.subtract(Duration(days: 1));
+  DateTime dayBeforeYesterday = today.subtract(Duration(days: 2));
+
+  DateTime inputDate = DateTime(date.year, date.month, date.day);
+
+  if (inputDate == today) {
+    return "Today";
+  } else if (inputDate == yesterday) {
+    return "Yesterday";
+  } else if (inputDate == dayBeforeYesterday) {
+    return "Day before yesterday";
+  } else {
+    return DateFormat("dd MMM yyyy").format(date); // Example: 23 JUN 2024
+  }
+}
+
+String formatTime(String dateTimeString) {
+  DateTime dateTime = DateTime.parse(dateTimeString).toLocal();
+  return DateFormat('hh:mm a').format(dateTime);
+}
