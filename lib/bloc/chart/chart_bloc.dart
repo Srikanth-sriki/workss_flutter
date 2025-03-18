@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -8,6 +9,7 @@ import 'package:works_app/dao/friends_dao.dart';
 import 'package:works_app/models/chat/charts_list_modal.dart';
 import 'package:works_app/models/chat/chat_view_modal.dart';
 
+import '../../components/global_handle.dart';
 import '../../helper/custom_log.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
 import '../../models/chat/invite_friend_modal.dart';
@@ -40,6 +42,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     });
     on<UploadFileEvent>((event, emit) async {
       await mapUploadFilesEvent(event, emit);
+    });
+    on<EditGroupChatProfileEvent>((event, emit) async {
+      await mapGroupProfileEdit(event, emit);
     });
   }
 
@@ -273,6 +278,30 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     } catch (error) {
       customLog("The error of upload image is : $error");
       emit(UploadFileFailed(message: "Something Went Wrong"));
+    }
+  }
+  Future<void> mapGroupProfileEdit(
+      EditGroupChatProfileEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const EditGroupChatProfileLoading());
+      var response =
+      await friendsDao.editGroupChatProfile(id: event.chatId, picture: event.picture, name: event.name, description: event.description);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess(message);
+        emit(EditGroupChatProfileSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError(message);
+        emit(EditGroupChatProfileFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError(message);
+        emit(EditGroupChatProfileFailed(message: message));
+      }
+    } catch (error) {
+      emit(EditGroupChatProfileFailed(message: "Something went wrong"));
     }
   }
 }

@@ -102,3 +102,20 @@ class UploadFileEvent extends ChartEvent {
   @override
   List<Object> get props => [filePath];
 }
+
+class EditGroupChatProfileEvent extends ChartEvent {
+  String name;
+  String picture;
+  String chatId;
+  String description;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  EditGroupChatProfileEvent({
+    required this.name,
+    required this.picture,
+    required this.chatId,
+    required this.description,required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [name,chatId,picture,description,onError,onSuccess];
+}

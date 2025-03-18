@@ -348,6 +348,7 @@ Widget chartMemberCardViewSearchCards(
     {required String image,
     required String name,
     required VoidCallback onTapCard,
+      required bool admin,
     required String message}) {
   return TouchRippleEffect(
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
@@ -363,73 +364,97 @@ Widget chartMemberCardViewSearchCards(
         padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
-          color: COLORS.primaryOne.withOpacity(0.1),
+          color: COLORS.white,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  width: SizeConfig.blockWidth * 12,
-                  height: SizeConfig.blockWidth * 12,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: COLORS.primary,
-                        width: SizeConfig.blockWidth * 0.3,
-                      ),
-                      image: DecorationImage(
-                          image: NetworkImage(
-                            image
-                                .isEmpty
-                                ? 'https://via.placeholder.com/150'
-                                : image,
+                Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: SizeConfig.blockWidth * 12,
+                    height: SizeConfig.blockWidth * 12,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: COLORS.primary,
+                          width: SizeConfig.blockWidth * 0.3,
+                        ),
+                        image: DecorationImage(
+                            image: NetworkImage(
+                              image
+                                  .isEmpty
+                                  ? 'https://via.placeholder.com/150'
+                                  : image,
+                            ),
+                            fit: BoxFit.cover),
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(
+                                SizeConfig.blockWidth * 3))),
+                  ),
+                  SizedBox(width: SizeConfig.blockWidth * 3),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: SizeConfig.blockWidth * 50,
+                        child: Text(
+                          name,
+                          style: TextStyle(
+                            color: COLORS.neutralDark,
+                            fontSize: SizeConfig.blockWidth * 3.5,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: "Poppins",
                           ),
-                          fit: BoxFit.cover),
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(
-                              SizeConfig.blockWidth * 3))),
-                ),
-                SizedBox(width: SizeConfig.blockWidth * 3),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: SizeConfig.blockWidth * 50,
-                      child: Text(
-                        name,
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 3.5,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Poppins",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // textAlign: TextAlign.end,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        // textAlign: TextAlign.end,
+                      ),
+                      SizedBox(
+                        width: SizeConfig.blockWidth * 50,
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: "Poppins",
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                ),
+                if(admin)...[
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight*0.6,horizontal: SizeConfig.blockWidth*3,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 1.5),
+                      color: COLORS.semanticTwo.withOpacity(0.15),
+                    ),
+                    child: Text(
+                      'Admin',
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 2,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
                       ),
                     ),
-                    SizedBox(
-                      width: SizeConfig.blockWidth * 50,
-                      child: Text(
-                        message,
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Poppins",
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        // textAlign: TextAlign.end,
-                      ),
-                    ),
-                  ],
-                ),
+                  )
+                ]
+
               ],
             ),
           ],

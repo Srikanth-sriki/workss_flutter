@@ -11,3 +11,5 @@ class GlobalBlocClass {
   static BuildContext? homeContext;
 
 }
+
+typedef CallbackWithMessage = void Function(String message);

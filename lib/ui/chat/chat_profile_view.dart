@@ -12,124 +12,326 @@ import 'package:works_app/ui/chat/modal/editGroupDescripation.dart';
 import 'package:works_app/ui/chat/modal/editGroupName.dart';
 import 'package:works_app/ui/chat/remove_friends.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
+import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
+import '../professional/professional_view.dart';
 import 'archived_chats.dart';
 import 'chat_view.dart';
 import 'invite_friends.dart';
 
 class ChatProfileViewScreen extends StatefulWidget {
   final ChatViewGroupInfo chatViewGroupInfo;
-  const ChatProfileViewScreen({super.key,required this.chatViewGroupInfo});
+  const ChatProfileViewScreen({super.key, required this.chatViewGroupInfo});
 
   @override
   State<ChatProfileViewScreen> createState() => _ChatProfileViewScreenState();
 }
 
 class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
+  late ChartBloc chartBloc;
+  late InitialRegisterBloc initialRegisterBloc;
   File? _profileImage;
   String profilePic = '';
 
   @override
   void initState() {
+    super.initState();
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+    initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
     profilePic = widget.chatViewGroupInfo.picture!;
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: COLORS.white,
-      appBar: CustomAppBar(
-        title: '',
-        backgroundColor: COLORS.white,
-        titleColors: COLORS.neutralDark,
-        showLeadingIcon: true,
-        actions: [
-          InkWell(
-            child: Image.asset(
-              'assets/images/home/share.png',
-              height: SizeConfig.blockWidth * 5,
-              width: SizeConfig.blockWidth * 5,
-            ),
-          ),
-          SizedBox(width: SizeConfig.blockWidth * 1.5),
-          IconButton(
-            icon: Icon(
-              Icons.more_vert,
-              color: COLORS.black,
-              size: SizeConfig.blockWidth * 6,
-            ),
-            onPressed: () {
-              showDynamicBottomSheet(
-                context,
-                'Group Options',
-                [
-                  BottomSheetItem(
-                    title: 'Invite People',
-                    onTap: () => {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const InviteFriendsList(),))
-                    },
-                  ),
-                  BottomSheetItem(
-                    title: 'Remove People',
-                    onTap: () => {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RemoveFriendsChat(),))
-                    },
-                  ),
-                  BottomSheetItem(
-                    title: 'Archive',
-                    onTap: () => {},
-                  ),
-                  BottomSheetItem(
-                    title: 'Mute Notification',
-                    onTap: () => print('Add Friends clicked'),
-                  ),
-                  BottomSheetItem(
-                    title: 'Leave Group',
-                    onTap: () => {
-                    },
-                  ),
-                  BottomSheetItem(
-                    title: 'Clear Chat',
-                    onTap: () => print('Add Friends clicked'),
-                  ),
-                  BottomSheetItem(
-                    title: 'Report or Block',
-                    onTap: () => print('Add Friends clicked'),
-                  ),
-                ],
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<InitialRegisterBloc, InitialRegisterState>(
+          listener: (context, state) {
+            if (state is UploadImageSuccess) {
+              chartBloc.add(EditGroupChatProfileEvent(
+                picture: state.filePath,
+                name: widget.chatViewGroupInfo.name!,
+                description:
+                widget.chatViewGroupInfo.description!,
+                chatId: widget.chatViewGroupInfo.id!,
+                onSuccess: (message) {},
+                onError: (message) {
+                  Navigator.pop(context);
+                  showCustomSnackBar(
+                    context: context,
+                    message: 'Something Went wrong',
+                  );
+                },
+              ));
+            }  else if (state is UploadImageFailed) {
+              showCustomSnackBar(
+                context: context,
+                message: state.message,
               );
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-          child: SingleChildScrollView(
-        child: SizedBox(
-          width: SizeConfig.blockWidth * 100,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: const Color(0xffF5FAFF),
+        appBar: CustomAppBar(
+          title: '',
+          backgroundColor: COLORS.white,
+          titleColors: COLORS.neutralDark,
+          showLeadingIcon: true,
+          borderColor: true,
+          actions: [
+            InkWell(
+              child: Image.asset(
+                'assets/images/home/share.png',
+                height: SizeConfig.blockWidth * 5,
+                width: SizeConfig.blockWidth * 5,
+              ),
+            ),
+            SizedBox(width: SizeConfig.blockWidth * 1.5),
+            IconButton(
+              icon: Icon(
+                Icons.more_vert,
+                color: COLORS.black,
+                size: SizeConfig.blockWidth * 6,
+              ),
+              onPressed: () {
+                showDynamicBottomSheet(
+                  context,
+                  'Group Options',
+                  [
+                    BottomSheetItem(
+                      title: 'Invite People',
+                      onTap: () => {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const InviteFriendsList(),
+                            ))
+                      },
+                    ),
+                    BottomSheetItem(
+                      title: 'Remove People',
+                      onTap: () => {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RemoveFriendsChat(),
+                            ))
+                      },
+                    ),
+                    BottomSheetItem(
+                      title: 'Archive',
+                      onTap: () => {},
+                    ),
+                    BottomSheetItem(
+                      title: 'Mute Notification',
+                      onTap: () => print('Add Friends clicked'),
+                    ),
+                    BottomSheetItem(
+                      title: 'Leave Group',
+                      onTap: () => {},
+                    ),
+                    BottomSheetItem(
+                      title: 'Clear Chat',
+                      onTap: () => print('Add Friends clicked'),
+                    ),
+                    BottomSheetItem(
+                      title: 'Report or Block',
+                      onTap: () => print('Add Friends clicked'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        body: SafeArea(
+            child: SingleChildScrollView(
+          child: SizedBox(
+            width: SizeConfig.blockWidth * 100,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  color: COLORS.white,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(SizeConfig.blockWidth * 0.5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              _buildProfilePicture(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    widget.chatViewGroupInfo.name!,
+                                    style: TextStyle(
+                                      color: COLORS.neutralDark,
+                                      fontSize: SizeConfig.blockWidth * 4,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: "Poppins",
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: SizeConfig.blockWidth * 1.5,
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      showMaterialModalBottomSheet(
+                                        enableDrag: true,
+                                        expand: false,
+                                        isDismissible: true,
+                                        backgroundColor: COLORS.white,
+                                        context: context,
+                                        closeProgressThreshold: 0,
+                                        duration: const Duration(seconds: 0),
+                                        useRootNavigator: true,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(
+                                                  SizeConfig.blockWidth * 3.5)),
+                                        ),
+                                        builder: (context) => BlocProvider<ChartBloc>(
+                                          create: (context) =>
+                                              ChartBloc(), // Provide your ProfileBloc
+                                          child:  EditGroupNameModal(chatViewGroupInfo:widget.chatViewGroupInfo),
+                                        ),
+                                      );
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/profile/edit.png',
+                                      width: SizeConfig.blockWidth * 5,
+                                      height: SizeConfig.blockWidth * 5,
+                                      color: COLORS.primary,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Text(
+                                '${widget.chatViewGroupInfo.participants!.length} Members'
+                                    .tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 3.5,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: SizeConfig.blockHeight * 2,
+                      ),
+                      const Divider(
+                        color: COLORS.neutralDarkTwo,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: SizeConfig.blockHeight,
+                            horizontal: SizeConfig.blockWidth * 4.5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Description'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 4,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () {
+                                showMaterialModalBottomSheet(
+                                  enableDrag: true,
+                                  expand: false,
+                                  isDismissible: true,
+                                  backgroundColor: COLORS.white,
+                                  context: context,
+                                  closeProgressThreshold: 0,
+                                  duration: const Duration(seconds: 0),
+                                  useRootNavigator: true,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(
+                                            SizeConfig.blockWidth * 3.5)),
+                                  ),
+                                  builder: (context) => BlocProvider<ChartBloc>(
+                                    create: (context) =>
+                                        ChartBloc(), // Provide your ProfileBloc
+                                    child:  EditGroupDescriptionModal(chatViewGroupInfo:widget.chatViewGroupInfo),
+                                  ),
+
+                                );
+                              },
+                              child: Image.asset(
+                                'assets/images/profile/edit.png',
+                                width: SizeConfig.blockWidth * 5,
+                                height: SizeConfig.blockWidth * 5,
+                                color: COLORS.primary,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 4.5),
+                        child: Text(
+                          widget.chatViewGroupInfo.description!,
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.5,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          softWrap: true,
+                        ),
+                      ),
+                      SizedBox(
+                        height: SizeConfig.blockHeight * 2,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      border: Border(
+                          top: BorderSide(
+                              color: COLORS.neutralDarkTwo,
+                              width: SizeConfig.blockWidth * 0.2))),
+                  padding: EdgeInsets.symmetric(
+                      vertical: SizeConfig.blockHeight * 2,
+                      horizontal: SizeConfig.blockWidth * 4.5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      _buildProfilePicture(),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            widget.chatViewGroupInfo.name!,
+                            'Members'.tr(),
                             style: TextStyle(
                               color: COLORS.neutralDark,
                               fontSize: SizeConfig.blockWidth * 4,
@@ -137,277 +339,176 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                               fontFamily: "Poppins",
                             ),
                           ),
-                          SizedBox(
-                            width: SizeConfig.blockWidth * 1.5,
-                          ),
-                          InkWell(
-                            onTap: () {
-                              showMaterialModalBottomSheet(
-                                enableDrag: true,
-                                expand: false,
-                                isDismissible: true,
-                                backgroundColor: COLORS.white,
-                                context: context,
-                                closeProgressThreshold: 0,
-                                duration: const Duration(seconds: 0),
-                                useRootNavigator: true,
-                                shape:  RoundedRectangleBorder(
-                                  borderRadius:
-                                  BorderRadius.vertical(top: Radius.circular(SizeConfig.blockWidth*3.5)),
-                                ),
-                                builder: (context) => const EditGroupNameModal(),
-                              );
-                            },
-                            child: Image.asset(
-                              'assets/images/profile/edit.png',
-                              width: SizeConfig.blockWidth * 5,
-                              height: SizeConfig.blockWidth * 5,
-                              color: COLORS.primary,
+                          Container(
+                            margin: EdgeInsets.only(left: SizeConfig.blockWidth),
+                            alignment: Alignment.center,
+                            width: SizeConfig.blockWidth * 7,
+                            height: SizeConfig.blockHeight * 3.5,
+                            decoration: BoxDecoration(
+                              color: COLORS.accent,
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 1.5),
+                            ),
+                            child: Text(
+                              widget.chatViewGroupInfo.participants!.length!
+                                  .toString(),
+                              style: TextStyle(
+                                color: COLORS.white,
+                                fontSize: SizeConfig.blockWidth * 2.8,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: "Poppins",
+                              ),
+                              textAlign: TextAlign.center,
                             ),
                           )
                         ],
                       ),
-                      Text(
-                        '${widget.chatViewGroupInfo.participants!.length} Members'.tr(),
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.5,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) => FriendsBloc()
+                                                  ..add(FetchFriendsAddListEvent(
+                                                      page: 1,
+                                                      pageSize: 10,
+                                                      keyWord: '')),
+                                              ),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc())
+                                            ],
+                                            child: const AddFriendsScreen(
+                                                header: 'Add Friend'),
+                                          )));
+                            },
+                            child: Icon(
+                              Icons.add_circle_outline,
+                              color: COLORS.neutralDark,
+                              size: SizeConfig.blockWidth * 5,
+                            ),
+                          ),
+                          SizedBox(
+                            width: SizeConfig.blockWidth * 3,
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) => FriendsBloc()
+                                                  ..add(FetchFriendsAddListEvent(
+                                                      page: 1,
+                                                      pageSize: 10,
+                                                      keyWord: '')),
+                                              ),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc())
+                                            ],
+                                            child: const AddFriendsScreen(
+                                                header: 'Friend Suggestion'),
+                                          )));
+                            },
+                            child: Icon(
+                              Icons.search,
+                              color: COLORS.neutralDark,
+                              size: SizeConfig.blockWidth * 6,
+                            ),
+                          )
+                        ],
+                      )
                     ],
                   ),
                 ),
-              ),
-              Divider(
-                color: COLORS.neutralDarkTwo,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: SizeConfig.blockHeight,
-                    horizontal: SizeConfig.blockWidth * 4.5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Description'.tr(),
-                      style: TextStyle(
-                        color: COLORS.neutralDark,
-                        fontSize: SizeConfig.blockWidth * 4,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: "Poppins",
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        showMaterialModalBottomSheet(
-                          enableDrag: true,
-                          expand: false,
-                          isDismissible: true,
-                          backgroundColor: COLORS.white,
-                          context: context,
-                          closeProgressThreshold: 0,
-                          duration: const Duration(seconds: 0),
-                          useRootNavigator: true,
-                          shape:  RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(SizeConfig.blockWidth*3.5)),
-                          ),
-                          builder: (context) => const EditGroupDescriptionModal(),
-                        );
-                      },
-                      child: Image.asset(
-                        'assets/images/profile/edit.png',
-                        width: SizeConfig.blockWidth * 5,
-                        height: SizeConfig.blockWidth * 5,
-                        color: COLORS.primary,
-                      ),
-                    )
-                  ],
+                SizedBox(
+                  height: SizeConfig.blockHeight * 0.5,
                 ),
-              ),
-              SizedBox(
-                height: SizeConfig.blockHeight * 1.5,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 4.5),
-                child: Text(
-                    widget.chatViewGroupInfo.description!,
-                  style: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.5,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 4.5,
                   ),
-                  softWrap: true,
-                ),
-              ),
-              SizedBox(
-                height: SizeConfig.blockHeight * 1,
-              ),
-              Divider(
-                color: COLORS.neutralDarkTwo,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: SizeConfig.blockHeight,
-                    horizontal: SizeConfig.blockWidth * 4.5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Members'.tr(),
-                          style: TextStyle(
-                            color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 4,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(left: SizeConfig.blockWidth),
-                          alignment: Alignment.center,
-                          width: SizeConfig.blockWidth * 8.5,
-                          height: SizeConfig.blockHeight * 3.5,
-                          decoration: BoxDecoration(
-                            color: COLORS.accent,
-                            borderRadius: BorderRadius.circular(
-                                SizeConfig.blockWidth * 1.5),
-                          ),
-                          child: Text(
-                            widget.chatViewGroupInfo.participants!.length!.toString(),
-                            style: TextStyle(
-                              color: COLORS.white,
-                              fontSize: SizeConfig.blockWidth * 2.8,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: "Poppins",
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        )
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: (){
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => FriendsBloc()
-                                            ..add(FetchFriendsAddListEvent(
-                                                page: 1,
-                                                pageSize: 10,
-                                                keyWord: '')),
-                                        ),
-                                        BlocProvider(
-                                            create: (context) =>
-                                                ShowInterestedBloc())
-                                      ],
-                                      child: const AddFriendsScreen(header: 'Add Friend'),
-                                    )));
+                  child: ListView.builder(
+                      itemCount: widget.chatViewGroupInfo.participants!.length,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        Participant participants =
+                            widget.chatViewGroupInfo.participants![index];
+                        return chartMemberCardViewSearchCards(
+                          image: participants.user.profilePic,
+                          name: participants.user.name,
+                          admin: participants.isAdmin,
+                          onTapCard: () {
+                            showDynamicBottomSheet(
+                              context,
+                              'Member Options',
+                              [
+                                BottomSheetItem(
+                                  title: 'View Profile',
+                                  onTap: () => {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MultiBlocProvider(
+                                                  providers: [
+                                                    BlocProvider(
+                                                      create: (context) =>
+                                                          ProfessionalBloc()
+                                                            ..add(
+                                                                FetchProfessionalView(
+                                                                    participants
+                                                                        .userId)),
+                                                    ),
+                                                    BlocProvider(
+                                                      create: (context) =>
+                                                          ShowInterestedBloc(),
+                                                    ),
+                                                    BlocProvider(
+                                                        create: (context) =>
+                                                            ReportPostBloc())
+                                                  ],
+                                                  child: ProfessionalViewScreen(
+                                                    id: participants.userId,
+                                                    refreshPageCallback: () {},
+                                                  ),
+                                                )))
+                                  },
+                                ),
+                                BottomSheetItem(
+                                  title: 'Mark as admin',
+                                  onTap: () => {},
+                                ),
+                                BottomSheetItem(
+                                  title: 'Message',
+                                  onTap: () => {},
+                                ),
+                                BottomSheetItem(
+                                  title: 'Remove (${participants.user.name})',
+                                  onTap: () => print('Add Friends clicked'),
+                                ),
+                              ],
+                            );
                           },
-                          child: Icon(
-                            Icons.add_circle_outline,
-                            color: COLORS.neutralDark,
-                            size: SizeConfig.blockWidth * 5,
-                          ),
-                        ),
-                        SizedBox(
-                          width: SizeConfig.blockWidth * 3,
-                        ),
-                        InkWell(
-                          onTap: (){
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => FriendsBloc()
-                                            ..add(FetchFriendsAddListEvent(
-                                                page: 1,
-                                                pageSize: 10,
-                                                keyWord: '')),
-                                        ),
-                                        BlocProvider(
-                                            create: (context) =>
-                                                ShowInterestedBloc())
-                                      ],
-                                      child: const AddFriendsScreen(header: 'Friend Suggestion'),
-                                    )));
-                          },
-                          child: Icon(
-                            Icons.search,
-                            color: COLORS.neutralDark,
-                            size: SizeConfig.blockWidth * 6,
-                          ),
-                        )
-
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: SizeConfig.blockHeight * 0.5,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 4.5,
-
-                ),
-                child: ListView.builder(
-                    itemCount: widget.chatViewGroupInfo.participants!.length,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      Participant participants = widget.chatViewGroupInfo.participants![index];
-                      return chartMemberCardViewSearchCards(
-                        image: participants.user.profilePic   ,
-                        name: participants.user.name,
-                        onTapCard: () {
-                          showDynamicBottomSheet(
-                            context,
-                            'Member Options',
-                            [
-                              BottomSheetItem(
-                                title: 'View Profile',
-                                onTap: () => {},
-                              ),
-                              BottomSheetItem(
-                                title: 'Mark as admin',
-                                onTap: () => {},
-                              ),
-                              BottomSheetItem(
-                                title: 'Message',
-                                onTap: () => {},
-                              ),
-                              BottomSheetItem(
-                                title: 'Remove (User name goes her)',
-                                onTap: () => print('Add Friends clicked'),
-                              ),
-                            ],
-                          );
-                        },
-                        message: participants.user.professionType,
-                      );
-                    }),
-              )
-            ],
+                          message: participants.user.professionType,
+                        );
+                      }),
+                )
+              ],
+            ),
           ),
-        ),
-      )),
+        )),
+      ),
     );
   }
 
@@ -420,9 +521,12 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
           ImagePickerComponent(
             onImageSelected: (File image) {
               setState(() {
-                _profileImage = image;
                 profilePic = '';
+                _profileImage = image;
+
               });
+              initialRegisterBloc
+                  .add(UploadImageEvent(imagePath: _profileImage!));
             },
           ),
         ] else if (_profileImage != null) ...[
@@ -456,6 +560,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                       _profileImage = image;
                       profilePic = '';
                     });
+                    initialRegisterBloc
+                        .add(UploadImageEvent(imagePath: _profileImage!));
                   },
                 ),
               )
@@ -465,8 +571,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
           Stack(
             children: [
               Container(
-                height: SizeConfig.blockWidth * 32,
-                width: SizeConfig.blockWidth * 34,
+                height: SizeConfig.blockWidth * 30,
+                width: SizeConfig.blockWidth * 30,
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: COLORS.primary,
@@ -496,7 +602,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
             ],
           ),
         ],
-        SizedBox(height: SizeConfig.blockHeight * 3),
+        SizedBox(height: SizeConfig.blockHeight * 2),
       ],
     );
   }

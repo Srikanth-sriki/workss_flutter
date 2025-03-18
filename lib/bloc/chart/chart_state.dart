@@ -148,3 +148,22 @@ class UploadFileFailed extends ChartState {
   @override
   List<Object> get props => [message];
 }
+
+class EditGroupChatProfileSuccess extends ChartState {
+  String message;
+  EditGroupChatProfileSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class EditGroupChatProfileFailed extends ChartState {
+  String message;
+  EditGroupChatProfileFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class EditGroupChatProfileLoading extends ChartState {
+  const EditGroupChatProfileLoading();
+  @override
+  List<Object> get props => [];
+}

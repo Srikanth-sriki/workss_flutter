@@ -277,6 +277,30 @@ class FriendsDao {
       customLog("The error of Upload Mci : $error");
     }
   }
+
+  Future editGroupChat({
+    required String chatId,
+    required String picture,
+    required String description,
+    required String name,
+  }) async {
+    Map<String, dynamic> body = {
+      "id": chatId,
+      "name": name,
+      "description": description,
+      "picture":picture
+    };
+    var url = '${Config.url}/user/chat/edit-group';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
+
 }
 
 

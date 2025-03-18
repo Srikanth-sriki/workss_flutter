@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../bloc/chart/chart_bloc.dart';
 import '../../../global_helper/reuse_widget.dart';
+import '../../../models/chat/chat_view_pro_modal.dart';
 
 class EditGroupDescriptionModal extends StatefulWidget {
-  const EditGroupDescriptionModal({super.key});
+  final ChatViewGroupInfo chatViewGroupInfo;
+  const EditGroupDescriptionModal({super.key, required this.chatViewGroupInfo});
 
   @override
   _EditGroupDescriptionModalState createState() =>
@@ -14,14 +18,15 @@ class EditGroupDescriptionModal extends StatefulWidget {
 
 class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
   final _formKey = GlobalKey<FormState>();
+  late ChartBloc chartBloc;
   final TextEditingController messageController = TextEditingController();
-
-
   bool messageError = false;
+
   @override
   void initState() {
     super.initState();
-
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+    messageController.text = widget.chatViewGroupInfo.description!;
   }
 
   @override
@@ -74,24 +79,22 @@ class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
                   color: COLORS.neutralDarkTwo,
                   thickness: SizeConfig.blockHeight * 0.15,
                 ),
-
                 buildBioTextField(
-                  label: ''.tr(),
-                  controller: messageController,
-                  hintText: "Enter Group Description".tr(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      setState(() => messageError = true);
-                      return 'Please enter Group Description'.tr();
-                    }
-                    setState(() => messageError = false);
-                    return null;
-                  },
-                  error: messageError,
-                  title: ''.tr(),
-                  onChanged: (value) {},
-                    maxLines: 5
-                ),
+                    label: ''.tr(),
+                    controller: messageController,
+                    hintText: "Enter Group Description".tr(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        setState(() => messageError = true);
+                        return 'Please enter Group Description'.tr();
+                      }
+                      setState(() => messageError = false);
+                      return null;
+                    },
+                    error: messageError,
+                    title: ''.tr(),
+                    onChanged: (value) {},
+                    maxLines: 5),
                 Container(
                   margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
                   padding: EdgeInsets.only(
@@ -121,9 +124,25 @@ class _EditGroupDescriptionModalState extends State<EditGroupDescriptionModal> {
                         text: 'SAVE'.tr(),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
+                            chartBloc.add(EditGroupChatProfileEvent(
+                                picture: widget.chatViewGroupInfo.picture!,
+                                name: widget.chatViewGroupInfo.name!,
+                                description: messageController.text,
+                                chatId: widget.chatViewGroupInfo.id!,
+                              onSuccess: (message){
+                                Navigator.pop(context);
+                              },
+                              onError: (message) {
+                                Navigator.pop(context);
+                                showCustomSnackBar(
+                                  context: context,
+                                  message: 'Something Went wrong',
+                                );
+                              },
 
+
+                            ));
                           }
-
                         },
                         backgroundColor: COLORS.primary,
                         showIcon: false,

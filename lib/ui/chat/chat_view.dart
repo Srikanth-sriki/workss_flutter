@@ -316,12 +316,17 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                           InkWell(
                             onTap: () {
                               Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (BuildContext context) =>
-                                   ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo),
-                                ),
-                              );
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => ChartBloc(),
+                                          ),
+                                          BlocProvider(create: (context) =>InitialRegisterBloc())
+                                        ],
+                                        child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo)
+                                      )));
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,

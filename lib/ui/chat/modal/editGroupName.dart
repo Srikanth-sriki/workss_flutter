@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../bloc/chart/chart_bloc.dart';
 import '../../../global_helper/reuse_widget.dart';
+import '../../../models/chat/chat_view_pro_modal.dart';
 
 class EditGroupNameModal extends StatefulWidget {
-  const EditGroupNameModal({super.key});
+  final ChatViewGroupInfo chatViewGroupInfo;
+  const EditGroupNameModal({super.key, required this.chatViewGroupInfo});
 
   @override
-  _EditGroupNameModalState createState() =>
-      _EditGroupNameModalState();
+  _EditGroupNameModalState createState() => _EditGroupNameModalState();
 }
 
 class _EditGroupNameModalState extends State<EditGroupNameModal> {
   final _formKey = GlobalKey<FormState>();
+  late ChartBloc chartBloc;
   final TextEditingController messageController = TextEditingController();
-
-
   bool messageError = false;
+
   @override
   void initState() {
     super.initState();
-
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+    messageController.text = widget.chatViewGroupInfo.name!;
   }
 
   @override
@@ -74,24 +78,22 @@ class _EditGroupNameModalState extends State<EditGroupNameModal> {
                   color: COLORS.neutralDarkTwo,
                   thickness: SizeConfig.blockHeight * 0.15,
                 ),
-
                 buildBioTextField(
-                  label: ''.tr(),
-                  controller: messageController,
-                  hintText: "Enter Group Name".tr(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      setState(() => messageError = true);
-                      return 'Please enter Group Name'.tr();
-                    }
-                    setState(() => messageError = false);
-                    return null;
-                  },
-                  error: messageError,
-                  title: ''.tr(),
-                  onChanged: (value) {},
-                  maxLines: 1
-                ),
+                    label: ''.tr(),
+                    controller: messageController,
+                    hintText: "Enter Group Name".tr(),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        setState(() => messageError = true);
+                        return 'Please enter Group Name'.tr();
+                      }
+                      setState(() => messageError = false);
+                      return null;
+                    },
+                    error: messageError,
+                    title: ''.tr(),
+                    onChanged: (value) {},
+                    maxLines: 1),
                 Container(
                   margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
                   padding: EdgeInsets.only(
@@ -121,9 +123,24 @@ class _EditGroupNameModalState extends State<EditGroupNameModal> {
                         text: 'SAVE'.tr(),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-
+                            chartBloc.add(EditGroupChatProfileEvent(
+                              picture: widget.chatViewGroupInfo.picture!,
+                              name: messageController.text,
+                              description:
+                                  widget.chatViewGroupInfo.description!,
+                              chatId: widget.chatViewGroupInfo.id!,
+                              onSuccess: (message) {
+                                Navigator.pop(context);
+                              },
+                              onError: (message) {
+                                Navigator.pop(context);
+                                showCustomSnackBar(
+                                  context: context,
+                                  message: 'Something Went wrong',
+                                );
+                              },
+                            ));
                           }
-
                         },
                         backgroundColor: COLORS.primary,
                         showIcon: false,
