@@ -1,0 +1,2 @@
+/Users/kalyanimotors/StudioProjects/works/android/app/.cxx/RelWithDebInfo/5s605m3l/x86/CMakeFiles/edit_cache.dir
+/Users/kalyanimotors/StudioProjects/works/android/app/.cxx/RelWithDebInfo/5s605m3l/x86/CMakeFiles/rebuild_cache.dir

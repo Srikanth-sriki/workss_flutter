@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/kalyanimotors/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/kalyanimotors/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/kalyanimotors/StudioProjects/works/android/app/.cxx/Debug/404a5r3j/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/kalyanimotors/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/kalyanimotors/StudioProjects/works/android/app/.cxx/Debug/404a5r3j/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

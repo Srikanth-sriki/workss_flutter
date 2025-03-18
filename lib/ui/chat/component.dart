@@ -373,10 +373,25 @@ Widget chartMemberCardViewSearchCards(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  image,
-                  width: SizeConfig.blockWidth * 14,
-                  height: SizeConfig.blockWidth * 14,
+                Container(
+                  width: SizeConfig.blockWidth * 12,
+                  height: SizeConfig.blockWidth * 12,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                        color: COLORS.primary,
+                        width: SizeConfig.blockWidth * 0.3,
+                      ),
+                      image: DecorationImage(
+                          image: NetworkImage(
+                            image
+                                .isEmpty
+                                ? 'https://via.placeholder.com/150'
+                                : image,
+                          ),
+                          fit: BoxFit.cover),
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(
+                              SizeConfig.blockWidth * 3))),
                 ),
                 SizedBox(width: SizeConfig.blockWidth * 3),
                 Column(

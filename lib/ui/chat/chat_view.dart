@@ -319,7 +319,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (BuildContext context) =>
-                                  const ChatProfileViewScreen(),
+                                   ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo),
                                 ),
                               );
                             },
@@ -337,7 +337,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       ),
                                       image: DecorationImage(
                                           image: NetworkImage(
-                                            widget.chatViewProfile.picture!
+                                            chatViewGroupInfo.picture!
                                                 .isEmpty
                                                 ? 'https://via.placeholder.com/150'
                                                 : chatViewGroupInfo.picture!,

@@ -1,0 +1,2 @@
+/Users/kalyanimotors/StudioProjects/works/android/app/.cxx/Debug/404a5r3j/x86_64/CMakeFiles/edit_cache.dir
+/Users/kalyanimotors/StudioProjects/works/android/app/.cxx/Debug/404a5r3j/x86_64/CMakeFiles/rebuild_cache.dir

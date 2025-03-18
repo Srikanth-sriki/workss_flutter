@@ -17,12 +17,14 @@ import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/chat/chat_view_pro_modal.dart';
 import 'archived_chats.dart';
 import 'chat_view.dart';
 import 'invite_friends.dart';
 
 class ChatProfileViewScreen extends StatefulWidget {
-  const ChatProfileViewScreen({super.key});
+  final ChatViewGroupInfo chatViewGroupInfo;
+  const ChatProfileViewScreen({super.key,required this.chatViewGroupInfo});
 
   @override
   State<ChatProfileViewScreen> createState() => _ChatProfileViewScreenState();
@@ -31,6 +33,11 @@ class ChatProfileViewScreen extends StatefulWidget {
 class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
   File? _profileImage;
   String profilePic = '';
+
+  @override
+  void initState() {
+    profilePic = widget.chatViewGroupInfo.picture!;
+  }
 
 
   @override
@@ -122,7 +129,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Group Name Goes Here'.tr(),
+                            widget.chatViewGroupInfo.name!,
                             style: TextStyle(
                               color: COLORS.neutralDark,
                               fontSize: SizeConfig.blockWidth * 4,
@@ -161,7 +168,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                         ],
                       ),
                       Text(
-                        '23 Members'.tr(),
+                        '${widget.chatViewGroupInfo.participants!.length} Members'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.5,
@@ -228,8 +235,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                 padding: EdgeInsets.symmetric(
                     horizontal: SizeConfig.blockWidth * 4.5),
                 child: Text(
-                  'Lorem ipsum dolor sit amet consectetur. Blandit enim euismod eget a amet etiam venenatis nunc libero. Netus quis a pharetra felis lectus. Mi eu at augue pharetra molestie odio donec gravida nisi. Porttitor orci auctor sapien sociis vitae.'
-                      .tr(),
+                    widget.chatViewGroupInfo.description!,
                   style: TextStyle(
                     color: COLORS.neutralDarkOne,
                     fontSize: SizeConfig.blockWidth * 3.5,
@@ -275,7 +281,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 SizeConfig.blockWidth * 1.5),
                           ),
                           child: Text(
-                            '23'.tr(),
+                            widget.chatViewGroupInfo.participants!.length!.toString(),
                             style: TextStyle(
                               color: COLORS.white,
                               fontSize: SizeConfig.blockWidth * 2.8,
@@ -361,14 +367,15 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
 
                 ),
                 child: ListView.builder(
-                    itemCount: 5,
+                    itemCount: widget.chatViewGroupInfo.participants!.length,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
+                      Participant participants = widget.chatViewGroupInfo.participants![index];
                       return chartMemberCardViewSearchCards(
-                        image: 'assets/images/home/dumy1.png',
-                        name: 'Julia Vandervort-Will',
+                        image: participants.user.profilePic   ,
+                        name: participants.user.name,
                         onTapCard: () {
                           showDynamicBottomSheet(
                             context,
@@ -393,7 +400,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                             ],
                           );
                         },
-                        message: 'Lorem ipsum dolor sit',
+                        message: participants.user.professionType,
                       );
                     }),
               )
