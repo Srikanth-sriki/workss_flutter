@@ -415,9 +415,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                        const InviteFriendsList(),
-                                      ))
+                                          builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) =>
+                                                ChartBloc()
+                                                  ..add(InviteMemberChartEvent(page: 1, pageSize: 10, groupId: chatViewGroupInfo.id!, keyWord: '')),
+                                              ),
+                                            ],
+                                            child: InviteFriendsList(groupId: chatViewGroupInfo.id!,),
+                                          )))
                                 },
                               ),
                               BottomSheetItem(

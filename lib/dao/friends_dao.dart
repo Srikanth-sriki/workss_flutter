@@ -157,27 +157,6 @@ class FriendsDao {
     customLog("Response Status Code : ${response.body}");
     return response;
   }
-
-  Future editGroupChatProfile({
-    required String id,
-    required String picture,
-    required String name,
-    required String description,
-  }) async {
-    var url = '${Config.url}/user/chat/edit-group';
-    Map<String, dynamic> body = {
-      "picture": picture,
-      "name": name,
-      "description": description,
-      "id": id,};
-    final response = await http.post(
-      Uri.parse(url),
-      headers: Config.authHeaders(),
-      body: jsonEncode(body),
-    );
-    return response;
-  }
-
   Future fetchInviteMemberList({
     required int page,
     required int pageSize,
@@ -300,6 +279,8 @@ class FriendsDao {
     customLog(body);
     return response;
   }
+
+
 
 }
 

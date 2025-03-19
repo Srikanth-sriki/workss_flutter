@@ -28,9 +28,6 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<ChartGroupCreateEvent>((event, emit) async {
       await mapCreateChartGroupEvent(event, emit);
     });
-    on<ChartGroupEditEvent>((event, emit) async {
-      await mapEditChartGroupEvent(event, emit);
-    });
     on<InviteMemberChartEvent>((event, emit) async {
       await mapInviteMemberListEvent(event, emit);
     });
@@ -114,31 +111,6 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       emit(ChartGroupCreateFailed(message: "Something Went wrong"));
     }
   }
-
-  Future<void> mapEditChartGroupEvent(
-      ChartGroupEditEvent event, Emitter<ChartState> emit) async {
-    try {
-      emit(const ChartListLoading());
-      var response = await friendsDao.editGroupChatProfile(
-          picture: event.picture,
-          name: event.name,
-          id: event.id,
-          description: event.description);
-      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
-      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
-        String message = jsonDecoded["message"];
-        emit(ChartGroupCreateSuccess(message: message));
-      } else {
-        String message = jsonDecoded["message"];
-        customLog("The failure reason: $message");
-        emit(ChartGroupCreateFailed(message: message));
-      }
-    } catch (error) {
-      customLog("The error is : $error");
-      emit(ChartGroupCreateFailed(message: "Something Went wrong"));
-    }
-  }
-
   Future<void> mapInviteMemberListEvent(
       InviteMemberChartEvent event, Emitter<ChartState> emit) async {
     try {
@@ -285,7 +257,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     try {
       emit(const EditGroupChatProfileLoading());
       var response =
-      await friendsDao.editGroupChatProfile(id: event.chatId, picture: event.picture, name: event.name, description: event.description);
+      await friendsDao.editGroupChat(chatId: event.chatId, picture: event.picture, name: event.name, description: event.description);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];

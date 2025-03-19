@@ -111,11 +111,19 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                     BottomSheetItem(
                       title: 'Invite People',
                       onTap: () => {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const InviteFriendsList(),
-                            ))
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) =>
+                                ChartBloc()
+                                  ..add(InviteMemberChartEvent(page: 1, pageSize: 10, groupId: widget.chatViewGroupInfo.id!, keyWord: '')),
+                              ),
+                            ],
+                            child: InviteFriendsList(groupId: widget.chatViewGroupInfo.id!,),
+                          )))
                       },
                     ),
                     BottomSheetItem(
