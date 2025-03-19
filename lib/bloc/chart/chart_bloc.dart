@@ -43,6 +43,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<EditGroupChatProfileEvent>((event, emit) async {
       await mapGroupProfileEdit(event, emit);
     });
+    on<FetchChartViewProfileEvent>((event, emit) async {
+      await mapChatViewProfileEvent(event, emit);
+    });
   }
 
   Future<void> mapCharListEvent(
@@ -176,10 +179,6 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         ChatViewGroupInfo chatViewGroupInfo ;
         chatViewGroupInfo = ChatViewGroupInfo.fromJson(jsonDecoded["data"]["chatData"]);
 
-
-
-
-
         List<ChatView> chatViewList = [];
         for (var i in jsonDecoded["data"]["messages"]) {
           chatViewList.add(ChatView.fromJson(i));
@@ -274,6 +273,30 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       emit(EditGroupChatProfileFailed(message: "Something went wrong"));
+    }
+  }
+
+  Future<void> mapChatViewProfileEvent(
+      FetchChartViewProfileEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const ChatViewProfileLoading());
+
+      var response = await friendsDao.fetchChatViewProfile(chatId: event.chatId);
+
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        ChatViewGroupInfo chatViewGroupInfo ;
+        chatViewGroupInfo = ChatViewGroupInfo.fromJson(jsonDecoded["data"]["chatData"]);
+        emit(ChatViewProfileSuccess(chatViewGroupInfo:chatViewGroupInfo
+        ));
+      } else {
+        emit(ChatViewProfileFailed(message: jsonDecoded["message"] ?? 'Error'));
+        customLog(jsonDecoded["message"]);
+      }
+    } catch (error) {
+      emit(ChatViewProfileFailed(message: "Something went wrong"));
+      customLog('jsonDecoded["message"]');
     }
   }
 }

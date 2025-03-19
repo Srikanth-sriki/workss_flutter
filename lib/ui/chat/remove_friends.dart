@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/chat/chat_view_pro_modal.dart';
 import '../friends/component.dart';
 
 class RemoveFriendsChat extends StatefulWidget {
-  const RemoveFriendsChat({super.key});
+  final ChatViewGroupInfo chatViewGroupInfo;
+   RemoveFriendsChat({super.key,required this.chatViewGroupInfo});
 
   @override
   State<RemoveFriendsChat> createState() => _RemoveFriendsChatState();
@@ -22,7 +24,13 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
   String searchKeyword = "";
   bool showSearchBar = false;
   bool selectAll = false;
-  List<bool> selectedItems = List.generate(10, (_) => false);
+  late List<bool> selectedItems;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedItems = List.generate(widget.chatViewGroupInfo.participants?.length ?? 0, (_) => false);
+  }
 
   void _onSearchChanged(String keyword) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -36,14 +44,16 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
   void _toggleSelectAll(bool value) {
     setState(() {
       selectAll = value;
-      for (int i = 0; i < selectedItems.length; i++) {
-        selectedItems[i] = value;
-      }
+      selectedItems = List.generate(selectedItems.length, (_) => value);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Participant> filteredParticipants = widget.chatViewGroupInfo.participants!
+        .where((p) => p.user.name.toLowerCase().contains(searchKeyword.toLowerCase()))
+        .toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const CustomAppBar(
@@ -168,32 +178,44 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
                   horizontal: SizeConfig.blockWidth * 4.5,
                 ),
                 child: ListView.builder(
-                    itemCount: selectedItems.length,
+                    itemCount: filteredParticipants.length,
                     shrinkWrap: true,
                     scrollDirection: Axis.vertical,
                     itemBuilder: (context, index) {
+                      Participant participant = filteredParticipants[index];
                       return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Checkbox(
-                                side: BorderSide(
-                                    color: COLORS.neutralDarkOne,
-                                    width: SizeConfig.blockWidth * 0.5),
-                                checkColor: COLORS.white,
-                                activeColor: COLORS.primary,
-                                value: selectedItems[index],
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedItems[index] = value ?? false;
-                                  });
-                                },
-                              ),
+                              if(selectAll)...[
+                                Checkbox(
+                                  side: BorderSide(
+                                      color: COLORS.neutralDarkOne,
+                                      width: SizeConfig.blockWidth * 0.5),
+                                  checkColor: COLORS.white,
+                                  activeColor: COLORS.primary,
+                                  value: selectedItems[index],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedItems[index] = value ?? false;
+                                    });
+                                  },
+                                ),
+                              ]
+                              else...[
+                                SizedBox(width: SizeConfig.blockWidth,)
+                              ],
+
                               friendChatRemoveSearchDetailsCards(
-                                image: 'assets/images/home/dumy1.png',
-                                name: 'Julia Vandervort-Will',
+                                image: participant.user.profilePic,
+                                name: participant.user.name,
+                                disc: participant.user.professionType,
                                 onTapCard: () {},
-                                disc: 'Mathematics Tutor',
+                                width:selectAll?SizeConfig.blockWidth*76:SizeConfig.blockWidth*85
                               ),
                             ],
                           ),

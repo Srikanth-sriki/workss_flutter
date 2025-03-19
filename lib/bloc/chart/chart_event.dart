@@ -119,3 +119,13 @@ class EditGroupChatProfileEvent extends ChartEvent {
   @override
   List<Object> get props => [name,chatId,picture,description,onError,onSuccess];
 }
+
+
+class FetchChartViewProfileEvent extends ChartEvent {
+  String chatId;
+  FetchChartViewProfileEvent({
+    required this.chatId
+  });
+  @override
+  List<Object> get props => [chatId];
+}

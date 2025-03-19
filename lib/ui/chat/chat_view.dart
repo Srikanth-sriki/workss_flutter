@@ -434,7 +434,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                        const RemoveFriendsChat(),
+                                            RemoveFriendsChat(chatViewGroupInfo:chatViewGroupInfo),
                                       ))
                                 },
                               ),

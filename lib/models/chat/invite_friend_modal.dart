@@ -20,17 +20,17 @@ class InviteFriend {
   });
 
   factory InviteFriend.fromJson(Map<String, dynamic> json) => InviteFriend(
-    id: json["id"]??'',
-    userId: json["userId"]??'',
-    friendId: json["friendId"]??'',
-    user: json.containsKey('user')?User.fromJson(json["user"]):null,
+    id: json["id"],
+    userId: json["userId"],
+    friendId: json["friendId"],
+    user: User.fromJson(json["user"]),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "userId": userId,
     "friendId": friendId,
-    "user": user?.toJson(),
+    "user": user!.toJson(),
   };
 }
 
@@ -41,8 +41,7 @@ class User {
   String? bio;
   String? userType;
   String? professionType;
-  IsInvited? isInvited;
-  dynamic? isGroupMember;
+  IsGroupMember? isGroupMember;
 
   User({
      this.id,
@@ -51,7 +50,6 @@ class User {
      this.bio,
      this.userType,
      this.professionType,
-     this.isInvited,
      this.isGroupMember,
   });
 
@@ -62,8 +60,8 @@ class User {
     bio: json["bio"]??"",
     userType: json["user_type"]??"",
     professionType: json["profession_type"]??"",
-    isInvited: IsInvited.fromJson(json["isInvited"]),
-    isGroupMember: json["isGroupMember"],
+    // isInvited: json["isInvited"],
+    isGroupMember: IsGroupMember.fromJson(json["isGroupMember"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -73,36 +71,36 @@ class User {
     "bio": bio,
     "user_type": userType,
     "profession_type": professionType,
-    "isInvited": isInvited?.toJson(),
-    "isGroupMember": isGroupMember,
+    // "isInvited": isInvited,
+    "isGroupMember": isGroupMember!.toJson(),
   };
 }
 
-class IsInvited {
+class IsGroupMember {
   String? id;
-  String? userId;
   String? chatId;
-  String? sentBy;
+  String? userId;
+  bool? isAdmin;
 
-
-  IsInvited({
+  IsGroupMember({
      this.id,
-     this.userId,
      this.chatId,
-     this.sentBy,
+     this.userId,
+     this.isAdmin,
+
   });
 
-  factory IsInvited.fromJson(Map<String, dynamic> json) => IsInvited(
-    id: json["id"],
-    userId: json["user_id"],
-    chatId: json["chat_id"],
-    sentBy: json["sent_by"],
+  factory IsGroupMember.fromJson(Map<String, dynamic> json) => IsGroupMember(
+    id: json["id"]??"",
+    chatId: json["chat_id"]??"",
+    userId: json["user_id"]??"",
+    isAdmin: json["is_admin"]??"",
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "user_id": userId,
     "chat_id": chatId,
-    "sent_by": sentBy,
+    "user_id": userId,
+    "is_admin": isAdmin,
   };
 }

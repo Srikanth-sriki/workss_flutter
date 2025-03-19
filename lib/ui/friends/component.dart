@@ -228,6 +228,7 @@ Widget friendChatRemoveSearchDetailsCards({
   required String name,
   required VoidCallback onTapCard,
   required String disc,
+  required double? width
 }) {
   return InkWell(
     onTap: onTapCard,
@@ -241,7 +242,7 @@ Widget friendChatRemoveSearchDetailsCards({
           right: SizeConfig.blockWidth * 2,
           left: SizeConfig.blockWidth * 2),
       color: COLORS.white,
-      width: SizeConfig.blockWidth * 75,
+      width: width,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -250,15 +251,32 @@ Widget friendChatRemoveSearchDetailsCards({
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                image,
+              Container(
                 width: SizeConfig.blockWidth * 12,
                 height: SizeConfig.blockWidth * 12,
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: COLORS.primary,
+                      width: SizeConfig.blockWidth * 0.2,
+                    ),
+                    image: DecorationImage(
+                        image: NetworkImage(
+                          image
+                              .isEmpty
+                              ? 'https://via.placeholder.com/150'
+                              : image,
+                        ),
+                        fit: BoxFit.cover),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(
+                            SizeConfig.blockWidth * 2.5))),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
                 width: SizeConfig.blockWidth * 25,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       name,

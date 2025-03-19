@@ -33,7 +33,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
   int maxPageNumber = 1;
   bool showSearchBar = false;
   bool selectAll = false;
-  late List<InviteFriend> inviteFriendsList;
+   List<InviteFriend> inviteFriendsList =[];
   List<bool> selectedItems = List.generate(10, (_) => false);
   final ScrollController _scrollController = ScrollController();
 
@@ -277,18 +277,19 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                       vertical: SizeConfig.blockHeight * 0.2,
                     ),
                     child: ListView.builder(
-                        itemCount: 5,
+                        itemCount: inviteFriendsList.length,
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {
+                          InviteFriend inviteList = inviteFriendsList![index];
                           return Column(
                             children: [
                               friendSearchDetailsCards(
                                   image: 'assets/images/home/dumy1.png',
-                                  name: 'Julia Vandervort-Will',
+                                  name: inviteList.user!.name!,
                                   onTapCard: () {},
                                   added: index % 2 == 0 ? true : false,
-                                  disc: 'Mathematics Tutor',
+                                  disc: inviteList.user!.bio!,
                                   buttonText1: 'Cancel',
                                   buttonText2: 'Invite',
                                   onTapButtonCard: () {},

@@ -132,7 +132,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RemoveFriendsChat(),
+                              builder: (context) =>  RemoveFriendsChat(chatViewGroupInfo: widget.chatViewGroupInfo,),
                             ))
                       },
                     ),

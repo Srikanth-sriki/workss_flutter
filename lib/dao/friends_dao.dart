@@ -280,6 +280,19 @@ class FriendsDao {
     return response;
   }
 
+  Future fetchChatViewProfile({
+    required String chatId,
+  }) async {
+    var url =
+        '${Config.url}/user/chat/details?chatId=$chatId';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
 
 
 }

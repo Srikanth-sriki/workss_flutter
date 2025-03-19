@@ -167,3 +167,25 @@ class EditGroupChatProfileLoading extends ChartState {
   @override
   List<Object> get props => [];
 }
+
+class ChatViewProfileLoading extends ChartState {
+  const ChatViewProfileLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class ChatViewProfileFailed extends ChartState {
+  String message;
+  ChatViewProfileFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ChatViewProfileSuccess extends ChartState {
+  ChatViewGroupInfo chatViewGroupInfo = ChatViewGroupInfo();
+  ChatViewProfileSuccess(
+      {required this.chatViewGroupInfo});
+  @override
+  List<Object> get props => [chatViewGroupInfo];
+}
+
