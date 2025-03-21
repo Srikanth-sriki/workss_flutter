@@ -48,6 +48,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     });
   }
 
+
   Future<void> mapCharListEvent(
       ChartListEvent event, Emitter<ChartState> emit) async {
     try {
