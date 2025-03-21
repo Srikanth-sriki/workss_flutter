@@ -51,6 +51,10 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
     });
   }
 
+  void _updateSelectedItemsList() {
+    selectedItems = List.generate(inviteFriendsList.length, (_) => false);
+  }
+
   void _onSearchChanged(String keyword) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
@@ -123,23 +127,28 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                   isError = false;
                 });
               }
-              else if(state is InviteMemberSuccess){
+              else if (state is InviteMemberSuccess) {
                 setState(() {
                   isInviteMemberLoading = false;
                   isFetchingMore = false;
                   isError = false;
                   maxPageNumber = state.maxPageNumber;
+
                   if (currentPage == 1) {
                     inviteFriendsList = state.inviteFriend;
                   } else {
                     final newItems = state.inviteFriend.where(
-                            (newItem) => !inviteFriendsList
-                            .any((existingItem) => existingItem.id == newItem.id));
+                          (newItem) => !inviteFriendsList.any(
+                            (existingItem) => existingItem.id == newItem.id,
+                      ),
+                    );
                     inviteFriendsList.addAll(newItems);
                   }
 
+                  _updateSelectedItemsList();
                 });
               }
+
               else if(state is InviteMemberFailed){
                 setState(() {
                   isInviteMemberLoading = false;
@@ -285,7 +294,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                           return Column(
                             children: [
                               friendSearchDetailsCards(
-                                  image: 'assets/images/home/dumy1.png',
+                                  image: inviteList.user!.profilePic!,
                                   name: inviteList.user!.name!,
                                   onTapCard: () {},
                                   added: index % 2 == 0 ? true : false,
@@ -312,50 +321,56 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                       horizontal: SizeConfig.blockWidth * 4.5,
                     ),
                     child: ListView.builder(
-                        itemCount: selectedItems.length,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemBuilder: (context, index) {
-                          return Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    side: BorderSide(
-                                        color: COLORS.neutralDarkOne,
-                                        width: SizeConfig.blockWidth * 0.5),
-                                    checkColor: COLORS.white,
-                                    activeColor: COLORS.primary,
-                                    value: selectedItems[index],
-                                    onChanged: (value) {
-                                      setState(() {
-                                        selectedItems[index] = value ?? false;
-                                      });
-                                    },
+                      itemCount: inviteFriendsList.length,  // Use inviteFriendsList length
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        InviteFriend inviteList = inviteFriendsList[index]; // Get the correct object
+
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                Checkbox(
+                                  side: BorderSide(
+                                    color: COLORS.neutralDarkOne,
+                                    width: SizeConfig.blockWidth * 0.5,
                                   ),
-                                  friendSearchDetailsCards(
-                                      image: 'assets/images/home/dumy1.png',
-                                      name: 'Julia Vandervort-Will',
-                                      onTapCard: () {},
-                                      added: index % 2 == 0 ? true : false,
-                                      disc: 'Mathematics Tutor',
-                                      buttonText1: 'Cancel',
-                                      buttonText2: 'Invite',
-                                      bgFriend: false,
-                                      onTapButtonCard: () {},
-                                      buttonRequired: false),
-                                ],
-                              ),
-                              Divider(
-                                color: COLORS.neutralDarkTwo,
-                                height: SizeConfig.blockHeight,
-                                thickness: SizeConfig.blockWidth * 0.15,
-                              ),
-                            ],
-                          );
-                        }),
+                                  checkColor: COLORS.white,
+                                  activeColor: COLORS.primary,
+                                  value: selectedItems[index],  // Correctly referencing the bool list
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedItems[index] = value ?? false;  // Update selection state
+                                    });
+                                  },
+                                ),
+                                friendSearchDetailsCards(
+                                  image: inviteList.user!.profilePic!,  //
+                                  name: inviteList.user!.name!,  // Use data from InviteFriend
+                                  onTapCard: () {},
+                                  added: index % 2 == 0 ? true : false,
+                                  disc: inviteList.user!.bio!,  // Assuming InviteFriend has occupation
+                                  buttonText1: 'Cancel',
+                                  buttonText2: 'Invite',
+                                  bgFriend: false,
+                                  onTapButtonCard: () {},
+                                  buttonRequired: false,
+                                ),
+                              ],
+                            ),
+                            Divider(
+                              color: COLORS.neutralDarkTwo,
+                              height: SizeConfig.blockHeight,
+                              thickness: SizeConfig.blockWidth * 0.15,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
+
               ]],
             ],
           ),
