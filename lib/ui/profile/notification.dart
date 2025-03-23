@@ -197,55 +197,55 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                     workViewedIntrestShowed: value);
                               },
                             ),
-                            // buildSectionHeader('Social Notifications'),
-                            // buildSwitchTile(
-                            //   title: 'Friend Request',
-                            //   value: settingFetchModelList.friendRequest!,
-                            //   onChanged: (value) {
-                            //     _updateNotificationSetting(
-                            //         friendRequest: value);
-                            //   },
-                            // ),
-                            // buildSwitchTile(
-                            //   title: 'New Clips from Friends',
-                            //   value: settingFetchModelList.newClipsFromFriends!,
-                            //   onChanged: (value) {
-                            //     _updateNotificationSetting(
-                            //         newClipsFromFriends: value);
-                            //   },
-                            // ),
-                            // buildSwitchTile(
-                            //   title: 'New Friends and Suggestions',
-                            //   value:
-                            //       settingFetchModelList.newFriendSuggestions!,
-                            //   onChanged: (value) {
-                            //     _updateNotificationSetting(
-                            //         newFriendSuggestions: value);
-                            //   },
-                            // ),
-                            // buildSectionHeader('Clips Notifications'),
-                            // buildSwitchTile(
-                            //   title: 'Messages Received',
-                            //   value: settingFetchModelList.msgRecevied!,
-                            //   onChanged: (value) {
-                            //     _updateNotificationSetting(msgRecevied: value);
-                            //   },
-                            // ),
-                            // buildSwitchTile(
-                            //   title: 'Comments or Likes on Your Posts',
-                            //   value: settingFetchModelList.cmtOrLikeOnYourPost!,
-                            //   onChanged: (value) {
-                            //     _updateNotificationSetting(
-                            //         cmtOrLikeOnYourPost: value);
-                            //   },
-                            // ),
-                            // buildSwitchTile(
-                            //   title: 'Group Alerts',
-                            //   value: settingFetchModelList.groupAlert!,
-                            //   onChanged: (value) {
-                            //     _updateNotificationSetting(groupAlert: value);
-                            //   },
-                            // ),
+                            buildSectionHeader('Social Notifications'),
+                            buildSwitchTile(
+                              title: 'Friend Request',
+                              value: settingFetchModelList.friendRequest!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(
+                                    friendRequest: value);
+                              },
+                            ),
+                            buildSwitchTile(
+                              title: 'New Clips from Friends',
+                              value: settingFetchModelList.newClipsFromFriends!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(
+                                    newClipsFromFriends: value);
+                              },
+                            ),
+                            buildSwitchTile(
+                              title: 'New Friends and Suggestions',
+                              value:
+                                  settingFetchModelList.newFriendSuggestions!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(
+                                    newFriendSuggestions: value);
+                              },
+                            ),
+                            buildSectionHeader('Clips Notifications'),
+                            buildSwitchTile(
+                              title: 'Messages Received',
+                              value: settingFetchModelList.msgRecevied!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(msgRecevied: value);
+                              },
+                            ),
+                            buildSwitchTile(
+                              title: 'Comments or Likes on Your Posts',
+                              value: settingFetchModelList.cmtOrLikeOnYourPost!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(
+                                    cmtOrLikeOnYourPost: value);
+                              },
+                            ),
+                            buildSwitchTile(
+                              title: 'Group Alerts',
+                              value: settingFetchModelList.groupAlert!,
+                              onChanged: (value) {
+                                _updateNotificationSetting(groupAlert: value);
+                              },
+                            ),
                           ],
                         ),
                       ]

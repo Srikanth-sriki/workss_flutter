@@ -24,6 +24,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../components/global_handle.dart';
 import '../../dao/home_dao.dart';
 import '../../models/notification_list_model.dart';
 
@@ -39,6 +40,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<FetchNotificationList>(_onFetchNotificationList);
     on<FetchNotificationSingleClear>(_onFetchNotificationSingleClear);
     on<FetchNotificationClearAll>(_onFetchNotificationClearAll);
+    on<FetchNotificationViewEvent>(_onFetchNotificationView);
   }
 
   Future<void> _onFetchNotificationList(
@@ -80,14 +82,33 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       FetchNotificationClearAll event, Emitter<NotificationState> emit) async {
     try {
       final response = await homeDao.fetchNotificationClearAll();
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200) {
         emit(NotificationClearAllSuccess(message: "All notifications cleared successfully"));
         add(const FetchNotificationList()); // Re-fetch notifications after clearing all
       } else {
-        emit(NotificationFetchFailure(message: "Failed to clear all notifications"));
+        emit(NotificationFetchFailure(message: jsonDecoded['message']));
       }
     } catch (error) {
       emit(NotificationFetchFailure(message: "Something went wrong while clearing all notifications"));
+    }
+  }
+
+  Future<void> _onFetchNotificationView(
+      FetchNotificationViewEvent event, Emitter<NotificationState> emit) async {
+    try {
+      final response = await homeDao.fetchNotificationView(id: event.id);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        emit(NotificationViewSuccess(message: "All notifications cleared successfully"));
+        add(const FetchNotificationList()); // Re-fetch notifications after clearing all
+      } else {
+        emit(NotificationViewFailed(message: jsonDecoded['message']));
+        event.onError!(jsonDecoded['message']);
+      }
+    } catch (error) {
+      emit(NotificationViewFailed(message: "Something went wrong"));
+      event.onError!('Something went wrong');
     }
   }
 }

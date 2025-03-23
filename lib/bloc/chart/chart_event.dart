@@ -124,8 +124,114 @@ class EditGroupChatProfileEvent extends ChartEvent {
 class FetchChartViewProfileEvent extends ChartEvent {
   String chatId;
   FetchChartViewProfileEvent({
-    required this.chatId
+    required this.chatId,
   });
   @override
   List<Object> get props => [chatId];
+}
+
+class SendInviteMemberEvent extends ChartEvent {
+  String chatId;
+  List<String> invitedUsers;
+  CallbackWithMessage? onSuccess;
+  CallbackWithMessage? onError;
+  SendInviteMemberEvent({
+    required this.chatId,
+    required this.invitedUsers,
+     this.onSuccess, this.onError
+  });
+  @override
+  List<Object> get props => [chatId,invitedUsers,];
+}
+class SendRemoveMemberEvent extends ChartEvent {
+  String chatId;
+  List<String> removeMember;
+  CallbackWithMessage? onSuccess;
+  CallbackWithMessage? onError;
+  SendRemoveMemberEvent({
+    required this.chatId,
+    required this.removeMember,
+     this.onSuccess, this.onError
+  });
+  @override
+  List<Object> get props => [chatId,removeMember,];
+}
+
+
+class ClearChatEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  ClearChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class ArchiveChatEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  ArchiveChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class LeaveGroupChatEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  LeaveGroupChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class ArchivedChartListEvent extends ChartEvent {
+  const ArchivedChartListEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class AcceptChatEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  AcceptChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class RejectGroupChatEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  RejectGroupChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class StartMessageEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  StartMessageEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
 }

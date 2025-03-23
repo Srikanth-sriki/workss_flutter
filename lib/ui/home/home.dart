@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/bloc/report_post_bloc.dart';
 import 'package:works_app/components/config.dart';
@@ -529,6 +530,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         create: (context) => NotificationBloc()
                                           ..add(const FetchNotificationList()),
                                       ),
+                                      BlocProvider(create: (context)=> ShowInterestedBloc()),
+                                      BlocProvider(create: (context)=> ChartBloc()),
                                       BlocProvider(
                                           create: (context) => FriendsBloc()
                                             ..add(FetchFriendsRequestListEvent(

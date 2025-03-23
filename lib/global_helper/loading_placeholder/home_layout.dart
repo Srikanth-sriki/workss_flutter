@@ -164,7 +164,11 @@ Widget dropDownLoader({
   );
 }
 
-Widget emptyComponent() {
+Widget emptyComponent(
+    {
+       String? errorText = "No data available"
+    }
+    ) {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -178,7 +182,7 @@ Widget emptyComponent() {
         ),
         SizedBox(height: SizeConfig.blockHeight * 2),
         Text(
-          'No data available'.tr(),
+          errorText!.tr(),
           style: TextStyle(
             color: COLORS.neutralDarkOne,
             fontSize: SizeConfig.blockWidth * 3.6,

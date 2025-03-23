@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/models/friends/friendsRequestList.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/notification/notification_bloc.dart';
@@ -10,6 +11,7 @@ import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/popup.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/friends/friends_search_list_modal.dart';
+import '../../models/notification_list_model.dart';
 import '../friends/component.dart';
 
 class NotificationListScreen extends StatefulWidget {
@@ -22,15 +24,27 @@ class NotificationListScreen extends StatefulWidget {
 class _NotificationListScreenState extends State<NotificationListScreen> {
   late NotificationBloc notificationBloc;
   late FriendsBloc friendsBloc;
+  late ShowInterestedBloc showInterestedBloc;
+  late ChartBloc chartBloc;
   late List<RequestFriendsList> friends;
   int notificationLength = 0;
   bool showHint = false;
+  double getWidth(NotificationModel notification) {
+    bool hasProfilePic = notification.content?.profilePic?.isNotEmpty ?? false;
+    bool isRead = notification.isRead ?? false;
+
+    return hasProfilePic
+        ? (isRead ? SizeConfig.blockWidth * 65 : SizeConfig.blockWidth * 33)
+        : (isRead ? SizeConfig.blockWidth * 53 : SizeConfig.blockWidth * 45);
+  }
 
   @override
   void initState() {
     super.initState();
     notificationBloc = BlocProvider.of<NotificationBloc>(context);
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
+    showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
   }
 
   @override
@@ -134,12 +148,12 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                         itemBuilder: (context, index) {
                           final notification = state.notifications[index];
                           return Dismissible(
-                              key: Key(notification.id),
+                              key: Key(notification.id!),
                               direction: DismissDirection.horizontal,
                               onDismissed: (direction) {
                                 context.read<NotificationBloc>().add(
                                     FetchNotificationSingleClear(
-                                        notification.id));
+                                        notification.id!));
                               },
                               background: Container(
                                 margin: EdgeInsets.symmetric(
@@ -191,26 +205,177 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      notification.title,
-                                      style: TextStyle(
-                                        color: COLORS.neutralDark,
-                                        fontSize: SizeConfig.blockWidth * 3.6,
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: "Poppins",
+                                    if (notification.type == 'friend_request' ||
+                                        notification.type == 'group_invite') ...[
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              if (notification!.content!
+                                                  .profilePic!.isNotEmpty)
+                                                Container(
+                                                  width: SizeConfig.blockWidth * 12,
+                                                  height: SizeConfig.blockWidth * 12,
+                                                  decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                        image: NetworkImage(notification.content!.profilePic!),
+                                                        fit: BoxFit.fill,
+                                                      ),
+                                                      borderRadius: BorderRadius.all(Radius.circular(SizeConfig.blockWidth * 3))),
+                                                ),
+                                              SizedBox(width: SizeConfig.blockWidth * 2,),
+                                              SizedBox(
+                                                width: getWidth(notification),
+                                                child: Text(
+                                                  notification.content!.body!,
+                                                  style: TextStyle(
+                                                    color: COLORS.neutralDark,
+                                                    fontSize: SizeConfig.blockWidth * 3,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Poppins",
+                                                  ),
+                                                  softWrap: true,
+                                                  overflow: TextOverflow.clip,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          if(notification.isRead! == false)...[
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                InkWell(
+                                                  onTap: (){
+                                                    if(notification.type == 'friend_request'){
+                                                      showInterestedBloc.add(RejectRequestFriendsEvent(
+                                                          id: notification.content!.requestId!,
+                                                          onSuccess: (message) {
+                                                            showCustomSnackBar(
+                                                                context: context,
+                                                                message: message,
+                                                                backgroundColor: COLORS.neutralDarkTwo);
+                                                            notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                          },
+                                                          onError: (message) {
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                            );
+                                                          })
+                                                      );
+                                                    }
+                                                    if(notification.type == 'group_invite'){
+                                                      chartBloc.add(RejectGroupChatEvent(chatId: notification.content!.inviteId!,
+                                                          onSuccess: (message) {
+                                                            showCustomSnackBar(
+                                                                context: context,
+                                                                message: message,
+                                                                backgroundColor: COLORS.neutralDarkTwo);
+                                                            notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                          },
+                                                          onError: (message) {
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                            );
+                                                          }
+                                                      ));
+                                                    }
+                                                  },
+                                                  child: Container(
+                                                    height: SizeConfig.blockHeight * 5,
+                                                    width: SizeConfig.blockWidth * 10,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius
+                                                            .circular(SizeConfig
+                                                            .blockWidth *
+                                                            2),
+                                                        color:
+                                                        COLORS.neutralDarkTwo),
+                                                    child: Icon(
+                                                      Icons.clear,
+                                                      size:
+                                                      SizeConfig.blockWidth * 6,
+                                                      color: COLORS.neutralDark,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                  SizeConfig.blockWidth * 2,
+                                                ),
+                                                customIconButton(
+                                                    text: notification.type == 'friend_request'?'Accept':notification.type == 'group_invite'?'Join':'',
+                                                    onPressed: () {
+                                                      if(notification.type == 'friend_request'){
+                                                        showInterestedBloc.add(AcceptRequestFriendsEvent(
+                                                            id: notification.content!.requestId!,
+                                                            onSuccess: (message) {
+                                                              showCustomSnackBar(
+                                                                  context: context,
+                                                                  message: message,
+                                                                  backgroundColor: COLORS.neutralDarkTwo);
+                                                              notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                            },
+                                                            onError: (message) {
+                                                              showCustomSnackBar(
+                                                                context: context,
+                                                                message: message,
+                                                              );
+                                                            }
+                                                        )
+                                                        );
+                                                      }
+                                                      if(notification.type == 'group_invite'){
+                                                        chartBloc.add(AcceptChatEvent(chatId: notification.content!.inviteId!,
+                                                            onSuccess: (message) {
+                                                              showCustomSnackBar(
+                                                                  context: context,
+                                                                  message: message,
+                                                                  backgroundColor: COLORS.neutralDarkTwo);
+                                                              notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                            },
+                                                            onError: (message) {
+                                                              showCustomSnackBar(
+                                                                context: context,
+                                                                message: message,
+                                                              );
+                                                            }
+                                                        ));
+                                                      }
+                                                    },
+                                                    width: SizeConfig.blockWidth * 23,
+                                                    height: SizeConfig.blockHeight * 6.5,
+                                                    backgroundColor: COLORS.primary,
+                                                    textColor: COLORS.white,
+
+                                                    showIcon: false)
+                                              ],
+                                            )
+                                          ]
+                                        ],
+                                      )
+                                    ] else ...[
+                                      Text(
+                                        notification.description!,
+                                        style: TextStyle(
+                                          color: COLORS.neutralDark,
+                                          fontSize: SizeConfig.blockWidth * 3.15,
+                                          fontWeight: FontWeight.w400,
+                                          fontFamily: "Poppins",
+                                        ),
+                                        softWrap: true,
                                       ),
-                                      softWrap: true,
-                                    ),
-                                    Text(
-                                      notification.description,
-                                      style: TextStyle(
-                                        color: COLORS.neutralDarkOne,
-                                        fontSize: SizeConfig.blockWidth * 3.25,
-                                        fontWeight: FontWeight.w400,
-                                        fontFamily: "Poppins",
-                                      ),
-                                      softWrap: true,
-                                    ),
+                                    ]
                                   ],
                                 ),
                               ));
@@ -279,8 +444,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       print(friends);
                     });
                   } else if (state is FriendsRequestListFailed) {
-                    setState(() {
-                    });
+                    setState(() {});
                   }
                 },
                 builder: (context, state) {
@@ -301,20 +465,14 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                               image: state
                                   .friendsSearchList[index].sender.profilePic,
                               name: state.friendsSearchList[index].sender.name,
-                              onTapCard: () {
-
-                              },
-                              onTapIcon: () {
-
-                              },
+                              onTapCard: () {},
+                              onTapIcon: () {},
                               onTapMessage: () {},
                             );
                           }),
                     );
                   } else if (state is FriendsRequestListFailed) {
-                    return ErrorScreen(onRetry: () {
-
-                    });
+                    return ErrorScreen(onRetry: () {});
                   }
                   return Container();
                 },

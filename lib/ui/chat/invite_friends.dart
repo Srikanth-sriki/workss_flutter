@@ -33,8 +33,8 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
   int maxPageNumber = 1;
   bool showSearchBar = false;
   bool selectAll = false;
-   List<InviteFriend> inviteFriendsList =[];
-  List<bool> selectedItems = List.generate(10, (_) => false);
+  List<InviteFriend> inviteFriendsList = [];
+  List<Map<String, dynamic>> selectedItems = [];
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -52,7 +52,9 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
   }
 
   void _updateSelectedItemsList() {
-    selectedItems = List.generate(inviteFriendsList.length, (_) => false);
+    selectedItems = inviteFriendsList
+        .map((friend) => {"id": friend.user!.id!, "selected": false})
+        .toList();
   }
 
   void _onSearchChanged(String keyword) {
@@ -60,18 +62,30 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       setState(() {
         searchKeyword = keyword;
+        currentPage = 1;
       });
+      _fetchData(isNewFetch: true);
     });
   }
 
   void _toggleSelectAll(bool value) {
     setState(() {
       selectAll = value;
-      for (int i = 0; i < selectedItems.length; i++) {
-        selectedItems[i] = value;
+      for (var item in selectedItems) {
+        item["selected"] = value;
       }
     });
   }
+
+  // void _toggleItemSelection(int index, bool value) {
+  //   setState(() {
+  //     selectedItems[index]["selected"] = value;
+  //
+  //     // Check if all items are selected
+  //     bool allSelected = selectedItems.every((item) => item["selected"]);
+  //     selectAll = allSelected;
+  //   });
+  // }
 
   void _fetchData({bool isNewFetch = false}) {
     if (isNewFetch) {
@@ -107,6 +121,18 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
     _fetchData();
   }
 
+  void checkSelectedId() {
+    List<String> selectedUserIds = selectedItems
+        .where((user) => user["selected"] == true) // Filter only selected users
+        .map((user) => user["id"] as String) // Extract only the IDs
+        .toList();
+    if (selectedUserIds.isEmpty) {
+      setState(() {
+        selectAll = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,8 +152,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                   isFetchingMore = true;
                   isError = false;
                 });
-              }
-              else if (state is InviteMemberSuccess) {
+              } else if (state is InviteMemberSuccess) {
                 setState(() {
                   isInviteMemberLoading = false;
                   isFetchingMore = false;
@@ -138,8 +163,8 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                     inviteFriendsList = state.inviteFriend;
                   } else {
                     final newItems = state.inviteFriend.where(
-                          (newItem) => !inviteFriendsList.any(
-                            (existingItem) => existingItem.id == newItem.id,
+                      (newItem) => !inviteFriendsList.any(
+                        (existingItem) => existingItem.id == newItem.id,
                       ),
                     );
                     inviteFriendsList.addAll(newItems);
@@ -147,29 +172,33 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
 
                   _updateSelectedItemsList();
                 });
-              }
-
-              else if(state is InviteMemberFailed){
+              } else if (state is InviteMemberFailed) {
                 setState(() {
                   isInviteMemberLoading = false;
                   isFetchingMore = false;
-                  isError= true;
+                  isError = true;
                   showCustomSnackBar(
                     context: context,
                     message: state.message,
                   );
                 });
+              } else if (state is SendInviteMemberSuccess) {
+                showCustomSnackBar(
+                    context: context,
+                    message: state.message,
+                    backgroundColor: COLORS.neutralDarkTwo);
+              } else if (state is SendInviteMemberFailed) {
+                showCustomSnackBar(
+                  context: context,
+                  message: state.message,
+                );
               }
             })
           ],
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if(isInviteMemberLoading == true && currentPage == 1)...[
-                friendsListLoading()
-              ]
-              else if(inviteFriendsList.isNotEmpty && !isInviteMemberLoading)...[
               Container(
                 padding: EdgeInsets.symmetric(
                     horizontal: SizeConfig.blockWidth * 3.5,
@@ -211,7 +240,15 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                       ),
                       onPressed: () {
                         setState(() {
+                          _searchController.clear();
                           showSearchBar = !showSearchBar;
+                          if (!showSearchBar) {
+                            setState(() {
+                              searchKeyword = '';
+                              currentPage = 1;
+                              _fetchData(isNewFetch: true);
+                            });
+                          }
                         });
                       },
                     ),
@@ -278,14 +315,19 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
               // Divider(
               //   color: COLORS.neutralDarkTwo,height: SizeConfig.blockHeight,
               // ),
-              if (selectAll == false) ...[
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 4.5,
-                      vertical: SizeConfig.blockHeight * 0.2,
-                    ),
-                    child: ListView.builder(
+
+              if (isInviteMemberLoading == true && currentPage == 1) ...[
+                friendsListLoading()
+              ] else if (inviteFriendsList.isNotEmpty &&
+                  !isInviteMemberLoading) ...[
+                if (selectAll == false) ...[
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5,
+                        vertical: SizeConfig.blockHeight * 0.2,
+                      ),
+                      child: ListView.builder(
                         itemCount: inviteFriendsList.length,
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
@@ -297,11 +339,22 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                   image: inviteList.user!.profilePic!,
                                   name: inviteList.user!.name!,
                                   onTapCard: () {},
-                                  added: index % 2 == 0 ? true : false,
+                                  added: inviteList.user!.isInvited != null
+                                      ? true
+                                      : false,
                                   disc: inviteList.user!.bio!,
                                   buttonText1: 'Cancel',
                                   buttonText2: 'Invite',
-                                  onTapButtonCard: () {},
+                                  onTapButtonCard: () {
+                                    chartBloc.add(SendInviteMemberEvent(
+                                        chatId: widget.groupId,
+                                        invitedUsers: [
+                                          inviteList.user!.id!,
+                                        ],
+                                        onSuccess: (message) {
+                                          _fetchData();
+                                        }));
+                                  },
                                   bgFriend: false),
                               Divider(
                                 color: COLORS.neutralDarkTwo,
@@ -310,68 +363,92 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                               ),
                             ],
                           );
-                        }),
-                  ),
-                )
-              ],
-              if (selectAll == true) ...[
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 4.5,
+                        },
+                      ),
                     ),
-                    child: ListView.builder(
-                      itemCount: inviteFriendsList.length,  // Use inviteFriendsList length
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      itemBuilder: (context, index) {
-                        InviteFriend inviteList = inviteFriendsList[index]; // Get the correct object
+                  )
+                ],
+                if (selectAll == true) ...[
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5,
+                      ),
+                      child: ListView.builder(
+                        itemCount: inviteFriendsList
+                            .length, // Use inviteFriendsList length
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemBuilder: (context, index) {
+                          InviteFriend inviteList = inviteFriendsList[
+                              index]; // Get the correct object
 
-                        return Column(
-                          children: [
-                            Row(
-                              children: [
-                                Checkbox(
-                                  side: BorderSide(
-                                    color: COLORS.neutralDarkOne,
-                                    width: SizeConfig.blockWidth * 0.5,
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    side: BorderSide(
+                                      color: COLORS.neutralDarkOne,
+                                      width: SizeConfig.blockWidth * 0.5,
+                                    ),
+                                    checkColor: COLORS.white,
+                                    activeColor: COLORS.primary,
+                                    value: selectedItems[index]["selected"],
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        selectedItems[index]["selected"] =
+                                            value ?? false;
+                                        checkSelectedId();
+                                      });
+                                    },
                                   ),
-                                  checkColor: COLORS.white,
-                                  activeColor: COLORS.primary,
-                                  value: selectedItems[index],  // Correctly referencing the bool list
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedItems[index] = value ?? false;  // Update selection state
-                                    });
-                                  },
-                                ),
-                                friendSearchDetailsCards(
-                                  image: inviteList.user!.profilePic!,  //
-                                  name: inviteList.user!.name!,  // Use data from InviteFriend
-                                  onTapCard: () {},
-                                  added: index % 2 == 0 ? true : false,
-                                  disc: inviteList.user!.bio!,  // Assuming InviteFriend has occupation
-                                  buttonText1: 'Cancel',
-                                  buttonText2: 'Invite',
-                                  bgFriend: false,
-                                  onTapButtonCard: () {},
-                                  buttonRequired: false,
-                                ),
-                              ],
-                            ),
-                            Divider(
-                              color: COLORS.neutralDarkTwo,
-                              height: SizeConfig.blockHeight,
-                              thickness: SizeConfig.blockWidth * 0.15,
-                            ),
-                          ],
-                        );
-                      },
+                                  friendSearchDetailsCards(
+                                    image: inviteList.user!.profilePic!, //
+                                    name: inviteList.user!
+                                        .name!, // Use data from InviteFriend
+                                    onTapCard: () {
+                                      setState(() {
+                                        selectedItems[index]["selected"] =
+                                            !selectedItems[index]["selected"];
+                                        checkSelectedId();
+                                      });
+                                    },
+                                    added: inviteList.user!.isInvited != null
+                                        ? false
+                                        : true,
+                                    disc: inviteList.user!
+                                        .bio!, // Assuming InviteFriend has occupation
+                                    buttonText1: 'Cancel',
+                                    buttonText2: 'Invite',
+                                    bgFriend: false,
+                                    onTapButtonCard: () {},
+                                    buttonRequired: false,
+                                  ),
+                                ],
+                              ),
+                              Divider(
+                                color: COLORS.neutralDarkTwo,
+                                height: SizeConfig.blockHeight,
+                                thickness: SizeConfig.blockWidth * 0.15,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-
-              ]],
+                ]
+              ] else if (inviteFriendsList.isEmpty) ...[
+                SizedBox(
+                    width: SizeConfig.screenWidth,
+                    height: SizeConfig.blockHeight * 80,
+                    child: emptyComponent())
+              ] else if (isInviteMemberLoading == false && isError) ...[
+                ErrorScreen(onRetry: () {
+                  _fetchData();
+                })
+              ]
             ],
           ),
         ),
@@ -384,8 +461,25 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
               child: customButton(
                 text: 'INVITE'.tr(),
                 onPressed: () {
-                  setState(() {});
-                  Navigator.pop(context);
+                  setState(() {
+                    print(selectedItems);
+                    List<String> selectedUserIds = selectedItems
+                        .where((user) =>
+                            user["selected"] ==
+                            true) // Filter only selected users
+                        .map((user) =>
+                            user["id"] as String) // Extract only the IDs
+                        .toList();
+                    print(selectedUserIds.length);
+
+                    chartBloc.add(SendInviteMemberEvent(
+                        chatId: widget.groupId,
+                        invitedUsers: selectedUserIds,
+                        onSuccess: (message) {
+                          _fetchData();
+                          selectAll = false;
+                        }));
+                  });
                 },
                 backgroundColor: COLORS.primary,
                 showIcon: false,

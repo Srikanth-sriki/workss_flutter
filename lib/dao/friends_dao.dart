@@ -28,8 +28,7 @@ class FriendsDao {
     required int pageSize,
     required String keyWord,
   }) async {
-    var url =
-        '${Config.url}/user/friend/search?search=$keyWord';
+    var url = '${Config.url}/user/friend/search?search=$keyWord';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -110,7 +109,6 @@ class FriendsDao {
     return response;
   }
 
-
   Future fetchFriendsRequestList({
     required int page,
     required int pageSize,
@@ -136,6 +134,16 @@ class FriendsDao {
     return response;
   }
 
+  Future fetchArchivedChartList() async {
+    var url = '${Config.url}/user/chat/archive-list';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.body}");
+    return response;
+  }
+
   Future createGroupChat({
     required String picture,
     required String name,
@@ -147,7 +155,8 @@ class FriendsDao {
       "picture": picture,
       "name": name,
       "description": description,
-      "invitedUsers": invitedUsers,};
+      "invitedUsers": invitedUsers,
+    };
     final response = await http.post(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -155,8 +164,10 @@ class FriendsDao {
     );
     customLog("Response Status Code : ${response.statusCode}");
     customLog("Response Status Code : ${response.body}");
+    customLog("Response Status Code : ${response.request}");
     return response;
   }
+
   Future fetchInviteMemberList({
     required int page,
     required int pageSize,
@@ -187,14 +198,15 @@ class FriendsDao {
     customLog("Response Status Code : ${response.statusCode}");
     return response;
   }
+
   Future sendMessageChat({
     required String chatId,
     required String content,
     required String messageType,
-     String? fileName,
-     String? fileUrl,
-     String? fileType,
-     String? fileSize,
+    String? fileName,
+    String? fileUrl,
+    String? fileType,
+    String? fileSize,
   }) async {
     Map<String, dynamic> body = {
       "chatId": chatId,
@@ -267,7 +279,7 @@ class FriendsDao {
       "id": chatId,
       "name": name,
       "description": description,
-      "picture":picture
+      "picture": picture
     };
     var url = '${Config.url}/user/chat/edit-group';
     final response = await http.post(
@@ -283,8 +295,7 @@ class FriendsDao {
   Future fetchChatViewProfile({
     required String chatId,
   }) async {
-    var url =
-        '${Config.url}/user/chat/details?chatId=$chatId';
+    var url = '${Config.url}/user/chat/details?chatId=$chatId';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -293,10 +304,136 @@ class FriendsDao {
     return response;
   }
 
+  Future inviteMemberRequest({
+    required String chatId,
+    required List<String> invitedUsers,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId,
+      "invitedUsers": invitedUsers,
+    };
+    var url = '${Config.url}/user/chat/invite';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
 
+  Future removeMemberRequest({
+    required String chatId,
+    required List<String> removedUsers,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId,
+      "removingUsers": removedUsers,
+    };
+    var url = '${Config.url}/user/chat/remove-members';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
+
+  Future clearChatRequest({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {"chatId": chatId};
+    var url = '${Config.url}/user/chat/clear-chat';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future archiveChatRequest({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId
+    };
+    var url = '${Config.url}/user/chat/archive';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future leaveChatRequest({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId
+    };
+    var url = '${Config.url}/user/chat/leave-group';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future acceptInviteGroup({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "id": chatId
+    };
+    var url = '${Config.url}/user/chat/accept-invite';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future rejectInviteGroup({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "id": chatId
+    };
+    var url = '${Config.url}/user/chat/reject-invite';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future sendChatMessage({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "userId": chatId
+    };
+    var url = '${Config.url}/user/chat/start-chat';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
 
 }
-
-
-
-

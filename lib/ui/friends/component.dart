@@ -227,6 +227,7 @@ Widget friendChatRemoveSearchDetailsCards({
   required String image,
   required String name,
   required VoidCallback onTapCard,
+  required VoidCallback onTapButton,
   required String disc,
   required double? width
 }) {
@@ -309,7 +310,7 @@ Widget friendChatRemoveSearchDetailsCards({
           ),
           customIconButton(
               text: 'Remove',
-              onPressed: onTapCard,
+              onPressed: onTapButton,
               width: SizeConfig.blockWidth * 25,
               height: SizeConfig.blockHeight * 6.25,
               backgroundColor: COLORS.neutralDarkTwo,

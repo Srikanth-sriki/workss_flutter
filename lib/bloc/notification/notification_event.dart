@@ -26,7 +26,20 @@ class FetchNotificationSingleClear extends NotificationEvent {
 
 class FetchNotificationClearAll extends NotificationEvent {
   const FetchNotificationClearAll();
-
   @override
   List<Object> get props => [];
+}
+
+
+class FetchNotificationViewEvent extends NotificationEvent {
+  String id;
+  CallbackWithMessage? onSuccess;
+  CallbackWithMessage? onError;
+  FetchNotificationViewEvent({
+    required this.id,
+     this.onSuccess,
+     this.onError
+  });
+  @override
+  List<Object> get props => [id];
 }

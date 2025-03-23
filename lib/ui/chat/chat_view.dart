@@ -39,14 +39,16 @@ import 'chat_wave_form.dart';
 import 'invite_friends.dart';
 import 'modal/markas_admin_modal.dart';
 import 'modal/report_or_block.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class ChatViewScreen extends StatefulWidget {
   final VoidCallback refreshPageCallback;
-  final ChatList chatViewProfile;
+  final String chatId;
+  final bool isGroup;
   const ChatViewScreen(
       {super.key,
       required this.refreshPageCallback,
-      required this.chatViewProfile});
+      required this.chatId,required this.isGroup});
 
   @override
   State<ChatViewScreen> createState() => _ChatViewScreenState();
@@ -89,6 +91,34 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         _loadMoreData();
       }
     });
+    connectToSocket();
+  }
+
+
+  void connectToSocket() {
+    final socket = io.io('https://43.204.94.146', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print('Connected to the socket server');
+    });
+
+    socket.onDisconnect((_) {
+      print('Disconnected from the socket server');
+    });
+
+    socket.on('new_message', (data) {
+      print('Received message: $data');
+    });
+
+    // Add more event listeners and functionality as needed.
+
+    // To send a message to the server, use:
+    // socket.emit('eventName', 'message data');
   }
 
   void _getDir() async {
@@ -110,7 +140,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     chartBloc.add(FetchChartViewEvent(
       page: currentPage,
       pageSize: pageSize,
-      chatId: widget.chatViewProfile.chatId!,
+      chatId: widget.chatId,
     ));
   }
 
@@ -169,7 +199,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   void onSendMessage() {
     chartBloc.add(ChartSendMessageEvent(
-      chatId: widget.chatViewProfile.chatId!,
+      chatId: widget.chatId,
       content: _messageController.text,
       messageType: _messageController.text.isEmpty ? 'media' : "text",
       fileName: _messageController.text.isEmpty ? '' : null,
@@ -241,7 +271,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
               });
             } else if(state is UploadFileSuccess){
               chartBloc.add(ChartSendMessageEvent(
-                chatId: widget.chatViewProfile.chatId!,
+                chatId: widget.chatId,
                 content: 'media',
                 messageType:'media',
                 fileName: state.filePath.split('/').last,
@@ -264,7 +294,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   profilePicture = state.filePath;
 
                   chartBloc.add(ChartSendMessageEvent(
-                    chatId: widget.chatViewProfile.chatId!,
+                    chatId: widget.chatId,
                     content: 'media',
                     messageType:'media',
                     fileName: profilePicture.split('/').last,
@@ -315,18 +345,20 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider(
-                                            create: (context) => ChartBloc(),
-                                          ),
-                                          BlocProvider(create: (context) =>InitialRegisterBloc())
-                                        ],
-                                        child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo)
-                                      )));
+                              if(widget.isGroup){
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) => ChartBloc(),
+                                              ),
+                                              BlocProvider(create: (context) =>InitialRegisterBloc())
+                                            ],
+                                            child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo)
+                                        )));
+                              }
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -402,13 +434,28 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                             'Chat Options',
                             [
                               BottomSheetItem(
-                                title: 'Mute Notification',
-                                onTap: () => {},
-                              ),
+                              title: 'Mute Notification',
+                              onTap: () => {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ProfileBloc()
+                                            ..add(const FetchSettingEvent()),
+                                        ),
+                                      ],
+                                      child: const NotificationScreen(),
+                                    )))
+                          },
+                          ),
+
                               BottomSheetItem(
                                 title: 'Unfriend',
                                 onTap: () => {},
                               ),
+                          if(widget.isGroup)...[
                               BottomSheetItem(
                                 title: 'Invite Friends',
                                 onTap: () => {
@@ -433,20 +480,44 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            RemoveFriendsChat(chatViewGroupInfo:chatViewGroupInfo),
-                                      ))
+                                          builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) =>
+                                                ChartBloc()
+                                                  ..add(FetchChartViewProfileEvent( chatId: chatViewGroupInfo.id!)),
+                                              ),
+                                            ],
+                                            child: RemoveFriendsChat(chatViewGroupInfo:chatViewGroupInfo),
+                                          )))
+
                                 },
                               ),
                               BottomSheetItem(
                                   title: 'Share Joining Link', onTap: () => {}),
                               BottomSheetItem(
                                 title: 'Archive',
-                                onTap: () => {},
-                              ),
-                              BottomSheetItem(
-                                title: 'Mute Notification',
-                                onTap: () => print('Add Friends clicked'),
+                                onTap: () => {
+                                  chartBloc.add(ArchiveChatEvent(
+                                      chatId: widget.chatId,
+                                      onSuccess: (message) {
+                                        showCustomSnackBar(
+                                            context: context,
+                                            message: message,
+                                            backgroundColor: COLORS.neutralDarkTwo);
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/main_screen',
+                                          arguments: {'selectedIndex': 3},
+                                        );
+                                      },
+                                      onError: (message) {
+                                        showCustomSnackBar(
+                                          context: context,
+                                          message: message,
+                                        );
+                                      }))
+                                },
                               ),
                               BottomSheetItem(
                                 title: 'Delete Group',
@@ -493,28 +564,73 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   //     buttonText: 'Are you sure you want to \nleave the group?',header: 'LEAVE',
                                   //   ),
                                   // ),
-                                  showMaterialModalBottomSheet(
-                                    enableDrag: true,
-                                    expand: false,
-                                    isDismissible: true,
-                                    backgroundColor: COLORS.white,
-                                    context: context,
-                                    closeProgressThreshold: 0,
-                                    duration: const Duration(seconds: 0),
-                                    useRootNavigator: true,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20)),
-                                    ),
-                                    builder: (context) =>
-                                    const MarkasAdminModal(),
-                                  ),
+                                  if (chatViewGroupInfo.createdBy == Config.id)
+                                    {
+                                      showMaterialModalBottomSheet(
+                                        enableDrag: true,
+                                        expand: false,
+                                        isDismissible: true,
+                                        backgroundColor: COLORS.white,
+                                        context: context,
+                                        closeProgressThreshold: 0,
+                                        duration: const Duration(seconds: 0),
+                                        useRootNavigator: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(20)),
+                                        ),
+                                        builder: (context) => const MarkasAdminModal(),
+                                      ),
+                                    }
+                                  else
+                                    {
+                                      chartBloc.add(LeaveGroupChatEvent(
+                                          chatId: widget.chatId,
+                                          onSuccess: (message) {
+                                            showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                                backgroundColor: COLORS.neutralDarkTwo);
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/main_screen',
+                                              arguments: {'selectedIndex': 3},
+                                            );
+                                          },
+                                          onError: (message) {
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message: message,
+                                            );
+                                          }))
+                                    }
                                 },
                               ),
                               BottomSheetItem(
                                 title: 'Clear Chat',
-                                onTap: () => print('Add Friends clicked'),
+                                onTap: () => {
+                                  chartBloc.add(ClearChatEvent(
+                                      chatId: widget.chatId,
+                                      onSuccess: (message) {
+                                        showCustomSnackBar(
+                                            context: context,
+                                            message: message,
+                                            backgroundColor: COLORS.neutralDarkTwo);
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/main_screen',
+                                          arguments: {'selectedIndex': 3},
+                                        );
+                                      },
+                                      onError: (message) {
+                                        showCustomSnackBar(
+                                          context: context,
+                                          message: message,
+                                        );
+                                      }))
+                                },
                               ),
+                              ],
                               BottomSheetItem(
                                 title: 'Report or Block',
                                 onTap: () => {

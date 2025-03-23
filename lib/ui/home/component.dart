@@ -257,45 +257,48 @@ Widget addFriendCard({required bool added,required String image,required String 
   );
 }
 
-Widget friendViewCard({required String image,required String name,}){
-  return Container(
-    width: SizeConfig.blockWidth * 25,
-    height: SizeConfig.blockHeight * 18,
-    margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 0.6 ),
-    padding: EdgeInsets.all(SizeConfig.blockWidth * 2.5),
-    decoration: const BoxDecoration(
-      color: COLORS.white,
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: SizeConfig.blockWidth * 15.5,
-          height: SizeConfig.blockWidth * 15.5,
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage(image),
-                fit: BoxFit.fill,
-              ),
-              borderRadius: BorderRadius.all(
-                  Radius.circular(SizeConfig.blockWidth * 3))),
-        ),
-        SizedBox(height: SizeConfig.blockHeight*0.8),
-        Text(
-          name,
-          style: TextStyle(
-            color: COLORS.neutralDark,
-            fontSize: SizeConfig.blockWidth * 3,
-            fontWeight: FontWeight.w400,
-            fontFamily: "Poppins",
+Widget friendViewCard({required String image,required String name,required VoidCallback onTap}){
+  return InkWell(
+    onTap: onTap,
+    child: Container(
+      width: SizeConfig.blockWidth * 25,
+      height: SizeConfig.blockHeight * 18,
+      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 0.6 ),
+      padding: EdgeInsets.all(SizeConfig.blockWidth * 2.5),
+      decoration: const BoxDecoration(
+        color: COLORS.white,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: SizeConfig.blockWidth * 15.5,
+            height: SizeConfig.blockWidth * 15.5,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(image),
+                  fit: BoxFit.fill,
+                ),
+                borderRadius: BorderRadius.all(
+                    Radius.circular(SizeConfig.blockWidth * 3))),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          // textAlign: TextAlign.end,
-        ),
+          SizedBox(height: SizeConfig.blockHeight*0.8),
+          Text(
+            name,
+            style: TextStyle(
+              color: COLORS.neutralDark,
+              fontSize: SizeConfig.blockWidth * 3,
+              fontWeight: FontWeight.w400,
+              fontFamily: "Poppins",
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            // textAlign: TextAlign.end,
+          ),
 
-      ],
+        ],
+      ),
     ),
   );
 }

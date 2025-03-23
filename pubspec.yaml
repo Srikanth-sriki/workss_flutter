@@ -78,6 +78,7 @@ dependencies:
   chat_bubbles: ^1.6.0
   just_audio: ^0.9.42
   photo_view: ^0.15.0
+  socket_io_client: ^3.0.2
 
 
 

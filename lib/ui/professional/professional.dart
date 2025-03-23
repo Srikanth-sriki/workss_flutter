@@ -11,6 +11,7 @@ import 'package:works_app/ui/onboarding/language_selection.dart';
 import 'package:works_app/ui/professional/categories.dart';
 import 'package:works_app/ui/professional/professional_search.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
@@ -243,6 +244,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                       ..add(
                                                           const FetchNotificationList()),
                                               ),
+                                              BlocProvider(create: (context)=> ShowInterestedBloc()),
+                                              BlocProvider(create: (context)=> ChartBloc()),
                                               BlocProvider(
                                                   create: (context) => FriendsBloc()
                                                     ..add(FetchFriendsRequestListEvent(

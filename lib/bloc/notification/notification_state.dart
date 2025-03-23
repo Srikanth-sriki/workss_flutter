@@ -17,9 +17,9 @@ class FetchNotificationListLoading extends NotificationState {
 
 
 class NotificationFetchSuccess extends NotificationState {
-  final List<NotificationModel> notifications;
+  List<NotificationModel> notifications = [];
 
-  const NotificationFetchSuccess({required this.notifications});
+  NotificationFetchSuccess({required this.notifications});
 
   @override
   List<Object> get props => [notifications];
@@ -47,6 +47,24 @@ class NotificationClearAllSuccess extends NotificationState {
   final String message;
 
   const NotificationClearAllSuccess({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class NotificationViewSuccess extends NotificationState {
+  final String message;
+
+  const NotificationViewSuccess({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class NotificationViewFailed extends NotificationState {
+  final String message;
+
+  const NotificationViewFailed({required this.message});
 
   @override
   List<Object> get props => [message];

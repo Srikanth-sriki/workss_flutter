@@ -33,6 +33,20 @@ class _MainScreenState extends State<MainScreen> {
   late final Widget _cachedProfileScreen;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Retrieve arguments from Navigator
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (args != null && args.containsKey('selectedIndex')) {
+      setState(() {
+        _selectedIndex = args['selectedIndex'];
+      });
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 

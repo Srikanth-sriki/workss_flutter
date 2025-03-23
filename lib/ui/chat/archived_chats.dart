@@ -1,9 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/chat/charts_list_modal.dart';
 import 'chat_view.dart';
 import 'component.dart';
 
@@ -15,6 +21,21 @@ class ArchivedChatsScreen extends StatefulWidget {
 }
 
 class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
+  late ChartBloc chartBloc;
+  List<ChatList> chatList = [];
+  bool isChatListLoading = true;
+  bool isError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+  }
+
+  void _refreshPageAfterEdit() {
+    // _fetchData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,33 +45,91 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
         backgroundColor: COLORS.white,
         titleColors: COLORS.neutralDark,
       ),
-      body: SafeArea(child: Container(
-        padding: EdgeInsets.symmetric(
-            horizontal: SizeConfig.blockWidth * 5.5,
-            vertical: SizeConfig.blockHeight*2),
-        child: ListView.builder(
-            itemCount: 5,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            scrollDirection: Axis.vertical,
-            itemBuilder: (context, index) {
-              return chartSearchCards(
-                  image: 'assets/images/home/dumy1.png',
-                  name: 'Julia Vandervort-Will',
-                  isGroup: true,
-                  onTapCard: () {
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) =>
-                    //           ChatViewScreen(),
-                    //     ));
-                  },
-                  message: 'Lorem ipsum dolor sit',
-                  count: '2',
-                  date: '23 JUN 2024');
-            }),
-      )),
+      body: BlocListener<ChartBloc, ChartState>(
+        listener: (context, state) {
+          if (state is ArchivedChartListLoading) {
+            setState(() {
+              isChatListLoading = true;
+              isError = false;
+            });
+          } else if (state is ArchivedChartListSuccess) {
+            setState(() {
+
+              isChatListLoading = false;
+              isError = false;
+              chatList = state.chatList;
+            });
+          } else if (state is ArchivedChartListFailed) {
+            setState(() {
+              isChatListLoading = false;
+              isError = true;
+            });
+          }
+        },
+        child: SafeArea(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+              if (isChatListLoading) ...[
+                friendsListLoading()
+              ] else if (!isChatListLoading && chatList.isNotEmpty) ...[
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 5.5,
+                      vertical: SizeConfig.blockHeight * 2),
+                  child: ListView.builder(
+                      itemCount: chatList.length,
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        return chartSearchCards(
+                            image: chatList[index].picture!,
+                            name: chatList[index].name!,
+                            onTapCard: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) => ChartBloc()
+                                                  ..add(FetchChartViewEvent(
+                                                      page: 1,
+                                                      pageSize: 10,
+                                                      chatId: chatList[index]
+                                                          .chatId!)),
+                                              ),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      InitialRegisterBloc())
+                                            ],
+                                            child: ChatViewScreen(
+                                              refreshPageCallback:
+                                                  _refreshPageAfterEdit,
+                                              chatId: chatList[index].chatId!,
+                                              isGroup: chatList[index].isGroup!,
+                                            ),
+                                          )));
+                            },
+                            message: chatList[index].latestMessage != null
+                                ? chatList[index].latestMessage!.content!
+                                : "",
+                            count: chatList[index].unreadCount!,
+                            isGroup: chatList[index].isGroup!,
+                            date: formatChatDate(chatList[index].updatedAt!));
+                      }),
+                ),
+              ] else if (!isChatListLoading && chatList.isEmpty) ...[
+                emptyComponent(errorText: "No Chats Found")
+              ] else if (isError && !isChatListLoading) ...[
+                ErrorScreen(onRetry: () {
+                  _refreshPageAfterEdit();
+                })
+              ]
+            ])),
+      ),
     );
   }
 }

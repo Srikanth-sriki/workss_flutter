@@ -96,7 +96,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () {
       setState(() {
-        searchKeyword = keyword.toLowerCase(); // Store lowercase keyword for comparison
+        searchKeyword = keyword.toLowerCase();
         filteredFriendList = friendList.where((friend) {
           final name = friend.user.name.toLowerCase();
           final profession = friend.user.professionType.toLowerCase();
@@ -683,7 +683,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                           child: Container(
                                             alignment: Alignment.center,
                                             width: SizeConfig.blockWidth * 42,
-                                            height: SizeConfig.blockHeight * 7.25,
+                                            height: SizeConfig.blockHeight * 7,
                                             decoration: BoxDecoration(
                                               color: COLORS.white,
                                               border:
@@ -741,7 +741,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                         backgroundColor: COLORS.primary,
                                         showIcon: false,
                                         width: SizeConfig.blockWidth * 42,
-                                        height: SizeConfig.blockHeight * 8,
+                                        height: SizeConfig.blockHeight * 7,
                                         textColor: COLORS.white,
                                       )
                                     ],
@@ -805,7 +805,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                       child: Container(
                                         alignment: Alignment.center,
                                         width: SizeConfig.blockWidth * 100,
-                                        height: SizeConfig.blockHeight * 7.25,
+                                        height: SizeConfig.blockHeight * 7,
                                         decoration: BoxDecoration(
                                           color: COLORS.white,
                                           border:
@@ -881,6 +881,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                               ],
                             ),
                           ),
+                          if(friendList.isNotEmpty)
                           Padding(
                             padding: EdgeInsets.symmetric(
                               horizontal: SizeConfig.blockWidth * 5,

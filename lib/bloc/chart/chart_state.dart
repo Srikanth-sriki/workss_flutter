@@ -189,3 +189,163 @@ class ChatViewProfileSuccess extends ChartState {
   List<Object> get props => [chatViewGroupInfo];
 }
 
+class SendInviteMemberLoading extends ChartState {
+  const SendInviteMemberLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class SendInviteMemberFailed extends ChartState {
+  String message;
+  SendInviteMemberFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class SendInviteMemberSuccess extends ChartState {
+  String message;
+  SendInviteMemberSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class SendRemoveMemberLoading extends ChartState {
+  const SendRemoveMemberLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class SendRemoveMemberFailed extends ChartState {
+  String message;
+  SendRemoveMemberFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class SendRemoveMemberSuccess extends ChartState {
+  String message;
+  SendRemoveMemberSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ClearChatLoading extends ChartState {
+  const ClearChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class ClearChatSuccess extends ChartState {
+  String message;
+  ClearChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class ClearChatFailed extends ChartState {
+  String message;
+  ClearChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ArchiveChatLoading extends ChartState {
+  const ArchiveChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class ArchiveChatSuccess extends ChartState {
+  String message;
+  ArchiveChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class ArchiveChatFailed extends ChartState {
+  String message;
+  ArchiveChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class LeaveChatLoading extends ChartState {
+  const LeaveChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class LeaveChatSuccess extends ChartState {
+  String message;
+  LeaveChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class LeaveChatFailed extends ChartState {
+  String message;
+  LeaveChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ArchivedChartListLoading extends ChartState {
+  const ArchivedChartListLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class ArchivedChartListFailed extends ChartState {
+  String message;
+  ArchivedChartListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ArchivedChartListSuccess extends ChartState {
+  List<ChatList> chatList = [];
+  ArchivedChartListSuccess({required this.chatList});
+  @override
+  List<Object> get props => [chatList];
+}
+
+class AcceptInviteChatLoading extends ChartState {
+  const AcceptInviteChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class AcceptInviteChatSuccess extends ChartState {
+  String message;
+  AcceptInviteChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class AcceptInviteChatFailed extends ChartState {
+  String message;
+  AcceptInviteChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class RejectInviteChatLoading extends ChartState {
+  const RejectInviteChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class RejectInviteChatSuccess extends ChartState {
+  String message;
+  RejectInviteChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class RejectInviteChatFailed extends ChartState {
+  String message;
+  RejectInviteChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class StartMessageSuccess extends ChartState {
+  String chatId;
+  StartMessageSuccess({required this.chatId});
+  @override
+  List<Object> get props => [chatId];
+}
+class StartMessageChatFailed extends ChartState {
+  String message;
+  StartMessageChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

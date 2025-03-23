@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -8,10 +9,13 @@ import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/ui/chat/group_create_success.dart';
 
+import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/friends/friends_search_list_modal.dart';
 import '../profile/component.dart';
 import 'component.dart';
 
@@ -25,10 +29,13 @@ class CreateGroupScreen extends StatefulWidget {
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _formKey = GlobalKey<FormState>();
   late ChartBloc chartBloc;
+  late FriendsBloc friendsBloc;
   late InitialRegisterBloc initialRegisterBloc;
   late String profilePicture;
   final TextEditingController groupName = TextEditingController();
   final TextEditingController groupDescription = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
   bool groupNameError = false;
   bool groupDescriptionError = false;
   bool isSubmitButtonEnabled = false;
@@ -36,13 +43,73 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   bool inviteMemberListLoading = true;
   bool groupCreateLoad = false;
   File? _profileImage;
+  bool isFriendsListLoad = true;
+  List<Friend> friends = [];
+  bool isFriendsListError = false;
+  List<String> selectedFriends = [];
+  Timer? _debounce;
+  String searchKeyword = "";
+  bool isFetchingMore = false;
+  int currentPage = 1;
+  int pageSize = 10;
+  int maxPageNumber = 1;
+  bool showSearchBar = false;
 
   @override
   void initState() {
     super.initState();
+    friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
     profilePicture = "";
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !isFetchingMore &&
+          currentPage < maxPageNumber) {
+        _loadMoreData();
+      }
+    });
+  }
+
+  void _onSearchChanged(String keyword) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        searchKeyword = keyword;
+        currentPage = 1;
+      });
+      _fetchData();
+    });
+  }
+
+  void _fetchData({bool isNewFetch = false}) {
+    if (isNewFetch) {
+      friends.clear();
+      currentPage = 1;
+    }
+
+    friendsBloc.add(FetchFriendsListEvent(
+      page: currentPage,
+      pageSize: pageSize,
+      keyWord: searchKeyword,
+    ));
+  }
+
+  void _loadMoreData() {
+    setState(() {
+      isFetchingMore = true;
+      currentPage++;
+    });
+    _fetchData();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   void fetchInviteList() {
@@ -57,12 +124,22 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     }
   }
 
+  void toggleSelection(String friendId) {
+    setState(() {
+      if (selectedFriends.contains(friendId)) {
+        selectedFriends.remove(friendId);
+      } else {
+        selectedFriends.add(friendId);
+      }
+    });
+  }
+
   void _submitButton() {
     chartBloc.add(ChartGroupCreateEvent(
         picture: profilePicture,
         name: groupName.text,
         description: groupDescription.text,
-        invitedUsers: []));
+        invitedUsers: selectedFriends));
   }
 
   @override
@@ -117,7 +194,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   decoration: BoxDecoration(
                       color: COLORS.primaryOne.withOpacity(0.5),
                       borderRadius:
-                      BorderRadius.circular(SizeConfig.blockWidth * 2.5)),
+                          BorderRadius.circular(SizeConfig.blockWidth * 2.5)),
                   child: Text(
                     groupStepOne ? 'Step 2'.tr() : 'Step 1'.tr(),
                     style: TextStyle(
@@ -132,7 +209,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             ),
             Padding(
               padding:
-              EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 7),
+                  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 7),
               child: Text(
                 'Build your own work network'.tr(),
                 style: TextStyle(
@@ -148,22 +225,44 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       ),
       body: MultiBlocListener(
         listeners: [
-          BlocListener<ChartBloc, ChartState>(
+          BlocListener<FriendsBloc, FriendsState>(
             listener: (context, state) {
-              if (state is InviteMemberLoading) {
+              if (state is FriendsListLoading) {
                 setState(() {
-                  inviteMemberListLoading = true;
+                  isFriendsListLoad = true;
+                  isFriendsListError = false;
+                });
+              } else if (state is FriendsListSuccess) {
+                setState(() {
+                  friends = state.friendsSearchList;
+                  isFriendsListLoad = false;
+                  isFriendsListError = false;
+                });
+              } else if (state is FriendsListFailed) {
+                setState(() {
+                  isFriendsListLoad = false;
+                  isFriendsListError = true;
                 });
               }
-              if (state is InviteMemberSuccess) {
-                setState(() {
-                  inviteMemberListLoading = false;
-                });
-              } else if (state is InviteMemberFailed) {
-                setState(() {
-                  inviteMemberListLoading = false;
-                });
-              } else if (state is ChartListLoading) {
+            },
+          ),
+          BlocListener<ChartBloc, ChartState>(
+            listener: (context, state) {
+              // if (state is InviteMemberLoading) {
+              //   setState(() {
+              //     inviteMemberListLoading = true;
+              //   });
+              // }
+              // if (state is InviteMemberSuccess) {
+              //   setState(() {
+              //     inviteMemberListLoading = false;
+              //   });
+              // } else if (state is InviteMemberFailed) {
+              //   setState(() {
+              //     inviteMemberListLoading = false;
+              //   });
+              // } else
+              if (state is ChartListLoading) {
                 setState(() {
                   groupCreateLoad = true;
                 });
@@ -172,8 +271,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (
-                          BuildContext context) => const GroupCreateSuccess(),
+                      builder: (BuildContext context) =>
+                          const GroupCreateSuccess(),
                     ),
                   );
                   groupCreateLoad = false;
@@ -193,7 +292,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             listener: (context, state) {
               if (state is UploadImageSuccess) {
                 profilePicture = state.filePath;
-              }  else if (state is UploadImageFailed) {
+              } else if (state is UploadImageFailed) {
                 showCustomSnackBar(
                   context: context,
                   message: state.message,
@@ -205,106 +304,198 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         child: SafeArea(
             child: groupStepOne != true
                 ? SingleChildScrollView(
-                child: Container(
-                  width: SizeConfig.screenWidth,
-                  padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
-                  child: Form(
-                      key: _formKey,
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            _buildProfilePicture(),
-                            _buildTextField(
-                                label: 'Group Name',
-                                controller: groupName,
-                                hintText: "Enter group name".tr(),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    setState(() => groupNameError = true);
-                                    return 'Please enter group name'.tr();
-                                  }
-                                  setState(() => groupNameError = false);
-                                  return null;
-                                },
-                                error: groupNameError,
-                                onChanged: (value) {
-                                  _validateForm();
-                                },
-                                title: 'Group Name'.tr()),
-                            _buildBioTextField(
-                                label: 'Group Description'.tr(),
-                                controller: groupDescription,
-                                hintText: "Write group description here".tr(),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
+                    child: Container(
+                    width: SizeConfig.screenWidth,
+                    padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
+                    child: Form(
+                        key: _formKey,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              _buildProfilePicture(),
+                              _buildTextField(
+                                  label: 'Group Name',
+                                  controller: groupName,
+                                  hintText: "Enter group name".tr(),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      setState(() => groupNameError = true);
+                                      return 'Please enter group name'.tr();
+                                    }
+                                    setState(() => groupNameError = false);
+                                    return null;
+                                  },
+                                  error: groupNameError,
+                                  onChanged: (value) {
+                                    _validateForm();
+                                  },
+                                  title: 'Group Name'.tr()),
+                              _buildBioTextField(
+                                  label: 'Group Description'.tr(),
+                                  controller: groupDescription,
+                                  hintText: "Write group description here".tr(),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      setState(
+                                          () => groupDescriptionError = true);
+                                      return 'Please enter description'.tr();
+                                    }
                                     setState(
-                                            () => groupDescriptionError = true);
-                                    return 'Please enter description'.tr();
-                                  }
-                                  setState(
-                                          () => groupDescriptionError = false);
-                                  return null;
-                                },
-                                error: groupDescriptionError,
-                                onChanged: (value) {
-                                  _validateForm();
-                                },
-                                title: 'Group Description'.tr()),
-                          ])),
-                ))
+                                        () => groupDescriptionError = false);
+                                    return null;
+                                  },
+                                  error: groupDescriptionError,
+                                  onChanged: (value) {
+                                    _validateForm();
+                                  },
+                                  title: 'Group Description'.tr()),
+                            ])),
+                  ))
                 : Container(
-              width: SizeConfig.screenWidth,
-              padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Select Friends',
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.8,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                    width: SizeConfig.screenWidth,
+                    padding: EdgeInsets.all(SizeConfig.blockWidth * 4.5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Select Friends',
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 3.8,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                showSearchBar ? Icons.close : Icons.search,
+                                color: COLORS.neutralDarkOne,
+                                size: SizeConfig.blockHeight * 3.5,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  showSearchBar = !showSearchBar;
+                                  if (!showSearchBar) {
+                                    setState(() {
+                                      searchKeyword = '';
+                                      currentPage = 1;
+                                      _fetchData(isNewFetch: true);
+                                    });
+                                  }
+                                });
+                              },
+                            ),
+                          ],
                         ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          setState(() {});
-                        },
-                        child: Icon(
-                          Icons.search,
-                          color: COLORS.neutralDarkOne,
-                          size: SizeConfig.blockWidth * 6,
+                        if (showSearchBar)
+                          TextField(
+                            controller: _searchController,
+                            style: TextStyle(
+                              color: COLORS.neutralDarkOne,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                            cursorColor: COLORS.black,
+                            decoration: InputDecoration(
+                              fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              focusColor:
+                                  COLORS.neutralDarkTwo.withOpacity(0.6),
+                              filled: true,
+                              hintText: 'Ex: Search'.tr(),
+                              hintStyle: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 3.25,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: COLORS.neutralDarkOne,
+                                size: SizeConfig.blockWidth * 5,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3.25),
+                                borderSide: BorderSide(
+                                    color:
+                                        COLORS.neutralDarkTwo.withOpacity(0.6),
+                                    width: SizeConfig.blockWidth * 0.1),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3.25),
+                                borderSide: BorderSide(
+                                    color:
+                                        COLORS.neutralDarkTwo.withOpacity(0.6),
+                                    width: SizeConfig.blockWidth * 0.1),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3.25),
+                                borderSide: BorderSide(
+                                    color:
+                                        COLORS.neutralDarkTwo.withOpacity(0.6),
+                                    width: SizeConfig.blockWidth * 0.1),
+                              ),
+                            ),
+                            onChanged: _onSearchChanged,
+                          ),
+                        SizedBox(
+                          height: SizeConfig.blockHeight * 2.5,
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: SizeConfig.blockHeight * 1.5,
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                        itemCount: 5,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemBuilder: (context, index) {
-                          return createGroupInviteCard(
-                              image: 'assets/images/home/dumy1.png',
-                              name: 'Julia Vandervort-Will',
-                              onTapCard: () {},
-                              added: index % 2 == 0 ? true : false,
-                              disc: 'Mathematics Tutor');
-                        }),
-                  )
-                ],
-              ),
-            )),
+                        if (isFriendsListLoad) ...[
+                          Expanded(child: globalLoadingWidget())
+                        ] else if (!isFriendsListLoad &&
+                            friends.isNotEmpty) ...[
+                          Expanded(
+                            child: ListView.builder(
+                                controller: _scrollController,
+                                itemCount:
+                                    friends.length + (isFetchingMore ? 1 : 0),
+                                shrinkWrap: true,
+                                scrollDirection: Axis.vertical,
+                                itemBuilder: (context, index) {
+                                  final friend = friends[index].friends;
+                                  final isSelected =
+                                      selectedFriends.contains(friend.id);
+                                  if (index < friends.length) {
+                                    return createGroupInviteCard(
+                                      image: friend.profilePic,
+                                      name: friend.name,
+                                      disc: friend.bio,
+                                      added: isSelected,
+                                      onTapCard: () =>
+                                          toggleSelection(friend.id),
+                                    );
+                                  } else if (isFetchingMore) {
+                                    return Center(
+                                        child: SizedBox(
+                                            height: SizeConfig.blockHeight * 3,
+                                            width: SizeConfig.blockHeight * 3,
+                                            child: CircularProgressIndicator(
+                                              color: COLORS.primary,
+                                              strokeWidth:
+                                                  SizeConfig.blockWidth * 0.8,
+                                            )));
+                                  } else {
+                                    return const SizedBox.shrink();
+                                  }
+                                }),
+                          )
+                        ] else if (friends.isEmpty) ...[
+                          emptyComponent()
+                        ],
+                      ],
+                    ),
+                  )),
       ),
       bottomNavigationBar: Container(
         padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight * 2),
@@ -347,35 +538,34 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 height: SizeConfig.blockHeight * 8,
                 textColor: COLORS.white,
               )
-            ] else
-              ...[
-                customButton(
-                  text: 'BACK'.tr(),
-                  onPressed: () {
-                    setState(() {
-                      groupStepOne = false;
-                    });
-                  },
-                  backgroundColor: COLORS.neutralDarkTwo,
-                  showIcon: false,
-                  width: SizeConfig.blockWidth * 42,
-                  height: SizeConfig.blockHeight * 8,
-                  textColor: COLORS.black,
-                ),
-                customButton(
-                  text: 'CREATE'.tr(),
-                  onPressed: () {
-                    _submitButton();
-                  },
-                  backgroundColor: isSubmitButtonEnabled
-                      ? COLORS.primary
-                      : COLORS.primary.withOpacity(0.4),
-                  showIcon: false,
-                  width: SizeConfig.blockWidth * 42,
-                  height: SizeConfig.blockHeight * 8,
-                  textColor: COLORS.white,
-                )
-              ]
+            ] else ...[
+              customButton(
+                text: 'BACK'.tr(),
+                onPressed: () {
+                  setState(() {
+                    groupStepOne = false;
+                  });
+                },
+                backgroundColor: COLORS.neutralDarkTwo,
+                showIcon: false,
+                width: SizeConfig.blockWidth * 42,
+                height: SizeConfig.blockHeight * 8,
+                textColor: COLORS.black,
+              ),
+              customButton(
+                text: 'CREATE'.tr(),
+                onPressed: () {
+                  _submitButton();
+                },
+                backgroundColor: isSubmitButtonEnabled
+                    ? COLORS.primary
+                    : COLORS.primary.withOpacity(0.4),
+                showIcon: false,
+                width: SizeConfig.blockWidth * 42,
+                height: SizeConfig.blockHeight * 8,
+                textColor: COLORS.white,
+              )
+            ]
           ],
         ),
       ),
@@ -390,58 +580,59 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         registerText(text: 'Group Picture'.tr()),
         _profileImage == null
             ? ImagePickerComponent(
-          onImageSelected: (File image) {
-            setState(() {
-              _profileImage = image;
-              initialRegisterBloc
-                  .add(UploadImageEvent(imagePath: _profileImage!));
-            });
-          },
-        )
-            : Stack(
-          children: [
-            Container(
-              height: SizeConfig.blockWidth * 32,
-              width: SizeConfig.blockWidth * 34,
-              decoration: BoxDecoration(
-                  border: Border.all(
-                    color: COLORS.primary,
-                    width: 1.2,
-                  ),
-                  image: DecorationImage(
-                    image: FileImage(
-                      File(_profileImage!.path),
-                    ),
-                    fit: BoxFit.fill,
-                  ),
-                  borderRadius:
-                  BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: ImagePickerModal(
                 onImageSelected: (File image) {
                   setState(() {
                     _profileImage = image;
+                    initialRegisterBloc
+                        .add(UploadImageEvent(imagePath: _profileImage!));
                   });
                 },
+              )
+            : Stack(
+                children: [
+                  Container(
+                    height: SizeConfig.blockWidth * 32,
+                    width: SizeConfig.blockWidth * 34,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: COLORS.primary,
+                          width: 1.2,
+                        ),
+                        image: DecorationImage(
+                          image: FileImage(
+                            File(_profileImage!.path),
+                          ),
+                          fit: BoxFit.fill,
+                        ),
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: ImagePickerModal(
+                      onImageSelected: (File image) {
+                        setState(() {
+                          _profileImage = image;
+                        });
+                      },
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
         SizedBox(height: SizeConfig.blockHeight * 3),
       ],
     );
   }
 
-  Widget _buildTextField({required String label,
-    required TextEditingController controller,
-    required String hintText,
-    required String? Function(String?) validator,
-    required String? Function(String?) onChanged,
-    required bool error,
-    required String title}) {
+  Widget _buildTextField(
+      {required String label,
+      required TextEditingController controller,
+      required String hintText,
+      required String? Function(String?) validator,
+      required String? Function(String?) onChanged,
+      required bool error,
+      required String title}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -461,13 +652,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
-  Widget _buildBioTextField({required String label,
-    required TextEditingController controller,
-    required String hintText,
-    required String? Function(String?) validator,
-    required String? Function(String?) onChanged,
-    required bool error,
-    required String title}) {
+  Widget _buildBioTextField(
+      {required String label,
+      required TextEditingController controller,
+      required String hintText,
+      required String? Function(String?) validator,
+      required String? Function(String?) onChanged,
+      required bool error,
+      required String title}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

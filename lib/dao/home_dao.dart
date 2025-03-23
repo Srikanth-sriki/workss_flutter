@@ -304,6 +304,17 @@ class HomeDao {
     return response;
   }
 
+  Future fetchNotificationView({required String id}) async {
+    var url = '${Config.url}/user/notification/view?id=$id';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
   Future fetchNotificationClearAll() async {
     var url = '${Config.url}/user/notification/clear-all';
     final response = await http.post(

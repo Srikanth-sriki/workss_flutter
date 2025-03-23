@@ -224,8 +224,6 @@ String formatChatDate(DateTime date) {
     return "Today";
   } else if (inputDate == yesterday) {
     return "Yesterday";
-  } else if (inputDate == dayBeforeYesterday) {
-    return "Day before yesterday";
   } else {
     return DateFormat("dd MMM yyyy").format(date); // Example: 23 JUN 2024
   }

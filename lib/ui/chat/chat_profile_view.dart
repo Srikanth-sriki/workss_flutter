@@ -15,17 +15,22 @@ import 'package:works_app/ui/chat/remove_friends.dart';
 import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
+import '../../components/config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
 import '../professional/professional_view.dart';
+import '../profile/notification.dart';
 import 'archived_chats.dart';
 import 'chat_view.dart';
 import 'invite_friends.dart';
+import 'modal/markas_admin_modal.dart';
+import 'modal/report_or_block.dart';
 
 class ChatProfileViewScreen extends StatefulWidget {
   final ChatViewGroupInfo chatViewGroupInfo;
@@ -59,8 +64,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
               chartBloc.add(EditGroupChatProfileEvent(
                 picture: state.filePath,
                 name: widget.chatViewGroupInfo.name!,
-                description:
-                widget.chatViewGroupInfo.description!,
+                description: widget.chatViewGroupInfo.description!,
                 chatId: widget.chatViewGroupInfo.id!,
                 onSuccess: (message) {},
                 onError: (message) {
@@ -71,7 +75,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                   );
                 },
               ));
-            }  else if (state is UploadImageFailed) {
+            } else if (state is UploadImageFailed) {
               showCustomSnackBar(
                 context: context,
                 message: state.message,
@@ -89,6 +93,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
           showLeadingIcon: true,
           borderColor: true,
           actions: [
+            if(widget.chatViewGroupInfo.isGroup!)...[
             InkWell(
               child: Image.asset(
                 'assets/images/home/share.png',
@@ -111,19 +116,25 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                     BottomSheetItem(
                       title: 'Invite People',
                       onTap: () => {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MultiBlocProvider(
-                            providers: [
-                              BlocProvider(
-                                create: (context) =>
-                                ChartBloc()
-                                  ..add(InviteMemberChartEvent(page: 1, pageSize: 10, groupId: widget.chatViewGroupInfo.id!, keyWord: '')),
-                              ),
-                            ],
-                            child: InviteFriendsList(groupId: widget.chatViewGroupInfo.id!,),
-                          )))
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ChartBloc()
+                                            ..add(InviteMemberChartEvent(
+                                                page: 1,
+                                                pageSize: 10,
+                                                groupId: widget
+                                                    .chatViewGroupInfo.id!,
+                                                keyWord: '')),
+                                        ),
+                                      ],
+                                      child: InviteFriendsList(
+                                        groupId: widget.chatViewGroupInfo.id!,
+                                      ),
+                                    )))
                       },
                     ),
                     BottomSheetItem(
@@ -132,34 +143,155 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>  RemoveFriendsChat(chatViewGroupInfo: widget.chatViewGroupInfo,),
-                            ))
+                                builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ChartBloc()
+                                            ..add(FetchChartViewProfileEvent(
+                                                chatId: widget
+                                                    .chatViewGroupInfo.id!)),
+                                        ),
+                                      ],
+                                      child: RemoveFriendsChat(
+                                          chatViewGroupInfo:
+                                              widget.chatViewGroupInfo),
+                                    )))
                       },
                     ),
                     BottomSheetItem(
                       title: 'Archive',
-                      onTap: () => {},
+                      onTap: () => {
+                        chartBloc.add(ArchiveChatEvent(
+                            chatId: widget.chatViewGroupInfo.id!,
+                            onSuccess: (message) {
+                              showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                  backgroundColor: COLORS.neutralDarkTwo);
+                              Navigator.pushNamed(
+                                context,
+                                '/main_screen',
+                                arguments: {'selectedIndex': 3},
+                              );
+                            },
+                            onError: (message) {
+                              showCustomSnackBar(
+                                context: context,
+                                message: message,
+                              );
+                            }))
+                      },
                     ),
                     BottomSheetItem(
                       title: 'Mute Notification',
-                      onTap: () => print('Add Friends clicked'),
+                      onTap: () => {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ProfileBloc()
+                                            ..add(const FetchSettingEvent()),
+                                        ),
+                                      ],
+                                      child: const NotificationScreen(),
+                                    )))
+                      },
                     ),
                     BottomSheetItem(
                       title: 'Leave Group',
-                      onTap: () => {},
+                      onTap: () => {
+                        if (widget.chatViewGroupInfo.createdBy == Config.id)
+                          {
+                            showMaterialModalBottomSheet(
+                              enableDrag: true,
+                              expand: false,
+                              isDismissible: true,
+                              backgroundColor: COLORS.white,
+                              context: context,
+                              closeProgressThreshold: 0,
+                              duration: const Duration(seconds: 0),
+                              useRootNavigator: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                              ),
+                              builder: (context) => const MarkasAdminModal(),
+                            ),
+                          }
+                        else
+                          {
+                            chartBloc.add(LeaveGroupChatEvent(
+                                chatId: widget.chatViewGroupInfo.id!,
+                                onSuccess: (message) {
+                                  showCustomSnackBar(
+                                      context: context,
+                                      message: message,
+                                      backgroundColor: COLORS.neutralDarkTwo);
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/main_screen',
+                                    arguments: {'selectedIndex': 3},
+                                  );
+                                },
+                                onError: (message) {
+                                  showCustomSnackBar(
+                                    context: context,
+                                    message: message,
+                                  );
+                                }))
+                          }
+                      },
                     ),
                     BottomSheetItem(
                       title: 'Clear Chat',
-                      onTap: () => print('Add Friends clicked'),
+                      onTap: () => {
+                        chartBloc.add(ClearChatEvent(
+                            chatId: widget.chatViewGroupInfo.id!,
+                            onSuccess: (message) {
+                              showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                  backgroundColor: COLORS.neutralDarkTwo);
+                              Navigator.pushNamed(
+                                context,
+                                '/main_screen',
+                                arguments: {'selectedIndex': 3},
+                              );
+                            },
+                            onError: (message) {
+                              showCustomSnackBar(
+                                context: context,
+                                message: message,
+                              );
+                            }))
+                      },
                     ),
                     BottomSheetItem(
                       title: 'Report or Block',
-                      onTap: () => print('Add Friends clicked'),
+                      onTap: () => {
+                        showMaterialModalBottomSheet(
+                          enableDrag: true,
+                          expand: false,
+                          isDismissible: true,
+                          backgroundColor: COLORS.white,
+                          context: context,
+                          closeProgressThreshold: 0,
+                          duration: const Duration(seconds: 0),
+                          useRootNavigator: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (context) => const ReportOrBlockModal(),
+                        ),
+                      },
                     ),
                   ],
                 );
               },
-            ),
+            )],
           ],
         ),
         body: SafeArea(
@@ -216,10 +348,13 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                               top: Radius.circular(
                                                   SizeConfig.blockWidth * 3.5)),
                                         ),
-                                        builder: (context) => BlocProvider<ChartBloc>(
+                                        builder: (context) =>
+                                            BlocProvider<ChartBloc>(
                                           create: (context) =>
                                               ChartBloc(), // Provide your ProfileBloc
-                                          child:  EditGroupNameModal(chatViewGroupInfo:widget.chatViewGroupInfo),
+                                          child: EditGroupNameModal(
+                                              chatViewGroupInfo:
+                                                  widget.chatViewGroupInfo),
                                         ),
                                       );
                                     },
@@ -288,9 +423,10 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                   builder: (context) => BlocProvider<ChartBloc>(
                                     create: (context) =>
                                         ChartBloc(), // Provide your ProfileBloc
-                                    child:  EditGroupDescriptionModal(chatViewGroupInfo:widget.chatViewGroupInfo),
+                                    child: EditGroupDescriptionModal(
+                                        chatViewGroupInfo:
+                                            widget.chatViewGroupInfo),
                                   ),
-
                                 );
                               },
                               child: Image.asset(
@@ -348,7 +484,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                             ),
                           ),
                           Container(
-                            margin: EdgeInsets.only(left: SizeConfig.blockWidth),
+                            margin:
+                                EdgeInsets.only(left: SizeConfig.blockWidth),
                             alignment: Alignment.center,
                             width: SizeConfig.blockWidth * 7,
                             height: SizeConfig.blockHeight * 3.5,
@@ -382,10 +519,11 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                             providers: [
                                               BlocProvider(
                                                 create: (context) => FriendsBloc()
-                                                  ..add(FetchFriendsAddListEvent(
-                                                      page: 1,
-                                                      pageSize: 10,
-                                                      keyWord: '')),
+                                                  ..add(
+                                                      FetchFriendsAddListEvent(
+                                                          page: 1,
+                                                          pageSize: 10,
+                                                          keyWord: '')),
                                               ),
                                               BlocProvider(
                                                   create: (context) =>
@@ -413,10 +551,11 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                             providers: [
                                               BlocProvider(
                                                 create: (context) => FriendsBloc()
-                                                  ..add(FetchFriendsAddListEvent(
-                                                      page: 1,
-                                                      pageSize: 10,
-                                                      keyWord: '')),
+                                                  ..add(
+                                                      FetchFriendsAddListEvent(
+                                                          page: 1,
+                                                          pageSize: 10,
+                                                          keyWord: '')),
                                               ),
                                               BlocProvider(
                                                   create: (context) =>
@@ -473,10 +612,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                     BlocProvider(
                                                       create: (context) =>
                                                           ProfessionalBloc()
-                                                            ..add(
-                                                                FetchProfessionalView(
-                                                                    participants
-                                                                        .userId)),
+                                                            ..add(FetchProfessionalView(
+                                                                participants
+                                                                    .userId)),
                                                     ),
                                                     BlocProvider(
                                                       create: (context) =>
@@ -493,18 +631,57 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                 )))
                                   },
                                 ),
-                                BottomSheetItem(
-                                  title: 'Mark as admin',
-                                  onTap: () => {},
-                                ),
+                                if (widget.chatViewGroupInfo.createdBy ==
+                                    Config.id) ...[
+                                  BottomSheetItem(
+                                    title: 'Mark as admin',
+                                    onTap: () => {
+                                      showMaterialModalBottomSheet(
+                                        enableDrag: true,
+                                        expand: false,
+                                        isDismissible: true,
+                                        backgroundColor: COLORS.white,
+                                        context: context,
+                                        closeProgressThreshold: 0,
+                                        duration: const Duration(seconds: 0),
+                                        useRootNavigator: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(20)),
+                                        ),
+                                        builder: (context) =>
+                                            const MarkasAdminModal(),
+                                      ),
+                                    },
+                                  ),
+                                ],
                                 BottomSheetItem(
                                   title: 'Message',
                                   onTap: () => {},
                                 ),
-                                BottomSheetItem(
-                                  title: 'Remove (${participants.user.name})',
-                                  onTap: () => print('Add Friends clicked'),
-                                ),
+                                if (widget.chatViewGroupInfo.createdBy ==
+                                    Config.id) ...[
+                                  BottomSheetItem(
+                                    title: 'Remove (${participants.user.name})',
+                                    onTap: () => {
+                                      chartBloc.add(SendRemoveMemberEvent(
+                                          chatId: participants.chatId!,
+                                          removeMember: [participants.userId!],
+                                          onSuccess: (message) {
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message: message,
+                                            );
+                                          },
+                                          onError: (message) {
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message: message,
+                                            );
+                                          }))
+                                    },
+                                  ),
+                                ],
                               ],
                             );
                           },
@@ -531,7 +708,6 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
               setState(() {
                 profilePic = '';
                 _profileImage = image;
-
               });
               initialRegisterBloc
                   .add(UploadImageEvent(imagePath: _profileImage!));

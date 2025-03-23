@@ -22,9 +22,11 @@ import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/friends/friends_search_list_modal.dart';
+import '../friends/friends_details.dart';
 import '../home/component.dart';
 import '../profile/notification.dart';
 import 'addFriends.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatMainScreen extends StatefulWidget {
   const ChatMainScreen({super.key});
@@ -61,8 +63,31 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     });
   }
 
+  // void _onSearchChanged(String keyword) {
+  //   if (_debounce?.isActive ?? false) _debounce?.cancel();
+  //   _debounce = Timer(const Duration(milliseconds: 500), () {
+  //     setState(() {
+  //       searchKeyword = keyword.toLowerCase();
+  //       chatList = chatList.where((chatList) {
+  //         final name = chatList.name!.toLowerCase();
+  //         return name.contains(searchKeyword) ;
+  //       }).toList();
+  //     });
+  //   });
+  // }
+
+
   void _refreshPageAfterEdit() {
-    // _fetchData();
+    _fetchData();
+  }
+
+  void _fetchData(){
+    friendsBloc.add(FetchFriendsListEvent(
+      page: 1,
+      pageSize: 10,
+      keyWord: '',
+    ));
+    ChartBloc().add(const ChartListEvent());
   }
 
   @override
@@ -93,7 +118,15 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                       BlocProvider(
                                         create: (context) => ChartBloc(),
                                       ),
-                                      BlocProvider(create: (context) =>InitialRegisterBloc())
+                                      BlocProvider(
+                                          create: (context) =>
+                                              InitialRegisterBloc()),
+                                      BlocProvider(
+                                          create: (context) => FriendsBloc()
+                                            ..add(FetchFriendsListEvent(
+                                                page: 1,
+                                                pageSize: 10,
+                                                keyWord: ''))),
                                     ],
                                     child: const CreateGroupScreen(),
                                   )))
@@ -105,8 +138,15 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ArchivedChatsScreen(),
-                          ))
+                              builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => ChartBloc()
+                                          ..add(const ArchivedChartListEvent()),
+                                      ),
+                                    ],
+                                    child: const ArchivedChatsScreen(),
+                                  )))
                     },
                   ),
                   BottomSheetItem(
@@ -299,9 +339,12 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                         ReportPostBloc()),
                                                 BlocProvider(
                                                     create: (context) =>
+                                                        ChartBloc()),
+                                                BlocProvider(
+                                                    create: (context) =>
                                                         ShowInterestedBloc())
                                               ],
-                                              child: FriendsSearchListScreen(),
+                                              child: FriendsSearchListScreen(refreshPageCallback: _refreshPageAfterEdit,),
                                             )));
                               }),
                         ),
@@ -316,7 +359,40 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                               itemBuilder: (context, index) {
                                 return friendViewCard(
                                     image: friends[index].friends.profilePic,
-                                    name: friends[index].friends.name);
+                                    name: friends[index].friends.name,
+                                onTap: (){
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) {
+                                                  final bloc = FriendsBloc();
+                                                  bloc.add(
+                                                      FetchFriendsSingleView(
+                                                          friendId: friends[index].friends
+                                                              .id));
+                                                  return bloc;
+                                                },
+                                              ),
+                                              BlocProvider(
+                                                create: (context) =>
+                                                    ShowInterestedBloc(),
+                                              ),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ReportPostBloc()),
+                                              BlocProvider(create: (context)=>ShowInterestedBloc())
+                                            ],
+                                            child: FriendsDetailsScreen(
+                                              refreshPageCallback:
+                                              _refreshPageAfterEdit,
+                                              id: friends[index].friends.id,
+                                            ),
+                                          )));
+                                }
+                                );
                               }),
                         ),
                         const Divider(
@@ -342,19 +418,29 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => MultiBlocProvider(
-                                                providers: [
-                                                  BlocProvider(
-                                                    create: (context) =>
-                                                    ChartBloc()
-                                                      ..add(
-                                                          FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatList[index].chatId!)),
-                                                  ),
-                                                  BlocProvider(create: (context) => InitialRegisterBloc())
-
-                                                ],
-                                                child: ChatViewScreen(refreshPageCallback: _refreshPageAfterEdit,chatViewProfile: chatList[index],),
-                                              )));
+                                              builder: (context) =>
+                                                  MultiBlocProvider(
+                                                    providers: [
+                                                      BlocProvider(
+                                                        create: (context) => ChartBloc()
+                                                          ..add(FetchChartViewEvent(
+                                                              page: 1,
+                                                              pageSize: 10,
+                                                              chatId: chatList[
+                                                                      index]
+                                                                  .chatId!)),
+                                                      ),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              InitialRegisterBloc())
+                                                    ],
+                                                    child: ChatViewScreen(
+                                                      refreshPageCallback:
+                                                          _refreshPageAfterEdit,
+                                                      chatId: chatList[index].chatId!,
+                                                      isGroup: chatList[index].isGroup!,
+                                                    ),
+                                                  )));
                                     },
                                     message:
                                         chatList[index].latestMessage != null
