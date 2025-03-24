@@ -346,14 +346,33 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                   buttonText1: 'Cancel',
                                   buttonText2: 'Invite',
                                   onTapButtonCard: () {
-                                    chartBloc.add(SendInviteMemberEvent(
-                                        chatId: widget.groupId,
-                                        invitedUsers: [
-                                          inviteList.user!.id!,
-                                        ],
-                                        onSuccess: (message) {
-                                          _fetchData();
-                                        }));
+                                    if(inviteList.user!.isInvited != null){
+                                      chartBloc.add(CancelInviteChatEvent(
+                                          id: inviteList.user!.isInvited!.id!,
+                                          onSuccess: (message) {
+                                            _fetchData();
+                                            showCustomSnackBar(
+                                            context: context,
+                                      message:message,
+                                      backgroundColor: COLORS.neutralDarkTwo);
+                                          }, onError: (String message) {
+                                        showCustomSnackBar(
+                                            context: context,
+                                            message: message,
+                                            );
+                                      }));
+                                    }
+                                    else{
+                                      chartBloc.add(SendInviteMemberEvent(
+                                          chatId: widget.groupId,
+                                          invitedUsers: [
+                                            inviteList.user!.id!,
+                                          ],
+                                          onSuccess: (message) {
+                                            _fetchData();
+                                          }));
+                                    }
+
                                   },
                                   bgFriend: false),
                               Divider(

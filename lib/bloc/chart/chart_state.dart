@@ -349,3 +349,37 @@ class StartMessageChatFailed extends ChartState {
   @override
   List<Object> get props => [message];
 }
+
+
+
+class DeleteGroupChatSuccess extends ChartState {
+  String message;
+  DeleteGroupChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class DeleteGroupChatFailed extends ChartState {
+  String message;
+  DeleteGroupChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class CancelInviteChatLoading extends ChartState {
+  const CancelInviteChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class CancelInviteSuccess extends ChartState {
+  String message;
+  CancelInviteSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class CancelInviteChatFailed extends ChartState {
+  String message;
+  CancelInviteChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

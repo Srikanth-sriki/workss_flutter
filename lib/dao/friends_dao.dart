@@ -436,4 +436,39 @@ class FriendsDao {
     return response;
   }
 
+
+  Future deleteGroupChart({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "userId": chatId
+    };
+    var url = '${Config.url}/user/chat/delete-group';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+
+  Future cancelInviteGroupChart({
+    required String id,
+  }) async {
+    Map<String, dynamic> body = {
+      "id": id
+    };
+    var url = '${Config.url}/user/chat/cancel-invite';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+
 }

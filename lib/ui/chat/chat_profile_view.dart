@@ -217,7 +217,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(20)),
                               ),
-                              builder: (context) => const MarkasAdminModal(),
+                              builder: (context) =>  MarkasAdminModal(members:widget.chatViewGroupInfo.participants!),
                             ),
                           }
                         else
@@ -650,7 +650,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                               top: Radius.circular(20)),
                                         ),
                                         builder: (context) =>
-                                            const MarkasAdminModal(),
+                                             MarkasAdminModal(members:widget.chatViewGroupInfo.participants!),
                                       ),
                                     },
                                   ),

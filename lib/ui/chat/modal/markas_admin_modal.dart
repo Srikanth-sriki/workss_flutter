@@ -4,9 +4,11 @@ import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:works_app/ui/chat/mark_as_admin.dart';
 import '../../../global_helper/reuse_widget.dart';
+import '../../../models/chat/chat_view_pro_modal.dart';
 
 class MarkasAdminModal extends StatefulWidget {
-  const MarkasAdminModal({super.key});
+  final List<Participant> members;
+   MarkasAdminModal({super.key,required this.members});
 
   @override
   _MarkasAdminModalState createState() => _MarkasAdminModalState();
@@ -89,7 +91,7 @@ class _MarkasAdminModalState extends State<MarkasAdminModal> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MarkAsAdminList(),
+                            builder: (context) => MarkAsAdminList(members: widget.members,),
                           ),
                         );
                       },

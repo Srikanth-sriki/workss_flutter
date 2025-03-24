@@ -235,3 +235,27 @@ class StartMessageEvent extends ChartEvent {
   @override
   List<Object> get props => [chatId,onError,onSuccess];
 }
+
+class DeleteGroupEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  DeleteGroupEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class CancelInviteChatEvent extends ChartEvent {
+  String id;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  CancelInviteChatEvent({
+    required this.id,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [id,onError,onSuccess];
+}

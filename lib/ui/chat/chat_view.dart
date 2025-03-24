@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
@@ -55,6 +56,7 @@ class ChatViewScreen extends StatefulWidget {
 }
 
 class _ChatViewScreenState extends State<ChatViewScreen> {
+  late io.Socket socket;
   late ChartBloc chartBloc;
   late InitialRegisterBloc initialRegisterBloc;
   List<ChatView> chatView = [];
@@ -76,6 +78,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   int pageSize = 10;
   int maxPageNumber = 1;
   bool isFetchingMore = false;
+  final String serverUrl = 'https://43.204.94.146';
 
   @override
   void initState() {
@@ -96,29 +99,40 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
 
   void connectToSocket() {
-    final socket = io.io('https://43.204.94.146', <String, dynamic>{
+    socket = io.io(serverUrl, <String, dynamic>{
       'transports': ['websocket'],
-      'autoConnect': false,
+      'autoConnect': true,
     });
 
-    socket.connect();
-
     socket.onConnect((_) {
-      print('Connected to the socket server');
+      print('Connected to WebSocket');
     });
 
     socket.onDisconnect((_) {
-      print('Disconnected from the socket server');
+      print('Disconnected from WebSocket');
     });
 
+    socket.onError((error) {
+      print('WebSocket Error: $error');
+    });
+
+    socket.onReconnect((_) {
+      print('WebSocket Reconnected');
+    });
+
+    // Listen for new messages
     socket.on('new_message', (data) {
-      print('Received message: $data');
+      data = jsonDecode(data);
+      setState(() {
+       print('-----------------------------------');
+       print(data);
+      });
     });
 
-    // Add more event listeners and functionality as needed.
+    socket.onAny((event, data) {
+      print('Event: $event, Data: $data');
+    });
 
-    // To send a message to the server, use:
-    // socket.emit('eventName', 'message data');
   }
 
   void _getDir() async {
@@ -162,11 +176,11 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    recorderController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   recorderController.dispose();
+  //   super.dispose();
+  // }
 
   void _startOrStopRecording() async {
     try {
@@ -210,6 +224,35 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     _messageController.clear();
   }
 
+  // void onSendMessage() {
+  //   if (_messageController.text.isNotEmpty) {
+  //     final messageData = {
+  //       'chatId': widget.chatId,
+  //       'content': _messageController.text,
+  //       'messageType': 'text',
+  //       'fileName': null,
+  //       'fileUrl': null,
+  //       'fileType': null,
+  //       'fileSize': null,
+  //     };
+  //
+  //     socket.emit('send_message', messageData);
+  //     setState(() {
+  //       print(messageData);
+  //     });
+  //
+  //     _messageController.clear();
+  //   }
+  // }
+
+  @override
+  void dispose() {
+    recorderController.dispose();
+    socket.disconnect();
+    socket.dispose();
+    super.dispose();
+  }
+
   void _onMessageChanged(String keyword) {}
   @override
   Widget build(BuildContext context) {
@@ -227,7 +270,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           BlocListener<ChartBloc, ChartState>(listener: (context, state) {
             if (state is ChatViewLoading && currentPage == 1) {
               setState(() {
-                isChartViewLoading = true;
+                //isChartViewLoading = true;
                 isFetchingMore = true;
               });
             } else if (state is ChatViewSuccess) {
@@ -285,6 +328,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                 isChartViewLoading = false;
                 isFetchingMore = false;
               });
+            }
+            else if(state is ChartSendMessageSuccess){
+              socket.on('new_message', (data) {
+                data = jsonDecode(data);
+                setState(() {
+                  print('-----------------------------------');
+                  print(data);
+                });
+              });
+              _fetchData();
             }
           }),
           BlocListener<InitialRegisterBloc, InitialRegisterState>(
@@ -372,14 +425,11 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         color: COLORS.primary,
                                         width: SizeConfig.blockWidth * 0.3,
                                       ),
-                                      image: DecorationImage(
-                                          image: NetworkImage(
-                                            chatViewGroupInfo.picture!
-                                                .isEmpty
-                                                ? 'https://via.placeholder.com/150'
-                                                : chatViewGroupInfo.picture!,
+                                      image:  chatViewGroupInfo.picture!
+                                          .isNotEmpty?DecorationImage(
+                                          image: NetworkImage(chatViewGroupInfo.picture!,
                                           ),
-                                          fit: BoxFit.cover),
+                                          fit: BoxFit.cover):null,
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(
                                               SizeConfig.blockWidth * 3))),
@@ -579,7 +629,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                           borderRadius: BorderRadius.vertical(
                                               top: Radius.circular(20)),
                                         ),
-                                        builder: (context) => const MarkasAdminModal(),
+                                        builder: (context) =>  MarkasAdminModal(members: chatViewGroupInfo.participants!,),
                                       ),
                                     }
                                   else
