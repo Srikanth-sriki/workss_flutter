@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
+import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
@@ -103,7 +104,11 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
                                               ),
                                               BlocProvider(
                                                   create: (context) =>
-                                                      InitialRegisterBloc())
+                                                      InitialRegisterBloc()),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc()),
+
                                             ],
                                             child: ChatViewScreen(
                                               refreshPageCallback:

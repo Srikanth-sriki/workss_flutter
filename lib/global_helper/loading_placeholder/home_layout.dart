@@ -164,11 +164,7 @@ Widget dropDownLoader({
   );
 }
 
-Widget emptyComponent(
-    {
-       String? errorText = "No data available"
-    }
-    ) {
+Widget emptyComponent({String? errorText = "No data available"}) {
   return Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,

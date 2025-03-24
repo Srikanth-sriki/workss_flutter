@@ -592,9 +592,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                         Participant participants =
                             widget.chatViewGroupInfo.participants![index];
                         return chartMemberCardViewSearchCards(
-                          image: participants.user.profilePic,
-                          name: participants.user.name,
-                          admin: participants.isAdmin,
+                          image: participants.user!.profilePic!,
+                          name: participants.user!.name!,
+                          admin: participants.isAdmin!,
                           onTapCard: () {
                             showDynamicBottomSheet(
                               context,
@@ -614,7 +614,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                           ProfessionalBloc()
                                                             ..add(FetchProfessionalView(
                                                                 participants
-                                                                    .userId)),
+                                                                    .userId!)),
                                                     ),
                                                     BlocProvider(
                                                       create: (context) =>
@@ -625,7 +625,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                             ReportPostBloc())
                                                   ],
                                                   child: ProfessionalViewScreen(
-                                                    id: participants.userId,
+                                                    id: participants.userId!,
                                                     refreshPageCallback: () {},
                                                   ),
                                                 )))
@@ -662,7 +662,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 if (widget.chatViewGroupInfo.createdBy ==
                                     Config.id) ...[
                                   BottomSheetItem(
-                                    title: 'Remove (${participants.user.name})',
+                                    title: 'Remove (${participants.user!.name})',
                                     onTap: () => {
                                       chartBloc.add(SendRemoveMemberEvent(
                                           chatId: participants.chatId!,
@@ -685,7 +685,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                               ],
                             );
                           },
-                          message: participants.user.professionType,
+                          message: participants.user!.professionType!,
                         );
                       }),
                 )

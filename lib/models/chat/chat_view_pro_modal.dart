@@ -13,6 +13,7 @@ class ChatViewGroupInfo {
   String? description;
   String? createdBy;
   bool? isGroup;
+  List<String>? archivedFor;
   List<Participant>? participants;
 
   ChatViewGroupInfo(
@@ -22,6 +23,7 @@ class ChatViewGroupInfo {
       this.description,
       this.isGroup,
       this.participants,
+        this.archivedFor,
       this.createdBy});
 
   factory ChatViewGroupInfo.fromJson(Map<String, dynamic> json) =>
@@ -32,6 +34,8 @@ class ChatViewGroupInfo {
         description: json["description"] ?? "",
         createdBy: json["created_by"] ?? "",
         isGroup: json["is_group"] ?? false,
+        archivedFor: json["archived_for"] != null
+            ? List<String>.from(json["archived_for"].map((x) => x)):null,
         participants: json["participants"] != null
             ? List<Participant>.from(
                 json["participants"].map((x) => Participant.fromJson(x)))
@@ -45,24 +49,25 @@ class ChatViewGroupInfo {
         "description": description,
         "is_group": isGroup,
         "created_by": createdBy,
+         "archived_for": List<dynamic>.from(archivedFor!.map((x) => x)),
         "participants":
             List<dynamic>.from(participants!.map((x) => x.toJson())),
       };
 }
 
 class Participant {
-  String id;
-  String chatId;
-  String userId;
-  bool isAdmin;
-  User user;
+  String? id;
+  String? chatId;
+  String? userId;
+  bool? isAdmin;
+  User? user;
 
   Participant({
-    required this.id,
-    required this.chatId,
-    required this.userId,
-    required this.isAdmin,
-    required this.user,
+     this.id,
+     this.chatId,
+     this.userId,
+     this.isAdmin,
+     this.user,
   });
 
   factory Participant.fromJson(Map<String, dynamic> json) => Participant(
@@ -78,23 +83,23 @@ class Participant {
         "chat_id": chatId,
         "user_id": userId,
         "is_admin": isAdmin,
-        "user": user.toJson(),
+        "user": user!.toJson(),
       };
 }
 
 class User {
-  String id;
-  String name;
-  String profilePic;
-  String userType;
-  String professionType;
+  String? id;
+  String? name;
+  String? profilePic;
+  String? userType;
+  String? professionType;
 
   User({
-    required this.id,
-    required this.name,
-    required this.profilePic,
-    required this.userType,
-    required this.professionType,
+     this.id,
+     this.name,
+     this.profilePic,
+     this.userType,
+     this.professionType,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(

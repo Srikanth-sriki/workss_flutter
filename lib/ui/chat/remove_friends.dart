@@ -106,7 +106,7 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
                 chatViewGroupInfo = state.chatViewGroupInfo;
                 _updateSelectedItemsList();
                 filteredParticipants = state.chatViewGroupInfo.participants!
-                    .where((p) => p.user.name
+                    .where((p) => p.user!.name!
                         .toLowerCase()
                         .contains(searchKeyword.toLowerCase()))
                     .toList();
@@ -291,9 +291,9 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
                                     )
                                   ],
                                   friendChatRemoveSearchDetailsCards(
-                                      image: participant.user.profilePic,
-                                      name: participant.user.name,
-                                      disc: participant.user.professionType,
+                                      image: participant.user!.profilePic!,
+                                      name: participant.user!.name!,
+                                      disc: participant.user!.professionType!,
                                       onTapCard: () {
                                         setState(() {
                                           selectedItems[index]["selected"] =

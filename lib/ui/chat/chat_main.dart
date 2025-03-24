@@ -20,6 +20,7 @@ import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
+import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/friends/friends_search_list_modal.dart';
 import '../friends/friends_details.dart';
@@ -44,6 +45,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isFriendsListLoad = true;
   bool isChatListLoading = true;
+  bool isError = false;
   Timer? _debounce;
   String searchKeyword = "";
 
@@ -227,10 +229,12 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                 setState(() {
                   chatList = state.chatList;
                   isChatListLoading = false;
+                  isError=false;
                 });
               } else if (state is ChartListFailed) {
                 setState(() {
                   isChatListLoading = false;
+                  isError=true;
                 });
               }
             },
@@ -311,7 +315,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: SizeConfig.blockHeight),
-                      if (!isFriendsListLoad && friends.isNotEmpty) ...[
+                       if (!isFriendsListLoad && friends.isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 4.5,
@@ -383,7 +387,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                               BlocProvider(
                                                   create: (context) =>
                                                       ReportPostBloc()),
-                                              BlocProvider(create: (context)=>ShowInterestedBloc())
+                                              BlocProvider(create: (context)=>ShowInterestedBloc()),
+                                              BlocProvider(create: (context)=>ChartBloc())
                                             ],
                                             child: FriendsDetailsScreen(
                                               refreshPageCallback:
@@ -399,7 +404,15 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                           color: COLORS.neutralDarkTwo,
                         ),
                       ],
-                      if (!isChatListLoading && chatList.isNotEmpty) ...[
+                      if (isChatListLoading) ...[
+                        Padding( padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.blockWidth * 2.5,
+                          vertical: SizeConfig.blockHeight * 0.2,
+                        ),
+                        child: friendsListLoading(),
+                        )
+
+                      ] else if (!isChatListLoading && chatList.isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 4.5,
@@ -432,7 +445,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                       ),
                                                       BlocProvider(
                                                           create: (context) =>
-                                                              InitialRegisterBloc())
+                                                              InitialRegisterBloc()),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc()),
                                                     ],
                                                     child: ChatViewScreen(
                                                       refreshPageCallback:
@@ -453,6 +469,23 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                     date: formatChatDate(
                                         chatList[index].updatedAt!));
                               }),
+                        )
+                      ]
+                      else if (!isChatListLoading && chatList.isEmpty) ...[
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: SizeConfig.blockWidth * 2.5,
+                              vertical: SizeConfig.blockHeight * 4,),
+                            child: emptyComponent(errorText: "No Chats Found"),
+                          )
+                      ] else if (isError && !isChatListLoading) ...[
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 2.5,
+                            vertical: SizeConfig.blockHeight * 4,),
+                          child: ErrorScreen(onRetry: () {
+                            _refreshPageAfterEdit();
+                          }),
                         )
                       ]
                     ],

@@ -100,7 +100,9 @@ Widget friendSearchDetailsCards({
   double width = 30,
   double buttonWidth = 32,
   required VoidCallback onTapButtonCard,
-  bool sendMessageButtonRequired = false
+  bool sendMessageButtonRequired = false,
+  Widget? widgetButton,
+  bool widgetButtonRequired = false
 }) {
   return InkWell(
     onTap: onTapCard,
@@ -177,6 +179,9 @@ Widget friendSearchDetailsCards({
                 backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
                 textColor: added ? COLORS.neutralDark : COLORS.white,
                 showIcon: false)
+          ],
+          if(widgetButtonRequired)...[
+            widgetButton!
           ],
           if (sendMessageButtonRequired) ...[
           SizedBox(

@@ -10,6 +10,7 @@ import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/friends/component.dart';
 import 'package:works_app/ui/friends/friends_details.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
@@ -235,7 +236,9 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                                           BlocProvider(
                                               create: (context) =>
                                                   ReportPostBloc()),
-                                          BlocProvider(create: (context)=>ShowInterestedBloc())
+                                          BlocProvider(create: (context)=>ShowInterestedBloc()),
+                                          BlocProvider(create: (context)=>ChartBloc())
+
                                         ],
                                         child: FriendsDetailsScreen(
                                           refreshPageCallback:

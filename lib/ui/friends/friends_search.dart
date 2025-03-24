@@ -107,7 +107,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
   }
 
   void _refreshPageAfterEdit() {
-    _fetchData();
+    _fetchData(isNewFetch: true);
     widget.refreshPageCallback();
   }
 
@@ -249,7 +249,8 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                                 BlocProvider(
                                                     create: (context) =>
                                                         ReportPostBloc()),
-                                                BlocProvider(create: (context)=>ShowInterestedBloc())
+                                                BlocProvider(create: (context)=>ShowInterestedBloc()),
+                                                BlocProvider(create: (context)=>ChartBloc())
                                               ],
                                               child: FriendsDetailsScreen(
                                                 refreshPageCallback:
@@ -286,7 +287,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                                           ),
                                                           BlocProvider(
                                                               create: (context) =>
-                                                                  InitialRegisterBloc())
+                                                                  InitialRegisterBloc()),
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  ShowInterestedBloc()),
                                                         ],
                                                         child: ChatViewScreen(
                                                           refreshPageCallback:
@@ -405,7 +409,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                                       ),
                                                       BlocProvider(
                                                           create: (context) =>
-                                                              InitialRegisterBloc())
+                                                              InitialRegisterBloc()),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc()),
                                                     ],
                                                     child: ChatViewScreen(
                                                       refreshPageCallback:

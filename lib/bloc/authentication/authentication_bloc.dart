@@ -13,6 +13,7 @@ import '../../components/config.dart';
 import '../../components/global_handle.dart';
 import '../../components/local_constant.dart';
 import '../../main.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -59,6 +60,36 @@ class AuthenticationBloc
       Config.userType =userType;
       print(token);
       print(profileCompleted);
+      late io.Socket socket;
+
+
+        socket = io.io('https://43.204.94.146', <String, dynamic>{
+          'transports': ['websocket'],
+          'autoConnect': true,
+        });
+
+        socket.onConnect((_) {
+          socket.emit("connected", userId);
+        });
+
+
+
+        socket.onDisconnect((_) {
+          print('Disconnected from WebSocket');
+        });
+
+        socket.onError((error) {
+          print('WebSocket Error: $error');
+        });
+
+        socket.onReconnect((_) {
+          socket.emit("connected", userId);
+          print('WebSocket Reconnected');
+        });
+
+
+
+
 
       if (token.isNotEmpty) {
         if (profileCompleted == false) {

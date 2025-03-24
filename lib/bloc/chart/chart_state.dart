@@ -383,3 +383,36 @@ class CancelInviteChatFailed extends ChartState {
   @override
   List<Object> get props => [message];
 }
+
+
+class MarkAsAdminLoading extends ChartState {
+  const MarkAsAdminLoading();
+  @override
+  List<Object> get props => [];
+}
+class MarkAsAdminSuccess extends ChartState {
+  String message;
+  MarkAsAdminSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class MarkAsAdminFailed extends ChartState {
+  String message;
+  MarkAsAdminFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class UnArchiveChatSuccess extends ChartState {
+  String message;
+  UnArchiveChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class UnArchiveChatFailed extends ChartState {
+  String message;
+  UnArchiveChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

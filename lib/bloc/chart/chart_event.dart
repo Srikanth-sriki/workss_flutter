@@ -259,3 +259,34 @@ class CancelInviteChatEvent extends ChartEvent {
   @override
   List<Object> get props => [id,onError,onSuccess];
 }
+
+class MarkAsAdminEvent extends ChartEvent {
+  String chatId;
+  List<String> users;
+  CallbackWithMessage? onSuccess;
+  CallbackWithMessage? onError;
+
+  MarkAsAdminEvent({
+    required this.chatId,
+    required this.users,
+    this.onSuccess, this.onError
+  });
+
+  @override
+  List<Object> get props => [chatId, users];
+}
+
+
+class UnArchiveChatEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+
+  UnArchiveChatEvent({
+    required this.chatId,
+    required this.onSuccess, required this.onError
+  });
+
+  @override
+  List<Object> get props => [chatId,onError,onSuccess ];
+}

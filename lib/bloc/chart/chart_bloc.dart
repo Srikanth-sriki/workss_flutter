@@ -88,6 +88,14 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       await mapCancelGroupInviteChatEvent(event, emit);
     });
 
+    on<MarkAsAdminEvent>((event, emit) async {
+      await mapMarkAsAdminEvent(event, emit);
+    });
+
+    on<UnArchiveChatEvent>((event, emit) async {
+      await mapUnArchiveChatsEvent(event, emit);
+    });
+
 
   }
 
@@ -639,6 +647,52 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     } catch (error) {
       customLog("The error is : $error");
       emit(CancelInviteChatFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+  Future<void> mapMarkAsAdminEvent(
+      MarkAsAdminEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const MarkAsAdminLoading());
+      var response = await friendsDao.markAsAdminRequest(chatId: event.chatId, userIds: event.users);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(MarkAsAdminSuccess(message: message));
+        event.onSuccess!(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(MarkAsAdminFailed(message: message));
+        event.onError!(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(MarkAsAdminFailed(message: "Something Went wrong"));
+      event.onError!('Something Went wrong"');
+    }
+  }
+
+  Future<void> mapUnArchiveChatsEvent(
+      UnArchiveChatEvent event, Emitter<ChartState> emit) async {
+    try {
+
+      var response = await friendsDao.unArchiveChatRequest(chatId: event.chatId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(UnArchiveChatSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(UnArchiveChatFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(UnArchiveChatFailed(message: "Something Went wrong"));
       event.onError('Something Went wrong"');
     }
   }

@@ -121,7 +121,7 @@ class _GroupCreateSuccessState extends State<GroupCreateSuccess>
                     Navigator.pushNamed(
                       context,
                       '/main_screen',
-                      arguments: {'selectedIndex': 4},
+                      arguments: {'selectedIndex': 3},
                     );
                   },
                   backgroundColor: COLORS.primary,

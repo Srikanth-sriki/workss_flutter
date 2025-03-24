@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:works_app/ui/chat/mark_as_admin.dart';
+import '../../../bloc/chart/chart_bloc.dart';
 import '../../../global_helper/reuse_widget.dart';
 import '../../../models/chat/chat_view_pro_modal.dart';
 
@@ -88,12 +90,18 @@ class _MarkasAdminModalState extends State<MarkasAdminModal> {
                     customButton(
                       text: 'MARK ADMIN'.tr(),
                       onPressed: () {
+                        Navigator.pop(context);
+
                         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MarkAsAdminList(members: widget.members,),
-                          ),
-                        );
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) => ChartBloc()),
+                                  ],
+                                  child: MarkAsAdminList(members: widget.members,),
+                                )));
                       },
                       backgroundColor: COLORS.primary,
                       showIcon: false,

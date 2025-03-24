@@ -441,7 +441,7 @@ class FriendsDao {
     required String chatId,
   }) async {
     Map<String, dynamic> body = {
-      "userId": chatId
+      "chatId": chatId
     };
     var url = '${Config.url}/user/chat/delete-group';
     final response = await http.post(
@@ -469,6 +469,42 @@ class FriendsDao {
     customLog("Response Status Code : ${response.statusCode}");
     return response;
   }
+
+  Future markAsAdminRequest({
+    required String chatId,
+    required List<String> userIds,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId,
+      "userIds": userIds,
+    };
+    var url = '${Config.url}/user/chat/mark-admin';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
+
+  Future unArchiveChatRequest({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId
+    };
+    var url = '${Config.url}/user/chat/unarchive';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
 
 
 }
