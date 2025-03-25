@@ -12,10 +12,12 @@ import 'package:works_app/ui/friends/friends_details.dart';
 
 import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../models/friends/global_search_list_modal.dart';
+import 'chat_view.dart';
 
 class AddFriendsScreen extends StatefulWidget {
   final String header;
@@ -29,6 +31,7 @@ class AddFriendsScreen extends StatefulWidget {
 class _AddFriendsScreenState extends State<AddFriendsScreen> {
   late FriendsBloc friendsBloc;
   late ShowInterestedBloc showInterestedBloc;
+  late ChartBloc chartBloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   late List<SearchFriendLists> searchFriendLists;
@@ -44,6 +47,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -256,7 +260,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                             disc: searchFriendLists[index].professionType!,
                             bgFriend: true,
                             onTapButtonCard: () {
-                              if (searchFriendLists[index].friendRequestSent == null) {
+                              if (searchFriendLists[index].friendRequestSent == null && searchFriendLists[index].isFriend == null) {
                                 showInterestedBloc.add(AddFriendEvent(
                                     userId: searchFriendLists[index].id,
                                     onSuccess: (message) {
@@ -273,6 +277,48 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                                       );
                                     }));
                               }
+                              if(searchFriendLists[index].isFriend != null){
+                                chartBloc.add(StartMessageEvent(chatId: searchFriendLists[index].isFriend!.friendId!,
+                                    onSuccess: (chatId){
+
+                                  print(chatId);
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MultiBlocProvider(
+                                                    providers: [
+                                                      BlocProvider(
+                                                        create: (context) => ChartBloc()
+                                                          ..add(FetchChartViewEvent(
+                                                              page: 1,
+                                                              pageSize: 10,
+                                                              chatId: chatId)),
+                                                      ),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              InitialRegisterBloc()),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc()),
+                                                    ],
+                                                    child: ChatViewScreen(
+                                                      refreshPageCallback:
+                                                      _refreshPageAfterEdit,
+                                                      chatId: chatId,
+                                                      isGroup: false,
+                                                    ),
+                                                  )));
+
+                                    }, onError: (message){
+                                      showCustomSnackBar(
+                                          context: context,
+                                          message: message,
+                                          backgroundColor: COLORS.neutralDarkTwo);
+                                    }));
+                              }
+
+
                             },
                             buttonRequired: searchFriendLists[index].isFriend == null,
                             sendMessageButtonRequired: searchFriendLists[index].isFriend != null,

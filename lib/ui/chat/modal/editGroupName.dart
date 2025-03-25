@@ -9,7 +9,8 @@ import '../../../models/chat/chat_view_pro_modal.dart';
 
 class EditGroupNameModal extends StatefulWidget {
   final ChatViewGroupInfo chatViewGroupInfo;
-  const EditGroupNameModal({super.key, required this.chatViewGroupInfo});
+  final VoidCallback refreshPageCallback;
+  const EditGroupNameModal({super.key, required this.chatViewGroupInfo,required this.refreshPageCallback});
 
   @override
   _EditGroupNameModalState createState() => _EditGroupNameModalState();
@@ -130,13 +131,14 @@ class _EditGroupNameModalState extends State<EditGroupNameModal> {
                                   widget.chatViewGroupInfo.description!,
                               chatId: widget.chatViewGroupInfo.id!,
                               onSuccess: (message) {
+                                widget.refreshPageCallback();
                                 Navigator.pop(context);
                               },
                               onError: (message) {
                                 Navigator.pop(context);
                                 showCustomSnackBar(
                                   context: context,
-                                  message: 'Something Went wrong',
+                                  message: message,
                                 );
                               },
                             ));

@@ -158,6 +158,14 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     ));
   }
 
+  void _refreshPageAfterEdit() {
+    chartBloc.add(FetchChartViewEvent(
+      page: 1,
+      pageSize: 10,
+      chatId: widget.chatId,
+    ));
+  }
+
   void _loadMoreData() {
     if (!isFetchingMore && currentPage < maxPageNumber) {
       setState(() => isFetchingMore = true);
@@ -398,11 +406,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         builder: (context) => MultiBlocProvider(
                                             providers: [
                                               BlocProvider(
-                                                create: (context) => ChartBloc(),
+                                                create: (context) => ChartBloc()..add(FetchChartViewProfileEvent(
+                                                    chatId: chatViewGroupInfo.id!)),
                                               ),
+
                                               BlocProvider(create: (context) =>InitialRegisterBloc())
                                             ],
-                                            child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo)
+                                            child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo,refreshPageCallback: _refreshPageAfterEdit,)
                                         )));
                               }
                             },

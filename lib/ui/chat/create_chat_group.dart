@@ -491,7 +491,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                 }),
                           )
                         ] else if (friends.isEmpty) ...[
-                          emptyComponent()
+                          SizedBox(
+                            height: SizeConfig.blockHeight*60,
+                            child: emptyComponent(),
+                          )
                         ],
                       ],
                     ),

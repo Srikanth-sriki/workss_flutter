@@ -9,6 +9,7 @@ import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/chat/archived_chats.dart';
+import 'package:works_app/ui/chat/chat_list_search.dart';
 import 'package:works_app/ui/chat/chat_view.dart';
 import 'package:works_app/ui/chat/component.dart';
 import 'package:works_app/ui/chat/create_chat_group.dart';
@@ -185,7 +186,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                       ),
                                       BlocProvider(
                                           create: (context) =>
-                                              ShowInterestedBloc())
+                                              ShowInterestedBloc()),
+                                      BlocProvider(
+                                          create: (context) =>
+                                              ChartBloc())
                                     ],
                                     child: const AddFriendsScreen(
                                         header: 'Add Friend'),
@@ -247,60 +251,69 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: SizeConfig.blockWidth * 4.5,
-                      top: SizeConfig.blockHeight * 2,
-                      right: SizeConfig.blockWidth * 4.5,
-                      bottom: SizeConfig.blockHeight),
-                  child: TextField(
-                    controller: _searchController,
-                    style: TextStyle(
-                      color: COLORS.neutralDarkOne,
-                      fontSize: SizeConfig.blockWidth * 3.25,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: "Poppins",
-                    ),
-                    cursorColor: COLORS.black,
-                    decoration: InputDecoration(
-                      fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                      focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                      filled: true,
-                      hintText: 'Search your friends'.tr(),
-                      hintStyle: TextStyle(
+                InkWell(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatListSearch(chatList: chatList),));
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                        left: SizeConfig.blockWidth * 4.5,
+                        top: SizeConfig.blockHeight * 2,
+                        right: SizeConfig.blockWidth * 4.5,
+                        bottom: SizeConfig.blockHeight),
+                    child: TextField(
+                      controller: _searchController,
+                      style: TextStyle(
                         color: COLORS.neutralDarkOne,
                         fontSize: SizeConfig.blockWidth * 3.25,
                         fontWeight: FontWeight.w400,
                         fontFamily: "Poppins",
                       ),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: COLORS.neutralDarkOne,
-                        size: SizeConfig.blockWidth * 5,
+                      cursorColor: COLORS.black,
+                      decoration: InputDecoration(
+                        fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                        focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                        filled: true,
+                        hintText: 'Search your chats'.tr(),
+                        hintStyle: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.25,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: COLORS.neutralDarkOne,
+                          size: SizeConfig.blockWidth * 5,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderSide: BorderSide(
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              width: SizeConfig.blockWidth * 0.1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderSide: BorderSide(
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              width: SizeConfig.blockWidth * 0.1),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                          borderSide: BorderSide(
+                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              width: SizeConfig.blockWidth * 0.1),
+                        ),
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                        borderSide: BorderSide(
-                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                            width: SizeConfig.blockWidth * 0.1),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                        borderSide: BorderSide(
-                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                            width: SizeConfig.blockWidth * 0.1),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                        borderSide: BorderSide(
-                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                            width: SizeConfig.blockWidth * 0.1),
-                      ),
+                      onChanged: _onSearchChanged,
+                      enabled: false,
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ChatListSearch(chatList: chatList),));
+                      },
                     ),
-                    onChanged: _onSearchChanged,
                   ),
                 ),
                 const Divider(
@@ -315,7 +328,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: SizeConfig.blockHeight),
-                       if (!isFriendsListLoad && friends.isNotEmpty) ...[
+
+                      if (!isFriendsListLoad && friends.isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 4.5,
@@ -404,15 +418,16 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                           color: COLORS.neutralDarkTwo,
                         ),
                       ],
-                      if (isChatListLoading) ...[
+                      if (isChatListLoading && isFriendsListLoad) ...[
                         Padding( padding: EdgeInsets.symmetric(
                           horizontal: SizeConfig.blockWidth * 2.5,
                           vertical: SizeConfig.blockHeight * 0.2,
                         ),
-                        child: friendsListLoading(),
+                          child: friendsListLoading(),
                         )
 
-                      ] else if (!isChatListLoading && chatList.isNotEmpty) ...[
+                      ],
+                      if (!isChatListLoading && chatList.isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 4.5,
@@ -512,7 +527,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                     ),
                                     BlocProvider(
                                         create: (context) =>
-                                            ShowInterestedBloc())
+                                            ShowInterestedBloc()),
+                                    BlocProvider(
+                                        create: (context) =>
+                                            ChartBloc())
                                   ],
                                   child: const AddFriendsScreen(
                                       header: 'Add Friend'),

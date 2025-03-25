@@ -461,7 +461,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                               ),
                               BlocProvider(
                                   create: (context) =>
-                                      ShowInterestedBloc())
+                                      ShowInterestedBloc()),
+                              BlocProvider(
+                                  create: (context) =>
+                                      ChartBloc())
                             ],
                             child: const AddFriendsScreen(header: 'Add Friend'),
                           )));

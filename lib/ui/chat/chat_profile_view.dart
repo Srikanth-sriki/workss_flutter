@@ -34,7 +34,8 @@ import 'modal/report_or_block.dart';
 
 class ChatProfileViewScreen extends StatefulWidget {
   final ChatViewGroupInfo chatViewGroupInfo;
-  const ChatProfileViewScreen({super.key, required this.chatViewGroupInfo});
+  final VoidCallback refreshPageCallback;
+  ChatProfileViewScreen({super.key, required this.chatViewGroupInfo,required this.refreshPageCallback});
 
   @override
   State<ChatProfileViewScreen> createState() => _ChatProfileViewScreenState();
@@ -45,13 +46,20 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
   late InitialRegisterBloc initialRegisterBloc;
   File? _profileImage;
   String profilePic = '';
+  late ChatViewGroupInfo chatViewGroupInfo;
 
   @override
   void initState() {
     super.initState();
     chartBloc = BlocProvider.of<ChartBloc>(context);
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
+    chatViewGroupInfo = widget.chatViewGroupInfo;
     profilePic = widget.chatViewGroupInfo.picture!;
+  }
+
+  void _refreshPageAfterEdit() {
+    chartBloc.add(FetchChartViewProfileEvent(chatId: widget.chatViewGroupInfo.id!));
+    widget.refreshPageCallback();
   }
 
   @override
@@ -63,10 +71,19 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
             if (state is UploadImageSuccess) {
               chartBloc.add(EditGroupChatProfileEvent(
                 picture: state.filePath,
-                name: widget.chatViewGroupInfo.name!,
-                description: widget.chatViewGroupInfo.description!,
-                chatId: widget.chatViewGroupInfo.id!,
-                onSuccess: (message) {},
+                name: chatViewGroupInfo.name!,
+                description: chatViewGroupInfo.description!,
+                chatId: chatViewGroupInfo.id!,
+                onSuccess: (message) {
+                  setState(() {
+                    _refreshPageAfterEdit();
+                    showCustomSnackBar(
+                        context: context,
+                        message: message,
+                        backgroundColor: COLORS.neutralDarkTwo
+                    );
+                  });
+                },
                 onError: (message) {
                   Navigator.pop(context);
                   showCustomSnackBar(
@@ -83,6 +100,20 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
             }
           },
         ),
+        BlocListener<ChartBloc, ChartState>(listener: (context, state) {
+          if (state is ChatViewProfileLoading) {
+
+          } else if (state is ChatViewProfileSuccess) {
+            setState(() {
+              chatViewGroupInfo = state.chatViewGroupInfo;
+              profilePic = state.chatViewGroupInfo.picture!;
+            });
+          } else if (state is ChatViewProfileFailed) {
+            setState(() {
+
+            });
+          }
+        })
       ],
       child: Scaffold(
         backgroundColor: const Color(0xffF5FAFF),
@@ -93,7 +124,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
           showLeadingIcon: true,
           borderColor: true,
           actions: [
-            if(widget.chatViewGroupInfo.isGroup!)...[
+            if(chatViewGroupInfo.isGroup!)...[
             InkWell(
               child: Image.asset(
                 'assets/images/home/share.png',
@@ -126,13 +157,12 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                             ..add(InviteMemberChartEvent(
                                                 page: 1,
                                                 pageSize: 10,
-                                                groupId: widget
-                                                    .chatViewGroupInfo.id!,
+                                                groupId: chatViewGroupInfo.id!,
                                                 keyWord: '')),
                                         ),
                                       ],
                                       child: InviteFriendsList(
-                                        groupId: widget.chatViewGroupInfo.id!,
+                                        groupId: chatViewGroupInfo.id!,
                                       ),
                                     )))
                       },
@@ -154,7 +184,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                       ],
                                       child: RemoveFriendsChat(
                                           chatViewGroupInfo:
-                                              widget.chatViewGroupInfo),
+                                              chatViewGroupInfo),
                                     )))
                       },
                     ),
@@ -162,7 +192,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                       title: 'Archive',
                       onTap: () => {
                         chartBloc.add(ArchiveChatEvent(
-                            chatId: widget.chatViewGroupInfo.id!,
+                            chatId: chatViewGroupInfo.id!,
                             onSuccess: (message) {
                               showCustomSnackBar(
                                   context: context,
@@ -202,7 +232,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                     BottomSheetItem(
                       title: 'Leave Group',
                       onTap: () => {
-                        if (widget.chatViewGroupInfo.createdBy == Config.id)
+                        if (chatViewGroupInfo.createdBy == Config.id)
                           {
                             showMaterialModalBottomSheet(
                               enableDrag: true,
@@ -217,13 +247,13 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(20)),
                               ),
-                              builder: (context) =>  MarkasAdminModal(members:widget.chatViewGroupInfo.participants!),
+                              builder: (context) =>  MarkasAdminModal(members:chatViewGroupInfo.participants!),
                             ),
                           }
                         else
                           {
                             chartBloc.add(LeaveGroupChatEvent(
-                                chatId: widget.chatViewGroupInfo.id!,
+                                chatId: chatViewGroupInfo.id!,
                                 onSuccess: (message) {
                                   showCustomSnackBar(
                                       context: context,
@@ -248,7 +278,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                       title: 'Clear Chat',
                       onTap: () => {
                         chartBloc.add(ClearChatEvent(
-                            chatId: widget.chatViewGroupInfo.id!,
+                            chatId: chatViewGroupInfo.id!,
                             onSuccess: (message) {
                               showCustomSnackBar(
                                   context: context,
@@ -321,7 +351,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    widget.chatViewGroupInfo.name!,
+                                    chatViewGroupInfo.name!,
                                     style: TextStyle(
                                       color: COLORS.neutralDark,
                                       fontSize: SizeConfig.blockWidth * 4,
@@ -353,8 +383,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                           create: (context) =>
                                               ChartBloc(), // Provide your ProfileBloc
                                           child: EditGroupNameModal(
-                                              chatViewGroupInfo:
-                                                  widget.chatViewGroupInfo),
+                                              chatViewGroupInfo: chatViewGroupInfo,
+                                              refreshPageCallback: _refreshPageAfterEdit
+                                          ),
                                         ),
                                       );
                                     },
@@ -368,7 +399,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 ],
                               ),
                               Text(
-                                '${widget.chatViewGroupInfo.participants!.length} Members'
+                                '${chatViewGroupInfo.participants!.length} Members'
                                     .tr(),
                                 style: TextStyle(
                                   color: COLORS.neutralDarkOne,
@@ -424,8 +455,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                     create: (context) =>
                                         ChartBloc(), // Provide your ProfileBloc
                                     child: EditGroupDescriptionModal(
-                                        chatViewGroupInfo:
-                                            widget.chatViewGroupInfo),
+                                        chatViewGroupInfo: chatViewGroupInfo,
+                                    refreshPageCallback: _refreshPageAfterEdit,
+                                    ),
                                   ),
                                 );
                               },
@@ -442,8 +474,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 4.5),
-                        child: Text(
-                          widget.chatViewGroupInfo.description!,
+                        child: Text(chatViewGroupInfo.description!,
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
                             fontSize: SizeConfig.blockWidth * 3.5,
@@ -495,7 +526,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                   SizeConfig.blockWidth * 1.5),
                             ),
                             child: Text(
-                              widget.chatViewGroupInfo.participants!.length!
+                              chatViewGroupInfo.participants!.length!
                                   .toString(),
                               style: TextStyle(
                                 color: COLORS.white,
@@ -527,7 +558,10 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                               ),
                                               BlocProvider(
                                                   create: (context) =>
-                                                      ShowInterestedBloc())
+                                                      ShowInterestedBloc()),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ChartBloc())
                                             ],
                                             child: const AddFriendsScreen(
                                                 header: 'Add Friend'),
@@ -559,7 +593,10 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                               ),
                                               BlocProvider(
                                                   create: (context) =>
-                                                      ShowInterestedBloc())
+                                                      ShowInterestedBloc()),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ChartBloc())
                                             ],
                                             child: const AddFriendsScreen(
                                                 header: 'Friend Suggestion'),
@@ -584,13 +621,13 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                     horizontal: SizeConfig.blockWidth * 4.5,
                   ),
                   child: ListView.builder(
-                      itemCount: widget.chatViewGroupInfo.participants!.length,
+                      itemCount: chatViewGroupInfo.participants!.length,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       scrollDirection: Axis.vertical,
                       itemBuilder: (context, index) {
                         Participant participants =
-                            widget.chatViewGroupInfo.participants![index];
+                            chatViewGroupInfo.participants![index];
                         return chartMemberCardViewSearchCards(
                           image: participants.user!.profilePic!,
                           name: participants.user!.name!,
@@ -631,8 +668,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                 )))
                                   },
                                 ),
-                                if (widget.chatViewGroupInfo.createdBy ==
-                                    Config.id) ...[
+                                if (chatViewGroupInfo.createdBy != participants.userId) ...[
                                   BottomSheetItem(
                                     title: 'Mark as admin',
                                     onTap: () => {
@@ -650,17 +686,52 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                               top: Radius.circular(20)),
                                         ),
                                         builder: (context) =>
-                                             MarkasAdminModal(members:widget.chatViewGroupInfo.participants!),
+                                             MarkasAdminModal(members:chatViewGroupInfo.participants!),
                                       ),
                                     },
                                   ),
-                                ],
-                                BottomSheetItem(
-                                  title: 'Message',
-                                  onTap: () => {},
-                                ),
-                                if (widget.chatViewGroupInfo.createdBy ==
-                                    Config.id) ...[
+                                  BottomSheetItem(
+                                    title: 'Message',
+                                    onTap: () => {
+                                      chartBloc.add(StartMessageEvent(chatId: participants.user!.id!,
+                                          onSuccess: (chatId){
+                                            widget.refreshPageCallback();
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                              create: (context) => ChartBloc()
+                                                                ..add(FetchChartViewEvent(
+                                                                    page: 1,
+                                                                    pageSize: 10,
+                                                                    chatId: chatId)),
+                                                            ),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    InitialRegisterBloc()),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ShowInterestedBloc()),
+                                                          ],
+                                                          child: ChatViewScreen(
+                                                            refreshPageCallback:
+                                                            _refreshPageAfterEdit,
+                                                            chatId: chatId,
+                                                            isGroup: false,
+                                                          ),
+                                                        )));
+
+                                          }, onError: (message){
+                                            showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                                backgroundColor: COLORS.neutralDarkTwo);
+                                          }))
+                                    },
+                                  ),
                                   BottomSheetItem(
                                     title: 'Remove (${participants.user!.name})',
                                     onTap: () => {
@@ -682,6 +753,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                     },
                                   ),
                                 ],
+
+
                               ],
                             );
                           },
