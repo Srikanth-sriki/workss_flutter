@@ -216,6 +216,7 @@ Widget friendsListLoading() {
                   width: SizeConfig.blockWidth * 100,
                   decoration: BoxDecoration(
                     color: COLORS.primaryOne.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth*2.5)
                   ),
                 ),
               )

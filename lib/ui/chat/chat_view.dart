@@ -81,6 +81,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   int pageSize = 10;
   int maxPageNumber = 1;
   bool isFetchingMore = false;
+  bool textFiledChange =false;
   final String serverUrl = 'https://43.204.94.146';
 
   @override
@@ -229,6 +230,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       fileType: _messageController.text.isEmpty ? '' : null,
       fileSize: _messageController.text.isEmpty ? '' : null,
     ));
+    FocusScope.of(context).unfocus();
     _messageController.clear();
   }
 
@@ -253,383 +255,452 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   //   }
   // }
 
+  void _onMessageChanged(String keyword) {
+    setState(() {
+      textFiledChange = true;
+      print(textFiledChange);
+    });
+  }
+
   @override
   void dispose() {
     recorderController.dispose();
-    socket.disconnect();
-    socket.dispose();
+    _messageController.dispose();
+    _scrollController.dispose();
+    // socket.disconnect();
+    // socket.dispose();
     super.dispose();
   }
 
-  void _onMessageChanged(String keyword) {}
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: COLORS.white,
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        toolbarHeight: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
+    return WillPopScope(
+      onWillPop: () async {
+       widget.refreshPageCallback();
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: COLORS.white,
-      ),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<ChartBloc, ChartState>(listener: (context, state) {
-            if (state is ChatViewLoading && currentPage == 1) {
-              setState(() {
-                //isChartViewLoading = true;
-                isFetchingMore = true;
-              });
-            } else if (state is ChatViewSuccess) {
-              setState(() {
-                isChartViewLoading = false;
-                isFetchingMore = false;
-                maxPageNumber = state.maxPageNumber;
-                chatViewGroupInfo = state.chatViewGroupInfo;
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          toolbarHeight: 0,
+          scrolledUnderElevation: 0,
+          automaticallyImplyLeading: false,
+          backgroundColor: COLORS.white,
+        ),
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<ChartBloc, ChartState>(listener: (context, state) {
+              if (state is ChatViewLoading && currentPage == 1) {
+                setState(() {
+                  //isChartViewLoading = true;
+                  isFetchingMore = true;
+                });
+              } else if (state is ChatViewSuccess) {
+                setState(() {
+                  isChartViewLoading = false;
+                  isFetchingMore = false;
+                  maxPageNumber = state.maxPageNumber;
+                  chatViewGroupInfo = state.chatViewGroupInfo;
 
 
-                if (currentPage == 1) {
-                  chatView = state.chatView;
-                } else {
-                  for (var newChat in state.chatView) {
-                    var existingChat = chatView.firstWhere(
-                      (chat) => chat.date == newChat.date,
-                      orElse: () => ChatView(date: newChat.date, messages: []),
-                    );
+                  if (currentPage == 1) {
+                    chatView = state.chatView;
+                  } else {
+                    for (var newChat in state.chatView) {
+                      var existingChat = chatView.firstWhere(
+                        (chat) => chat.date == newChat.date,
+                        orElse: () => ChatView(date: newChat.date, messages: []),
+                      );
 
-                    if (existingChat.messages.isEmpty) {
-                      chatView.add(newChat);
-                    } else {
-                      final newMessages = newChat.messages
-                          .where(
-                            (newMessage) => !existingChat.messages.any(
-                              (existingMessage) =>
-                                  existingMessage.id == newMessage.id,
-                            ),
-                          )
-                          .toList();
+                      if (existingChat.messages.isEmpty) {
+                        chatView.add(newChat);
+                      } else {
+                        final newMessages = newChat.messages
+                            .where(
+                              (newMessage) => !existingChat.messages.any(
+                                (existingMessage) =>
+                                    existingMessage.id == newMessage.id,
+                              ),
+                            )
+                            .toList();
 
-                      existingChat.messages.addAll(newMessages);
+                        existingChat.messages.addAll(newMessages);
+                      }
                     }
                   }
-                }
-              });
-            } else if (state is ChatViewFailed) {
-              setState(() {
-                isChartViewLoading = false;
-                isFetchingMore = false;
-              });
-            } else if(state is UploadFileSuccess){
-              chartBloc.add(ChartSendMessageEvent(
-                chatId: widget.chatId,
-                content: 'media',
-                messageType:'media',
-                fileName: state.filePath.split('/').last,
-                fileUrl: state.filePath,
-                fileType: 'audio',
-                fileSize: '1mb',
-              ));
-            }
-            else if(state is UploadFileFailed){
-              setState(() {
-                isChartViewLoading = false;
-                isFetchingMore = false;
-              });
-            }
-            else if(state is ChartSendMessageSuccess){
-              _fetchData();
-            }
-          }),
-          BlocListener<InitialRegisterBloc, InitialRegisterState>(
-            listener: (context, state) {
-              if (state is UploadImageSuccess) {
-                setState(() {
-                  profilePicture = state.filePath;
-
-                  chartBloc.add(ChartSendMessageEvent(
-                    chatId: widget.chatId,
-                    content: 'media',
-                    messageType:'media',
-                    fileName: profilePicture.split('/').last,
-                    fileUrl: profilePicture,
-                    fileType: 'image',
-                    fileSize: '1mb',
-                  ));
                 });
-              } else if (state is UploadImageFailed) {
-                showCustomSnackBar(
-                  context: context,
-                  message: state.message,
-                );
+              } else if (state is ChatViewFailed) {
+                setState(() {
+                  isChartViewLoading = false;
+                  isFetchingMore = false;
+                });
+              } else if(state is UploadFileSuccess){
+                chartBloc.add(ChartSendMessageEvent(
+                  chatId: widget.chatId,
+                  content: 'media',
+                  messageType:'media',
+                  fileName: state.filePath.split('/').last,
+                  fileUrl: state.filePath,
+                  fileType: 'audio',
+                  fileSize: '1mb',
+                ));
+                FocusScope.of(context).unfocus();
               }
-            },
-          ),
-        ],
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if(!isChartViewLoading)...[
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 2.5,
-                      vertical: SizeConfig.blockHeight * 1.5),
-                  decoration: BoxDecoration(
-                      border: Border(
-                          bottom: BorderSide(
-                              color: COLORS.neutralDarkTwo,
-                              width: SizeConfig.blockHeight * 0.15))),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.arrow_back_ios,
-                                color: COLORS.black,
-                                size: SizeConfig.blockWidth * 4.5),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                          InkWell(
-                            onTap: () {
-                              if(widget.isGroup){
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) => ChartBloc()..add(FetchChartViewProfileEvent(
-                                                    chatId: chatViewGroupInfo.id!)),
-                                              ),
+              else if(state is UploadFileFailed){
+                setState(() {
+                  isChartViewLoading = false;
+                  isFetchingMore = false;
+                });
+              }
+              else if(state is ChartSendMessageSuccess){
+                _fetchData();
+              }
+            }),
+            BlocListener<InitialRegisterBloc, InitialRegisterState>(
+              listener: (context, state) {
+                if (state is UploadImageSuccess) {
+                  setState(() {
+                    profilePicture = state.filePath;
 
-                                              BlocProvider(create: (context) =>InitialRegisterBloc())
-                                            ],
-                                            child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo,refreshPageCallback: _refreshPageAfterEdit,)
-                                        )));
-                              }
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: SizeConfig.blockWidth * 12,
-                                  height: SizeConfig.blockWidth * 12,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: COLORS.primary,
-                                        width: SizeConfig.blockWidth * 0.3,
-                                      ),
-                                      image:  chatViewGroupInfo.picture!
-                                          .isNotEmpty?DecorationImage(
-                                          image: NetworkImage(chatViewGroupInfo.picture!,
-                                          ),
-                                          fit: BoxFit.cover):null,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(
-                                              SizeConfig.blockWidth * 3))),
-                                ),
-                                SizedBox(width: SizeConfig.blockWidth * 2),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width: SizeConfig.blockWidth * 45,
-                                      child: Text(chatViewGroupInfo.name!,
-                                          style: TextStyle(
-                                            color: COLORS.neutralDark,
-                                            fontSize: SizeConfig.blockWidth * 3.8,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: "Poppins",
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          maxLines: 1),
-                                    ),
-                                    SizedBox(
-                                      width: SizeConfig.blockWidth * 45,
-                                      child: Text(
-                                          chatViewGroupInfo.description!,
-                                          style: TextStyle(
-                                            color: COLORS.neutralDarkOne,
-                                            fontSize:
-                                            SizeConfig.blockWidth * 3.25,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: "Poppins",
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          maxLines: 1),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                    chartBloc.add(ChartSendMessageEvent(
+                      chatId: widget.chatId,
+                      content: 'media',
+                      messageType:'media',
+                      fileName: profilePicture.split('/').last,
+                      fileUrl: profilePicture,
+                      fileType: 'image',
+                      fileSize: '1mb',
+                    ));
+                    FocusScope.of(context).unfocus();
+                  });
+                } else if (state is UploadImageFailed) {
+                  showCustomSnackBar(
+                    context: context,
+                    message: state.message,
+                  );
+                }
+              },
+            ),
+          ],
+          child: SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if(!isChartViewLoading)...[
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 2.5,
+                        vertical: SizeConfig.blockHeight * 1.5),
+                    decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(
+                                color: COLORS.neutralDarkTwo,
+                                width: SizeConfig.blockHeight * 0.15))),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.arrow_back_ios,
+                                  color: COLORS.black,
+                                  size: SizeConfig.blockWidth * 4.5),
+                              onPressed: () {
+                                widget.refreshPageCallback();
+                                Navigator.pop(context);
+                              },
                             ),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: COLORS.black,
-                          size: SizeConfig.blockWidth * 6.5,
-                        ),
-                        onPressed: () {
-                          showDynamicBottomSheet(
-                            context,
-                            'Chat Options',
-                            [
-                              BottomSheetItem(
-                              title: 'Mute Notification',
-                              onTap: () => {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => ProfileBloc()
-                                            ..add(const FetchSettingEvent()),
-                                        ),
-                                      ],
-                                      child: const NotificationScreen(),
-                                    )))
-                          },
-                          ),
-
-                          if(widget.isGroup == false)...[
-                              BottomSheetItem(
-                                title: 'Unfriend',
-                                onTap: () => {
-                                  showInterestedBloc.add(UnfriendsEvent(
-                                      friendId: chatViewGroupInfo
-                                          .participants![0].userId!,
-                                      onSuccess: (message) {
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/main_screen',
-                                          arguments: {'selectedIndex': 3},
-                                        );
-                                        showCustomSnackBar(
-                                            context: context,
-                                            message:
-                                            "Successfully unfriended!",
-                                            backgroundColor:
-                                            COLORS.semanticTwo);
-                                        widget.refreshPageCallback();
-                                      },
-                                      onError: (message) {
-                                        showCustomSnackBar(
-                                          context: context,
-                                          message: message,
-                                        );
-                                      }))
-                                },
-                              )],
-                          if(widget.isGroup)...[
-                              BottomSheetItem(
-                                title: 'Invite Friends',
-                                onTap: () => {
+                            InkWell(
+                              onTap: () {
+                                if(widget.isGroup){
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) =>
-                                                ChartBloc()
-                                                  ..add(InviteMemberChartEvent(page: 1, pageSize: 10, groupId: chatViewGroupInfo.id!, keyWord: '')),
-                                              ),
-                                            ],
-                                            child: InviteFriendsList(groupId: chatViewGroupInfo.id!,),
-                                          )))
-                                },
-                              ),
-                              BottomSheetItem(
-                                title: 'Remove People',
-                                onTap: () => {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) =>
-                                                ChartBloc()
-                                                  ..add(FetchChartViewProfileEvent( chatId: chatViewGroupInfo.id!)),
-                                              ),
-                                            ],
-                                            child: RemoveFriendsChat(chatViewGroupInfo:chatViewGroupInfo),
-                                          )))
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) => ChartBloc()..add(FetchChartViewProfileEvent(
+                                                      chatId: chatViewGroupInfo.id!)),
+                                                ),
 
-                                },
-                              ),
-                              BottomSheetItem(
-                                  title: 'Share Joining Link', onTap: () => {}),
-                            if (chatViewGroupInfo.createdBy == Config.id)...[
-                              BottomSheetItem(
-                                title: 'Delete Group',
-                                onTap: () => {
-                                  showMaterialModalBottomSheet(
-                                    enableDrag: true,
-                                    expand: false,
-                                    isDismissible: true,
-                                    backgroundColor: COLORS.white,
-                                    context: context,
-                                    closeProgressThreshold: 0,
-                                    duration: const Duration(seconds: 0),
-                                    useRootNavigator: true,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20)),
-                                    ),
-                                    builder: (context) =>
-                                        BlocProvider(
-                                          create: (context) =>
-                                              ChartBloc(),
-                                          child:
-                                          DeleteGroupModal(
-                                            buttonText: 'DELETE',
-                                            header:
-                                            'Are you sure you want to \n delete the group?',
-                                            chatId: chatViewGroupInfo!.id!,
-                                          ),
+                                                BlocProvider(create: (context) =>InitialRegisterBloc())
+                                              ],
+                                              child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo,refreshPageCallback: _refreshPageAfterEdit,)
+                                          )));
+                                }
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    width: SizeConfig.blockWidth * 12,
+                                    height: SizeConfig.blockWidth * 12,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: COLORS.primary,
+                                          width: SizeConfig.blockWidth * 0.3,
                                         ),
+                                        image:  chatViewGroupInfo.picture!
+                                            .isNotEmpty?DecorationImage(
+                                            image: NetworkImage(chatViewGroupInfo.picture!,
+                                            ),
+                                            fit: BoxFit.cover):null,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                SizeConfig.blockWidth * 3))),
                                   ),
-                                },
-                              )
-                            ],
-                              BottomSheetItem(
-                                title: 'Leave Group',
-                                onTap: () => {
-                                  if (chatViewGroupInfo.createdBy == Config.id)
-                                    {
-                                      showMaterialModalBottomSheet(
-                                        enableDrag: true,
-                                        expand: false,
-                                        isDismissible: true,
-                                        backgroundColor: COLORS.white,
-                                        context: context,
-                                        closeProgressThreshold: 0,
-                                        duration: const Duration(seconds: 0),
-                                        useRootNavigator: true,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(20)),
-                                        ),
-                                        builder: (context) =>  MarkasAdminModal(members: chatViewGroupInfo.participants!,),
+                                  SizedBox(width: SizeConfig.blockWidth * 2),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        width: SizeConfig.blockWidth * 45,
+                                        child: Text(chatViewGroupInfo.name!,
+                                            style: TextStyle(
+                                              color: COLORS.neutralDark,
+                                              fontSize: SizeConfig.blockWidth * 3.8,
+                                              fontWeight: FontWeight.w400,
+                                              fontFamily: "Poppins",
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            maxLines: 1),
                                       ),
-                                    }
-                                  else
-                                    {
-                                      chartBloc.add(LeaveGroupChatEvent(
+                                      SizedBox(
+                                        width: SizeConfig.blockWidth * 45,
+                                        child: Text(
+                                            chatViewGroupInfo.description!,
+                                            style: TextStyle(
+                                              color: COLORS.neutralDarkOne,
+                                              fontSize:
+                                              SizeConfig.blockWidth * 3.25,
+                                              fontWeight: FontWeight.w400,
+                                              fontFamily: "Poppins",
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            maxLines: 1),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.more_vert,
+                            color: COLORS.black,
+                            size: SizeConfig.blockWidth * 6.5,
+                          ),
+                          onPressed: () {
+                            showDynamicBottomSheet(
+                              context,
+                              'Chat Options',
+                              [
+                                BottomSheetItem(
+                                title: 'Mute Notification',
+                                onTap: () => {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => ProfileBloc()
+                                              ..add(const FetchSettingEvent()),
+                                          ),
+                                        ],
+                                        child: const NotificationScreen(),
+                                      )))
+                            },
+                            ),
+
+                            if(widget.isGroup == false)...[
+                                BottomSheetItem(
+                                  title: 'Unfriend',
+                                  onTap: () => {
+                                    showInterestedBloc.add(UnfriendsEvent(
+                                        friendId: chatViewGroupInfo
+                                            .participants![0].userId!,
+                                        onSuccess: (message) {
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/main_screen',
+                                            arguments: {'selectedIndex': 3},
+                                          );
+                                          showCustomSnackBar(
+                                              context: context,
+                                              message:
+                                              "Successfully unfriended!",
+                                              backgroundColor:
+                                              COLORS.semanticTwo);
+                                          widget.refreshPageCallback();
+                                        },
+                                        onError: (message) {
+                                          showCustomSnackBar(
+                                            context: context,
+                                            message: message,
+                                          );
+                                        }))
+                                  },
+                                )],
+                            if(widget.isGroup)...[
+                                BottomSheetItem(
+                                  title: 'Invite Friends',
+                                  onTap: () => {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                  ChartBloc()
+                                                    ..add(InviteMemberChartEvent(page: 1, pageSize: 10, groupId: chatViewGroupInfo.id!, keyWord: '')),
+                                                ),
+                                              ],
+                                              child: InviteFriendsList(groupId: chatViewGroupInfo.id!,),
+                                            )))
+                                  },
+                                ),
+                                BottomSheetItem(
+                                  title: 'Remove People',
+                                  onTap: () => {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                  ChartBloc()
+                                                    ..add(FetchChartViewProfileEvent( chatId: chatViewGroupInfo.id!)),
+                                                ),
+                                              ],
+                                              child: RemoveFriendsChat(chatViewGroupInfo:chatViewGroupInfo),
+                                            )))
+
+                                  },
+                                ),
+                                BottomSheetItem(
+                                    title: 'Share Joining Link', onTap: () => {}),
+                              if (chatViewGroupInfo.createdBy == Config.id)...[
+                                BottomSheetItem(
+                                  title: 'Delete Group',
+                                  onTap: () => {
+                                    showMaterialModalBottomSheet(
+                                      enableDrag: true,
+                                      expand: false,
+                                      isDismissible: true,
+                                      backgroundColor: COLORS.white,
+                                      context: context,
+                                      closeProgressThreshold: 0,
+                                      duration: const Duration(seconds: 0),
+                                      useRootNavigator: true,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20)),
+                                      ),
+                                      builder: (context) =>
+                                          BlocProvider(
+                                            create: (context) =>
+                                                ChartBloc(),
+                                            child:
+                                            DeleteGroupModal(
+                                              buttonText: 'DELETE',
+                                              header:
+                                              'Are you sure you want to \n delete the group?',
+                                              chatId: chatViewGroupInfo!.id!,
+                                            ),
+                                          ),
+                                    ),
+                                  },
+                                )
+                              ],
+                                BottomSheetItem(
+                                  title: 'Leave Group',
+                                  onTap: () => {
+                                    if (chatViewGroupInfo.createdBy == Config.id)
+                                      {
+                                        showMaterialModalBottomSheet(
+                                          enableDrag: true,
+                                          expand: false,
+                                          isDismissible: true,
+                                          backgroundColor: COLORS.white,
+                                          context: context,
+                                          closeProgressThreshold: 0,
+                                          duration: const Duration(seconds: 0),
+                                          useRootNavigator: true,
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.vertical(
+                                                top: Radius.circular(20)),
+                                          ),
+                                          builder: (context) =>  MarkasAdminModal(members: chatViewGroupInfo.participants!,),
+                                        ),
+                                      }
+                                    else
+                                      {
+                                        chartBloc.add(LeaveGroupChatEvent(
+                                            chatId: widget.chatId,
+                                            onSuccess: (message) {
+                                              showCustomSnackBar(
+                                                  context: context,
+                                                  message: message,
+                                                  backgroundColor: COLORS.neutralDarkTwo);
+                                              Navigator.pushNamed(
+                                                context,
+                                                '/main_screen',
+                                                arguments: {'selectedIndex': 3},
+                                              );
+                                            },
+                                            onError: (message) {
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                              );
+                                            }))
+                                      }
+                                  },
+                                ),
+                                ],
+                                BottomSheetItem(
+                                  title: 'Clear Chat',
+                                  onTap: () => {
+                                    chartBloc.add(ClearChatEvent(
+                                        chatId: widget.chatId,
+                                        onSuccess: (message) {
+                                          showCustomSnackBar(
+                                              context: context,
+                                              message: message,
+                                              backgroundColor: COLORS.neutralDarkTwo);
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/main_screen',
+                                            arguments: {'selectedIndex': 3},
+                                          );
+                                        },
+                                        onError: (message) {
+                                          showCustomSnackBar(
+                                            context: context,
+                                            message: message,
+                                          );
+                                        }))
+                                  },
+                                ),
+
+                                if(chatViewGroupInfo.archivedFor!.contains(Config.id))...[
+                                  BottomSheetItem(
+                                    title: 'UnArchive',
+                                    onTap: () => {
+                                      chartBloc.add(UnArchiveChatEvent(
                                           chatId: widget.chatId,
                                           onSuccess: (message) {
                                             showCustomSnackBar(
@@ -648,224 +719,135 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                               message: message,
                                             );
                                           }))
-                                    }
-                                },
-                              ),
-                              ],
-                              BottomSheetItem(
-                                title: 'Clear Chat',
-                                onTap: () => {
-                                  chartBloc.add(ClearChatEvent(
-                                      chatId: widget.chatId,
-                                      onSuccess: (message) {
-                                        showCustomSnackBar(
-                                            context: context,
-                                            message: message,
-                                            backgroundColor: COLORS.neutralDarkTwo);
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/main_screen',
-                                          arguments: {'selectedIndex': 3},
-                                        );
-                                      },
-                                      onError: (message) {
-                                        showCustomSnackBar(
-                                          context: context,
-                                          message: message,
-                                        );
-                                      }))
-                                },
-                              ),
-
-                              if(chatViewGroupInfo.archivedFor!.contains(Config.id))...[
-                                BottomSheetItem(
-                                  title: 'UnArchive',
-                                  onTap: () => {
-                                    chartBloc.add(UnArchiveChatEvent(
-                                        chatId: widget.chatId,
-                                        onSuccess: (message) {
-                                          showCustomSnackBar(
+                                    },
+                                  )
+                                ] else...[
+                                  BottomSheetItem(
+                                    title: 'Archive',
+                                    onTap: () => {
+                                      chartBloc.add(ArchiveChatEvent(
+                                          chatId: widget.chatId,
+                                          onSuccess: (message) {
+                                            showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                                backgroundColor: COLORS.neutralDarkTwo);
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/main_screen',
+                                              arguments: {'selectedIndex': 3},
+                                            );
+                                          },
+                                          onError: (message) {
+                                            showCustomSnackBar(
                                               context: context,
                                               message: message,
-                                              backgroundColor: COLORS.neutralDarkTwo);
-                                          Navigator.pushNamed(
-                                            context,
-                                            '/main_screen',
-                                            arguments: {'selectedIndex': 3},
-                                          );
-                                        },
-                                        onError: (message) {
-                                          showCustomSnackBar(
-                                            context: context,
-                                            message: message,
-                                          );
-                                        }))
-                                  },
-                                )
-                              ] else...[
+                                            );
+                                          }))
+                                    },
+                                  )
+                                ],
                                 BottomSheetItem(
-                                  title: 'Archive',
+                                  title: 'Report or Block',
                                   onTap: () => {
-                                    chartBloc.add(ArchiveChatEvent(
-                                        chatId: widget.chatId,
-                                        onSuccess: (message) {
-                                          showCustomSnackBar(
-                                              context: context,
-                                              message: message,
-                                              backgroundColor: COLORS.neutralDarkTwo);
-                                          Navigator.pushNamed(
-                                            context,
-                                            '/main_screen',
-                                            arguments: {'selectedIndex': 3},
-                                          );
-                                        },
-                                        onError: (message) {
-                                          showCustomSnackBar(
-                                            context: context,
-                                            message: message,
-                                          );
-                                        }))
-                                  },
-                                )
-                              ],
-                              BottomSheetItem(
-                                title: 'Report or Block',
-                                onTap: () => {
-                                  showMaterialModalBottomSheet(
-                                    enableDrag: true,
-                                    expand: false,
-                                    isDismissible: true,
-                                    backgroundColor: COLORS.white,
-                                    context: context,
-                                    closeProgressThreshold: 0,
-                                    duration: const Duration(seconds: 0),
-                                    useRootNavigator: true,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20)),
+                                    showMaterialModalBottomSheet(
+                                      enableDrag: true,
+                                      expand: false,
+                                      isDismissible: true,
+                                      backgroundColor: COLORS.white,
+                                      context: context,
+                                      closeProgressThreshold: 0,
+                                      duration: const Duration(seconds: 0),
+                                      useRootNavigator: true,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20)),
+                                      ),
+                                      builder: (context) =>
+                                      const ReportOrBlockModal(),
                                     ),
-                                    builder: (context) =>
-                                    const ReportOrBlockModal(),
-                                  ),
-                                },
-                              )
-                            ],
-                          );
-                        },
-                      ),
-                    ],
+                                  },
+                                )
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                      padding: EdgeInsets.only(
-                        top: SizeConfig.blockHeight * 2,
-                        right: SizeConfig.blockWidth * 1.5,
-                        left: SizeConfig.blockWidth * 1.5,
-                      ),
-                      child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: chatView.length + (isFetchingMore ? 1 : 0),
-                          shrinkWrap: true,
-                          scrollDirection: Axis.vertical,
-                          reverse: true,
-                          itemBuilder: (context, index) {
-                            if (index == chatView.length) {
-                              return isFetchingMore
-                                  ? Center(
-                                child:
-                                LoadingAnimationWidget.discreteCircle(
-                                  color: COLORS.primary,
-                                  // secondRingColor: COLORS.semanticTwo,
-                                  // thirdRingColor: COLORS.accent,
-                                  size: SizeConfig.blockHeight * 3.5,
-                                ),
-                              )
-                                  : SizedBox.shrink();
-                            }
-                            ChatView chatDate = chatView[index];
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: SizeConfig.blockHeight,top:SizeConfig.blockHeight),
-                                  child: Text(
-                                    chatDate.date,
-                                    style: TextStyle(
-                                      color: COLORS.neutralDarkOne,
-                                      fontSize: SizeConfig.blockWidth * 3.25,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
+                  Expanded(
+                    child: Padding(
+                        padding: EdgeInsets.only(
+                          top: SizeConfig.blockHeight * 2,
+                          right: SizeConfig.blockWidth * 1.5,
+                          left: SizeConfig.blockWidth * 1.5,
+                        ),
+                        child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: chatView.length + (isFetchingMore ? 1 : 0),
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            reverse: true,
+                            itemBuilder: (context, index) {
+                              if (index == chatView.length) {
+                                return isFetchingMore
+                                    ? Center(
+                                  child:
+                                  LoadingAnimationWidget.discreteCircle(
+                                    color: COLORS.primary,
+                                    // secondRingColor: COLORS.semanticTwo,
+                                    // thirdRingColor: COLORS.accent,
+                                    size: SizeConfig.blockHeight * 3.5,
+                                  ),
+                                )
+                                    : SizedBox.shrink();
+                              }
+                              ChatView chatDate = chatView[index];
+                              return Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: SizeConfig.blockHeight,top:SizeConfig.blockHeight),
+                                    child: Text(
+                                      chatDate.date,
+                                      style: TextStyle(
+                                        color: COLORS.neutralDarkOne,
+                                        fontSize: SizeConfig.blockWidth * 3.25,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
+                                      ),
                                     ),
                                   ),
-                                ),
 
-                                ListView.builder(
-                                  itemCount: chatDate.messages.length,
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  reverse: true,
-                                  itemBuilder: (context, msgIndex) {
-                                    Message message = chatDate.messages[msgIndex];
-                                    return Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        if (message.senderId == Config.id) ...[
-                                          SendMessage(
-                                            message: message.content!,
-                                            key: null,
-                                            isSeenByMe: true,
-                                            time: formatTime(
-                                                message.updatedAt!.toString()),
-                                            audioShow: message.type == 'media' &&
-                                                message
-                                                    .messageMedia!.isNotEmpty &&
-                                                message.messageMedia![0]
-                                                    .fileType ==
-                                                    "audio",
-                                            textShow: message.type == 'text',
-                                            imageShow: message.type == 'media' &&
-                                                message
-                                                    .messageMedia!.isNotEmpty &&
-                                                message.messageMedia![0]
-                                                    .fileType ==
-                                                    "image",
-                                            imageUrl:
-                                            message.messageMedia!.isNotEmpty
-                                                ? message
-                                                .messageMedia![0].fileUrl!
-                                                : '',
-                                            audioWidget: WaveBubble(
-                                              audioUrl:
-                                              message.messageMedia!.isNotEmpty
-                                                  ? message.messageMedia![0]
-                                                  .fileUrl!
-                                                  : '',
-                                              isSender: true,
-                                            ),
-                                          )
-                                        ] else ...[
-                                          ReceivedMessage(
+                                  ListView.builder(
+                                    itemCount: chatDate.messages.length,
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    reverse: true,
+                                    itemBuilder: (context, msgIndex) {
+                                      Message message = chatDate.messages[msgIndex];
+                                      return Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          if (message.senderId == Config.id) ...[
+                                            SendMessage(
                                               message: message.content!,
                                               key: null,
                                               isSeenByMe: true,
                                               time: formatTime(
                                                   message.updatedAt!.toString()),
-                                              audioShow: message.type ==
-                                                  'media' &&
+                                              audioShow: message.type == 'media' &&
                                                   message
                                                       .messageMedia!.isNotEmpty &&
                                                   message.messageMedia![0]
                                                       .fileType ==
                                                       "audio",
                                               textShow: message.type == 'text',
-                                              imageShow: message.type ==
-                                                  'media' &&
+                                              imageShow: message.type == 'media' &&
                                                   message
                                                       .messageMedia!.isNotEmpty &&
                                                   message.messageMedia![0]
@@ -873,251 +855,287 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                       "image",
                                               imageUrl:
                                               message.messageMedia!.isNotEmpty
-                                                  ? message.messageMedia![0]
-                                                  .fileUrl!
+                                                  ? message
+                                                  .messageMedia![0].fileUrl!
                                                   : '',
                                               audioWidget: WaveBubble(
-                                                audioUrl: message
-                                                    .messageMedia!.isNotEmpty
-                                                    ? message
-                                                    .messageMedia![0].fileUrl!
+                                                audioUrl:
+                                                message.messageMedia!.isNotEmpty
+                                                    ? message.messageMedia![0]
+                                                    .fileUrl!
                                                     : '',
                                                 isSender: true,
                                               ),
-                                              sendName: message.sender!.name!)
+                                            )
+                                          ] else ...[
+                                            ReceivedMessage(
+                                                message: message.content!,
+                                                key: null,
+                                                isSeenByMe: true,
+                                                time: formatTime(
+                                                    message.updatedAt!.toString()),
+                                                audioShow: message.type ==
+                                                    'media' &&
+                                                    message
+                                                        .messageMedia!.isNotEmpty &&
+                                                    message.messageMedia![0]
+                                                        .fileType ==
+                                                        "audio",
+                                                textShow: message.type == 'text',
+                                                imageShow: message.type ==
+                                                    'media' &&
+                                                    message
+                                                        .messageMedia!.isNotEmpty &&
+                                                    message.messageMedia![0]
+                                                        .fileType ==
+                                                        "image",
+                                                imageUrl:
+                                                message.messageMedia!.isNotEmpty
+                                                    ? message.messageMedia![0]
+                                                    .fileUrl!
+                                                    : '',
+                                                audioWidget: WaveBubble(
+                                                  audioUrl: message
+                                                      .messageMedia!.isNotEmpty
+                                                      ? message
+                                                      .messageMedia![0].fileUrl!
+                                                      : '',
+                                                  isSender: true,
+                                                ),
+                                                sendName: message.sender!.name!)
+                                          ],
                                         ],
-                                      ],
-                                    );
-                                  },
-                                ),
-                              ],
-                            );
-                          })),
-                )
-              ]
-              else...[
-                SizedBox(
-                  width: SizeConfig.blockWidth*90,
-                  height: SizeConfig.blockHeight*90,
-                  child:  globalLoadingWidget(),
-                )
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            })),
+                  )
+                ]
+                else...[
+                  SizedBox(
+                    width: SizeConfig.blockWidth*90,
+                    height: SizeConfig.blockHeight*90,
+                    child:  globalLoadingWidget(),
+                  )
 
-              ]
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-              vertical: SizeConfig.blockHeight * 2,
-              horizontal: SizeConfig.blockWidth * 4),
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                  color: COLORS.neutralDarkTwo,
-                  width: SizeConfig.blockWidth * 0.25),
+                ]
+              ],
             ),
-            color: COLORS.white,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              if (!isRecording) ...[
-                InkWell(
-                  onTap: () => _showPicker(context, (File image) {
-                    setState(() {
-                      _profileImage = image;
-                      profilePicture = '';
-                      initialRegisterBloc
-                          .add(UploadImageEvent(imagePath: _profileImage!));
-                    });
-                  }),
-                  child: Container(
-                    padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-                    height: SizeConfig.blockHeight * 8,
-                    decoration: BoxDecoration(
-                        color: COLORS.primaryOne.withOpacity(0.35),
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
-                    child: Icon(
-                      Icons.add,
-                      color: COLORS.primary,
-                      size: SizeConfig.blockWidth * 6,
+        ),
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+                vertical: SizeConfig.blockHeight * 2,
+                horizontal: SizeConfig.blockWidth * 4),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                    color: COLORS.neutralDarkTwo,
+                    width: SizeConfig.blockWidth * 0.25),
+              ),
+              color: COLORS.white,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (!isRecording) ...[
+                  InkWell(
+                    onTap: () => _showPicker(context, (File image) {
+                      setState(() {
+                        _profileImage = image;
+                        profilePicture = '';
+                        initialRegisterBloc
+                            .add(UploadImageEvent(imagePath: _profileImage!));
+                      });
+                    }),
+                    child: Container(
+                      padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                      height: SizeConfig.blockHeight * 8,
+                      decoration: BoxDecoration(
+                          color: COLORS.primaryOne.withOpacity(0.35),
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
+                      child: Icon(
+                        Icons.add,
+                        color: COLORS.primary,
+                        size: SizeConfig.blockWidth * 6,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: SizeConfig.blockWidth * 4,
-                )
-              ],
-              Expanded(
-                  child: isRecording
-                      ? AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: Container(
-                            width: SizeConfig.blockWidth * 90,
+                  SizedBox(
+                    width: SizeConfig.blockWidth * 4,
+                  )
+                ],
+                Expanded(
+                    child: isRecording
+                        ? AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Container(
+                              width: SizeConfig.blockWidth * 90,
+                              height: SizeConfig.blockHeight * 8,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3),
+                                color: COLORS.primary,
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 3),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  AudioWaveforms(
+                                    enableGesture: true,
+                                    size: Size(SizeConfig.blockWidth * 70,
+                                        SizeConfig.blockHeight * 8),
+                                    recorderController: recorderController,
+                                    waveStyle: const WaveStyle(
+                                        waveColor: COLORS.white,
+                                        extendWaveform: true,
+                                        showMiddleLine: false,
+                                        waveThickness: 1.5,
+                                        waveCap: StrokeCap.square),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(
+                                          SizeConfig.blockWidth * 3),
+                                      color: COLORS.primary,
+                                    ),
+                                    padding: EdgeInsets.only(
+                                        left: SizeConfig.blockWidth * 3),
+                                    //                   margin:  EdgeInsets.symmetric(
+                                    // horizontal: SizeConfig.blockWidth*3),
+                                  ),
+                                  InkWell(
+                                    onTap: _startOrStopRecording,
+                                    borderRadius: BorderRadius.circular(
+                                        SizeConfig.blockWidth * 10),
+                                    child: Container(
+                                      width: SizeConfig.blockWidth * 10,
+                                      height: SizeConfig.blockWidth * 10,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.blockWidth * 2.5),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 10),
+                                        color: COLORS.white,
+                                      ),
+                                      child: Image.asset(
+                                        'assets/images/chat/message.png',
+                                        width: SizeConfig.blockWidth * 2.5,
+                                        height: SizeConfig.blockWidth * 2.5,
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          )
+                        : Container(
                             height: SizeConfig.blockHeight * 8,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 3),
-                              color: COLORS.primary,
+                                  SizeConfig.blockWidth * 3.25),
+                              color: COLORS.primaryOne.withOpacity(0.35),
+                              border: Border.all(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1,
+                              ),
                             ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: SizeConfig.blockWidth * 3),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                AudioWaveforms(
-                                  enableGesture: true,
-                                  size: Size(SizeConfig.blockWidth * 70,
-                                      SizeConfig.blockHeight * 8),
-                                  recorderController: recorderController,
-                                  waveStyle: const WaveStyle(
-                                      waveColor: COLORS.white,
-                                      extendWaveform: true,
-                                      showMiddleLine: false,
-                                      waveThickness: 1.5,
-                                      waveCap: StrokeCap.square),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                        SizeConfig.blockWidth * 3),
-                                    color: COLORS.primary,
-                                  ),
-                                  padding: EdgeInsets.only(
-                                      left: SizeConfig.blockWidth * 3),
-                                  //                   margin:  EdgeInsets.symmetric(
-                                  // horizontal: SizeConfig.blockWidth*3),
-                                ),
-                                InkWell(
-                                  onTap: _startOrStopRecording,
-                                  borderRadius: BorderRadius.circular(
-                                      SizeConfig.blockWidth * 10),
-                                  child: Container(
-                                    width: SizeConfig.blockWidth * 10,
-                                    height: SizeConfig.blockWidth * 10,
-                                    padding: EdgeInsets.all(
-                                        SizeConfig.blockWidth * 2.5),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 10),
-                                      color: COLORS.white,
-                                    ),
-                                    child: Image.asset(
-                                      'assets/images/chat/message.png',
-                                      width: SizeConfig.blockWidth * 2.5,
-                                      height: SizeConfig.blockWidth * 2.5,
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(
-                          height: SizeConfig.blockHeight * 8,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                                SizeConfig.blockWidth * 3.25),
-                            color: COLORS.primaryOne.withOpacity(0.35),
-                            border: Border.all(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _messageController,
-                                  style: TextStyle(
-                                    color: COLORS.neutralDark,
-                                    fontSize: SizeConfig.blockWidth * 3.25,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: "Poppins",
-                                  ),
-                                  // autofocus: true,
-                                  cursorColor: COLORS.black,
-                                  decoration: InputDecoration(
-                                    fillColor:
-                                        COLORS.primaryOne.withOpacity(0.05),
-                                    focusColor:
-                                        COLORS.primaryOne.withOpacity(0.05),
-                                    filled: true,
-                                    hintText: 'Your message'.tr(),
-                                    hintStyle: TextStyle(
-                                      color: COLORS.neutralDarkOne,
+                                Expanded(
+                                  child: TextField(
+                                    controller: _messageController,
+                                    style: TextStyle(
+                                      color: COLORS.neutralDark,
                                       fontSize: SizeConfig.blockWidth * 3.25,
                                       fontWeight: FontWeight.w400,
                                       fontFamily: "Poppins",
                                     ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 3.25),
-                                      borderSide: BorderSide(
-                                        color:
-                                            COLORS.primaryOne.withOpacity(0.1),
-                                        width: 0,
+                                    // autofocus: true,
+                                    cursorColor: COLORS.black,
+                                    decoration: InputDecoration(
+                                      fillColor:
+                                          COLORS.primaryOne.withOpacity(0.05),
+                                      focusColor:
+                                          COLORS.primaryOne.withOpacity(0.05),
+                                      filled: true,
+                                      hintText: 'Your message'.tr(),
+                                      hintStyle: TextStyle(
+                                        color: COLORS.neutralDarkOne,
+                                        fontSize: SizeConfig.blockWidth * 3.25,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
                                       ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 3.25),
-                                      borderSide: BorderSide(
-                                        color:
-                                            COLORS.primaryOne.withOpacity(0.1),
-                                        width: 0,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 3.25),
-                                      borderSide: BorderSide(
-                                        color:
-                                            COLORS.primaryOne.withOpacity(0.1),
-                                        width: 0,
-                                      ),
-                                    ),
-                                  ),
-                                  maxLines: null,
-                                  minLines: 1, // Start with 1 line
-                                  expands:
-                                      false, // Don't make it fill all available space, but grow as needed
-                                  onChanged: _onMessageChanged,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                    right: SizeConfig.blockWidth * 2.5),
-                                child: InkWell(
-                                  onTap: _messageController.text.isEmpty
-                                      ? _startOrStopRecording
-                                      : onSendMessage,
-                                  child: _messageController.text.isEmpty
-                                      ? Image.asset(
-                                          'assets/images/chat/message.png',
-                                          width: SizeConfig.blockWidth * 5,
-                                          height: SizeConfig.blockWidth * 5,
-                                        )
-                                      : Icon(
-                                          Icons.send,
-                                          color: COLORS.primary,
-                                          size: SizeConfig.blockWidth * 5,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 3.25),
+                                        borderSide: BorderSide(
+                                          color:
+                                              COLORS.primaryOne.withOpacity(0.1),
+                                          width: 0,
                                         ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 3.25),
+                                        borderSide: BorderSide(
+                                          color:
+                                              COLORS.primaryOne.withOpacity(0.1),
+                                          width: 0,
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 3.25),
+                                        borderSide: BorderSide(
+                                          color:
+                                              COLORS.primaryOne.withOpacity(0.1),
+                                          width: 0,
+                                        ),
+                                      ),
+                                    ),
+                                    maxLines: null,
+                                    minLines: 1, // Start with 1 line
+                                    expands: false, // Don't make it fill all available space, but grow as needed
+                                    onChanged: _onMessageChanged,
+                                  ),
                                 ),
-                              )
-                            ],
-                          ),
-                        )),
-            ],
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      right: SizeConfig.blockWidth * 2.5),
+                                  child: InkWell(
+                                    onTap: _messageController.text.isEmpty
+                                        ? _startOrStopRecording
+                                        : onSendMessage,
+                                    child: _messageController.text.isEmpty
+                                        ? Image.asset(
+                                            'assets/images/chat/message.png',
+                                            width: SizeConfig.blockWidth * 5,
+                                            height: SizeConfig.blockWidth * 5,
+                                          )
+                                        : Icon(
+                                            Icons.send,
+                                            color: COLORS.primary,
+                                            size: SizeConfig.blockWidth * 5,
+                                          ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )),
+              ],
+            ),
           ),
         ),
       ),

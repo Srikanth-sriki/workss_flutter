@@ -127,7 +127,7 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
                       }),
                 ),
               ] else if (!isChatListLoading && chatList.isEmpty) ...[
-                emptyComponent(errorText: "No Chats Found")
+                Expanded(child: emptyComponent(errorText: "No Chats Found"))
               ] else if (isError && !isChatListLoading) ...[
                 ErrorScreen(onRetry: () {
                   _refreshPageAfterEdit();

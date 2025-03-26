@@ -262,39 +262,44 @@ Widget friendViewCard({required String image,required String name,required VoidC
     onTap: onTap,
     child: Container(
       width: SizeConfig.blockWidth * 25,
-      height: SizeConfig.blockHeight * 18,
-      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 0.6 ),
-      padding: EdgeInsets.all(SizeConfig.blockWidth * 2.5),
+      height: SizeConfig.blockWidth * 25,
+
+      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 0.6 ),
+      padding: EdgeInsets.all(SizeConfig.blockWidth * 0.5),
       decoration: const BoxDecoration(
         color: COLORS.white,
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: SizeConfig.blockWidth * 15.5,
-            height: SizeConfig.blockWidth * 15.5,
+            width: SizeConfig.blockWidth * 20,
+            height: SizeConfig.blockWidth * 20,
             decoration: BoxDecoration(
                 image: DecorationImage(
                   image: NetworkImage(image),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 ),
                 borderRadius: BorderRadius.all(
                     Radius.circular(SizeConfig.blockWidth * 3))),
           ),
           SizedBox(height: SizeConfig.blockHeight*0.8),
-          Text(
-            name,
-            style: TextStyle(
-              color: COLORS.neutralDark,
-              fontSize: SizeConfig.blockWidth * 3,
-              fontWeight: FontWeight.w400,
-              fontFamily: "Poppins",
+          SizedBox(
+            width: SizeConfig.blockWidth * 23,
+            child: Text(
+              capitalizeEachWord(name),
+              style: TextStyle(
+                color: COLORS.neutralDark,
+                fontSize: SizeConfig.blockWidth * 3,
+                fontWeight: FontWeight.w400,
+                fontFamily: "Poppins",
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              // textAlign: TextAlign.end,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            // textAlign: TextAlign.end,
           ),
 
         ],

@@ -212,9 +212,11 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                     return friendsListLoading();
                   } else if (state is FriendsListSuccess) {
                     return Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 4.5,
-                        vertical: SizeConfig.blockHeight * 0.2,
+                      padding: EdgeInsets.only(
+                        left: SizeConfig.blockWidth * 4.5,
+                        right: SizeConfig.blockWidth * 4.5,
+                        top: SizeConfig.blockHeight * 0.2,
+                        bottom: SizeConfig.blockHeight,
                       ),
                       child: ListView.builder(
                           itemCount: state.friendsSearchList.length,

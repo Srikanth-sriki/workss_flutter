@@ -366,7 +366,7 @@ class _WaveBubbleState extends State<WaveBubble> {
                 waveformType: WaveformType.fitWidth,
                 playerWaveStyle: playerWaveStyle,
                 continuousWaveform: true,
-                enableSeekGesture: true,backgroundColor: Colors.red,
+                enableSeekGesture: true,
               ),
             ],
           ],

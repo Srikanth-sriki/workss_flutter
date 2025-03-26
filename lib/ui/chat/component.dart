@@ -43,11 +43,18 @@ Widget chartSearchCards({
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if(image.isNotEmpty)...[
-                  Image.network(
-                    image,
+                  Container(
                     width: SizeConfig.blockWidth * 14,
                     height: SizeConfig.blockWidth * 14,
-                  )
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(image),
+                          fit: BoxFit.fill,
+                        ),
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(SizeConfig.blockWidth * 2))),
+                  ),
+
                 ]
                 else...[
                   Container(
@@ -69,7 +76,7 @@ Widget chartSearchCards({
                     SizedBox(
                       width: SizeConfig.blockWidth * 40,
                       child: Text(
-                        name,
+                        capitalizeEachWord(name),
                         style: TextStyle(
                           color: COLORS.neutralDark,
                           fontSize: SizeConfig.blockWidth * 3.3,
@@ -81,11 +88,11 @@ Widget chartSearchCards({
                         // textAlign: TextAlign.end,
                       ),
                     ),
-                    if(message.isEmpty)...[
+                    if(message.isNotEmpty)...[
                       SizedBox(
                         width: SizeConfig.blockWidth * 40,
                         child: Text(
-                          message,
+                          capitalizeFirstLetter(message),
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
                             fontSize: SizeConfig.blockWidth * 3,
@@ -903,6 +910,139 @@ class SendMessage extends StatelessWidget {
   }
 }
 
+// class ReceivedMessage extends StatelessWidget {
+//   final bool isSeenByMe;
+//   final String message;
+//   final String time;
+//   final String sendName;
+//   final bool imageShow;
+//   final bool textShow;
+//   final bool audioShow;
+//   final Widget? audioWidget;
+//   final String imageUrl;
+//   const ReceivedMessage({
+//     super.key,
+//     required this.message,
+//     required this.isSeenByMe,
+//     required this.time,
+//     required this.sendName,
+//     required this.imageShow,
+//     required this.textShow,
+//     required this.audioShow,
+//     required this.imageUrl,
+//     this.audioWidget,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final messageTextGroup = Flexible(
+//         child: Row(
+//       mainAxisAlignment: MainAxisAlignment.start,
+//       crossAxisAlignment: CrossAxisAlignment.end,
+//       children: [
+//         Transform(
+//           alignment: Alignment.center,
+//           transform: Matrix4.rotationX(math.pi),
+//           child: CustomPaint(
+//             painter: Triangle(COLORS.primaryOne.withOpacity(0.5),),
+//           ),
+//         ),
+//         Flexible(
+//           child: Container(
+//             padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+//             decoration: BoxDecoration(
+//               color: COLORS.primaryOne.withOpacity(0.5),
+//                 borderRadius: BorderRadius.only(
+//                   topRight: Radius.circular(SizeConfig.blockWidth * 3),
+//                   topLeft: Radius.circular(SizeConfig.blockWidth * 3),
+//                   bottomRight: Radius.circular(SizeConfig.blockWidth * 3),
+//                 ),
+//             ),
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.start,
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 if (textShow) ...[
+//                   Text(
+//                     message,
+//                     style: TextStyle(
+//                       color: COLORS.neutralDark,
+//                       fontSize: SizeConfig.blockWidth * 3.25,
+//                       fontWeight: FontWeight.w400,
+//                       fontFamily: "Poppins",
+//                     ),softWrap: true,
+//                   )
+//                 ],
+//                 if (imageShow) ...[
+//                   GestureDetector(
+//                     onTap: () => _showImageDialog(context, imageUrl),
+//                     child: Container(
+//                       width: SizeConfig.blockWidth * 40,
+//                       height: SizeConfig.blockWidth * 40,
+//                       decoration: BoxDecoration(
+//                           image: DecorationImage(
+//                               image: NetworkImage(imageUrl), fit: BoxFit.cover),
+//                           borderRadius: BorderRadius.all(
+//                               Radius.circular(SizeConfig.blockWidth * 3))),
+//                     ),
+//                   ),
+//                   SizedBox(
+//                     height: SizeConfig.blockHeight,
+//                   )
+//                 ],
+//                 if (audioShow && audioWidget != null) ...[audioWidget!],
+//                 Row(
+//
+//                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                   crossAxisAlignment: CrossAxisAlignment.center,
+//                   children: [
+//                     Flexible(
+//                       child: Text(
+//                         capitalizeFirstLetter(sendName),
+//                         style: TextStyle(
+//                           color: COLORS.neutralDarkOne,
+//                           fontSize: SizeConfig.blockWidth * 3,
+//                           fontWeight: FontWeight.w400,
+//                           fontFamily: "Poppins",
+//                         ),
+//                         overflow: TextOverflow.ellipsis,
+//                       ),
+//                     ),
+//                     SizedBox(width: SizeConfig.blockWidth * 2), // Space between name and time
+//                     Text(
+//                       time.toUpperCase(),
+//                       style: TextStyle(
+//                         color: COLORS.neutralDarkOne,
+//                         fontSize: SizeConfig.blockWidth * 3,
+//                         fontWeight: FontWeight.w400,
+//                         fontFamily: "Poppins",
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ],
+//     ));
+//
+//     return Padding(
+//       padding: EdgeInsets.only(right: SizeConfig.blockWidth*20, left: SizeConfig.blockWidth*5, top: SizeConfig.blockWidth*1.5, bottom: SizeConfig.blockWidth*1.5),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.end,
+//         children: <Widget>[
+//           SizedBox(height: SizeConfig.blockHeight * 10),
+//           messageTextGroup,
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+
+
 class ReceivedMessage extends StatelessWidget {
   final bool isSeenByMe;
   final String message;
@@ -913,6 +1053,7 @@ class ReceivedMessage extends StatelessWidget {
   final bool audioShow;
   final Widget? audioWidget;
   final String imageUrl;
+
   const ReceivedMessage({
     super.key,
     required this.message,
@@ -928,110 +1069,128 @@ class ReceivedMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messageTextGroup = Flexible(
-        child: Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.rotationX(math.pi),
-          child: CustomPaint(
-            painter: Triangle(COLORS.primaryOne.withOpacity(0.5),),
-          ),
-        ),
-        Flexible(
-          child: Container(
-            padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-            decoration: BoxDecoration(
-              color: COLORS.primaryOne.withOpacity(0.5),
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(SizeConfig.blockWidth * 3),
-                  topLeft: Radius.circular(SizeConfig.blockWidth * 3),
-                  bottomRight: Radius.circular(SizeConfig.blockWidth * 3),
-                ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (textShow) ...[
-                  Text(
-                    message,
-                    style: TextStyle(
-                      color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 3.25,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: "Poppins",
-                    ),softWrap: true,
-                  )
-                ],
-                if (imageShow) ...[
-                  GestureDetector(
-                    onTap: () => _showImageDialog(context, imageUrl),
-                    child: Container(
-                      width: SizeConfig.blockWidth * 40,
-                      height: SizeConfig.blockWidth * 40,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: NetworkImage(imageUrl), fit: BoxFit.cover),
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(SizeConfig.blockWidth * 3))),
-                    ),
-                  ),
-                  SizedBox(
-                    height: SizeConfig.blockHeight,
-                  )
-                ],
-                if (audioShow && audioWidget != null) ...[audioWidget!],
-                Row(
+    return Padding(
+      padding: EdgeInsets.only(
+        right: SizeConfig.blockWidth * 20,
+        left: SizeConfig.blockWidth * 5,
+        top: SizeConfig.blockWidth * 1.5,
+        bottom: SizeConfig.blockWidth * 1.5,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
 
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationX(math.pi),
+            child: CustomPaint(
+              painter: Triangle(COLORS.primaryOne.withOpacity(0.5)),
+            ),
+          ),
+
+
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: SizeConfig.blockWidth * 60,
+            ),
+            child: IntrinsicWidth(
+              child: Container(
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                decoration: BoxDecoration(
+                  color: COLORS.primaryOne.withOpacity(0.5),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(SizeConfig.blockWidth * 3),
+                    topLeft: Radius.circular(SizeConfig.blockWidth * 3),
+                    bottomRight: Radius.circular(SizeConfig.blockWidth * 3),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Flexible(
-                      child: Text(
-                        capitalizeFirstLetter(sendName),
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                    // Message Text
+                    if (textShow)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            color: COLORS.neutralDark,
+                            fontSize: SizeConfig.blockWidth * 3.25,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          softWrap: true,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    SizedBox(width: SizeConfig.blockWidth * 2), // Space between name and time
-                    Text(
-                      time.toUpperCase(),
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+
+
+                    if (imageShow)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: GestureDetector(
+                          onTap: () => _showImageDialog(context, imageUrl),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                            child: Image.network(
+                              imageUrl,
+                              width: SizeConfig.blockWidth * 40,
+                              height: SizeConfig.blockWidth * 40,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+
+
+                    if (audioShow && audioWidget != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: audioWidget!,
+                      ),
+
+
+                    Padding(
+                      padding: EdgeInsets.only(top: SizeConfig.blockWidth * 2),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              capitalizeFirstLetter(sendName),
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 3,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          SizedBox(width: SizeConfig.blockWidth*4),
+                          Text(
+                            time.toUpperCase(),
+                            style: TextStyle(
+                              color: COLORS.neutralDarkOne,
+                              fontSize: SizeConfig.blockWidth * 3,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ],
-    ));
-
-    return Padding(
-      padding: EdgeInsets.only(right: SizeConfig.blockWidth*20, left: SizeConfig.blockWidth*5, top: SizeConfig.blockWidth*1.5, bottom: SizeConfig.blockWidth*1.5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          SizedBox(height: SizeConfig.blockHeight * 10),
-          messageTextGroup,
         ],
       ),
     );
   }
 }
+
 
 void _showImageDialog(BuildContext context, String imageUrl) {
   showGeneralDialog(

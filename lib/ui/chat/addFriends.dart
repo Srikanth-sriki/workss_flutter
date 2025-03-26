@@ -203,9 +203,11 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
               } else if (state is FriendsAddListSuccess) {
                 return Expanded(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 4.5,
-                      vertical: SizeConfig.blockHeight * 0.2,
+                    padding: EdgeInsets.only(
+                      left: SizeConfig.blockWidth * 4.5,
+                      right: SizeConfig.blockWidth * 4.5,
+                      top: SizeConfig.blockHeight * 0.2,
+                      bottom: SizeConfig.blockHeight,
                     ),
                     child: ListView.builder(
                         itemCount: searchFriendLists.length,

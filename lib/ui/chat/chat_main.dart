@@ -57,14 +57,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     chartBloc = BlocProvider.of<ChartBloc>(context);
   }
 
-  void _onSearchChanged(String keyword) {
-    if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      setState(() {
-        searchKeyword = keyword;
-      });
-    });
-  }
+  void _onSearchChanged(String keyword) {}
 
   // void _onSearchChanged(String keyword) {
   //   if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -79,18 +72,28 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   //   });
   // }
 
-
   void _refreshPageAfterEdit() {
     _fetchData();
   }
 
-  void _fetchData(){
+  void _fetchData() {
+    // setState(() {
+    //   isFriendsListLoad = true;
+    //   isChatListLoading = true;
+    // });
     friendsBloc.add(FetchFriendsListEvent(
       page: 1,
       pageSize: 10,
       keyWord: '',
     ));
-    ChartBloc().add(const ChartListEvent());
+    chartBloc.add(const ChartListEvent());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchData();
+
   }
 
   @override
@@ -188,8 +191,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                           create: (context) =>
                                               ShowInterestedBloc()),
                                       BlocProvider(
-                                          create: (context) =>
-                                              ChartBloc())
+                                          create: (context) => ChartBloc())
                                     ],
                                     child: const AddFriendsScreen(
                                         header: 'Add Friend'),
@@ -233,12 +235,13 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                 setState(() {
                   chatList = state.chatList;
                   isChatListLoading = false;
-                  isError=false;
+                  isError = false;
+                  print('-----------------111111111111-----------');
                 });
               } else if (state is ChartListFailed) {
                 setState(() {
                   isChatListLoading = false;
-                  isError=true;
+                  isError = true;
                 });
               }
             },
@@ -252,8 +255,13 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 InkWell(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatListSearch(chatList: chatList),));
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ChatListSearch(chatList: chatList),
+                        ));
                   },
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -261,251 +269,247 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         top: SizeConfig.blockHeight * 2,
                         right: SizeConfig.blockWidth * 4.5,
                         bottom: SizeConfig.blockHeight),
-                    child: TextField(
-                      controller: _searchController,
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3.25,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+                    child: Container(
+                      height: SizeConfig.blockHeight * 7,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5,
                       ),
-                      cursorColor: COLORS.black,
-                      decoration: InputDecoration(
-                        fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        filled: true,
-                        hintText: 'Search your chats'.tr(),
-                        hintStyle: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.25,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: COLORS.neutralDarkOne,
-                          size: SizeConfig.blockWidth * 5,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3),
+                        color: COLORS.neutralDarkTwo.withOpacity(0.6),
                       ),
-                      onChanged: _onSearchChanged,
-                      enabled: false,
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ChatListSearch(chatList: chatList),));
-                      },
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: COLORS.neutralDarkOne,
+                            size: SizeConfig.blockWidth * 5,
+                          ),
+                          SizedBox(
+                            width: SizeConfig.blockWidth * 4,
+                          ),
+                          Text(
+                            'Search your chats'.tr(),
+                            style: TextStyle(
+                              color: COLORS.neutralDarkOne,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const Divider(
                   color: COLORS.neutralDarkTwo,
                 ),
-                Expanded(
-                    child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  controller: _scrollController,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: SizeConfig.blockHeight),
-
-                      if (!isFriendsListLoad && friends.isNotEmpty) ...[
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 4.5,
-                          ),
-                          child: addFriendText(
-                              textOne: 'Friends',
-                              textTwo: 'View All',
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(
-                                                  create: (context) =>
-                                                      FriendsBloc()
-                                                        ..add(
-                                                            FetchFriendsListEvent(
-                                                                page: 1,
-                                                                pageSize: 10,
-                                                                keyWord: '')),
-                                                ),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ReportPostBloc()),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ChartBloc()),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ShowInterestedBloc())
-                                              ],
-                                              child: FriendsSearchListScreen(refreshPageCallback: _refreshPageAfterEdit,),
-                                            )));
-                              }),
-                        ),
-                        SizedBox(
-                          height: SizeConfig.blockHeight * 18,
-                          child: ListView.builder(
-                              itemCount: min(friends.length, 8),
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: SizeConfig.blockWidth * 2.5),
-                              itemBuilder: (context, index) {
-                                return friendViewCard(
-                                    image: friends[index].friends.profilePic,
-                                    name: friends[index].friends.name,
-                                onTap: (){
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) {
-                                                  final bloc = FriendsBloc();
-                                                  bloc.add(
-                                                      FetchFriendsSingleView(
-                                                          friendId: friends[index].friends
-                                                              .id));
-                                                  return bloc;
-                                                },
-                                              ),
-                                              BlocProvider(
-                                                create: (context) =>
-                                                    ShowInterestedBloc(),
-                                              ),
-                                              BlocProvider(
-                                                  create: (context) =>
-                                                      ReportPostBloc()),
-                                              BlocProvider(create: (context)=>ShowInterestedBloc()),
-                                              BlocProvider(create: (context)=>ChartBloc())
-                                            ],
-                                            child: FriendsDetailsScreen(
-                                              refreshPageCallback:
-                                              _refreshPageAfterEdit,
-                                              id: friends[index].friends.id,
-                                            ),
-                                          )));
-                                }
-                                );
-                              }),
-                        ),
-                        const Divider(
-                          color: COLORS.neutralDarkTwo,
-                        ),
-                      ],
-                      if (isChatListLoading && isFriendsListLoad) ...[
-                        Padding( padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.blockWidth * 2.5,
-                          vertical: SizeConfig.blockHeight * 0.2,
-                        ),
-                          child: friendsListLoading(),
-                        )
-
-                      ],
-                      if (!isChatListLoading && chatList.isNotEmpty) ...[
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 4.5,
-                            vertical: SizeConfig.blockHeight * 0.2,
-                          ),
-                          child: ListView.builder(
-                              itemCount: chatList.length,
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              scrollDirection: Axis.vertical,
-                              itemBuilder: (context, index) {
-                                return chartSearchCards(
-                                    image: chatList[index].picture!,
-                                    name: chatList[index].name!,
-                                    onTapCard: () {
+                if (isChatListLoading && isFriendsListLoad) ...[
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 2.5,
+                      vertical: SizeConfig.blockHeight * 0.2,
+                    ),
+                    child: friendsListLoading(),
+                  )
+                ]
+                else...[
+                  Expanded(
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        controller: _scrollController,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: SizeConfig.blockHeight),
+                            if (!isFriendsListLoad && friends.isNotEmpty) ...[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 4.5,
+                                ),
+                                child: addFriendText(
+                                    textOne: 'Friends',
+                                    textTwo: 'View All',
+                                    onTap: () {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) =>
-                                                  MultiBlocProvider(
-                                                    providers: [
-                                                      BlocProvider(
-                                                        create: (context) => ChartBloc()
-                                                          ..add(FetchChartViewEvent(
+                                              builder: (context) => MultiBlocProvider(
+                                                providers: [
+                                                  BlocProvider(
+                                                    create: (context) =>
+                                                    FriendsBloc()
+                                                      ..add(
+                                                          FetchFriendsListEvent(
                                                               page: 1,
                                                               pageSize: 10,
-                                                              chatId: chatList[
-                                                                      index]
-                                                                  .chatId!)),
-                                                      ),
-                                                      BlocProvider(
-                                                          create: (context) =>
-                                                              InitialRegisterBloc()),
-                                                      BlocProvider(
-                                                          create: (context) =>
-                                                              ShowInterestedBloc()),
-                                                    ],
-                                                    child: ChatViewScreen(
-                                                      refreshPageCallback:
-                                                          _refreshPageAfterEdit,
-                                                      chatId: chatList[index].chatId!,
-                                                      isGroup: chatList[index].isGroup!,
-                                                    ),
-                                                  )));
-                                    },
-                                    message:
-                                        chatList[index].latestMessage != null
-                                            ? chatList[index]
-                                                .latestMessage!
-                                                .content!
-                                            : "",
-                                    count: chatList[index].unreadCount!,
-                                    isGroup: chatList[index].isGroup!,
-                                    date: formatChatDate(
-                                        chatList[index].updatedAt!));
-                              }),
-                        )
-                      ]
-                      else if (!isChatListLoading && chatList.isEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 2.5,
-                              vertical: SizeConfig.blockHeight * 4,),
-                            child: emptyComponent(errorText: "No Chats Found"),
-                          )
-                      ] else if (isError && !isChatListLoading) ...[
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: SizeConfig.blockWidth * 2.5,
-                            vertical: SizeConfig.blockHeight * 4,),
-                          child: ErrorScreen(onRetry: () {
-                            _refreshPageAfterEdit();
-                          }),
-                        )
-                      ]
-                    ],
-                  ),
-                )),
+                                                              keyWord: '')),
+                                                  ),
+                                                  BlocProvider(
+                                                      create: (context) =>
+                                                          ReportPostBloc()),
+                                                  BlocProvider(
+                                                      create: (context) =>
+                                                          ChartBloc()),
+                                                  BlocProvider(
+                                                      create: (context) =>
+                                                          ShowInterestedBloc())
+                                                ],
+                                                child: FriendsSearchListScreen(
+                                                  refreshPageCallback:
+                                                  _refreshPageAfterEdit,
+                                                ),
+                                              )));
+                                    }),
+                              ),
+                              SizedBox(
+                                height: SizeConfig.blockHeight * 18,
+                                child: ListView.builder(
+                                    itemCount: min(friends.length, 8),
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: SizeConfig.blockWidth * 2.5),
+                                    itemBuilder: (context, index) {
+                                      return friendViewCard(
+                                          image: friends[index].friends.profilePic,
+                                          name: friends[index].friends.name,
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                              create: (context) {
+                                                                final bloc =
+                                                                FriendsBloc();
+                                                                bloc.add(
+                                                                    FetchFriendsSingleView(
+                                                                        friendId: friends[
+                                                                        index]
+                                                                            .friends
+                                                                            .id));
+                                                                return bloc;
+                                                              },
+                                                            ),
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  ShowInterestedBloc(),
+                                                            ),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ReportPostBloc()),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ShowInterestedBloc()),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ChartBloc())
+                                                          ],
+                                                          child: FriendsDetailsScreen(
+                                                            refreshPageCallback:
+                                                            _refreshPageAfterEdit,
+                                                            id: friends[index]
+                                                                .friends
+                                                                .id,
+                                                          ),
+                                                        )));
+                                          });
+                                    }),
+                              ),
+                              const Divider(
+                                color: COLORS.neutralDarkTwo,
+                              ),
+                            ],
+
+                            if (!isChatListLoading && chatList.isNotEmpty) ...[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 4.5,
+                                  vertical: SizeConfig.blockHeight * 0.2,
+                                ),
+                                child: ListView.builder(
+                                    itemCount: chatList.length,
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    scrollDirection: Axis.vertical,
+                                    itemBuilder: (context, index) {
+                                      return chartSearchCards(
+                                          image: chatList[index].picture!,
+                                          name: chatList[index].name!,
+                                          onTapCard: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                              create: (context) => ChartBloc()
+                                                                ..add(FetchChartViewEvent(
+                                                                    page: 1,
+                                                                    pageSize: 10,
+                                                                    chatId: chatList[
+                                                                    index]
+                                                                        .chatId!)),
+                                                            ),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    InitialRegisterBloc()),
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ShowInterestedBloc()),
+                                                          ],
+                                                          child: ChatViewScreen(
+                                                            refreshPageCallback:
+                                                            _refreshPageAfterEdit,
+                                                            chatId: chatList[index]
+                                                                .chatId!,
+                                                            isGroup: chatList[index]
+                                                                .isGroup!,
+                                                          ),
+                                                        )));
+                                          },
+                                          message:
+                                          chatList[index].latestMessage != null
+                                              ? chatList[index]
+                                              .latestMessage!
+                                              .content!
+                                              : "",
+                                          count: chatList[index].unreadCount!,
+                                          isGroup: chatList[index].isGroup!,
+                                          date: formatChatDate(
+                                              chatList[index].updatedAt!));
+                                    }),
+                              )
+                            ] else if (!isChatListLoading && chatList.isEmpty) ...[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 2.5,
+                                  vertical: SizeConfig.blockHeight * 4,
+                                ),
+                                child: emptyComponent(errorText: "No Chats Found"),
+                              )
+                            ] else if (isError && !isChatListLoading) ...[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 2.5,
+                                  vertical: SizeConfig.blockHeight * 4,
+                                ),
+                                child: ErrorScreen(onRetry: () {
+                                  _refreshPageAfterEdit();
+                                }),
+                              )
+                            ]
+                          ],
+                        ),
+                      ))
+                ],
               ],
             ),
             Positioned(
@@ -529,8 +533,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                         create: (context) =>
                                             ShowInterestedBloc()),
                                     BlocProvider(
-                                        create: (context) =>
-                                            ChartBloc())
+                                        create: (context) => ChartBloc())
                                   ],
                                   child: const AddFriendsScreen(
                                       header: 'Add Friend'),
