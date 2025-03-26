@@ -506,5 +506,22 @@ class FriendsDao {
   }
 
 
+  Future unSendFriendRequest({
+    required String userId,
+  }) async {
+    Map<String, dynamic> body = {
+      "userId": userId
+    };
+    var url = '${Config.url}/user/friend/unsend-request';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+
 
 }

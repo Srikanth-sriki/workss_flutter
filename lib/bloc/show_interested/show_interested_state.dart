@@ -115,3 +115,16 @@ class RejectRequestFriendsFailed extends ShowInterestedState {
   List<Object> get props => [message];
 }
 
+class UnSendFriendSuccess extends ShowInterestedState {
+  String message;
+  UnSendFriendSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class UnSendFriendFriendsFailed extends ShowInterestedState {
+  String message;
+  UnSendFriendFriendsFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+

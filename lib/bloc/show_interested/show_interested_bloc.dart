@@ -45,6 +45,10 @@ class ShowInterestedBloc
     on<UnfriendsEvent>((event, emit) async {
       await mapUnfriendEvent(event, emit);
     });
+
+    on<UnSendFriendEvent>((event, emit) async {
+      await mapUnSendFriendEvent(event, emit);
+    });
   }
 
   Future<void> mapInterestedPropertyEvent(
@@ -232,4 +236,30 @@ class ShowInterestedBloc
       emit(UnfriendsFailed(message: "Something went wrong"));
     }
   }
+
+  Future<void> mapUnSendFriendEvent(
+      UnSendFriendEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const WorkInterestedLoading());
+      var response =
+      await friendsDao.unSendFriendRequest(userId: event.userId);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess(message);
+        emit(UnSendFriendSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError(message);
+        emit(UnSendFriendFriendsFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError(message);
+        emit(UnSendFriendFriendsFailed(message: message));
+      }
+    } catch (error) {
+      emit(UnSendFriendFriendsFailed(message: "Something went wrong"));
+    }
+  }
+
 }

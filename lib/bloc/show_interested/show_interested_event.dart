@@ -88,3 +88,15 @@ class UnfriendsEvent extends ShowInterestedEvent {
   @override
   List<Object> get props => [friendId,onSuccess,onError];
 }
+
+
+class UnSendFriendEvent extends ShowInterestedEvent {
+String userId;
+CallbackWithMessage onSuccess;
+CallbackWithMessage onError;
+UnSendFriendEvent({
+  required this.userId, required this.onSuccess,required this.onError
+});
+@override
+List<Object> get props => [userId,onSuccess,onError];
+}

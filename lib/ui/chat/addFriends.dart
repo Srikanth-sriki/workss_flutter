@@ -262,23 +262,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                             disc: searchFriendLists[index].professionType!,
                             bgFriend: true,
                             onTapButtonCard: () {
-                              if (searchFriendLists[index].friendRequestSent == null && searchFriendLists[index].isFriend == null) {
-                                showInterestedBloc.add(AddFriendEvent(
-                                    userId: searchFriendLists[index].id,
-                                    onSuccess: (message) {
-                                      setState(() {
-                                        searchFriendLists[index].friendRequestSent =
-                                            FriendRequestSent(
-                                                 userId: searchFriendLists[index].id,);
-                                      });
-                                    },
-                                    onError: (message) {
-                                      showCustomSnackBar(
-                                        context: context,
-                                        message: message,
-                                      );
-                                    }));
-                              }
+
                               if(searchFriendLists[index].isFriend != null){
                                 chartBloc.add(StartMessageEvent(chatId: searchFriendLists[index].isFriend!.friendId!,
                                     onSuccess: (chatId){
@@ -319,8 +303,38 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                                           backgroundColor: COLORS.neutralDarkTwo);
                                     }));
                               }
-
-
+                              else if (searchFriendLists[index].friendRequestSent != null ) {
+                                showInterestedBloc.add(UnSendFriendEvent(
+                                    userId: searchFriendLists[index].id,
+                                    onSuccess: (message) {
+                                      setState(() {
+                                        searchFriendLists[index].friendRequestSent = null;
+                                      });
+                                    },
+                                    onError: (message) {
+                                      showCustomSnackBar(
+                                        context: context,
+                                        message: message,
+                                      );
+                                    }));
+                              }
+                              else{
+                                showInterestedBloc.add(AddFriendEvent(
+                                    userId: searchFriendLists[index].id,
+                                    onSuccess: (message) {
+                                      setState(() {
+                                        searchFriendLists[index].friendRequestSent =
+                                            FriendRequestSent(
+                                              userId: searchFriendLists[index].id,);
+                                      });
+                                    },
+                                    onError: (message) {
+                                      showCustomSnackBar(
+                                        context: context,
+                                        message: message,
+                                      );
+                                    }));
+                              }
                             },
                             buttonRequired: searchFriendLists[index].isFriend == null,
                             sendMessageButtonRequired: searchFriendLists[index].isFriend != null,

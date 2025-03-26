@@ -382,47 +382,44 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                         image: friends[index].friends.profilePic,
                                         name: friends[index].friends.name,
                                         onTap: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MultiBlocProvider(
-                                                        providers: [
-                                                          BlocProvider(
-                                                            create: (context) {
-                                                              final bloc =
-                                                              FriendsBloc();
-                                                              bloc.add(
-                                                                  FetchFriendsSingleView(
-                                                                      friendId: friends[
-                                                                      index]
-                                                                          .friends
-                                                                          .id));
-                                                              return bloc;
-                                                            },
-                                                          ),
-                                                          BlocProvider(
-                                                            create: (context) =>
-                                                                ShowInterestedBloc(),
-                                                          ),
-                                                          BlocProvider(
-                                                              create: (context) =>
-                                                                  ReportPostBloc()),
-                                                          BlocProvider(
-                                                              create: (context) =>
-                                                                  ShowInterestedBloc()),
-                                                          BlocProvider(
-                                                              create: (context) =>
-                                                                  ChartBloc())
-                                                        ],
-                                                        child: FriendsDetailsScreen(
-                                                          refreshPageCallback:
-                                                          _refreshPageAfterEdit,
-                                                          id: friends[index]
-                                                              .friends
-                                                              .id,
-                                                        ),
-                                                      )));
+                                          chartBloc.add(StartMessageEvent(chatId: friends[index].friends!.id,
+                                              onSuccess: (chatId){
+
+                                                print(chatId);
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            MultiBlocProvider(
+                                                              providers: [
+                                                                BlocProvider(
+                                                                  create: (context) => ChartBloc()
+                                                                    ..add(FetchChartViewEvent(
+                                                                        page: 1,
+                                                                        pageSize: 10,
+                                                                        chatId: chatId)),
+                                                                ),
+                                                                BlocProvider(
+                                                                    create: (context) =>
+                                                                        InitialRegisterBloc()),
+                                                                BlocProvider(
+                                                                    create: (context) =>
+                                                                        ShowInterestedBloc()),
+                                                              ],
+                                                              child: ChatViewScreen(
+                                                                refreshPageCallback:
+                                                                _refreshPageAfterEdit,
+                                                                chatId: chatId,
+                                                                isGroup: false,
+                                                              ),
+                                                            )));
+
+                                              }, onError: (message){
+                                                showCustomSnackBar(
+                                                    context: context,
+                                                    message: message,
+                                                    backgroundColor: COLORS.neutralDarkTwo);
+                                              }));
                                         });
                                   }),
                             ),
