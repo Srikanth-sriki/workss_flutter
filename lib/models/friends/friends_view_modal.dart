@@ -30,16 +30,19 @@ class FriendsSearchView {
 }
 
 class FriendData {
-  User user;
-  List<FriendDataList> friends;
+  User? user;
+  List<FriendDataList>? friends;
 
   FriendData({
-    required this.user,
-    required this.friends,
+     this.user,
+     this.friends,
   });
 
   factory FriendData.fromJson(Map<String, dynamic> json) => FriendData(
-    user: User.fromJson(json["user"]),
+    user: json.containsKey('user') && json['user'] != null
+        ? User.fromJson(json["user"])
+        : null,
+
     friends: json.containsKey('friends') && json['friends'] != null
         ? List<FriendDataList>.from((json['friends'] as List).map((x) => FriendDataList.fromJson(x)))
         : [],
@@ -47,8 +50,8 @@ class FriendData {
   );
 
   Map<String, dynamic> toJson() => {
-    "user": user.toJson(),
-    "friends": List<FriendDataList>.from(friends.map((x) => x.toJson())),
+    "user": user!.toJson(),
+    "friends": List<FriendDataList>.from(friends!.map((x) => x.toJson())),
   };
 }
 
@@ -212,30 +215,33 @@ class IsContacted {
 }
 
 class FriendDataList {
-  String id;
-  String userId;
-  String friendId;
-  FriendUser user;
+  String ?id;
+  String ?userId;
+  String ?friendId;
+  FriendUser? user;
 
   FriendDataList({
-    required this.id,
-    required this.userId,
-    required this.friendId,
-    required this.user,
+     this.id,
+     this.userId,
+     this.friendId,
+     this.user,
   });
 
   factory FriendDataList.fromJson(Map<String, dynamic> json) => FriendDataList(
     id: json["id"]??"",
     userId: json["userId"]??"",
     friendId: json["friendId"]??"",
-    user: FriendUser.fromJson(json["user"]),
+    user: json.containsKey('user') && json['user'] != null
+        ? FriendUser.fromJson(json["user"])
+        : null,
+
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "userId": userId,
     "friendId": friendId,
-    "user": user.toJson(),
+    "user": user!.toJson(),
   };
 }
 

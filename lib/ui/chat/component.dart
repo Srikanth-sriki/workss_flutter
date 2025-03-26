@@ -807,82 +807,88 @@ class SendMessage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Flexible(
-          child: Container(
-            padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-            decoration: BoxDecoration(
-              color: COLORS.neutralDarkTwo.withOpacity(0.9),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(SizeConfig.blockWidth * 3),
-                bottomLeft: Radius.circular(SizeConfig.blockWidth * 3),
-                topRight: Radius.circular(SizeConfig.blockWidth * 3),
+        Container(
+          constraints: BoxConstraints(
+            maxWidth: SizeConfig.blockWidth * 70,
+          ),
+          child: IntrinsicWidth(
+            child: Container(
+              padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+              decoration: BoxDecoration(
+                color: COLORS.neutralDarkTwo.withOpacity(0.9),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(SizeConfig.blockWidth * 2),
+                  bottomLeft: Radius.circular(SizeConfig.blockWidth * 2),
+                  topRight: Radius.circular(SizeConfig.blockWidth * 2),
+                ),
               ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (textShow) ...[
-                  Text(
-                    message,
-                    style: TextStyle(
-                      color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 3.25,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: "Poppins",
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (textShow) ...[
+                    Text(
+                      message,
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 3.25,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      softWrap: true,
+                    )
+                  ],
+                  if (imageShow) ...[
+                    GestureDetector(
+                      onTap: () => _showImageDialog(context, imageUrl),
+                      child: Container(
+                        width: SizeConfig.blockWidth * 40,
+                        height: SizeConfig.blockWidth * 40,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: NetworkImage(
+                                  imageUrl,
+                                ),
+                                fit: BoxFit.cover),
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(SizeConfig.blockWidth * 3))),
+                      ),
                     ),
-                  )
-                ],
-                if (imageShow) ...[
-                  GestureDetector(
-                    onTap: () => _showImageDialog(context, imageUrl),
-                    child: Container(
-                      width: SizeConfig.blockWidth * 40,
-                      height: SizeConfig.blockWidth * 40,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: NetworkImage(
-                                imageUrl,
-                              ),
-                              fit: BoxFit.cover),
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(SizeConfig.blockWidth * 3))),
-                    ),
-                  ),
+                    SizedBox(
+                      height: SizeConfig.blockHeight,
+                    )
+                  ],
+                  if (audioShow && audioWidget != null) ...[audioWidget!],
                   SizedBox(
-                    height: SizeConfig.blockHeight,
+                    width: SizeConfig.blockWidth * 20,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          time.toUpperCase(),
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 2.6,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                        SizedBox(
+                          width: SizeConfig.blockWidth * 1.5,
+                        ),
+                        Image.asset(
+                          isSeenByMe
+                              ? 'assets/images/chat/read_done.png'
+                              : 'assets/images/chat/read.png',
+                          width: SizeConfig.blockWidth * 3,
+                          height: SizeConfig.blockWidth * 3,
+                        )
+                      ],
+                    ),
                   )
                 ],
-                if (audioShow && audioWidget != null) ...[audioWidget!],
-                SizedBox(
-                  width: SizeConfig.blockWidth * 20,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        time.toUpperCase(),
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
-                      SizedBox(
-                        width: SizeConfig.blockWidth * 1.5,
-                      ),
-                      Image.asset(
-                        isSeenByMe
-                            ? 'assets/images/chat/read_done.png'
-                            : 'assets/images/chat/read.png',
-                        width: SizeConfig.blockWidth * 3.5,
-                        height: SizeConfig.blockWidth * 3.5,
-                      )
-                    ],
-                  ),
-                )
-              ],
+              ),
             ),
           ),
         ),
@@ -1092,7 +1098,7 @@ class ReceivedMessage extends StatelessWidget {
 
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: SizeConfig.blockWidth * 60,
+              maxWidth: SizeConfig.blockWidth * 80,
             ),
             child: IntrinsicWidth(
               child: Container(
@@ -1100,9 +1106,9 @@ class ReceivedMessage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: COLORS.primaryOne.withOpacity(0.5),
                   borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(SizeConfig.blockWidth * 3),
-                    topLeft: Radius.circular(SizeConfig.blockWidth * 3),
-                    bottomRight: Radius.circular(SizeConfig.blockWidth * 3),
+                    topRight: Radius.circular(SizeConfig.blockWidth * 2),
+                    topLeft: Radius.circular(SizeConfig.blockWidth * 2),
+                    bottomRight: Radius.circular(SizeConfig.blockWidth * 2),
                   ),
                 ),
                 child: Column(
@@ -1111,7 +1117,7 @@ class ReceivedMessage extends StatelessWidget {
                     // Message Text
                     if (textShow)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
+                        padding:  EdgeInsets.only(bottom:SizeConfig.blockHeight * 0.2),
                         child: Text(
                           message,
                           style: TextStyle(
@@ -1145,7 +1151,7 @@ class ReceivedMessage extends StatelessWidget {
 
                     if (audioShow && audioWidget != null)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
+                        padding:  EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.2),
                         child: audioWidget!,
                       ),
 
@@ -1160,7 +1166,7 @@ class ReceivedMessage extends StatelessWidget {
                               capitalizeFirstLetter(sendName),
                               style: TextStyle(
                                 color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3,
+                                fontSize: SizeConfig.blockWidth * 2.6,
                                 fontWeight: FontWeight.w400,
                                 fontFamily: "Poppins",
                               ),
@@ -1172,7 +1178,7 @@ class ReceivedMessage extends StatelessWidget {
                             time.toUpperCase(),
                             style: TextStyle(
                               color: COLORS.neutralDarkOne,
-                              fontSize: SizeConfig.blockWidth * 3,
+                              fontSize: SizeConfig.blockWidth * 2.6,
                               fontWeight: FontWeight.w400,
                               fontFamily: "Poppins",
                             ),

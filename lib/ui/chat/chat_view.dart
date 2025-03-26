@@ -51,7 +51,8 @@ class ChatViewScreen extends StatefulWidget {
   const ChatViewScreen(
       {super.key,
       required this.refreshPageCallback,
-      required this.chatId,required this.isGroup});
+      required this.chatId,
+      required this.isGroup});
 
   @override
   State<ChatViewScreen> createState() => _ChatViewScreenState();
@@ -81,7 +82,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   int pageSize = 10;
   int maxPageNumber = 1;
   bool isFetchingMore = false;
-  bool textFiledChange =false;
+  bool textFiledChange = false;
   final String serverUrl = 'https://43.204.94.146';
 
   @override
@@ -101,7 +102,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     });
     connectToSocket();
   }
-
 
   void connectToSocket() {
     socket = io.io('https://43.204.94.146', <String, dynamic>{
@@ -131,9 +131,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         _fetchData();
       });
     });
-
-
-
   }
 
   void _getDir() async {
@@ -272,12 +269,11 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-       widget.refreshPageCallback();
+        widget.refreshPageCallback();
         return true;
       },
       child: Scaffold(
@@ -304,14 +300,14 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   maxPageNumber = state.maxPageNumber;
                   chatViewGroupInfo = state.chatViewGroupInfo;
 
-
                   if (currentPage == 1) {
                     chatView = state.chatView;
                   } else {
                     for (var newChat in state.chatView) {
                       var existingChat = chatView.firstWhere(
                         (chat) => chat.date == newChat.date,
-                        orElse: () => ChatView(date: newChat.date, messages: []),
+                        orElse: () =>
+                            ChatView(date: newChat.date, messages: []),
                       );
 
                       if (existingChat.messages.isEmpty) {
@@ -336,25 +332,23 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   isChartViewLoading = false;
                   isFetchingMore = false;
                 });
-              } else if(state is UploadFileSuccess){
+              } else if (state is UploadFileSuccess) {
                 chartBloc.add(ChartSendMessageEvent(
                   chatId: widget.chatId,
                   content: 'media',
-                  messageType:'media',
+                  messageType: 'media',
                   fileName: state.filePath.split('/').last,
                   fileUrl: state.filePath,
                   fileType: 'audio',
                   fileSize: '1mb',
                 ));
                 FocusScope.of(context).unfocus();
-              }
-              else if(state is UploadFileFailed){
+              } else if (state is UploadFileFailed) {
                 setState(() {
                   isChartViewLoading = false;
                   isFetchingMore = false;
                 });
-              }
-              else if(state is ChartSendMessageSuccess){
+              } else if (state is ChartSendMessageSuccess) {
                 _fetchData();
               }
             }),
@@ -367,7 +361,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                     chartBloc.add(ChartSendMessageEvent(
                       chatId: widget.chatId,
                       content: 'media',
-                      messageType:'media',
+                      messageType: 'media',
                       fileName: profilePicture.split('/').last,
                       fileUrl: profilePicture,
                       fileType: 'image',
@@ -389,7 +383,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if(!isChartViewLoading)...[
+                if (!isChartViewLoading) ...[
                   Container(
                     padding: EdgeInsets.symmetric(
                         horizontal: SizeConfig.blockWidth * 2.5,
@@ -418,21 +412,30 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                             ),
                             InkWell(
                               onTap: () {
-                                if(widget.isGroup){
+                                if (widget.isGroup) {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(
-                                                  create: (context) => ChartBloc()..add(FetchChartViewProfileEvent(
-                                                      chatId: chatViewGroupInfo.id!)),
-                                                ),
-
-                                                BlocProvider(create: (context) =>InitialRegisterBloc())
-                                              ],
-                                              child: ChatProfileViewScreen(chatViewGroupInfo:chatViewGroupInfo,refreshPageCallback: _refreshPageAfterEdit,)
-                                          )));
+                                          builder: (context) =>
+                                              MultiBlocProvider(
+                                                  providers: [
+                                                    BlocProvider(
+                                                      create: (context) => ChartBloc()
+                                                        ..add(FetchChartViewProfileEvent(
+                                                            chatId:
+                                                                chatViewGroupInfo
+                                                                    .id!)),
+                                                    ),
+                                                    BlocProvider(
+                                                        create: (context) =>
+                                                            InitialRegisterBloc())
+                                                  ],
+                                                  child: ChatProfileViewScreen(
+                                                    chatViewGroupInfo:
+                                                        chatViewGroupInfo,
+                                                    refreshPageCallback:
+                                                        _refreshPageAfterEdit,
+                                                  ))));
                                 }
                               },
                               child: Row(
@@ -447,11 +450,14 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                           color: COLORS.primary,
                                           width: SizeConfig.blockWidth * 0.3,
                                         ),
-                                        image:  chatViewGroupInfo.picture!
-                                            .isNotEmpty?DecorationImage(
-                                            image: NetworkImage(chatViewGroupInfo.picture!,
-                                            ),
-                                            fit: BoxFit.cover):null,
+                                        image: chatViewGroupInfo
+                                                .picture!.isNotEmpty
+                                            ? DecorationImage(
+                                                image: NetworkImage(
+                                                  chatViewGroupInfo.picture!,
+                                                ),
+                                                fit: BoxFit.cover)
+                                            : null,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(
                                                 SizeConfig.blockWidth * 3))),
@@ -459,14 +465,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   SizedBox(width: SizeConfig.blockWidth * 2),
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(
                                         width: SizeConfig.blockWidth * 45,
                                         child: Text(chatViewGroupInfo.name!,
                                             style: TextStyle(
                                               color: COLORS.neutralDark,
-                                              fontSize: SizeConfig.blockWidth * 3.8,
+                                              fontSize:
+                                                  SizeConfig.blockWidth * 3.8,
                                               fontWeight: FontWeight.w400,
                                               fontFamily: "Poppins",
                                               overflow: TextOverflow.ellipsis,
@@ -480,7 +488,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             style: TextStyle(
                                               color: COLORS.neutralDarkOne,
                                               fontSize:
-                                              SizeConfig.blockWidth * 3.25,
+                                                  SizeConfig.blockWidth * 3.25,
                                               fontWeight: FontWeight.w400,
                                               fontFamily: "Poppins",
                                               overflow: TextOverflow.ellipsis,
@@ -506,130 +514,115 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                               'Chat Options',
                               [
                                 BottomSheetItem(
-                                title: 'Mute Notification',
-                                onTap: () => {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider(
-                                            create: (context) => ProfileBloc()
-                                              ..add(const FetchSettingEvent()),
-                                          ),
-                                        ],
-                                        child: const NotificationScreen(),
-                                      )))
-                            },
-                            ),
-
-                            if(widget.isGroup == false)...[
-                                BottomSheetItem(
-                                  title: 'Unfriend',
+                                  title: 'Mute Notification',
                                   onTap: () => {
-                                    showInterestedBloc.add(UnfriendsEvent(
-                                        friendId: chatViewGroupInfo
-                                            .participants![0].userId!,
-                                        onSuccess: (message) {
-                                          Navigator.pushNamed(
-                                            context,
-                                            '/main_screen',
-                                            arguments: {'selectedIndex': 3},
-                                          );
-                                          showCustomSnackBar(
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MultiBlocProvider(
+                                                  providers: [
+                                                    BlocProvider(
+                                                      create: (context) =>
+                                                          ProfileBloc()
+                                                            ..add(
+                                                                const FetchSettingEvent()),
+                                                    ),
+                                                  ],
+                                                  child:
+                                                      const NotificationScreen(),
+                                                )))
+                                  },
+                                ),
+                                if (widget.isGroup == false) ...[
+                                  BottomSheetItem(
+                                    title: 'Unfriend',
+                                    onTap: () => {
+                                      showInterestedBloc.add(UnfriendsEvent(
+                                          friendId: chatViewGroupInfo
+                                              .participants![0].userId!,
+                                          onSuccess: (message) {
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/main_screen',
+                                              arguments: {'selectedIndex': 3},
+                                            );
+                                            showCustomSnackBar(
+                                                context: context,
+                                                message:
+                                                    "Successfully unfriended!",
+                                                backgroundColor:
+                                                    COLORS.semanticTwo);
+                                            widget.refreshPageCallback();
+                                          },
+                                          onError: (message) {
+                                            showCustomSnackBar(
                                               context: context,
-                                              message:
-                                              "Successfully unfriended!",
-                                              backgroundColor:
-                                              COLORS.semanticTwo);
-                                          widget.refreshPageCallback();
-                                        },
-                                        onError: (message) {
-                                          showCustomSnackBar(
-                                            context: context,
-                                            message: message,
-                                          );
-                                        }))
-                                  },
-                                )],
-                            if(widget.isGroup)...[
-                                BottomSheetItem(
-                                  title: 'Invite Friends',
-                                  onTap: () => {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(
-                                                  create: (context) =>
-                                                  ChartBloc()
-                                                    ..add(InviteMemberChartEvent(page: 1, pageSize: 10, groupId: chatViewGroupInfo.id!, keyWord: '')),
-                                                ),
-                                              ],
-                                              child: InviteFriendsList(groupId: chatViewGroupInfo.id!,),
-                                            )))
-                                  },
-                                ),
-                                BottomSheetItem(
-                                  title: 'Remove People',
-                                  onTap: () => {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(
-                                                  create: (context) =>
-                                                  ChartBloc()
-                                                    ..add(FetchChartViewProfileEvent( chatId: chatViewGroupInfo.id!)),
-                                                ),
-                                              ],
-                                              child: RemoveFriendsChat(chatViewGroupInfo:chatViewGroupInfo),
-                                            )))
-
-                                  },
-                                ),
-                                BottomSheetItem(
-                                    title: 'Share Joining Link', onTap: () => {}),
-                              if (chatViewGroupInfo.createdBy == Config.id)...[
-                                BottomSheetItem(
-                                  title: 'Delete Group',
-                                  onTap: () => {
-                                    showMaterialModalBottomSheet(
-                                      enableDrag: true,
-                                      expand: false,
-                                      isDismissible: true,
-                                      backgroundColor: COLORS.white,
-                                      context: context,
-                                      closeProgressThreshold: 0,
-                                      duration: const Duration(seconds: 0),
-                                      useRootNavigator: true,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(20)),
-                                      ),
-                                      builder: (context) =>
-                                          BlocProvider(
-                                            create: (context) =>
-                                                ChartBloc(),
-                                            child:
-                                            DeleteGroupModal(
-                                              buttonText: 'DELETE',
-                                              header:
-                                              'Are you sure you want to \n delete the group?',
-                                              chatId: chatViewGroupInfo!.id!,
-                                            ),
-                                          ),
-                                    ),
-                                  },
-                                )
-                              ],
-                                BottomSheetItem(
-                                  title: 'Leave Group',
-                                  onTap: () => {
-                                    if (chatViewGroupInfo.createdBy == Config.id)
-                                      {
+                                              message: message,
+                                            );
+                                          }))
+                                    },
+                                  )
+                                ],
+                                if (widget.isGroup) ...[
+                                  BottomSheetItem(
+                                    title: 'Invite Friends',
+                                    onTap: () => {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MultiBlocProvider(
+                                                    providers: [
+                                                      BlocProvider(
+                                                        create: (context) => ChartBloc()
+                                                          ..add(InviteMemberChartEvent(
+                                                              page: 1,
+                                                              pageSize: 10,
+                                                              groupId:
+                                                                  chatViewGroupInfo
+                                                                      .id!,
+                                                              keyWord: '')),
+                                                      ),
+                                                    ],
+                                                    child: InviteFriendsList(
+                                                      groupId:
+                                                          chatViewGroupInfo.id!,
+                                                    ),
+                                                  )))
+                                    },
+                                  ),
+                                  BottomSheetItem(
+                                    title: 'Remove People',
+                                    onTap: () => {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MultiBlocProvider(
+                                                    providers: [
+                                                      BlocProvider(
+                                                        create: (context) => ChartBloc()
+                                                          ..add(FetchChartViewProfileEvent(
+                                                              chatId:
+                                                                  chatViewGroupInfo
+                                                                      .id!)),
+                                                      ),
+                                                    ],
+                                                    child: RemoveFriendsChat(
+                                                        chatViewGroupInfo:
+                                                            chatViewGroupInfo),
+                                                  )))
+                                    },
+                                  ),
+                                  BottomSheetItem(
+                                      title: 'Share Joining Link',
+                                      onTap: () => {}),
+                                  if (chatViewGroupInfo.createdBy ==
+                                      Config.id) ...[
+                                    BottomSheetItem(
+                                      title: 'Delete Group',
+                                      onTap: () => {
                                         showMaterialModalBottomSheet(
                                           enableDrag: true,
                                           expand: false,
@@ -643,33 +636,74 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             borderRadius: BorderRadius.vertical(
                                                 top: Radius.circular(20)),
                                           ),
-                                          builder: (context) =>  MarkasAdminModal(members: chatViewGroupInfo.participants!,),
+                                          builder: (context) => BlocProvider(
+                                            create: (context) => ChartBloc(),
+                                            child: DeleteGroupModal(
+                                              buttonText: 'DELETE',
+                                              header:
+                                                  'Are you sure you want to \n delete the group?',
+                                              chatId: chatViewGroupInfo!.id!,
+                                            ),
+                                          ),
                                         ),
-                                      }
-                                    else
-                                      {
-                                        chartBloc.add(LeaveGroupChatEvent(
-                                            chatId: widget.chatId,
-                                            onSuccess: (message) {
-                                              showCustomSnackBar(
+                                      },
+                                    )
+                                  ],
+                                  BottomSheetItem(
+                                    title: 'Leave Group',
+                                    onTap: () => {
+                                      if (chatViewGroupInfo.createdBy ==
+                                          Config.id)
+                                        {
+                                          showMaterialModalBottomSheet(
+                                            enableDrag: true,
+                                            expand: false,
+                                            isDismissible: true,
+                                            backgroundColor: COLORS.white,
+                                            context: context,
+                                            closeProgressThreshold: 0,
+                                            duration:
+                                                const Duration(seconds: 0),
+                                            useRootNavigator: true,
+                                            shape: const RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(20)),
+                                            ),
+                                            builder: (context) =>
+                                                MarkasAdminModal(
+                                              members: chatViewGroupInfo
+                                                  .participants!,
+                                            ),
+                                          ),
+                                        }
+                                      else
+                                        {
+                                          chartBloc.add(LeaveGroupChatEvent(
+                                              chatId: widget.chatId,
+                                              onSuccess: (message) {
+                                                showCustomSnackBar(
+                                                    context: context,
+                                                    message: message,
+                                                    backgroundColor:
+                                                        COLORS.neutralDarkTwo);
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/main_screen',
+                                                  arguments: {
+                                                    'selectedIndex': 3
+                                                  },
+                                                );
+                                              },
+                                              onError: (message) {
+                                                showCustomSnackBar(
                                                   context: context,
                                                   message: message,
-                                                  backgroundColor: COLORS.neutralDarkTwo);
-                                              Navigator.pushNamed(
-                                                context,
-                                                '/main_screen',
-                                                arguments: {'selectedIndex': 3},
-                                              );
-                                            },
-                                            onError: (message) {
-                                              showCustomSnackBar(
-                                                context: context,
-                                                message: message,
-                                              );
-                                            }))
-                                      }
-                                  },
-                                ),
+                                                );
+                                              }))
+                                        }
+                                    },
+                                  ),
                                 ],
                                 BottomSheetItem(
                                   title: 'Clear Chat',
@@ -680,7 +714,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                           showCustomSnackBar(
                                               context: context,
                                               message: message,
-                                              backgroundColor: COLORS.neutralDarkTwo);
+                                              backgroundColor:
+                                                  COLORS.neutralDarkTwo);
                                           Navigator.pushNamed(
                                             context,
                                             '/main_screen',
@@ -695,8 +730,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         }))
                                   },
                                 ),
-
-                                if(chatViewGroupInfo.archivedFor!.contains(Config.id))...[
+                                if (chatViewGroupInfo.archivedFor!
+                                    .contains(Config.id)) ...[
                                   BottomSheetItem(
                                     title: 'UnArchive',
                                     onTap: () => {
@@ -706,7 +741,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             showCustomSnackBar(
                                                 context: context,
                                                 message: message,
-                                                backgroundColor: COLORS.neutralDarkTwo);
+                                                backgroundColor:
+                                                    COLORS.neutralDarkTwo);
                                             Navigator.pushNamed(
                                               context,
                                               '/main_screen',
@@ -721,7 +757,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                           }))
                                     },
                                   )
-                                ] else...[
+                                ] else ...[
                                   BottomSheetItem(
                                     title: 'Archive',
                                     onTap: () => {
@@ -731,7 +767,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             showCustomSnackBar(
                                                 context: context,
                                                 message: message,
-                                                backgroundColor: COLORS.neutralDarkTwo);
+                                                backgroundColor:
+                                                    COLORS.neutralDarkTwo);
                                             Navigator.pushNamed(
                                               context,
                                               '/main_screen',
@@ -764,7 +801,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             top: Radius.circular(20)),
                                       ),
                                       builder: (context) =>
-                                      const ReportOrBlockModal(),
+                                          const ReportOrBlockModal(),
                                     ),
                                   },
                                 )
@@ -784,7 +821,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         ),
                         child: ListView.builder(
                             controller: _scrollController,
-                            itemCount: chatView.length + (isFetchingMore ? 1 : 0),
+                            itemCount:
+                                chatView.length + (isFetchingMore ? 1 : 0),
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             reverse: true,
@@ -792,15 +830,15 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                               if (index == chatView.length) {
                                 return isFetchingMore
                                     ? Center(
-                                  child:
-                                  LoadingAnimationWidget.discreteCircle(
-                                    color: COLORS.primary,
-                                    // secondRingColor: COLORS.semanticTwo,
-                                    // thirdRingColor: COLORS.accent,
-                                    size: SizeConfig.blockHeight * 3.5,
-                                  ),
-                                )
-                                    : SizedBox.shrink();
+                                        child: LoadingAnimationWidget
+                                            .discreteCircle(
+                                          color: COLORS.primary,
+                                          // secondRingColor: COLORS.semanticTwo,
+                                          // thirdRingColor: COLORS.accent,
+                                          size: SizeConfig.blockHeight * 3.5,
+                                        ),
+                                      )
+                                    : const SizedBox.shrink();
                               }
                               ChatView chatDate = chatView[index];
                               return Column(
@@ -809,7 +847,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                 children: [
                                   Padding(
                                     padding: EdgeInsets.only(
-                                        bottom: SizeConfig.blockHeight,top:SizeConfig.blockHeight),
+                                        bottom: SizeConfig.blockHeight,
+                                        top: SizeConfig.blockHeight),
                                     child: Text(
                                       chatDate.date,
                                       style: TextStyle(
@@ -820,89 +859,102 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       ),
                                     ),
                                   ),
-
                                   ListView.builder(
                                     itemCount: chatDate.messages.length,
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
                                     reverse: true,
                                     itemBuilder: (context, msgIndex) {
-                                      Message message = chatDate.messages[msgIndex];
+                                      Message message =
+                                          chatDate.messages[msgIndex];
                                       return Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          if (message.senderId == Config.id) ...[
+                                          if (message.senderId ==
+                                              Config.id) ...[
                                             SendMessage(
                                               message: message.content!,
                                               key: null,
                                               isSeenByMe: true,
-                                              time: formatTime(
-                                                  message.updatedAt!.toString()),
-                                              audioShow: message.type == 'media' &&
-                                                  message
-                                                      .messageMedia!.isNotEmpty &&
-                                                  message.messageMedia![0]
-                                                      .fileType ==
-                                                      "audio",
+                                              time: formatTime(message
+                                                  .updatedAt!
+                                                  .toString()),
+                                              audioShow:
+                                                  message.type == 'media' &&
+                                                      message.messageMedia!
+                                                          .isNotEmpty &&
+                                                      message.messageMedia![0]
+                                                              .fileType ==
+                                                          "audio",
                                               textShow: message.type == 'text',
-                                              imageShow: message.type == 'media' &&
-                                                  message
-                                                      .messageMedia!.isNotEmpty &&
-                                                  message.messageMedia![0]
-                                                      .fileType ==
-                                                      "image",
-                                              imageUrl:
-                                              message.messageMedia!.isNotEmpty
+                                              imageShow:
+                                                  message.type == 'media' &&
+                                                      message.messageMedia!
+                                                          .isNotEmpty &&
+                                                      message.messageMedia![0]
+                                                              .fileType ==
+                                                          "image",
+                                              imageUrl: message
+                                                      .messageMedia!.isNotEmpty
                                                   ? message
-                                                  .messageMedia![0].fileUrl!
+                                                      .messageMedia![0].fileUrl!
                                                   : '',
                                               audioWidget: WaveBubble(
-                                                audioUrl:
-                                                message.messageMedia!.isNotEmpty
+                                                audioUrl: message.messageMedia!
+                                                        .isNotEmpty
                                                     ? message.messageMedia![0]
-                                                    .fileUrl!
+                                                        .fileUrl!
                                                     : '',
                                                 isSender: true,
                                               ),
                                             )
                                           ] else ...[
-                                            ReceivedMessage(
-                                                message: message.content!,
-                                                key: null,
-                                                isSeenByMe: true,
-                                                time: formatTime(
-                                                    message.updatedAt!.toString()),
-                                                audioShow: message.type ==
-                                                    'media' &&
-                                                    message
-                                                        .messageMedia!.isNotEmpty &&
-                                                    message.messageMedia![0]
-                                                        .fileType ==
-                                                        "audio",
-                                                textShow: message.type == 'text',
-                                                imageShow: message.type ==
-                                                    'media' &&
-                                                    message
-                                                        .messageMedia!.isNotEmpty &&
-                                                    message.messageMedia![0]
-                                                        .fileType ==
-                                                        "image",
-                                                imageUrl:
-                                                message.messageMedia!.isNotEmpty
-                                                    ? message.messageMedia![0]
-                                                    .fileUrl!
-                                                    : '',
-                                                audioWidget: WaveBubble(
-                                                  audioUrl: message
-                                                      .messageMedia!.isNotEmpty
-                                                      ? message
-                                                      .messageMedia![0].fileUrl!
+                                            if (message.sender != null) ...[
+                                              ReceivedMessage(
+                                                  message: message.content!,
+                                                  key: null,
+                                                  isSeenByMe: true,
+                                                  time: formatTime(
+                                                      message
+                                                          .updatedAt!
+                                                          .toString()),
+                                                  audioShow: message.type ==
+                                                          'media' &&
+                                                      message.messageMedia!
+                                                          .isNotEmpty &&
+                                                      message.messageMedia![0]
+                                                              .fileType ==
+                                                          "audio",
+                                                  textShow:
+                                                      message.type == 'text',
+                                                  imageShow: message.type ==
+                                                          'media' &&
+                                                      message.messageMedia!
+                                                          .isNotEmpty &&
+                                                      message.messageMedia![0]
+                                                              .fileType ==
+                                                          "image",
+                                                  imageUrl: message
+                                                          .messageMedia!
+                                                          .isNotEmpty
+                                                      ? message.messageMedia![0]
+                                                          .fileUrl!
                                                       : '',
-                                                  isSender: true,
-                                                ),
-                                                sendName: message.sender!.name!)
+                                                  audioWidget: WaveBubble(
+                                                    audioUrl: message
+                                                            .messageMedia!
+                                                            .isNotEmpty
+                                                        ? message
+                                                            .messageMedia![0]
+                                                            .fileUrl!
+                                                        : '',
+                                                    isSender: true,
+                                                  ),
+                                                  sendName: message.sender!.name!)
+                                            ]
                                           ],
                                         ],
                                       );
@@ -912,14 +964,12 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                               );
                             })),
                   )
-                ]
-                else...[
+                ] else ...[
                   SizedBox(
-                    width: SizeConfig.blockWidth*90,
-                    height: SizeConfig.blockHeight*90,
-                    child:  globalLoadingWidget(),
+                    width: SizeConfig.blockWidth * 90,
+                    height: SizeConfig.blockHeight * 90,
+                    child: globalLoadingWidget(),
                   )
-
                 ]
               ],
             ),
@@ -960,8 +1010,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       height: SizeConfig.blockHeight * 8,
                       decoration: BoxDecoration(
                           color: COLORS.primaryOne.withOpacity(0.35),
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.5)),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 3.5)),
                       child: Icon(
                         Icons.add,
                         color: COLORS.primary,
@@ -988,7 +1038,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: SizeConfig.blockWidth * 3),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   AudioWaveforms(
@@ -1081,8 +1132,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         borderRadius: BorderRadius.circular(
                                             SizeConfig.blockWidth * 3.25),
                                         borderSide: BorderSide(
-                                          color:
-                                              COLORS.primaryOne.withOpacity(0.1),
+                                          color: COLORS.primaryOne
+                                              .withOpacity(0.1),
                                           width: 0,
                                         ),
                                       ),
@@ -1090,8 +1141,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         borderRadius: BorderRadius.circular(
                                             SizeConfig.blockWidth * 3.25),
                                         borderSide: BorderSide(
-                                          color:
-                                              COLORS.primaryOne.withOpacity(0.1),
+                                          color: COLORS.primaryOne
+                                              .withOpacity(0.1),
                                           width: 0,
                                         ),
                                       ),
@@ -1099,15 +1150,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         borderRadius: BorderRadius.circular(
                                             SizeConfig.blockWidth * 3.25),
                                         borderSide: BorderSide(
-                                          color:
-                                              COLORS.primaryOne.withOpacity(0.1),
+                                          color: COLORS.primaryOne
+                                              .withOpacity(0.1),
                                           width: 0,
                                         ),
                                       ),
                                     ),
                                     maxLines: null,
                                     minLines: 1, // Start with 1 line
-                                    expands: false, // Don't make it fill all available space, but grow as needed
+                                    expands:
+                                        false, // Don't make it fill all available space, but grow as needed
                                     onChanged: _onMessageChanged,
                                   ),
                                 ),

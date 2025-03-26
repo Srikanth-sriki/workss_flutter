@@ -102,8 +102,8 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
       setModalState(() {  // Update the modal UI
         searchKeyword = keyword.toLowerCase();
         filteredFriendList = friendList.where((friend) {
-          final name = friend.user.name.toLowerCase();
-          final profession = friend.user.professionType.toLowerCase();
+          final name = friend.user!.name.toLowerCase();
+          final profession = friend.user!.professionType.toLowerCase();
           return name.contains(searchKeyword) || profession.contains(searchKeyword);
         }).toList();
       });
@@ -175,9 +175,11 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                       shrinkWrap: true,
                       itemCount: filteredFriendList.length,
                       itemBuilder: (context, index) {
-                        return friendSearchDetailsCards(
-                            image: friendList[index].user.profilePic,
-                            name: friendList[index].user.name,
+                        return filteredFriendList[index].user != null ?
+
+                          friendSearchDetailsCards(
+                            image: friendList[index].user!.profilePic,
+                            name: friendList[index].user!.name,
                             onTapCard: () {
                               Navigator.push(
                                   context,
@@ -190,7 +192,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                               bloc.add(
                                                   FetchFriendsSingleView(
                                                       friendId:friendList[index]
-                                                          .friendId));
+                                                          .friendId!));
                                               return bloc;
                                             },
                                           ),
@@ -207,24 +209,24 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                         child: FriendsDetailsScreen(
                                           refreshPageCallback:
                                           _refreshPageAfterEdit,
-                                          id: friendList[index].friendId,
+                                          id: friendList[index].friendId!,
                                         ),
                                       )));
                             },
                             onTapButtonCard: () {},
-                            added: friendList[index].user.friendRequestSent != null
+                            added: friendList[index].user!.friendRequestSent != null
                                 ? true
                                 : false,
-                            disc: friendList[index].user.professionType,
+                            disc: friendList[index].user!.professionType,
                             buttonRequired: false,
                             widgetButtonRequired: true,
                             widgetButton:  customIconButton(
-                                text:  friendList[index].user.isFriend != null
+                                text:  friendList[index].user!.isFriend != null
                                     ? 'UNFRIEND'.tr():
                                 friendView.friendRequestSent != null?'REQUEST SENT'.tr()
                                     : 'ADD FRIEND'.tr(),
                                 onPressed: (){
-                                  if( friendList[index].user.isFriend == null){
+                                  if( friendList[index].user!.isFriend == null){
                                     showInterestedBloc.add(AddFriendEvent(
                                         userId: friendView.id,
                                         onSuccess: (message) {
@@ -249,11 +251,11 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                   }
                                   else{
                                     showInterestedBloc.add(UnfriendsEvent(
-                                        friendId: friendList[index].user.id,
+                                        friendId: friendList[index].user!.id,
                                         onSuccess: (message) {
                                           setState(() {
-                                            friendList[index].user.isFriend = null;
-                                            friendList[index].user.friendRequestSent = null;
+                                            friendList[index].user!.isFriend = null;
+                                            friendList[index].user!.friendRequestSent = null;
                                             widget.refreshPageCallback();
                                             _refreshPageAfterEdit();
                                           });
@@ -272,14 +274,14 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                         }));
                                   }
                                 },
-                                width: SizeConfig.blockWidth * 32,
+                                width: SizeConfig.blockWidth * 35,
                                 height: SizeConfig.blockHeight * 6.25,
-                                backgroundColor: (friendList[index].user.isFriend != null || friendView.friendRequestSent != null)
+                                backgroundColor: (friendList[index].user!.isFriend != null || friendView.friendRequestSent != null)
                                     ? COLORS.neutralDarkTwo : COLORS.primary,
-                                textColor:  (friendList[index].user.isFriend != null || friendView.friendRequestSent != null)
+                                textColor:  (friendList[index].user!.isFriend != null || friendView.friendRequestSent != null)
                                     ? COLORS.neutralDark : COLORS.white,
                                 showIcon: false)
-                        );
+                        ):const SizedBox(); ;
                       },
                     ),
                   ),
@@ -317,9 +319,9 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
         listener: (context, state) {
           if (state is FetchFriendsViewSuccess) {
             setState(() {
-              friendView = state.friendData.user;
-              friendList = state.friendData.friends;
-              filteredFriendList = state.friendData.friends;
+              friendView = state.friendData.user!;
+              friendList = state.friendData.friends!;
+              filteredFriendList = state.friendData.friends!;
               usertype = friendView.userType;
             });
           }
@@ -328,8 +330,8 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
           if (state is FetchFriendsViewLoading || state is FriendsInitial) {
             return globalLoadingWidget();
           } else if (state is FetchFriendsViewSuccess) {
-            friendView = state.friendData.user;
-            friendList = state.friendData.friends;
+            friendView = state.friendData.user!;
+            friendList = state.friendData.friends!;
             return SafeArea(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1075,112 +1077,113 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: friendList.length,
                               itemBuilder: (context, index) {
-                                return Padding(
+                                return friendList[index].user != null
+                                    ? Padding(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: SizeConfig.blockWidth * 5,
                                   ),
                                   child: friendSearchDetailsCards(
-                                    image: friendList[index].user.profilePic,
-                                    name: friendList[index].user.name,
+                                    image: friendList[index].user!.profilePic,
+                                    name: friendList[index].user!.name,
                                     onTapCard: () {
                                       Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => MultiBlocProvider(
-                                                providers: [
-                                                  BlocProvider(
-                                                    create: (context) {
-                                                      final bloc = FriendsBloc();
-                                                      bloc.add(
-                                                          FetchFriendsSingleView(
-                                                              friendId:friendList[index]
-                                                                  .friendId));
-                                                      return bloc;
-                                                    },
-                                                  ),
-                                                  BlocProvider(
-                                                    create: (context) =>
-                                                        ShowInterestedBloc(),
-                                                  ),
-                                                  BlocProvider(
-                                                      create: (context) =>
-                                                          ReportPostBloc()),
-                                                  BlocProvider(create: (context)=>ShowInterestedBloc()),
-                                                  BlocProvider(create: (context)=>ChartBloc())
-                                                ],
-                                                child: FriendsDetailsScreen(
-                                                  refreshPageCallback:
-                                                  _refreshPageAfterEdit,
-                                                  id: friendList[index].friendId,
-                                                ),
-                                              )));
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) {
+                                                  final bloc = FriendsBloc();
+                                                  bloc.add(FetchFriendsSingleView(
+                                                      friendId: friendList[index].friendId!));
+                                                  return bloc;
+                                                },
+                                              ),
+                                              BlocProvider(create: (context) => ShowInterestedBloc()),
+                                              BlocProvider(create: (context) => ReportPostBloc()),
+                                              BlocProvider(create: (context) => ShowInterestedBloc()),
+                                              BlocProvider(create: (context) => ChartBloc()),
+                                            ],
+                                            child: FriendsDetailsScreen(
+                                              refreshPageCallback: _refreshPageAfterEdit,
+                                              id: friendList[index].friendId!,
+                                            ),
+                                          ),
+                                        ),
+                                      );
                                     },
                                     onTapButtonCard: () {},
-                                    added: friendList[index].user.friendRequestSent != null
-                                        ? true
-                                        : false,
-                                    disc: friendList[index].user.professionType,
+                                    added: friendList[index].user!.friendRequestSent != null,
+                                    disc: friendList[index].user!.professionType,
                                     buttonRequired: false,
-                                      widgetButtonRequired: true,
-                                    widgetButton:  customIconButton(
-                                        text:  friendList[index].user.isFriend != null
-                                            ? 'UNFRIEND'.tr():
-                                        friendView.friendRequestSent != null?'REQUEST SENT'.tr()
-                                            : 'ADD FRIEND'.tr(),
-                                        onPressed: (){
-                                          if( friendList[index].user.isFriend == null){
-                                            showInterestedBloc.add(AddFriendEvent(
-                                                userId: friendView.id,
-                                                onSuccess: (message) {
-                                                  setState(() {
-                                                    friendView.isFriend =
-                                                        IsFriend(
-                                                            userId: friendView.id, id: '',friendId: '');
-                                                    friendView.friendRequestSent = FriendRequestSent(
-                                                      id:  friendView.id,
-                                                    );
-                                                  });
-                                                },
-                                                onError: (message) {
-                                                  showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                  );
-                                                }));
-                                          }
-                                          else{
-                                            showInterestedBloc.add(UnfriendsEvent(
-                                                friendId: friendList[index].user.id,
-                                                onSuccess: (message) {
-                                                  setState(() {
-                                                    friendList[index].user.isFriend = null;
-                                                    friendList[index].user.friendRequestSent = null;
-                                                    widget.refreshPageCallback();
-                                                  });
-                                                  showCustomSnackBar(
-                                                      context: context,
-                                                      message:
-                                                      "Successfully unfriended!",
-                                                      backgroundColor:
-                                                      COLORS.semanticTwo);
-                                                },
-                                                onError: (message) {
-                                                  showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                  );
-                                                }));
-                                          }
-                                        },
-                                        width: SizeConfig.blockWidth * 32,
-                                        height: SizeConfig.blockHeight * 6.25,
-                                        backgroundColor: (friendList[index].user.isFriend != null || friendView.friendRequestSent != null)
-                                            ? COLORS.neutralDarkTwo : COLORS.primary,
-                                        textColor:  (friendList[index].user.isFriend != null || friendView.friendRequestSent != null)
-                                            ? COLORS.neutralDark : COLORS.white,
-                                        showIcon: false)
+                                    widgetButtonRequired: true,
+                                    widgetButton: customIconButton(
+                                      text: friendList[index].user!.isFriend != null
+                                          ? 'UNFRIEND'.tr()
+                                          : friendView.friendRequestSent != null
+                                          ? 'REQUEST SENT'.tr()
+                                          : 'ADD FRIEND'.tr(),
+                                      onPressed: () {
+                                        if (friendList[index].user!.isFriend == null) {
+                                          showInterestedBloc.add(AddFriendEvent(
+                                            userId: friendList[index].user!.id,
+                                            onSuccess: (message) {
+                                              setState(() {
+                                                friendView.isFriend = IsFriend(
+                                                    userId: friendList[index].user!.id, id: '', friendId: '');
+                                                friendView.friendRequestSent =
+                                                    FriendRequestSent(id: friendList[index].user!.id);
+                                              });
+                                            },
+                                            onError: (message) {
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                              );
+                                            },
+                                          ));
+                                        } else {
+                                          showInterestedBloc.add(UnfriendsEvent(
+                                            friendId: friendList[index].user!.id,
+                                            onSuccess: (message) {
+                                              setState(() {
+                                                friendList[index].user!.isFriend = null;
+                                                friendList[index].user!.friendRequestSent = null;
+                                                widget.refreshPageCallback();
+                                              });
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: "Successfully unfriended!",
+                                                backgroundColor: COLORS.semanticTwo,
+                                              );
+                                            },
+                                            onError: (message) {
+                                              showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                              );
+                                            },
+                                          ));
+                                        }
+                                      },
+                                      width: SizeConfig.blockWidth * 35,
+                                      height: SizeConfig.blockHeight * 6.25,
+                                      backgroundColor:
+                                      (friendList[index].user!.isFriend != null ||
+                                          friendView.friendRequestSent != null)
+                                          ? COLORS.neutralDarkTwo
+                                          : COLORS.primary,
+                                      textColor:
+                                      (friendList[index].user!.isFriend != null ||
+                                          friendView.friendRequestSent != null)
+                                          ? COLORS.neutralDark
+                                          : COLORS.white,
+                                      showIcon: false,
+                                    ),
                                   ),
-                                );
+                                )
+                                    : const SizedBox(); // Return an empty widget if user is null
+
                               })
                         ],
                       ),

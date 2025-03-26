@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:works_app/components/colors.dart';
 
 import '../../components/size_config.dart';
@@ -216,12 +217,14 @@ class _WaveBubbleState extends State<WaveBubble> {
   static PlayerController?
       _currentlyPlayingController; // Keep track of playing controller
 
-
-    final playerWaveStyle = const PlayerWaveStyle(
+  final playerWaveStyle = const PlayerWaveStyle(
     fixedWaveColor: COLORS.neutralDark,
     liveWaveColor: COLORS.neutralDark,
     spacing: 6,
-    waveThickness: 1,backgroundColor: COLORS.neutralDark,waveCap: StrokeCap.square,showSeekLine: true,
+    waveThickness: 1,
+    backgroundColor: COLORS.neutralDark,
+    waveCap: StrokeCap.square,
+    showSeekLine: true,
   );
 
   @override
@@ -335,44 +338,69 @@ class _WaveBubbleState extends State<WaveBubble> {
   Widget build(BuildContext context) {
     return widget.audioUrl != null
         ? Align(
-      alignment: widget.isSender ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: SizeConfig.blockWidth,
-          horizontal: SizeConfig.blockWidth ,
-        ),
-        child: Row(
-          children: [
-            if (localFilePath == null)
-              isDownloading
-                  ?  CircularProgressIndicator() // Show loading when downloading
-                  : IconButton(
-                onPressed: _downloadAudio,
-                icon: const Icon(Icons.download,color: COLORS.neutralDark,),
+            alignment:
+                widget.isSender ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                vertical: SizeConfig.blockWidth * 0.2,
+                horizontal: SizeConfig.blockWidth * 0.5,
               ),
-
-            if (localFilePath != null) ...[
-              IconButton(
-                onPressed: _togglePlayPause,
-                icon: Icon(
-                  isPlaying ? Icons.pause : Icons.play_circle,
-                  color: COLORS.neutralDark,
-                  size: SizeConfig.blockWidth * 8,
-                ),
+              child: Row(
+                children: [
+                  if (localFilePath == null)
+                    isDownloading
+                        ? Center(
+                            child: LoadingAnimationWidget.hexagonDots(
+                              color: COLORS.primary,
+                              size: SizeConfig.blockHeight * 3,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                  onTap: _downloadAudio,
+                                  child: Icon(
+                                    Icons.download,
+                                    color: COLORS.neutralDark,
+                                    size: SizeConfig.blockHeight * 3.5,
+                                  )),
+                              SizedBox(width: SizeConfig.blockWidth,),
+                              Text(
+                                'audio.mp3',
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 2.5,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ],
+                          ),
+                  if (localFilePath != null) ...[
+                    InkWell(
+                      onTap: _togglePlayPause,
+                      child: Icon(
+                        isPlaying ? Icons.pause : Icons.play_circle,
+                        color: COLORS.neutralDark,
+                        size: SizeConfig.blockWidth * 8,
+                      ),
+                    ),
+                    AudioFileWaveforms(
+                      size: Size(SizeConfig.blockWidth * 40,
+                          SizeConfig.blockHeight * 3),
+                      playerController: controller,
+                      waveformType: WaveformType.fitWidth,
+                      playerWaveStyle: playerWaveStyle,
+                      continuousWaveform: true,
+                      enableSeekGesture: true,
+                    ),
+                  ],
+                ],
               ),
-              AudioFileWaveforms(
-                size: Size(SizeConfig.blockWidth * 40, SizeConfig.blockHeight * 3),
-                playerController: controller,
-                waveformType: WaveformType.fitWidth,
-                playerWaveStyle: playerWaveStyle,
-                continuousWaveform: true,
-                enableSeekGesture: true,
-              ),
-            ],
-          ],
-        ),
-      ),
-    )
+            ),
+          )
         : const SizedBox.shrink();
   }
 }
