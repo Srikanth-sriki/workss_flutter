@@ -18,6 +18,7 @@ import 'package:works_app/ui/home/work_search.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/notification/notification_bloc.dart';
+import '../../bloc/post_work/post_work_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
@@ -29,6 +30,7 @@ import '../../global_helper/reuse_widget.dart';
 import '../../models/home_fetch_model.dart';
 import '../chat/addFriends.dart';
 import '../friends/friends_search.dart';
+import '../post_work/post_work.dart';
 import 'filter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -155,55 +157,94 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           width: SizeConfig.screenWidth,
           padding: EdgeInsets.only(top: SizeConfig.blockHeight * 2),
-          child: Column(
+          child: Stack(
             children: [
-              _buildHeader(),
-              Expanded(
-                child: BlocConsumer<HomeBloc, HomeState>(
-                  listener: (context, state) {
-                    if (state is FetchHomeScreenSuccess) {
-                      setState(() {
-                        if (currentPage == 1) {
-                          // Only set data for the first page
-                          homeFetchModel = state.homeFetchModel;
-                        } else {
-                          // Only add new unique items for subsequent pages
-                          final newItems = state.homeFetchModel
-                              .where((item) => !homeFetchModel.contains(item));
-                          homeFetchModel.addAll(newItems);
+              Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(
+                    child: BlocConsumer<HomeBloc, HomeState>(
+                      listener: (context, state) {
+                        if (state is FetchHomeScreenSuccess) {
+                          setState(() {
+                            if (currentPage == 1) {
+                              // Only set data for the first page
+                              homeFetchModel = state.homeFetchModel;
+                            } else {
+                              // Only add new unique items for subsequent pages
+                              final newItems = state.homeFetchModel
+                                  .where((item) => !homeFetchModel.contains(item));
+                              homeFetchModel.addAll(newItems);
+                            }
+                            maxPageNumber = state.maxPageNumber;
+                            isFetchingMore = false;
+                          });
+                        } else if (state is FetchHomeScreenFailed) {
+                          setState(() {
+                            isFetchingMore = false;
+                          });
                         }
-                        maxPageNumber = state.maxPageNumber;
-                        isFetchingMore = false;
-                      });
-                    } else if (state is FetchHomeScreenFailed) {
-                      setState(() {
-                        isFetchingMore = false;
-                      });
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is HomeScreenLoading && currentPage == 1 ||
-                        state is HomeInitial) {
-                      return const ShimmerJobCards();
-                    } else if (state is FetchHomeScreenSuccess) {
-                      return _buildListView();
-                    } else if (state is FetchHomeScreenFailed) {
-                      return ErrorScreen(onRetry: () {
-                        homeBloc.add(FetchHomeScreenEvent(
-                            page: currentPage,
-                            pageSize: pageSize,
-                            keyWord: "",
-                            profession: "",
-                            city: "",
-                            gender: "",
-                            currentLongitude: '',
-                            currentLatitude: ''));
-                      });
-                    }
-                    return Container();
-                  },
-                ),
+                      },
+                      builder: (context, state) {
+                        if (state is HomeScreenLoading && currentPage == 1 ||
+                            state is HomeInitial) {
+                          return const ShimmerJobCards();
+                        } else if (state is FetchHomeScreenSuccess) {
+                          return _buildListView();
+                        } else if (state is FetchHomeScreenFailed) {
+                          return ErrorScreen(onRetry: () {
+                            homeBloc.add(FetchHomeScreenEvent(
+                                page: currentPage,
+                                pageSize: pageSize,
+                                keyWord: "",
+                                profession: "",
+                                city: "",
+                                gender: "",
+                                currentLongitude: '',
+                                currentLatitude: ''));
+                          });
+                        }
+                        return Container();
+                      },
+                    ),
+                  ),
+                ],
               ),
+              Positioned(
+                bottom: SizeConfig.blockHeight * 2.5,
+                right: SizeConfig.blockHeight * 4,
+                child: FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) {
+                                      final bloc = PostWorkBloc();
+                                      bloc.add(const FetchWorkPlaceEvent());
+                                      bloc.add(const FetchWorkKnownLanguageEvent());
+                                      return bloc;
+                                    },
+                                  ),
+                                  BlocProvider(
+                                      create: (context) =>
+                                          ProfileBloc()),
+                                  BlocProvider(
+                                      create: (context) =>
+                                          ProfessionalBloc()),
+                                ],
+                                child: const PostWorkScreen(),
+                              )));
+                    },
+                    backgroundColor: COLORS.primary,
+                    child: Icon(
+                      Icons.add,
+                      color: COLORS.white,
+                      size: SizeConfig.blockWidth * 6.5,
+                    )),
+              )
             ],
           ),
         ),
@@ -232,30 +273,30 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
-                  // addFriendText(
-                  //     textOne: 'Add Friends',
-                  //     textTwo: 'View All',
-                  //     onTap: () {
-                  //       Navigator.push(
-                  //           context,
-                  //           MaterialPageRoute(
-                  //               builder: (BuildContext context) =>
-                  //                   const AddFriendsScreen(
-                  //                       header: 'Friend Suggestion')));
-                  //     }),
-                  // SizedBox(
-                  //   height: SizeConfig.blockHeight * 33,
-                  //   child: ListView.builder(
-                  //       itemCount: 8,
-                  //       shrinkWrap: true,
-                  //       scrollDirection: Axis.horizontal,
-                  //       itemBuilder: (context, index) {
-                  //         return addFriendCard(
-                  //             added: index % 2 == 0 ? true : false,
-                  //             image: 'assets/images/home/dumy1.png',
-                  //             name: 'Julia Vandervort-Will');
-                  //       }),
-                  // ),
+                  addFriendText(
+                      textOne: 'Add Friends',
+                      textTwo: 'View All',
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    const AddFriendsScreen(
+                                        header: 'Friend Suggestion')));
+                      }),
+                  SizedBox(
+                    height: SizeConfig.blockHeight * 33,
+                    child: ListView.builder(
+                        itemCount: 8,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return addFriendCard(
+                              added: index % 2 == 0 ? true : false,
+                              image: 'assets/images/home/dumy1.png',
+                              name: 'Julia Vandervort-Will');
+                        }),
+                  ),
                   SizedBox(height: SizeConfig.blockHeight * 2),
                   Padding(
                     padding:
@@ -550,9 +591,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           borderRadius: BorderRadius.circular(
                               SizeConfig.blockWidth * 2.5),
                           color: COLORS.primaryOne.withOpacity(0.3)),
-                      child: Icon(
-                        Icons.notifications_none,
-                        size: SizeConfig.blockWidth * 5.5,
+                      child: Image.asset(
+                        'assets/images/home/notification.png',
+                        width: SizeConfig.blockWidth * 5.5,
+                        height: SizeConfig.blockWidth * 5.5,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
@@ -561,7 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        SizedBox(height: SizeConfig.blockHeight * 2),
+        SizedBox(height: SizeConfig.blockHeight * 2.5),
         Padding(
           padding: EdgeInsets.symmetric(
             horizontal: SizeConfig.blockWidth * 5,
@@ -611,10 +654,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(
                             horizontal: SizeConfig.blockWidth * 4),
-                        child: Icon(
-                          Icons.search,
-                          color: COLORS.neutralDarkOne,
-                          size: SizeConfig.blockWidth * 6,
+                        child: Image.asset(
+                          'assets/images/home/search.png',
+                          width: SizeConfig.blockWidth * 5.5,
+                          height: SizeConfig.blockWidth * 5.5,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       Text(

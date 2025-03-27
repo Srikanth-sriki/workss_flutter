@@ -306,26 +306,49 @@ class _WaveBubbleState extends State<WaveBubble> {
     }
   }
 
+  // void _togglePlayPause() async {
+  //   if (isPlaying) {
+  //     await controller.pausePlayer();
+  //     return;
+  //   }
+  //
+  //   // Stop previously playing audio
+  //   if (_currentlyPlayingController != null &&
+  //       _currentlyPlayingController != controller) {
+  //     await _currentlyPlayingController!.pausePlayer();
+  //   }
+  //
+  //   await controller.startPlayer();
+  //   controller.setFinishMode(finishMode: FinishMode.stop);
+  //
+  //   _currentlyPlayingController = controller; // Set current controller
+  //
+  //   // Notify parent widget (if applicable)
+  //   widget.onPlay?.call(controller);
+  // }
+
   void _togglePlayPause() async {
     if (isPlaying) {
       await controller.pausePlayer();
       return;
     }
 
-    // Stop previously playing audio
     if (_currentlyPlayingController != null &&
         _currentlyPlayingController != controller) {
       await _currentlyPlayingController!.pausePlayer();
     }
 
+    if (localFilePath != null) {
+      await _preparePlayer(); // Ensure player is ready before playing
+    }
+
     await controller.startPlayer();
     controller.setFinishMode(finishMode: FinishMode.stop);
 
-    _currentlyPlayingController = controller; // Set current controller
-
-    // Notify parent widget (if applicable)
+    _currentlyPlayingController = controller;
     widget.onPlay?.call(controller);
   }
+
 
   @override
   void dispose() {

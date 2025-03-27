@@ -139,6 +139,8 @@ flutter:
      - assets/images/home/filter.png
      - assets/images/home/home.png
      - assets/images/home/app_share.png
+     - assets/images/home/search.png
+     - assets/images/home/notification.png
      - assets/images/home/gender.png
      - assets/images/home/speak.png
      - assets/images/home/work_select.png

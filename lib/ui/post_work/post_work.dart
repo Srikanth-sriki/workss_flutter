@@ -241,27 +241,43 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
             elevation: 0,
             automaticallyImplyLeading: false,
             toolbarHeight: SizeConfig.blockHeight * 11,
-            title: Column(
+            title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Post Work'.tr(),
-                  style: TextStyle(
-                    color: COLORS.white,
-                    fontSize: SizeConfig.blockWidth * 4.6,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
+                InkWell(
+                  onTap: (){
+                    // Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(top: SizeConfig.blockHeight*0.5),
+                    child: Icon(Icons.arrow_back_ios_new ,color: COLORS.white,size: SizeConfig.blockHeight*2.5,),
                   ),
                 ),
-                Text(
-                  'Hire professionals/workers for your work'.tr(),
-                  style: TextStyle(
-                    color: COLORS.primaryOne,
-                    fontSize: SizeConfig.blockWidth * 3.5,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                  ),
+                SizedBox(width: SizeConfig.blockWidth*2,),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Post Work'.tr(),
+                      style: TextStyle(
+                        color: COLORS.white,
+                        fontSize: SizeConfig.blockWidth * 4.6,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                    Text(
+                      'Hire professionals/workers for your work'.tr(),
+                      style: TextStyle(
+                        color: COLORS.primaryOne,
+                        fontSize: SizeConfig.blockWidth * 3.5,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

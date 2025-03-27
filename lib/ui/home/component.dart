@@ -259,7 +259,8 @@ Widget addFriendCard({required bool added,required String image,required String 
 
 Widget friendViewCard({required String image,required String name,required VoidCallback onTap}){
   return InkWell(
-    onTap: onTap,
+    onTap: onTap,splashColor: COLORS.white.withOpacity(0.2),
+
     child: Container(
       width: SizeConfig.blockWidth * 25,
       height: SizeConfig.blockWidth * 25,

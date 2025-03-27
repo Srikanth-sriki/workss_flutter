@@ -33,6 +33,7 @@ import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../helper/socket_service.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/chat/chat_view_modal.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
@@ -84,13 +85,17 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   bool isFetchingMore = false;
   bool textFiledChange = false;
   final String serverUrl = 'https://43.204.94.146';
+  bool _isMounted = false;
 
   @override
   void initState() {
     super.initState();
+    _isMounted = true;
+
     chartBloc = BlocProvider.of<ChartBloc>(context);
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+
     _getDir();
     _initialiseControllers();
 
@@ -100,6 +105,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         _loadMoreData();
       }
     });
+
+    SocketService().reconnect();
     connectToSocket();
   }
 
@@ -109,27 +116,12 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       'autoConnect': true,
     });
 
-    socket.onConnect((_) {
-      socket.emit("connected", Config.id);
-    });
-
-    socket.onDisconnect((_) {
-      print('Disconnected from WebSocket');
-    });
-
-    socket.onError((error) {
-      print('WebSocket Error: $error');
-    });
-
-    socket.onReconnect((_) {
-      socket.emit("connected", Config.id);
-    });
-
-    // Listen for new messages
     socket.on('new_message', (data) {
-      setState(() {
-        _fetchData();
-      });
+      if (_isMounted) {
+        setState(() {
+          _fetchData();
+        });
+      }
     });
   }
 
@@ -181,12 +173,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       debugPrint("File not picked");
     }
   }
-
-  // @override
-  // void dispose() {
-  //   recorderController.dispose();
-  //   super.dispose();
-  // }
 
   void _startOrStopRecording() async {
     try {
@@ -261,13 +247,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   @override
   void dispose() {
+    _isMounted = false;
+
+    socket.off('new_message');
+    socket.disconnect();
     recorderController.dispose();
     _messageController.dispose();
     _scrollController.dispose();
-    // socket.disconnect();
-    // socket.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -438,6 +427,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                   ))));
                                 }
                               },
+                              splashColor: COLORS.white.withOpacity(0.2),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,7 +805,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   Expanded(
                     child: Padding(
                         padding: EdgeInsets.only(
-                          top: SizeConfig.blockHeight * 2,
+                          top: SizeConfig.blockHeight * 0.5,
                           right: SizeConfig.blockWidth * 1.5,
                           left: SizeConfig.blockWidth * 1.5,
                         ),

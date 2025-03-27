@@ -23,6 +23,7 @@ import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
+import '../../helper/socket_service.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/friends/friends_search_list_modal.dart';
 import '../friends/friends_details.dart';
@@ -56,22 +57,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
+    SocketService().reconnect();
   }
 
-  void _onSearchChanged(String keyword) {}
-
-  // void _onSearchChanged(String keyword) {
-  //   if (_debounce?.isActive ?? false) _debounce?.cancel();
-  //   _debounce = Timer(const Duration(milliseconds: 500), () {
-  //     setState(() {
-  //       searchKeyword = keyword.toLowerCase();
-  //       chatList = chatList.where((chatList) {
-  //         final name = chatList.name!.toLowerCase();
-  //         return name.contains(searchKeyword) ;
-  //       }).toList();
-  //     });
-  //   });
-  // }
 
   void _refreshPageAfterEdit() {
     _fetchData();
