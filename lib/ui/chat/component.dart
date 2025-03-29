@@ -1098,7 +1098,7 @@ class ReceivedMessage extends StatelessWidget {
 
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: SizeConfig.blockWidth * 80,
+              maxWidth: SizeConfig.blockWidth * 70,
             ),
             child: IntrinsicWidth(
               child: Container(

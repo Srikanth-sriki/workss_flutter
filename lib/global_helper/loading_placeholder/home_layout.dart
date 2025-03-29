@@ -130,7 +130,7 @@ Widget categoryLoading() {
 }
 
 Widget dropDownLoader({
-  required String hintText
+  required String hintText,Color color =COLORS.neutralDark
 }){
   return Container(
     width: SizeConfig.blockWidth*100,

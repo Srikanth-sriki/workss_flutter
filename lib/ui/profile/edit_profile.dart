@@ -394,6 +394,11 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                 } else if (state is EditProfileSuccess) {
                   loading = false;
                   widget.refreshPageCallback();
+                  showCustomSnackBar(
+                    context: context,
+                    message: state.message,
+                    backgroundColor: COLORS.neutralDarkOne
+                  );
                   Navigator.pop(context, true);
                 } else if (state is EditProfileFailed) {
                   loading = false;
@@ -455,7 +460,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             onChanged: (value) {
                               _validateForm();
                             },
-                            title: 'name'.tr()),
+                            title: 'name'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
                         _buildMobileNumber(),
                         buildTextField(
                             label: 'Email Address',
@@ -476,7 +481,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             onChanged: (value) {
                               _validateForm();
                             },
-                            title: 'email'.tr()),
+                            title: 'email'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
                         buildTextField(
                           label: 'Pincode',
                           inputNameType: TextInputType.phone,
@@ -518,13 +523,14 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             return null;
                           },
                           title: 'Pincode'.tr(),
+                            color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400
                         ),
                         buildDropdown(
                           label: 'city'.tr(),
                           value: _selectedCity,
                           hintText: 'Select your city'.tr(),
                           items: dropdownCityItem,
-                          itemLoading: cityLoading,
+                          itemLoading: cityLoading,color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400,
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
                             _validateForm();
@@ -535,6 +541,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             }
                             return null;
                           },
+
                         ),
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
@@ -553,11 +560,12 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               }
                               return null;
                             },
+                              color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400
                           )
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          registerText(text: 'years_of_experience'.tr()),
+                          registerText(text: 'years_of_experience'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
                           normalTextField(
                               hintText: "Experience".tr(),
                               controller: experienceController,
@@ -585,7 +593,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           SizedBox(height: SizeConfig.blockHeight),
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
-                          registerText(text: 'charges_daily_wages'.tr()),
+                          registerText(text: 'charges_daily_wages'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
                           normalTextField(
                             hintText: "Charges".tr(),
                             controller: chargesController,
@@ -640,8 +648,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                 if (!feesChargesLoading) ...[
                                   Container(
                                     constraints: BoxConstraints(
-                                      maxWidth: SizeConfig.blockWidth *
-                                          30, // Add constraints
+                                      maxWidth: SizeConfig.blockWidth * 35, // Add constraints
                                     ),
                                     child: CustomDropdownButtonFormField(
                                       selectedValue: selectedCharge,
@@ -695,17 +702,20 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight * 0.5),
                           buildGenderSelection(
+                            color: COLORS.neutralDarkOne,
+                            fontWeight: FontWeight.w400,
                             groupValue: _selectedGender,
                             onChanged: (value) {
                               setState(() {
                                 _selectedGender = value;
                               });
                             },
+                            textFontWeight: FontWeight.w400
                           ),
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          registerText(text: 'Age'.tr()),
+                          registerText(text: 'Age'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
                           normalTextField(
                               hintText: "Enter your age".tr(),
                               controller: ageController,
@@ -763,7 +773,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          registerText(text: 'known_language'.tr()),
+                          registerText(text: 'known_language'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
                           if (!knowLanguageLoading) ...[
                             MultiDropdown<Language>(
                               items: knownLanguageItems,
@@ -858,7 +868,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             )
                           ],
                           if (knowLanguageLoading) ...[
-                            dropDownLoader(hintText: 'Select Languages')
+                            dropDownLoader(hintText: 'Select Languages',)
                           ]
                         ],
                         SizedBox(
@@ -880,12 +890,13 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             onChanged: (value) {
                               _validateForm();
                             },
-                            title: 'Bio'.tr(),maxLines: 6),
+                            title: 'Bio'.tr(),maxLines: 6,color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400),
                         MultipleImagePickerComponent(
                           onImagesSelected: _onImagesSelected,
                           error: imagesList,
                           removeImage: _removeImage,
                           defaultImages: workImages,
+                            color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400
                         ),
                       ],
                     ),
@@ -908,6 +919,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
               customButton(
                 text: 'back'.tr(),
                 onPressed: () {
+                  widget.refreshPageCallback();
                   Navigator.pop(context);
                 },
                 backgroundColor: COLORS.neutralDarkTwo,
@@ -941,7 +953,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: 'profile_picture'.tr()),
+        registerText(text: 'profile_picture'.tr(),color: COLORS.neutralDarkOne),
 
         // Conditional for displaying the profile picture
         if (_profileImage == null && profilePic.isEmpty) ...[
@@ -1042,7 +1054,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: 'mobile_number_label'.tr()),
+        registerText(text: 'mobile_number_label'.tr(),color: COLORS.neutralDarkOne),
         Container(
           width: SizeConfig.blockWidth * 100,
           height: SizeConfig.blockHeight * 8,

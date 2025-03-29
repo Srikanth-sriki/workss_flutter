@@ -971,13 +971,15 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           ),
           child: Container(
             padding: EdgeInsets.symmetric(
-                vertical: SizeConfig.blockHeight * 2,
-                horizontal: SizeConfig.blockWidth * 4),
+              vertical: SizeConfig.blockHeight * 2,
+              horizontal: SizeConfig.blockWidth * 4,
+            ),
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                    color: COLORS.neutralDarkTwo,
-                    width: SizeConfig.blockWidth * 0.25),
+                  color: COLORS.neutralDarkTwo,
+                  width: SizeConfig.blockWidth * 0.25,
+                ),
               ),
               color: COLORS.white,
             ),
@@ -991,17 +993,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       setState(() {
                         _profileImage = image;
                         profilePicture = '';
-                        initialRegisterBloc
-                            .add(UploadImageEvent(imagePath: _profileImage!));
+                        initialRegisterBloc.add(UploadImageEvent(imagePath: _profileImage!));
                       });
                     }),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
                       height: SizeConfig.blockHeight * 8,
                       decoration: BoxDecoration(
-                          color: COLORS.primaryOne.withOpacity(0.35),
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.5)),
+                        color: COLORS.primaryOne.withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                      ),
                       child: Icon(
                         Icons.add,
                         color: COLORS.primary,
@@ -1009,180 +1010,147 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: SizeConfig.blockWidth * 4,
-                  )
+                  SizedBox(width: SizeConfig.blockWidth * 4),
                 ],
                 Expanded(
-                    child: isRecording
-                        ? AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: Container(
-                              width: SizeConfig.blockWidth * 90,
-                              height: SizeConfig.blockHeight * 8,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 3),
-                                color: COLORS.primary,
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: SizeConfig.blockWidth * 3),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  AudioWaveforms(
-                                    enableGesture: true,
-                                    size: Size(SizeConfig.blockWidth * 70,
-                                        SizeConfig.blockHeight * 8),
-                                    recorderController: recorderController,
-                                    waveStyle: const WaveStyle(
-                                        waveColor: COLORS.white,
-                                        extendWaveform: true,
-                                        showMiddleLine: false,
-                                        waveThickness: 1.5,
-                                        waveCap: StrokeCap.square),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 3),
-                                      color: COLORS.primary,
-                                    ),
-                                    padding: EdgeInsets.only(
-                                        left: SizeConfig.blockWidth * 3),
-                                    //                   margin:  EdgeInsets.symmetric(
-                                    // horizontal: SizeConfig.blockWidth*3),
-                                  ),
-                                  InkWell(
-                                    onTap: _startOrStopRecording,
-                                    borderRadius: BorderRadius.circular(
-                                        SizeConfig.blockWidth * 10),
-                                    child: Container(
-                                      width: SizeConfig.blockWidth * 10,
-                                      height: SizeConfig.blockWidth * 10,
-                                      padding: EdgeInsets.all(
-                                          SizeConfig.blockWidth * 2.5),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                            SizeConfig.blockWidth * 10),
-                                        color: COLORS.white,
-                                      ),
-                                      child: Image.asset(
-                                        'assets/images/chat/message.png',
-                                        width: SizeConfig.blockWidth * 2.5,
-                                        height: SizeConfig.blockWidth * 2.5,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          )
-                        : Container(
-                            height: SizeConfig.blockHeight * 8,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 3.25),
-                              color: COLORS.primaryOne.withOpacity(0.35),
-                              border: Border.all(
-                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                                width: SizeConfig.blockWidth * 0.1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _messageController,
-                                    style: TextStyle(
-                                      color: COLORS.neutralDark,
-                                      fontSize: SizeConfig.blockWidth * 3.25,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
-                                    ),
-                                    // autofocus: true,
-                                    cursorColor: COLORS.black,
-                                    decoration: InputDecoration(
-                                      fillColor:
-                                          COLORS.primaryOne.withOpacity(0.05),
-                                      focusColor:
-                                          COLORS.primaryOne.withOpacity(0.05),
-                                      filled: true,
-                                      hintText: 'Your message'.tr(),
-                                      hintStyle: TextStyle(
-                                        color: COLORS.neutralDarkOne,
-                                        fontSize: SizeConfig.blockWidth * 3.25,
-                                        fontWeight: FontWeight.w400,
-                                        fontFamily: "Poppins",
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            SizeConfig.blockWidth * 3.25),
-                                        borderSide: BorderSide(
-                                          color: COLORS.primaryOne
-                                              .withOpacity(0.1),
-                                          width: 0,
-                                        ),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            SizeConfig.blockWidth * 3.25),
-                                        borderSide: BorderSide(
-                                          color: COLORS.primaryOne
-                                              .withOpacity(0.1),
-                                          width: 0,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            SizeConfig.blockWidth * 3.25),
-                                        borderSide: BorderSide(
-                                          color: COLORS.primaryOne
-                                              .withOpacity(0.1),
-                                          width: 0,
-                                        ),
-                                      ),
-                                    ),
-                                    maxLines: null,
-                                    minLines: 1, // Start with 1 line
-                                    expands:
-                                        false, // Don't make it fill all available space, but grow as needed
-                                    onChanged: _onMessageChanged,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      right: SizeConfig.blockWidth * 2.5),
-                                  child: InkWell(
-                                    onTap: _messageController.text.isEmpty
-                                        ? _startOrStopRecording
-                                        : onSendMessage,
-                                    child: _messageController.text.isEmpty
-                                        ? Image.asset(
-                                            'assets/images/chat/message.png',
-                                            width: SizeConfig.blockWidth * 5,
-                                            height: SizeConfig.blockWidth * 5,
-                                          )
-                                        : Icon(
-                                            Icons.send,
-                                            color: COLORS.primary,
-                                            size: SizeConfig.blockWidth * 5,
-                                          ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          )),
+                  child: isRecording
+                      ? _buildRecordingUI()
+                      : _buildTextInputUI(),
+                ),
               ],
             ),
           ),
         ),
+
       ),
     );
   }
+
+
+
+  Widget _buildTextInputUI() {
+    return Container(
+      height: SizeConfig.blockHeight * 8,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+        color: COLORS.primaryOne.withOpacity(0.35),
+        border: Border.all(
+          color: COLORS.neutralDarkTwo.withOpacity(0.6),
+          width: SizeConfig.blockWidth * 0.1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              style: TextStyle(
+                color: COLORS.neutralDark,
+                fontSize: SizeConfig.blockWidth * 3.25,
+                fontWeight: FontWeight.w400,
+                fontFamily: "Poppins",
+              ),
+              cursorColor: COLORS.black,
+              decoration: InputDecoration(
+                fillColor: COLORS.primaryOne.withOpacity(0.05),
+                filled: true,
+                hintText: 'Your message'.tr(),
+                hintStyle: TextStyle(
+                  color: COLORS.neutralDarkOne,
+                  fontSize: SizeConfig.blockWidth * 3.25,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Poppins",
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              maxLines: null,
+              minLines: 1,
+              onChanged: (text) {
+                setState(() {}); // Ensure the send button updates correctly
+              },
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: SizeConfig.blockWidth * 2.5),
+            child: InkWell(
+              onTap: _messageController.text.isEmpty ? _startOrStopRecording : onSendMessage,
+              child: _messageController.text.isEmpty
+                  ? Image.asset(
+                'assets/images/chat/message.png',
+                width: SizeConfig.blockWidth * 5,
+                height: SizeConfig.blockWidth * 5,
+              )
+                  : Icon(
+                Icons.send,
+                color: COLORS.primary,
+                size: SizeConfig.blockWidth * 5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecordingUI() {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: Container(
+        width: SizeConfig.blockWidth * 90,
+        height: SizeConfig.blockHeight * 8,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+          color: COLORS.primary,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 3),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            AudioWaveforms(
+              enableGesture: true,
+              size: Size(SizeConfig.blockWidth * 70, SizeConfig.blockHeight * 8),
+              recorderController: recorderController,
+              waveStyle: const WaveStyle(
+                waveColor: COLORS.white,
+                extendWaveform: true,
+                showMiddleLine: false,
+                waveThickness: 1.5,
+                waveCap: StrokeCap.square,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                color: COLORS.primary,
+              ),
+              padding: EdgeInsets.only(left: SizeConfig.blockWidth * 3),
+            ),
+            InkWell(
+              onTap: _startOrStopRecording,
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 10),
+              child: Container(
+                width: SizeConfig.blockWidth * 10,
+                height: SizeConfig.blockWidth * 10,
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 2.5),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 10),
+                  color: COLORS.white,
+                ),
+                child: Image.asset(
+                  'assets/images/chat/message.png',
+                  width: SizeConfig.blockWidth * 2.5,
+                  height: SizeConfig.blockWidth * 2.5,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   void _showPicker(context, onImageSelected) {
     showModalBottomSheet(

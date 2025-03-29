@@ -673,14 +673,17 @@ class MultipleImagePickerComponent extends StatefulWidget {
   final Function(List<File>) onImagesSelected;
   final bool error;
   final Function(int) removeImage;
-  final List<String> defaultImages; // Add default image paths
+  final List<String> defaultImages;
+  Color? color = COLORS.neutralDark;
+  FontWeight? fontWeight = FontWeight. w500;
 
-  const MultipleImagePickerComponent({
+   MultipleImagePickerComponent({
     super.key,
     required this.onImagesSelected,
     required this.error,
     required this.removeImage,
-    this.defaultImages = const [], // Initialize with an empty list
+    this.defaultImages = const [],
+    this.fontWeight,this.color
   });
 
   @override
@@ -1009,37 +1012,39 @@ class _MultipleImagePickerComponentState
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        registerText(text: 'Photos'),
-        SizedBox(
-          height: SizeConfig.blockHeight * 0.5,
-        ),
-        _displayImages.isEmpty
-            ? Column(
-                children: [
-                  _buildEmptyImagePicker(context),
-                  if (widget.error)
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: SizeConfig.blockHeight * 0.5,
-                          horizontal: SizeConfig.blockWidth * 2),
-                      child: Text(
-                        'Please upload picture'.tr(),
-                        style: TextStyle(
-                          color: COLORS.semantic,
-                          fontWeight: FontWeight.w300,
-                          fontFamily: "Poppins",
-                          fontSize: SizeConfig.blockWidth * 3.4,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          registerText(text: 'Photos',color: widget.color,fontWeight: widget.fontWeight),
+          SizedBox(
+            height: SizeConfig.blockHeight * 0.5,
+          ),
+          _displayImages.isEmpty
+              ? Column(
+                  children: [
+                    _buildEmptyImagePicker(context),
+                    if (widget.error)
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: SizeConfig.blockHeight * 0.5,
+                            horizontal: SizeConfig.blockWidth * 2),
+                        child: Text(
+                          'Please upload picture'.tr(),
+                          style: TextStyle(
+                            color: COLORS.semantic,
+                            fontWeight: FontWeight.w300,
+                            fontFamily: "Poppins",
+                            fontSize: SizeConfig.blockWidth * 3.4,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              )
-            : _buildImageGrid(),
-      ],
+                  ],
+                )
+              : _buildImageGrid(),
+        ],
+      ),
     );
   }
 
@@ -1139,6 +1144,7 @@ class _MultipleImagePickerComponentState
       ),
       child: GridView.builder(
         shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         itemCount: _displayImages.length < 2 ? _displayImages.length + 1 : 2,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -1185,6 +1191,7 @@ class _MultipleImagePickerComponentState
                 Positioned(
                   right: 0,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: () => _removeImage(index),
                     child: Container(
                         padding: EdgeInsets.all(SizeConfig.blockWidth),

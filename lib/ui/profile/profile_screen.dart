@@ -198,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         Radius.circular(
                                             SizeConfig.blockWidth * 2))),
                                 child: Icon(
-                                  Icons.edit,
+                                  Icons.edit_outlined,
                                   color: COLORS.accent,
                                   size: SizeConfig.blockWidth * 4,
                                 ),

@@ -185,7 +185,11 @@ Widget registerTextCard(
   );
 }
 
-Widget registerText({required String text}) {
+Widget registerText({
+  required String text,
+  Color? color = COLORS.neutralDark,
+  FontWeight? fontWeight = FontWeight.w500,
+}) {
   return Padding(
     padding: EdgeInsets.symmetric(
         vertical: SizeConfig.blockHeight * 0.5,
@@ -193,9 +197,9 @@ Widget registerText({required String text}) {
     child: Text(
       text.tr(),
       style: TextStyle(
-        color: COLORS.neutralDark,
+        color: color,
         fontSize: SizeConfig.blockWidth * 3.6,
-        fontWeight: FontWeight.w500,
+        fontWeight: fontWeight,
         fontFamily: "Poppins",
       ),
     ),
@@ -214,11 +218,14 @@ Widget buildTextField(
     bool? prefix = false,
     TextInputType? inputNameType =TextInputType.text,
     void Function()? onTap,
-    required String title}) {
+    required String title,
+      Color? color = COLORS.neutralDark,
+      FontWeight? fontWeight = FontWeight. w500
+    }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      registerText(text: title),
+      registerText(text: title,color: color,fontWeight: fontWeight),
       normalTextField(
           hintText: hintText,
           controller: controller,

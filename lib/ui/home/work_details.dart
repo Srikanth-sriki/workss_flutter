@@ -253,7 +253,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       padding:
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
                       child: Text(
-                        'Work Deatils'.tr(),
+                        'Work Details'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.6,

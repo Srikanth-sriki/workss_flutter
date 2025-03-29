@@ -739,12 +739,16 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                           chatId: participants.chatId!,
                                           removeMember: [participants.userId!],
                                           onSuccess: (message) {
+                                            Navigator.pop(context);
                                             showCustomSnackBar(
                                               context: context,
                                               message: message,
+                                              backgroundColor: COLORS.neutralDarkTwo
                                             );
+                                            _refreshPageAfterEdit();
                                           },
                                           onError: (message) {
+                                            Navigator.pop(context);
                                             showCustomSnackBar(
                                               context: context,
                                               message: message,

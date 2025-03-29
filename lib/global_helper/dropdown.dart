@@ -104,6 +104,8 @@ Widget buildDropdown({
   required String? Function(String?) validator,
   String?value,
   bool? itemLoading = false,
+  Color? color = COLORS.neutralDark,
+  FontWeight? fontWeight = FontWeight. w500
 }) {
   final TextEditingController textEditingController = TextEditingController();
   List<String> filteredItems = items;
@@ -111,7 +113,7 @@ Widget buildDropdown({
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      registerText(text: label),
+      registerText(text: label,color: color,fontWeight: fontWeight),
       DropdownButtonFormField2<String>(
         buttonStyleData: ButtonStyleData(height: SizeConfig.blockHeight*5),
         value: value,

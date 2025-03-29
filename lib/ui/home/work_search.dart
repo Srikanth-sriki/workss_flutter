@@ -198,7 +198,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
                     child: TextField(
                       controller: _searchController,
                       style: TextStyle(
-                        color: COLORS.neutralDarkOne,
+                        color: COLORS.neutralDark,
                         fontSize: SizeConfig.blockWidth * 3.25,
                         fontWeight: FontWeight.w400,
                         fontFamily: "Poppins",

@@ -231,6 +231,7 @@ class _WaveBubbleState extends State<WaveBubble> {
   void initState() {
     super.initState();
     controller = PlayerController();
+    _checkLocalFile();
 
     playerStateSubscription = controller.onPlayerStateChanged.listen((state) {
       setState(() {
@@ -241,6 +242,24 @@ class _WaveBubbleState extends State<WaveBubble> {
         _currentlyPlayingController = null; // Reset if audio stops
       }
     });
+  }
+
+  Future<void> _checkLocalFile() async {
+    if (widget.audioUrl == null) return;
+
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
+    final file = File(filePath);
+
+    if (await file.exists()) {
+      debugPrint("🟢 Audio file found locally: $filePath");
+      setState(() {
+        localFilePath = filePath;
+      });
+      await _preparePlayer();
+    } else {
+      debugPrint("❌ Audio file not found, requires download.");
+    }
   }
 
   Future<void> _downloadAudio() async {

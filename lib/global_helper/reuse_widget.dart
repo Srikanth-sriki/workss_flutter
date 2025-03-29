@@ -557,13 +557,15 @@ Widget bottomTabIcon({required String icon}) {
 
 Widget buildGenderSelection({
   required void Function(String?)? onChanged,
-  required String? groupValue,
+  required String? groupValue,Color?color =COLORS.neutralDark,
+  FontWeight? fontWeight = FontWeight. w500,
+  FontWeight? textFontWeight = FontWeight. w500
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      registerText(text: 'select_gender'.tr()),
+      registerText(text: 'select_gender'.tr(),color: color,fontWeight: fontWeight),
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -585,7 +587,7 @@ Widget buildGenderSelection({
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.8,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: textFontWeight,
                     fontFamily: "Poppins",
                   ),
                 ),
@@ -610,7 +612,7 @@ Widget buildGenderSelection({
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.8,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: textFontWeight,
                     fontFamily: "Poppins",
                   ),
                 ),
@@ -697,12 +699,13 @@ Widget buildBioTextField(
     required String hintText,
     required String? Function(String?) validator,
     required String? Function(String?) onChanged,
-    required bool error, int maxLines =8,
+    required bool error, int maxLines =8, Color? color =COLORS.neutralDark,
+      FontWeight? fontWeight = FontWeight. w500,
     required String title}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      registerText(text: title),
+      registerText(text: title,color: color,fontWeight:fontWeight ),
       normalTextField(
           hintText: hintText,
           controller: controller,

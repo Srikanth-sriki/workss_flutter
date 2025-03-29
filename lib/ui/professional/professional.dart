@@ -499,7 +499,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                         ],
                         if (!isCategoryLoad) ...[
                           SizedBox(
-                            height: SizeConfig.blockHeight * 20,
+                            height: SizeConfig.blockHeight * 23,
                             child: ListView.builder(
                                 itemCount: categoriesData.length,
                                 shrinkWrap: true,
@@ -529,8 +529,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                             MainAxisAlignment.start,
                                         children: [
                                           Container(
-                                            width: SizeConfig.blockWidth * 18,
-                                            height: SizeConfig.blockWidth * 18,
+                                            width: SizeConfig.blockWidth * 19,
+                                            height: SizeConfig.blockWidth * 19,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: COLORS.primaryOne
@@ -539,10 +539,10 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                             child: Center(
                                               child: AspectRatio(
                                                 aspectRatio: 1 / 1.25,
-                                                child: Image.network(
+                                                child: categoriesData[index].image.isNotEmpty?Image.network(
                                                   categoriesData[index].image,
                                                   fit: BoxFit.contain,
-                                                ),
+                                                ):null,
                                               ),
                                             ),
                                           ),
@@ -551,7 +551,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 SizeConfig.blockHeight * 0.5,
                                           ),
                                           SizedBox(
-                                            width: SizeConfig.blockWidth * 18,
+                                            width: SizeConfig.blockWidth * 19,
                                             child: Text(
                                               capitalizeEachWord(
                                                   categoriesData[index].name),
@@ -562,8 +562,10 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 fontWeight: FontWeight.w500,
                                                 fontFamily: "Poppins",
                                                 overflow: TextOverflow.ellipsis,
+
                                               ),
-                                              maxLines: 1,
+                                              maxLines: 2,
+                                              textAlign: TextAlign.center,
                                             ),
                                           ),
                                         ],
