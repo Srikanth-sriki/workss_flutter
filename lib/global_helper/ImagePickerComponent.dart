@@ -65,7 +65,9 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                 const Divider(
                   color: COLORS.neutralDarkTwo,
                 ),
-                SizedBox(height: SizeConfig.blockHeight*3,),
+                SizedBox(
+                  height: SizeConfig.blockHeight * 3,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -73,21 +75,27 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                     InkWell(
                       onTap: () async {
                         XFile? photo =
-                        await _picker.pickImage(source: ImageSource.camera);
+                            await _picker.pickImage(source: ImageSource.camera);
                         if (photo != null) {
                           widget.onImageSelected(File(photo.path));
                         }
+                        FocusScope.of(context).unfocus();
                         Navigator.of(context).pop();
-                      },borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                      },
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          border: Border.all(color: COLORS.primary,width: SizeConfig.blockWidth*0.15),
-                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.15),
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3),
                           color: COLORS.primaryOne.withOpacity(0.5),
                         ),
-                        width: SizeConfig.blockWidth*30,
-                        height: SizeConfig.blockWidth*30,
+                        width: SizeConfig.blockWidth * 30,
+                        height: SizeConfig.blockWidth * 30,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -121,9 +129,11 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                         if (image != null) {
                           widget.onImageSelected(File(image.path));
                         }
+                        FocusScope.of(context).unfocus();
                         Navigator.of(context).pop();
-                      }, borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3),
+                      },
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -161,7 +171,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                     ),
                   ],
                 ),
-                SizedBox(height: SizeConfig.blockHeight*3),
+                SizedBox(height: SizeConfig.blockHeight * 3),
               ],
             ));
       },
@@ -171,7 +181,13 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showPicker(context),
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.unfocus();
+        }
+        _showPicker(context);
+      },
       child: Container(
         margin: EdgeInsets.symmetric(
           vertical: SizeConfig.blockHeight,
@@ -211,7 +227,6 @@ class ImagePickerModal extends StatelessWidget {
     showModalBottomSheet(
       backgroundColor: COLORS.white,
       context: context,
-
       builder: (BuildContext context) {
         return Container(
             decoration: BoxDecoration(
@@ -253,29 +268,37 @@ class ImagePickerModal extends StatelessWidget {
                 const Divider(
                   color: COLORS.neutralDarkTwo,
                 ),
-                SizedBox(height: SizeConfig.blockHeight*3,),
+                SizedBox(
+                  height: SizeConfig.blockHeight * 3,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
                       onTap: () async {
-                        final pickedFile =
-                        await ImagePicker().pickImage(source: ImageSource.camera);
+                        final pickedFile = await ImagePicker()
+                            .pickImage(source: ImageSource.camera);
                         if (pickedFile != null) {
                           onImageSelected(File(pickedFile.path));
                         }
+                        FocusScope.of(context).unfocus();
                         Navigator.of(context).pop();
-                      }, borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                      },
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          border: Border.all(color: COLORS.primary,width: SizeConfig.blockWidth*0.15),
-                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.15),
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3),
                           color: COLORS.primaryOne.withOpacity(0.5),
                         ),
-                        width: SizeConfig.blockWidth*30,
-                        height: SizeConfig.blockWidth*30,
+                        width: SizeConfig.blockWidth * 30,
+                        height: SizeConfig.blockWidth * 30,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -308,8 +331,11 @@ class ImagePickerModal extends StatelessWidget {
                         if (pickedFile != null) {
                           onImageSelected(File(pickedFile.path));
                         }
+                        FocusScope.of(context).unfocus();
                         Navigator.of(context).pop();
-                      }, borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                      },
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -317,7 +343,7 @@ class ImagePickerModal extends StatelessWidget {
                               color: COLORS.primary,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 3),
+                              BorderRadius.circular(SizeConfig.blockWidth * 3),
                           color: COLORS.primaryOne.withOpacity(0.5),
                         ),
                         width: SizeConfig.blockWidth * 30,
@@ -347,7 +373,7 @@ class ImagePickerModal extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: SizeConfig.blockHeight*3),
+                SizedBox(height: SizeConfig.blockHeight * 3),
               ],
             ));
       },
@@ -357,9 +383,19 @@ class ImagePickerModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _showPicker(context), borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(SizeConfig.blockWidth * 3.5),
-        bottomRight: Radius.circular(SizeConfig.blockWidth * 3.5)),
+      onTap: () {
+        Future.delayed(const Duration(seconds: 2), () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        });
+        _showPicker(context);
+
+      },
+      borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(SizeConfig.blockWidth * 3.5),
+          bottomRight: Radius.circular(SizeConfig.blockWidth * 3.5)),
       child: Container(
         width: SizeConfig.blockWidth * 10,
         height: SizeConfig.blockWidth * 10,
@@ -675,16 +711,16 @@ class MultipleImagePickerComponent extends StatefulWidget {
   final Function(int) removeImage;
   final List<String> defaultImages;
   Color? color = COLORS.neutralDark;
-  FontWeight? fontWeight = FontWeight. w500;
+  FontWeight? fontWeight = FontWeight.w500;
 
-   MultipleImagePickerComponent({
-    super.key,
-    required this.onImagesSelected,
-    required this.error,
-    required this.removeImage,
-    this.defaultImages = const [],
-    this.fontWeight,this.color
-  });
+  MultipleImagePickerComponent(
+      {super.key,
+      required this.onImagesSelected,
+      required this.error,
+      required this.removeImage,
+      this.defaultImages = const [],
+      this.fontWeight,
+      this.color});
 
   @override
   _MultipleImagePickerComponentState createState() =>
@@ -866,17 +902,18 @@ class _MultipleImagePickerComponentState
                 const Divider(
                   color: COLORS.neutralDarkTwo,
                 ),
-                SizedBox(height: SizeConfig.blockHeight*3,),
+                SizedBox(
+                  height: SizeConfig.blockHeight * 3,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-
                       onTap: () async {
                         try {
-                          XFile? photo =
-                          await _picker.pickImage(source: ImageSource.camera);
+                          XFile? photo = await _picker.pickImage(
+                              source: ImageSource.camera);
                           print(photo!.path!);
                           if (photo.path.isNotEmpty &&
                               _displayImages.length < 3) {
@@ -892,16 +929,20 @@ class _MultipleImagePickerComponentState
                           print('Error picking image: $e');
                         }
                       },
-                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          border: Border.all(color: COLORS.primary,width: SizeConfig.blockWidth*0.15),
-                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3),
+                          border: Border.all(
+                              color: COLORS.primary,
+                              width: SizeConfig.blockWidth * 0.15),
+                          borderRadius:
+                              BorderRadius.circular(SizeConfig.blockWidth * 3),
                           color: COLORS.primaryOne.withOpacity(0.5),
                         ),
-                        width: SizeConfig.blockWidth*30,
-                        height: SizeConfig.blockWidth*30,
+                        width: SizeConfig.blockWidth * 30,
+                        height: SizeConfig.blockWidth * 30,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -930,8 +971,8 @@ class _MultipleImagePickerComponentState
                     InkWell(
                       onTap: () async {
                         try {
-                          XFile? image =
-                          await _picker.pickImage(source: ImageSource.gallery);
+                          XFile? image = await _picker.pickImage(
+                              source: ImageSource.gallery);
                           print(image!.path!);
                           if (image.path.isNotEmpty &&
                               _displayImages.length < 3) {
@@ -948,7 +989,7 @@ class _MultipleImagePickerComponentState
                         }
                       },
                       borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3),
+                          BorderRadius.circular(SizeConfig.blockWidth * 3),
                       child: Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
@@ -956,7 +997,7 @@ class _MultipleImagePickerComponentState
                               color: COLORS.primary,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 3),
+                              BorderRadius.circular(SizeConfig.blockWidth * 3),
                           color: COLORS.primaryOne.withOpacity(0.5),
                         ),
                         width: SizeConfig.blockWidth * 30,
@@ -986,7 +1027,7 @@ class _MultipleImagePickerComponentState
                     ),
                   ],
                 ),
-                SizedBox(height: SizeConfig.blockHeight*3),
+                SizedBox(height: SizeConfig.blockHeight * 3),
               ],
             ));
       },
@@ -1017,7 +1058,10 @@ class _MultipleImagePickerComponentState
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          registerText(text: 'Photos',color: widget.color,fontWeight: widget.fontWeight),
+          registerText(
+              text: 'Photos',
+              color: widget.color,
+              fontWeight: widget.fontWeight),
           SizedBox(
             height: SizeConfig.blockHeight * 0.5,
           ),
@@ -1051,11 +1095,17 @@ class _MultipleImagePickerComponentState
   Widget _buildEmptyImagePicker(BuildContext context) {
     return InkWell(
       onTap: () {
-        FocusScope.of(context).unfocus();
+        Future.delayed(const Duration(seconds: 2), () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        });
         _showPicker(context);
-      },    borderRadius: BorderRadius.all(
-      Radius.circular(SizeConfig.blockWidth * 3),
-    ),
+      },
+      borderRadius: BorderRadius.all(
+        Radius.circular(SizeConfig.blockWidth * 3),
+      ),
       child: Container(
         width: SizeConfig.blockWidth * 100,
         height: SizeConfig.blockHeight * 26,
@@ -1073,7 +1123,7 @@ class _MultipleImagePickerComponentState
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Upload your work images\n(max 2 pictures)'.tr(),
+              'Upload your work images (Optional) \n(max 2 pictures)'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: COLORS.neutralDark,
@@ -1154,7 +1204,15 @@ class _MultipleImagePickerComponentState
         itemBuilder: (BuildContext context, int index) {
           if (index == _displayImages.length && _displayImages.length < 2) {
             return GestureDetector(
-              onTap: () => _showPicker(context),
+              onTap: () {
+                Future.delayed(const Duration(seconds: 2), () {
+                  FocusScopeNode currentFocus = FocusScope.of(context);
+                  if (!currentFocus.hasPrimaryFocus) {
+                    currentFocus.unfocus();
+                  }
+                });
+                _showPicker(context);
+              },
               child: Container(
                 decoration: BoxDecoration(
                   color: COLORS.primaryOne.withOpacity(0.5),
@@ -1192,7 +1250,15 @@ class _MultipleImagePickerComponentState
                   right: 0,
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onTap: () => _removeImage(index),
+                    onTap: () {
+                      Future.delayed(const Duration(seconds: 2), () {
+                        FocusScopeNode currentFocus = FocusScope.of(context);
+                        if (!currentFocus.hasPrimaryFocus) {
+                          currentFocus.unfocus();
+                        }
+                      });
+                      _removeImage(index);
+                    },
                     child: Container(
                         padding: EdgeInsets.all(SizeConfig.blockWidth),
                         decoration: BoxDecoration(

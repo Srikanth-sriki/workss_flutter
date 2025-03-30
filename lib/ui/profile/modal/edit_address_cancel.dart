@@ -97,6 +97,7 @@ class _EditAddressCancelBottomSheetState extends State<EditAddressCancelBottomSh
                   onPressed: () {
                     widget.reset();
                     Navigator.pop(context);
+                    Navigator.pop(context);
                   },
                   backgroundColor: COLORS.primary,
                   showIcon: false,

@@ -38,6 +38,7 @@ class _FaqScreenState extends State<FaqScreen> {
         title: 'FAQs',
         backgroundColor: COLORS.white,
         titleColors: COLORS.neutralDark,
+        textCap: false,
       ),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, state) {

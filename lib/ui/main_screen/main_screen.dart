@@ -12,6 +12,7 @@ import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
+import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_profile_model.dart';
@@ -37,7 +38,8 @@ class _MainScreenState extends State<MainScreen> {
     super.didChangeDependencies();
 
     // Retrieve arguments from Navigator
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
     if (args != null && args.containsKey('selectedIndex')) {
       setState(() {
@@ -63,63 +65,127 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+
+
   Widget _getTabScreen(int index) {
-    switch (index) {
-      case 0:
-        return BlocProvider(
-          create: (_) => HomeBloc()
-            ..add(FetchHomeScreenEvent(
-                page: 1,
-                pageSize: 10,
-                keyWord: '',
-                profession: '',
-                city: '',
-                gender: '',
-                currentLongitude: '',
-                currentLatitude: '')),
-          child: const HomeScreen(),
-        );
-      case 1:
-        return BlocProvider(
-          create: (_) => ProfessionalBloc()
-            ..add(ProfessionalListEvent(
-                page: 1,
-                pageSize: 10,
-                keyWord: "",
-                profession: "",
-                city: "",
-                gender: "",
-                currentLongitude: '',
-                currentLatitude: '')),
-          child: const ProfessionalsScreen(),
-        );
-      case 2:
-        return const PostWorkScreen();
-      case 3:
-        return MultiBlocProvider(providers: [
-          BlocProvider(
-              create: (context) => FriendsBloc()
-                ..add(
-                    FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
-          BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
-        ], child: const ChatMainScreen());
-      case 4:
-        return _cachedProfileScreen;
-      default:
-        return BlocProvider(
-          create: (_) => HomeBloc()
-            ..add(FetchHomeScreenEvent(
-                page: 1,
-                pageSize: 10,
-                keyWord: '',
-                profession: '',
-                city: '',
-                gender: '',
-                currentLongitude: '',
-                currentLatitude: '')),
-          child: const HomeScreen(),
-        );
+    if(Config.profileCompleted){
+      switch (index) {
+        case 0:
+          return BlocProvider(
+            create: (_) => HomeBloc()
+              ..add(FetchHomeScreenEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: '',
+                  profession: '',
+                  city: '',
+                  gender: '',
+                  currentLongitude: '',
+                  currentLatitude: '')),
+            child: const HomeScreen(),
+          );
+        case 1:
+          return BlocProvider(
+            create: (_) => ProfessionalBloc()
+              ..add(ProfessionalListEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: "",
+                  profession: "",
+                  city: "",
+                  gender: "",
+                  currentLongitude: '',
+                  currentLatitude: '')),
+            child: const ProfessionalsScreen(),
+          );
+        case 2:
+          return const PostWorkScreen(
+            arrowBack: false,
+          );
+        case 3:
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(
+                      FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (context) => ChartBloc()..add(const ChartListEvent()))
+          ], child: const ChatMainScreen());
+        case 4:
+          return _cachedProfileScreen;
+        default:
+          return BlocProvider(
+            create: (_) => HomeBloc()
+              ..add(FetchHomeScreenEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: '',
+                  profession: '',
+                  city: '',
+                  gender: '',
+                  currentLongitude: '',
+                  currentLatitude: '')),
+            child: const HomeScreen(),
+          );
+      }
+    }else{
+      switch (index) {
+        case 0:
+          return BlocProvider(
+            create: (_) => HomeBloc()
+              ..add(FetchHomeScreenEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: '',
+                  profession: '',
+                  city: '',
+                  gender: '',
+                  currentLongitude: '',
+                  currentLatitude: '')),
+            child: const HomeScreen(),
+          );
+        case 1:
+          return BlocProvider(
+            create: (_) => ProfessionalBloc()
+              ..add(ProfessionalListEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: "",
+                  profession: "",
+                  city: "",
+                  gender: "",
+                  currentLongitude: '',
+                  currentLatitude: '')),
+            child: const ProfessionalsScreen(),
+          );
+        case 2:
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(
+                      FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (context) => ChartBloc()..add(const ChartListEvent()))
+          ], child: const ChatMainScreen());
+        case 3:
+          return _cachedProfileScreen;
+        default:
+          return BlocProvider(
+            create: (_) => HomeBloc()
+              ..add(FetchHomeScreenEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: '',
+                  profession: '',
+                  city: '',
+                  gender: '',
+                  currentLongitude: '',
+                  currentLatitude: '')),
+            child: const HomeScreen(),
+          );
+      }
     }
+
   }
 
   @override
@@ -196,18 +262,20 @@ class _MainScreenState extends State<MainScreen> {
               activeIcon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/prop_select_01.png'),
             ),
-            BottomNavigationBarItem(
-              icon: Image.asset(
-                'assets/images/bottom_tab/add_post.png',
-                width: SizeConfig.blockWidth * 4.2,
-                height: SizeConfig.blockWidth * 4.2,
-                fit: BoxFit.contain,
-                color: COLORS.neutralDarkOne,
+            if (Config.profileCompleted) ...[
+              BottomNavigationBarItem(
+                icon: Image.asset(
+                  'assets/images/bottom_tab/add_post.png',
+                  width: SizeConfig.blockWidth * 4.2,
+                  height: SizeConfig.blockWidth * 4.2,
+                  fit: BoxFit.contain,
+                  color: COLORS.neutralDarkOne,
+                ),
+                label: 'Post Works'.tr(),
+                activeIcon: bottomTabIcon(
+                    icon: 'assets/images/bottom_tab/add_post_select.png'),
               ),
-              label: 'Post Works'.tr(),
-              activeIcon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/add_post_select.png'),
-            ),
+            ],
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/chart.png'),
               label: 'Chat'.tr(),

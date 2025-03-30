@@ -42,6 +42,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   late LoginOtpBloc loginOtpBloc;
   late String otpToken;
   bool loading = false;
+  final TextEditingController _otpController = TextEditingController();
 
   @override
   void initState() {
@@ -79,6 +80,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   void dispose() {
     cancel();
     countdownTimer?.cancel();
+    _otpController.dispose();
     super.dispose();
   }
 
@@ -219,6 +221,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   length: otpLength,
                   obscureText: false,
                   animationType: AnimationType.fade,
+                  controller:_otpController ,
                   pinTheme: PinTheme(
                     shape: PinCodeFieldShape.box,
                     borderRadius: BorderRadius.circular(5),
@@ -229,9 +232,8 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                     inactiveFillColor: Colors.white,
                     activeColor: isOtpValid ? COLORS.primary : Colors.red,
                     selectedColor: isOtpValid ? COLORS.primary : Colors.red,
-                    inactiveColor:
-                        isOtpValid ? COLORS.neutralDarkTwo : Colors.red,
-                    errorBorderColor: Colors.red, // Error state color
+                    inactiveColor: isOtpValid ? COLORS.neutralDarkTwo : Colors.red,
+                    errorBorderColor: Colors.red,
                   ),
                   animationDuration: const Duration(milliseconds: 300),
                   backgroundColor: Colors.transparent,
@@ -256,33 +258,34 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   beforeTextPaste: (text) {
                     return true;
                   },
+
                 ),
                 Row(
                   mainAxisAlignment: errorMessage.isNotEmpty
                       ? MainAxisAlignment.spaceBetween
                       : MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (errorMessage.isNotEmpty)
                       Text(
                         errorMessage,
                         style: TextStyle(
                           color: Colors.red,
-                          fontSize: SizeConfig.blockWidth * 3,
+                          fontSize: SizeConfig.blockWidth * 3.1,
                           fontWeight: FontWeight.w400,
                           fontFamily: "Poppins",
                         ),
                       ),
                     remainingSeconds == 0
-                        ? TextButton(
-                            onPressed: () {
+                        ? InkWell(
+                            onTap: () {
                               setState(() {
                                 remainingSeconds = 30;
                                 startTimer();
                                 errorMessage = '';
                                 otpCode = '';
-                                loginOtpBloc
-                                    .add(ResendOtpEvent(otpToken: otpToken));
+                                _otpController.clear();
+                                loginOtpBloc.add(ResendOtpEvent(otpToken: otpToken));
                               });
                             },
                             child: Text(

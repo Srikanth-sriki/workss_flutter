@@ -205,7 +205,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                       color: COLORS.black,
                                                       fontSize: SizeConfig
                                                               .blockWidth *
-                                                          2.25,
+                                                          2.5,
                                                       fontWeight:
                                                           FontWeight.w400,
                                                       fontFamily: "Poppins",
@@ -266,7 +266,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                     'Work Post \nViewed by'.tr(),
                                                     style: TextStyle(
                                                       color: COLORS.black,
-                                                      fontSize: SizeConfig.blockWidth * 2.25,
+                                                      fontSize: SizeConfig.blockWidth * 2.5,
                                                       fontWeight:
                                                           FontWeight.w400,
                                                       fontFamily: "Poppins",
@@ -322,7 +322,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                             height:
                                                 SizeConfig.blockHeight * 7,
                                             textColor: COLORS.white,
-                                            width: SizeConfig.blockWidth * 50,
+                                            width: SizeConfig.blockWidth * 55,
                                           ),
                                           Row(
                                             mainAxisAlignment:
@@ -427,7 +427,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                                   );
 
                                                 },
-                                                color: COLORS.accent,
+                                                color: COLORS.accent.withOpacity(0.1),
                                               ),
                                             ],
                                           ),

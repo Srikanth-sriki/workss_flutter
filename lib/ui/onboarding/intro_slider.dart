@@ -201,7 +201,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                         title,
                         style: TextStyle(
                           color: COLORS.primaryTwo,
-                          fontSize: SizeConfig.blockWidth * 4,
+                          fontSize: SizeConfig.blockWidth * 4.25,
                           fontWeight: FontWeight.w600,
                           fontFamily: "Poppins",
                         ),

@@ -120,7 +120,7 @@ class _LogoutSuccessState extends State<LogoutSuccess> with SingleTickerProvider
               SizedBox(height: SizeConfig.blockHeight * 4.5),
               const Spacer(),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 9),
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 9,vertical: SizeConfig.blockHeight*2),
                 child: customButton(
                   text: 'LOGIN'.tr(),
                   onPressed: () {

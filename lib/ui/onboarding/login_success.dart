@@ -117,7 +117,7 @@ class _LoginSuccessState extends State<LoginSuccess>
               padding:
                   EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 9),
               child: customButton(
-                text: 'Explore'.tr(),
+                text: 'EXPLORE'.tr(),
                 onPressed: () {
                   Navigator.pushNamed(context, '/main_screen');
                 },

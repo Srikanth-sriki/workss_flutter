@@ -170,27 +170,26 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   }
 
   void _submitButton() {
-    if (workImages.isEmpty) {
-      setState(() {
-        imagesList = true;
-      });
-    } else {
-      List<String> languageSelect =
-          selectedLanguage.map((lang) => lang.name).toList();
-      postWorkBloc.add(EditPostWorkEvent(
-          workId: widget.fetchPostedModel.id!,
-          requiredProfession: _selectedProfession!,
-          experienceLevel: _experienceLevel!.toLowerCase(),
-          gender: _selectedGender!.toLowerCase(),
-          knowLanguage: languageSelect,
-          location: addressSelected,
-          workPlace: _selectedWorkPlace!.toLowerCase(),
-          workImages: workImages,
-          isProfessionalCanCall: isChecked,
-          latitude: latitude!,
-          longitude: longitude!,
-          description: bioController.text));
-    }
+    // if (workImages.isEmpty) {
+    //   setState(() {
+    //     imagesList = true;
+    //   });
+    // } else {}
+    List<String> languageSelect =
+    selectedLanguage.map((lang) => lang.name).toList();
+    postWorkBloc.add(EditPostWorkEvent(
+        workId: widget.fetchPostedModel.id!,
+        requiredProfession: _selectedProfession!,
+        experienceLevel: _experienceLevel!.toLowerCase(),
+        gender: _selectedGender!.toLowerCase(),
+        knowLanguage: languageSelect,
+        location: addressSelected,
+        workPlace: _selectedWorkPlace!.toLowerCase(),
+        workImages: workImages,
+        isProfessionalCanCall: isChecked,
+        latitude: latitude!,
+        longitude: longitude!,
+        description: bioController.text));
   }
 
   Future<Position> _determinePosition() async {

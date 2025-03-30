@@ -50,6 +50,10 @@ class _AddressScreenState extends State<AddressScreen> {
   bool addressArea = false;
   bool otherNameError = false;
   late ProfileBloc profileBloc;
+  bool addressAdded = false;
+  bool locationAdded = false;
+  bool instructionAdded = false;
+  bool nameAddressAdded = false;
 
   @override
   void initState() {
@@ -396,7 +400,20 @@ class _AddressScreenState extends State<AddressScreen> {
                                     },
                                     error: otherNameError,
                                     title: 'Name of Address'.tr(),
-                                    onChanged: (value) {})
+                                    color: nameAddressAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                                    fontWeight: nameAddressAdded?FontWeight.w400:FontWeight.w500,
+                                    onChanged: (value) {
+                                      if(value!.isNotEmpty){
+                                        setState(() {
+                                          nameAddressAdded = true;
+                                        });
+                                      }
+                                      else{
+                                        setState(() {
+                                          nameAddressAdded = false;
+                                        });
+                                      }
+                                    })
                               ],
                               buildTextField(
                                   label: 'Address',
@@ -405,7 +422,20 @@ class _AddressScreenState extends State<AddressScreen> {
                                   validator: (value) {},
                                   error: false,
                                   title: 'Address'.tr(),
-                                  onChanged: (value) {}),
+                                  color: addressAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                                  fontWeight: addressAdded?FontWeight.w400:FontWeight.w500,
+                                  onChanged: (value) {
+                                    if(value!.isNotEmpty){
+                                      setState(() {
+                                        addressAdded = true;
+                                      });
+                                    }
+                                    else{
+                                      setState(() {
+                                        addressAdded = false;
+                                      });
+                                    }
+                                  }),
                               buildTextField(
                                 label: 'Location',
                                 controller: homeAddress,
@@ -420,7 +450,20 @@ class _AddressScreenState extends State<AddressScreen> {
                                 },
                                 error: addressArea,
                                 title: 'Location'.tr(),
-                                onChanged: (value) {},
+                                  color: locationAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                                  fontWeight: locationAdded?FontWeight.w400:FontWeight.w500,
+                                  onChanged: (value) {
+                                    if(value!.isNotEmpty){
+                                      setState(() {
+                                        locationAdded = true;
+                                      });
+                                    }
+                                    else{
+                                      setState(() {
+                                        locationAdded = false;
+                                      });
+                                    }
+                                  }
                               ),
                               buildBioTextField(
                                   label: 'Instructions'.tr(),
@@ -431,8 +474,21 @@ class _AddressScreenState extends State<AddressScreen> {
                                   validator: (value) {},
                                   maxLines: 4,
                                   error: false,
-                                  title: 'Instructions'.tr(),
-                                  onChanged: (value) {}),
+                                  title: 'Instructions (Optional)'.tr(),
+                                color: instructionAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                                  fontWeight: instructionAdded?FontWeight.w400:FontWeight.w500,
+                                onChanged: (value) {
+                                  if(value!.isNotEmpty){
+                                    setState(() {
+                                      instructionAdded = true;
+                                    });
+                                  }
+                                  else{
+                                    setState(() {
+                                      instructionAdded = false;
+                                    });
+                                  }
+                                }),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -514,6 +570,7 @@ class _AddressScreenState extends State<AddressScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
         ),
+        elevation: 0
       ),
       onPressed: () => _setSelectedType(type),
       icon: Image.asset(

@@ -82,7 +82,7 @@ class WorkCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: COLORS.primaryOne,
                       borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 1.5),
+                          BorderRadius.circular(SizeConfig.blockWidth * 1),
                     ),
                     child: Text(
                       timeAgo,

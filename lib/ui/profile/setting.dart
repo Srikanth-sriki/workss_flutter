@@ -16,7 +16,7 @@ import '../../global_helper/reuse_widget.dart';
 import '../onboarding/language_selection.dart';
 
 class SettingsTile extends StatelessWidget {
-  final IconData icon;
+  final String icon;
   final String title;
   final VoidCallback onTap;
 
@@ -35,10 +35,8 @@ class SettingsTile extends StatelessWidget {
           dense: true,
           contentPadding:
               EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 6,vertical: SizeConfig.blockHeight*0.8),
-          leading: Icon(
-            icon,
-            color: COLORS.black,
-            size: SizeConfig.blockWidth * 6,
+          leading: Image.asset(icon,width: SizeConfig.blockWidth*5,
+          height: SizeConfig.blockWidth*5,color: COLORS.neutralDark,
           ),
           title: Text(
             title.tr(),
@@ -106,7 +104,7 @@ class _SettingAppState extends State<SettingApp> {
                   ),
                 ),
                 SettingsTile(
-                  icon: Icons.notifications,
+                  icon: 'assets/images/home/notification.png',
                   title: 'Notifications',
                   onTap: () {
                     Navigator.push(
@@ -136,7 +134,7 @@ class _SettingAppState extends State<SettingApp> {
                   },
                 ),
                 SettingsTile(
-                  icon: Icons.language,
+                  icon: 'assets/images/home/translation.png',
                   title: 'Change Language',
                   onTap: () {
                     Navigator.push(
@@ -164,7 +162,7 @@ class _SettingAppState extends State<SettingApp> {
                   ),
                 ),
                 SettingsTile(
-                  icon: Icons.description,
+                  icon: 'assets/images/profile/clip_bord.png',
                   title: 'Terms & Conditions',
                   onTap: () {
                     Navigator.push(
@@ -176,7 +174,7 @@ class _SettingAppState extends State<SettingApp> {
                   },
                 ),
                 SettingsTile(
-                  icon: Icons.privacy_tip,
+                  icon: 'assets/images/profile/clip_bord.png',
                   title: 'Privacy Policy',
                   onTap: () {
                     Navigator.push(
@@ -201,7 +199,7 @@ class _SettingAppState extends State<SettingApp> {
                   ),
                 ),
                 SettingsTile(
-                  icon: Icons.delete,
+                  icon: 'assets/images/profile/delete.png',
                   title: 'Delete Account',
                   onTap: () {
                     showMaterialModalBottomSheet(
@@ -226,7 +224,7 @@ class _SettingAppState extends State<SettingApp> {
                   },
                 ),
                 SettingsTile(
-                  icon: Icons.logout,
+                  icon: 'assets/images/profile/logout_outline.png',
                   title: 'Logout',
                   onTap: () {
                     showMaterialModalBottomSheet(

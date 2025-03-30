@@ -185,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           text: TextSpan(
                             text: "I accept the ".tr(),
                             style: TextStyle(
-                              color: COLORS.neutralDark,
+                              color: COLORS.neutralDarkOne,
                               fontSize: SizeConfig.blockWidth * 3.4,
                               fontWeight: FontWeight.w400,
                               fontFamily: "Poppins",),

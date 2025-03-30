@@ -633,7 +633,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackPress;
   final Color? titleColors;
   final bool? borderColor;
-  final List<Widget>? actions; // Add a new parameter for actions
+  final List<Widget>? actions;
+  final bool? textCap;
 
   const CustomAppBar({
     super.key,
@@ -643,7 +644,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBackPress,
     this.titleColors = COLORS.white,
     this.borderColor = false,
-    this.actions, // Initialize actions here
+    this.actions,
+    this.textCap = true
   });
 
   @override
@@ -673,12 +675,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: onBackPress ?? () => Navigator.of(context).pop(),
       )
           : null,
-      title: Text(
-        capitalizeEachWord(title).tr(),
+      title: Text(textCap!        ?
+        capitalizeEachWord(title).tr():title.tr(),
         style: TextStyle(
           color: titleColors,
           fontSize: SizeConfig.blockWidth * 4.25,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w400,
           fontFamily: "Poppins",
         ),
       ),
@@ -689,7 +691,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-    SizeConfig.blockHeight * 10,
+    SizeConfig.blockHeight * 8,
   );
 }
 
@@ -903,6 +905,7 @@ Widget buildProfessionalCard(
                             contacted ? COLORS.semanticTwo : COLORS.primary,
                         showIcon: false,
                         textColor: COLORS.white,
+                        height: SizeConfig.blockHeight*7
                       ),
                     ),
                     Row(
@@ -995,16 +998,20 @@ Widget buildDynamicRadioSelection({
   required void Function(String?)? onChanged,
   required String? groupValue,
   required String title,
+  Color? color = COLORS.neutralDark,
+  FontWeight? fontWeight = FontWeight.w500,
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      registerText(text: title.tr()),
+      registerText(text: title.tr(), color: color, fontWeight: fontWeight),
       Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: options.map((option) {
+          bool isSelected = option['value'] == groupValue; // Check if selected
+
           return GestureDetector(
             onTap: () => onChanged?.call(option['value']),
             child: Row(
@@ -1015,14 +1022,19 @@ Widget buildDynamicRadioSelection({
                   groupValue: groupValue,
                   onChanged: onChanged,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  fillColor: const MaterialStatePropertyAll(COLORS.primary),
+                  fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return COLORS.primary;
+                    }
+                    return COLORS.neutralDarkOne;
+                  }),
                 ),
                 Text(
                   option['label']!.tr(),
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.5,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400, // Change weight when selected
                     fontFamily: "Poppins",
                   ),
                 ),
@@ -1034,6 +1046,7 @@ Widget buildDynamicRadioSelection({
     ],
   );
 }
+
 
 
 // class IconActionCard extends StatelessWidget {

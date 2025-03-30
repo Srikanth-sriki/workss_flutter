@@ -208,7 +208,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                         Icon(
                           Icons.location_on,
                           color: COLORS.accent,
-                          size: SizeConfig.blockWidth * 4,
+                          size: SizeConfig.blockWidth * 4.5,
                         ),
                         SizedBox(width: SizeConfig.blockWidth * 1.5),
                         SizedBox(
@@ -382,7 +382,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                                     ProfessionalBloc()
                                       ..add(FetchProfessionalView(
                                           professionalData
-                                              .id!)),
+                                              .userId!)),
                                   ),
                                   BlocProvider(
                                     create: (context) =>
@@ -391,7 +391,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                                   BlocProvider(create:(context)=>ReportPostBloc() )
                                 ],
                                 child: ProfessionalViewScreen(
-                                  id: professionalData.id!,
+                                  id: professionalData.userId!,
                                   refreshPageCallback:_refreshPageAfterEdit ,
                                 ),
                               )));
@@ -413,7 +413,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                 languageImage: 'assets/images/home/speak.png',
                 contacted:
                 professionalData.user!.isContacted != null,
-                saved: professionalData.user!.isSaved == null,
+                saved: professionalData.user!.isSaved != null,
                 onShowInterest: () {
                   if (professionalData.user!.isContacted == null) {
                     showInterestedBloc

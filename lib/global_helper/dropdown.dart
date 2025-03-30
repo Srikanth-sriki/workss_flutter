@@ -96,70 +96,81 @@ class CustomDropdownButtonFormField extends StatelessWidget {
   }
 }
 
-Widget buildDropdown({
-  required String label,
-  required String hintText,
-  required List<String> items,
-  required void Function(String?) onChanged,
-  required String? Function(String?) validator,
-  String?value,
-  bool? itemLoading = false,
-  Color? color = COLORS.neutralDark,
-  FontWeight? fontWeight = FontWeight. w500
-}) {
+Widget buildDropdown(
+    {required String label,
+    required String hintText,
+    required List<String> items,
+    required void Function(String?) onChanged,
+    required String? Function(String?) validator,
+    String? value,
+    bool? itemLoading = false,
+    Color? color = COLORS.neutralDark,
+    FontWeight? fontWeight = FontWeight.w500}) {
   final TextEditingController textEditingController = TextEditingController();
   List<String> filteredItems = items;
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      registerText(text: label,color: color,fontWeight: fontWeight),
+      registerText(text: label, color: color, fontWeight: fontWeight),
       DropdownButtonFormField2<String>(
-        buttonStyleData: ButtonStyleData(height: SizeConfig.blockHeight*5),
+        buttonStyleData: ButtonStyleData(height: SizeConfig.blockHeight * 5),
         value: value,
-        isDense: true,menuItemStyleData: MenuItemStyleData(height: SizeConfig.blockHeight*6,),
-        decoration: InputDecoration(
-          contentPadding: EdgeInsets.symmetric(
-            vertical: SizeConfig.blockHeight * 1.5,
-            horizontal: SizeConfig.blockWidth * 3,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            borderSide: const BorderSide(
-              color: COLORS.neutralDarkTwo,
-              width: 1,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            borderSide: const BorderSide(
-              color: COLORS.primary,
-              width: 1,
-            ),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            borderSide: const BorderSide(
-              color: COLORS.semantic,
-              width: 1,
-            ),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            borderSide: const BorderSide(
-              color: COLORS.semantic,
-              width: 1.5,
-            ),
-          ),constraints: BoxConstraints(minHeight: SizeConfig.blockHeight*8,maxHeight: SizeConfig.blockHeight*15)
+        isDense: true,autofocus: true,
+        menuItemStyleData: MenuItemStyleData(
+          height: SizeConfig.blockHeight * 6,
         ),
+        decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(
+              vertical: SizeConfig.blockHeight * 1.5,
+              horizontal: SizeConfig.blockWidth * 3,
+            ),
+            errorStyle: TextStyle(
+              fontWeight: FontWeight.w400,
+              fontFamily: "Poppins",
+              fontSize: SizeConfig.blockWidth * 3.1,
+              color: COLORS.semantic,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+              borderSide: const BorderSide(
+                color: COLORS.neutralDarkTwo,
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+              borderSide: const BorderSide(
+                color: COLORS.primary,
+                width: 1,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+              borderSide: const BorderSide(
+                color: COLORS.semantic,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+              borderSide: const BorderSide(
+                color: COLORS.semantic,
+                width: 1.5,
+              ),
+            ),
+            constraints: BoxConstraints(
+                minHeight: SizeConfig.blockHeight * 8,
+                maxHeight: SizeConfig.blockHeight * 15)),
         dropdownStyleData: DropdownStyleData(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
             color: COLORS.white,
           ),
-          offset: const Offset(0, -4),
-          maxHeight: SizeConfig.blockHeight*40
+          //offset: Offset(0, SizeConfig.blockHeight * 0), // Moves dropdown below
+          maxHeight: SizeConfig.blockHeight * 50, // Set a max height
         ),
+
         isExpanded: true,
         style: TextStyle(
           fontSize: SizeConfig.blockWidth * 3,
@@ -178,31 +189,31 @@ Widget buildDropdown({
         ),
         items: filteredItems
             .map((item) => DropdownMenuItem<String>(
-          value: item,
-          child: Text(
-            capitalizeEachWord(item),
-            style: TextStyle(
-              fontSize: SizeConfig.blockWidth * 3.5,
-              color: COLORS.neutralDark,
-              fontWeight: FontWeight.w400,
-              fontFamily: "Poppins",
-            ),
-          ),
-        ))
+                  value: item,
+                  child: Text(
+                    capitalizeEachWord(item),
+                    style: TextStyle(
+                      fontSize: SizeConfig.blockWidth * 3.5,
+                      color: COLORS.neutralDark,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                ))
             .toList(),
         onChanged: onChanged,
         validator: validator,
         iconStyleData: IconStyleData(
-          icon: itemLoading!?
-          LoadingAnimationWidget.discreteCircle(
-            color: COLORS.accent,
-            size: SizeConfig.blockWidth * 4,
-          ):
-          Icon(
-            Icons.keyboard_arrow_down_outlined,
-            color: COLORS.accent,
-            size: SizeConfig.blockWidth * 6,
-          ),
+          icon: itemLoading!
+              ? LoadingAnimationWidget.discreteCircle(
+                  color: COLORS.accent,
+                  size: SizeConfig.blockWidth * 4,
+                )
+              : Icon(
+                  Icons.keyboard_arrow_down_outlined,
+                  color: COLORS.accent,
+                  size: SizeConfig.blockWidth * 6,
+                ),
         ),
         dropdownSearchData: DropdownSearchData(
           searchController: textEditingController,
@@ -211,7 +222,7 @@ Widget buildDropdown({
             height: SizeConfig.blockHeight * 7,
             margin: EdgeInsets.only(top: SizeConfig.blockHeight * 2),
             padding:
-            EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 3),
+                EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 3),
             child: TextFormField(
               expands: true,
               maxLines: null,
@@ -220,7 +231,7 @@ Widget buildDropdown({
                 // Update filteredItems based on search query
                 filteredItems = items
                     .where((item) =>
-                    item.toLowerCase().contains(value.toLowerCase()))
+                        item.toLowerCase().contains(value.toLowerCase()))
                     .toList();
               },
               decoration: InputDecoration(
@@ -238,18 +249,19 @@ Widget buildDropdown({
                 ),
                 border: OutlineInputBorder(
                   borderRadius:
-                  BorderRadius.circular(SizeConfig.blockWidth * 3),
+                      BorderRadius.circular(SizeConfig.blockWidth * 3),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius:
-                  BorderRadius.circular(SizeConfig.blockWidth * 3),
+                      BorderRadius.circular(SizeConfig.blockWidth * 3),
                   borderSide: const BorderSide(
                     color: COLORS.primary,
                     width: 1,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3),
                   borderSide: const BorderSide(
                     color: COLORS.neutralDarkOne,
                     width: 1,
@@ -259,7 +271,10 @@ Widget buildDropdown({
             ),
           ),
           searchMatchFn: (item, searchValue) {
-            return item.value.toString().toLowerCase().contains(searchValue.toLowerCase());
+            return item.value
+                .toString()
+                .toLowerCase()
+                .contains(searchValue.toLowerCase());
           },
         ),
         onMenuStateChange: (isOpen) {
@@ -273,4 +288,3 @@ Widget buildDropdown({
     ],
   );
 }
-

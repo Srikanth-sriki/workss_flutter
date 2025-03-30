@@ -318,7 +318,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           children: [
             Text(header,
                 style: TextStyle(
-                    fontSize: SizeConfig.blockWidth * 6.5,
+                    fontSize: SizeConfig.blockWidth * 6.8,
                     fontFamily: "Poppins",
                     color: isSelected ? COLORS.white : COLORS.primary,
                     fontWeight: FontWeight.w700)),

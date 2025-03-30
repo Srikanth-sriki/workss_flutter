@@ -397,7 +397,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   showCustomSnackBar(
                     context: context,
                     message: state.message,
-                    backgroundColor: COLORS.neutralDarkOne
+                    backgroundColor: COLORS.semanticTwo
                   );
                   Navigator.pop(context, true);
                 } else if (state is EditProfileFailed) {
@@ -569,9 +569,9 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           normalTextField(
                               hintText: "Experience".tr(),
                               controller: experienceController,
-                              maxLength: 2,
+                              maxLength: 4,
                               inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
                               ],
                               inputType: TextInputType.number,
                               onChanged: (value) {

@@ -30,6 +30,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
   bool bioError = false;
   bool phoneError = false;
   String _errorMessage = '';
+  bool buttonVisible = false;
 
   @override
   void initState() {
@@ -38,6 +39,17 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     setState(() {
       _enterName.text = Config.name;
       _phoneController.text = Config.phoneNumber;
+    });
+  }
+
+  void _validateForm() {
+    bool isValid = false;
+    if (bioController.text.isNotEmpty && _enterName.text.isNotEmpty && _phoneController.text.isNotEmpty &&
+        _emailController.text.isNotEmpty ) {
+      isValid = true;
+    }
+    setState(() {
+      buttonVisible = isValid;
     });
   }
 
@@ -130,11 +142,14 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                           },
                           error: nameError,
                           title: 'name'.tr(),
-                          onChanged: (value) {}),
+                          onChanged: (value) {
+                            _validateForm();
+                          }),
                       registerText(text: 'mobile_number'.tr()),
                       PhoneNumberInput(
                         controller: _phoneController,
                         onChanged: (value) {
+                          _validateForm();
                           setState(() {
                             RegExp regex = RegExp(r"^[0-9]{10}$");
                             phoneError = !regex.hasMatch(value);
@@ -173,7 +188,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                         },
                         error: emailError,
                         title: 'email'.tr(),
-                        onChanged: (value) {},
+                        onChanged: (value) {
+                          _validateForm();
+                        },
                       ),
                       buildBioTextField(
                           label: 'Message'.tr(),
@@ -189,20 +206,26 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                           },
                           error: bioError,
                           title: 'Message'.tr(),
-                          onChanged: (value) {}),
+                          onChanged: (value) {
+                            _validateForm();
+                          }),
                       SizedBox(height: 20), // Add spacing to push button down
                       customButton(
                         text: 'SUBMIT'.tr(),
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            profileBloc.add(ContactUsEvent(
-                                name: _enterName.text,
-                                email: _emailController.text,
-                                mobile: _phoneController.text,
-                                message: _phoneController.text));
+                          if(buttonVisible) {
+                            if (_formKey.currentState!.validate()) {
+                              profileBloc.add(ContactUsEvent(
+                                  name: _enterName.text,
+                                  email: _emailController.text,
+                                  mobile: _phoneController.text,
+                                  message: bioController.text));
+                            }
                           }
                         },
-                        backgroundColor: COLORS.primary,
+                        backgroundColor: buttonVisible
+                            ? COLORS.primary
+                            : COLORS.primary.withOpacity(0.4),
                         showIcon: false,
                         width: SizeConfig.blockWidth * 100,
                         height: SizeConfig.blockHeight * 8,

@@ -47,8 +47,11 @@ class SwitchTile extends StatelessWidget {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: COLORS.primary,
+              activeColor: COLORS.primaryOne,
+              activeTrackColor: COLORS.primary,
               inactiveThumbColor: COLORS.neutralDarkOne,
+              inactiveTrackColor: COLORS.white,
+
             ),
           ),
         ),
@@ -187,6 +190,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 _updateNotificationSetting(
                                     workPostedInCity: value);
                               },
+
                             ),
                             buildSwitchTile(
                               title: 'Works Viewed, Interest Showed',

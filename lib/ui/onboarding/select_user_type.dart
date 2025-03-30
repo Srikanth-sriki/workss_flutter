@@ -173,8 +173,8 @@ class UserTypeCard extends StatelessWidget {
           children: [
             Image.asset(
               isSelected ? selectedImagePath : imagePath,
-              width: SizeConfig.blockWidth * 6.5,
-              height: SizeConfig.blockHeight * 6.5,
+              width: isSelected ?SizeConfig.blockWidth * 7.5:SizeConfig.blockWidth * 6.5,
+              height:  isSelected ?SizeConfig.blockHeight * 7.5:SizeConfig.blockHeight * 6.5,
               fit: BoxFit.contain,
             ),
             // SizedBox(height: SizeConfig.blockHeight,),

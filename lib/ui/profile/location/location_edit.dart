@@ -51,32 +51,58 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   bool loading = false;
   double latitude = 0.0;
   double longitude = 0.0;
+  bool addressAdded = true;
+  bool locationAdded = true;
+  bool instructionAdded = true;
+  bool nameAddressAdded = true;
 
   @override
   void initState() {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
-    initialData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initialData();
+    });
 
   }
+
+
   void initialData() {
-     _initialPosition = LatLng(
+    _initialPosition = LatLng(
       double.tryParse(widget.addressItem.latitude ?? '0.0') ?? 0.0,
       double.tryParse(widget.addressItem.longitude ?? '0.0') ?? 0.0,
     );
-     _currentPosition=LatLng(
-       double.tryParse(widget.addressItem.latitude ?? '0.0') ?? 0.0,
-       double.tryParse(widget.addressItem.longitude ?? '0.0') ?? 0.0,
-     );
-     _selectedType = capitalizeFirstLetter(widget.addressItem.addressType!);
-     houseNo.text =  widget.addressItem.houseNo!;
-     homeAddress.text =widget.addressItem.area!;
-     Instructions.text =widget.addressItem.instructions!;
-     otherName.text =widget.addressItem.addressTypeName!;
-     isChecked = widget.addressItem.isDefault!;
-      latitude = double.tryParse(widget.addressItem.latitude ?? '0.0')!;
-      longitude =  double.tryParse(widget.addressItem.longitude ?? '0.0')!;
+    _currentPosition = LatLng(
+      double.tryParse(widget.addressItem.latitude ?? '0.0') ?? 0.0,
+      double.tryParse(widget.addressItem.longitude ?? '0.0') ?? 0.0,
+    );
+    _selectedType = capitalizeFirstLetter(widget.addressItem.addressType!);
+    houseNo.text = widget.addressItem.houseNo!;
+    homeAddress.text = widget.addressItem.area!;
+    Instructions.text = widget.addressItem.instructions!;
+    otherName.text = widget.addressItem.addressTypeName!;
+    isChecked = widget.addressItem.isDefault!;
+    latitude = double.tryParse(widget.addressItem.latitude ?? '0.0')!;
+    longitude = double.tryParse(widget.addressItem.longitude ?? '0.0')!;
+
+    bool newNameAddressAdded = widget.addressItem.addressTypeName!.isNotEmpty;
+    bool newAddressAdded = widget.addressItem.area!.isNotEmpty;
+    bool newInstructionAdded = widget.addressItem.instructions!.isNotEmpty;
+    bool newLocationAdded = widget.addressItem.houseNo!.isNotEmpty;
+
+    if (newNameAddressAdded != nameAddressAdded ||
+        newAddressAdded != addressAdded ||
+        newInstructionAdded != instructionAdded ||
+        newLocationAdded != locationAdded) {
+      setState(() {
+        nameAddressAdded = newNameAddressAdded;
+        addressAdded = newAddressAdded;
+        instructionAdded = newInstructionAdded;
+        locationAdded = newLocationAdded;
+      });
+    }
   }
+
 
   Future<void> _getCurrentLocation() async {
     setState(() {
@@ -406,7 +432,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                 },
                                 error: otherNameError,
                                 title: 'Name of Address'.tr(),
-                                onChanged: (value) {})
+                                color: nameAddressAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                                fontWeight: nameAddressAdded?FontWeight.w400:FontWeight.w500,
+                                onChanged: (value) {
+                                  if(value!.isNotEmpty){
+                                    setState(() {
+                                      nameAddressAdded = true;
+                                    });
+                                  }
+                                  else{
+                                    setState(() {
+                                      nameAddressAdded = false;
+                                    });
+                                  }
+                                })
                           ],
                           buildTextField(
                               label: 'Address',
@@ -415,7 +454,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               validator: (value) {},
                               error: false,
                               title: 'Address'.tr(),
-                              onChanged: (value) {}),
+                              color: addressAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                              fontWeight: addressAdded?FontWeight.w400:FontWeight.w500,
+                              onChanged: (value) {
+                                if(value!.isNotEmpty){
+                                  setState(() {
+                                    addressAdded = true;
+                                  });
+                                }
+                                else{
+                                  setState(() {
+                                    addressAdded = false;
+                                  });
+                                }
+                              }),
                           buildTextField(
                             label: 'Location',
                             controller: homeAddress,
@@ -423,7 +475,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                             validator: (value) {},
                             error: false,
                             title: 'Location'.tr(),
-                            onChanged: (value) {},
+                              color: locationAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                              fontWeight: locationAdded?FontWeight.w400:FontWeight.w500,
+                              onChanged: (value) {
+                                if(value!.isNotEmpty){
+                                  setState(() {
+                                    locationAdded = true;
+                                  });
+                                }
+                                else{
+                                  setState(() {
+                                    locationAdded = false;
+                                  });
+                                }
+                              }
                           ),
                           buildBioTextField(
                               label: 'Instructions'.tr(),
@@ -433,7 +498,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               validator: (value) {},
                               error: false,
                               title: 'Instructions'.tr(),maxLines: 6,
-                              onChanged: (value) {}),
+                              color: instructionAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
+                              fontWeight: instructionAdded?FontWeight.w400:FontWeight.w500,
+                              onChanged: (value) {
+                                if(value!.isNotEmpty){
+                                  setState(() {
+                                    instructionAdded = true;
+                                  });
+                                }
+                                else{
+                                  setState(() {
+                                    instructionAdded = false;
+                                  });
+                                }
+                              }),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -540,6 +618,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
         ),
+        elevation: 0
       ),
       onPressed: () => _setSelectedType(type),
       icon:  Image.asset(

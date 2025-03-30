@@ -184,6 +184,8 @@ flutter:
      - assets/images/chat/read_done.png
      - assets/images/chat/add_friend.png
      - assets/images/chat/chat_create.png
+     - assets/images/profile/clip_bord.png
+     - assets/images/profile/logout_outline.png
 
 
   #   - images/a_dot_ham.jpeg

@@ -48,10 +48,11 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
             "Are you sure you want to log out? Your session will end, and you'll need to log in again to continue.".tr(),
             style: TextStyle(
               color: COLORS.neutralDarkOne,
-              fontSize: SizeConfig.blockWidth * 3.4,
+              fontSize: SizeConfig.blockWidth * 3.5,
               fontWeight: FontWeight.w400,
               fontFamily: "Poppins",
             ),
+            textAlign: TextAlign.center,
           ),
           Container(
             margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),

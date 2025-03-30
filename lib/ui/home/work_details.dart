@@ -287,7 +287,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       padding:
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
                       child: Text(
-                        'Work Address'.tr(),
+                        'Work Location'.tr(),
                         style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.6,
@@ -443,20 +443,22 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: SizeConfig.blockHeight * 2),
-                    Padding(
-                      padding:
-                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
-                      child: Text(
-                        'Work Images'.tr(),
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.6,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                    if(singleWork.workImages!.isNotEmpty)...[
+                      SizedBox(height: SizeConfig.blockHeight * 2),
+                      Padding(
+                        padding:
+                        EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.5),
+                        child: Text(
+                          'Work Images'.tr(),
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.6,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
                         ),
-                      ),
-                    ),
+                      )
+                    ],
                     // Container(
                     //   width: SizeConfig.blockWidth * 100,
                     //   height: SizeConfig.blockHeight * 40,
