@@ -325,48 +325,64 @@ class _WaveBubbleState extends State<WaveBubble> {
     }
   }
 
+  void _togglePlayPause() async {
+    if (isPlaying) {
+      await controller.pausePlayer();
+      setState(() {
+        isPlaying = false;
+      });
+      return;
+    }
+
+    // Stop previously playing audio
+    if (_currentlyPlayingController != null &&
+        _currentlyPlayingController != controller) {
+      await _currentlyPlayingController!.pausePlayer();
+      setState(() {
+        isPlaying = false;
+      });
+    }
+
+    // Start playing audio
+    await controller.startPlayer();
+
+    // Ensure player stops at completion
+    controller.setFinishMode(finishMode: FinishMode.stop);
+
+    // Notify parent widget (if applicable)
+    widget.onPlay?.call(controller);
+
+    // Update current playing controller
+    _currentlyPlayingController = controller;
+
+    setState(() {
+      isPlaying = true;
+    });
+  }
+
+
+
   // void _togglePlayPause() async {
   //   if (isPlaying) {
   //     await controller.pausePlayer();
   //     return;
   //   }
   //
-  //   // Stop previously playing audio
   //   if (_currentlyPlayingController != null &&
   //       _currentlyPlayingController != controller) {
   //     await _currentlyPlayingController!.pausePlayer();
   //   }
   //
+  //   if (localFilePath != null) {
+  //     await _preparePlayer(); // Ensure player is ready before playing
+  //   }
+  //
   //   await controller.startPlayer();
   //   controller.setFinishMode(finishMode: FinishMode.stop);
   //
-  //   _currentlyPlayingController = controller; // Set current controller
-  //
-  //   // Notify parent widget (if applicable)
+  //   _currentlyPlayingController = controller;
   //   widget.onPlay?.call(controller);
   // }
-
-  void _togglePlayPause() async {
-    if (isPlaying) {
-      await controller.pausePlayer();
-      return;
-    }
-
-    if (_currentlyPlayingController != null &&
-        _currentlyPlayingController != controller) {
-      await _currentlyPlayingController!.pausePlayer();
-    }
-
-    if (localFilePath != null) {
-      await _preparePlayer(); // Ensure player is ready before playing
-    }
-
-    await controller.startPlayer();
-    controller.setFinishMode(finishMode: FinishMode.stop);
-
-    _currentlyPlayingController = controller;
-    widget.onPlay?.call(controller);
-  }
 
 
   @override
