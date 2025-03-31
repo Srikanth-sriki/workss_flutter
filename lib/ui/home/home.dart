@@ -27,6 +27,7 @@ import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/friends/global_search_list_modal.dart';
 import '../../models/home_fetch_model.dart';
 import '../chat/addFriends.dart';
 import '../friends/friends_search.dart';
@@ -43,7 +44,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late HomeBloc homeBloc;
   late ShowInterestedBloc showInterestedBloc;
+  late FriendsBloc friendsBloc;
   late List<HomeFetchModel> homeFetchModel = [];
+  late List<SearchFriendLists> searchFriendLists;
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
   int currentPage = 1;
@@ -58,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     homeBloc = BlocProvider.of<HomeBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    friendsBloc = BlocProvider.of<FriendsBloc>(context);
     _fetchData();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -162,52 +166,90 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   _buildHeader(),
-                  Expanded(
-                    child: BlocConsumer<HomeBloc, HomeState>(
-                      listener: (context, state) {
-                        if (state is FetchHomeScreenSuccess) {
-                          setState(() {
-                            if (currentPage == 1) {
-                              // Only set data for the first page
-                              homeFetchModel = state.homeFetchModel;
-                            } else {
-                              // Only add new unique items for subsequent pages
-                              final newItems = state.homeFetchModel
-                                  .where((item) => !homeFetchModel.contains(item));
-                              homeFetchModel.addAll(newItems);
-                            }
-                            maxPageNumber = state.maxPageNumber;
-                            isFetchingMore = false;
-                          });
-                        } else if (state is FetchHomeScreenFailed) {
-                          setState(() {
-                            isFetchingMore = false;
-                          });
+          Expanded(
+            child: MultiBlocListener(
+              listeners: [
+                BlocListener<HomeBloc, HomeState>(
+                  listener: (context, state) {
+                    if (state is FetchHomeScreenSuccess) {
+                      setState(() {
+                        if (currentPage == 1) {
+                          homeFetchModel = state.homeFetchModel;
+                        } else {
+                          final newItems = state.homeFetchModel
+                              .where((item) => !homeFetchModel.contains(item));
+                          homeFetchModel.addAll(newItems);
                         }
-                      },
-                      builder: (context, state) {
-                        if (state is HomeScreenLoading && currentPage == 1 ||
-                            state is HomeInitial) {
-                          return const ShimmerJobCards();
-                        } else if (state is FetchHomeScreenSuccess) {
-                          return _buildListView();
-                        } else if (state is FetchHomeScreenFailed) {
-                          return ErrorScreen(onRetry: () {
-                            homeBloc.add(FetchHomeScreenEvent(
-                                page: currentPage,
-                                pageSize: pageSize,
-                                keyWord: "",
-                                profession: "",
-                                city: "",
-                                gender: "",
-                                currentLongitude: '',
-                                currentLatitude: ''));
-                          });
-                        }
-                        return Container();
-                      },
-                    ),
-                  ),
+                        maxPageNumber = state.maxPageNumber;
+                        isFetchingMore = false;
+                      });
+
+                      // Trigger FriendsBloc when HomeBloc fetches data successfully
+                      context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
+                    } else if (state is FetchHomeScreenFailed) {
+                      setState(() {
+                        isFetchingMore = false;
+                      });
+                    }
+                  },
+                ),
+                BlocListener<FriendsBloc, FriendsState>(
+                  listener: (context, state) {
+                    if (state is FriendsAddListSuccess) {
+                      setState(() {
+                        searchFriendLists = state.searchFriendLists;
+                      });
+                    } else if (state is FriendsAddListFailed) {
+                      setState(() {
+                        isFetchingMore = false;
+                      });
+                    }
+                  },
+                ),
+              ],
+              child: BlocConsumer<HomeBloc, HomeState>(
+                listener: (context, state) {
+                  if (state is FetchHomeScreenSuccess) {
+                    setState(() {
+                      if (currentPage == 1) {
+                        homeFetchModel = state.homeFetchModel;
+                      } else {
+                        final newItems = state.homeFetchModel
+                            .where((item) => !homeFetchModel.contains(item));
+                        homeFetchModel.addAll(newItems);
+                      }
+                      maxPageNumber = state.maxPageNumber;
+                      isFetchingMore = false;
+                    });
+                  } else if (state is FetchHomeScreenFailed) {
+                    setState(() {
+                      isFetchingMore = false;
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  if (state is HomeScreenLoading && currentPage == 1 || state is HomeInitial) {
+                    return const ShimmerJobCards();
+                  } else if (state is FetchHomeScreenSuccess) {
+                    return _buildListView();
+                  } else if (state is FetchHomeScreenFailed) {
+                    return ErrorScreen(onRetry: () {
+                      context.read<HomeBloc>().add(FetchHomeScreenEvent(
+                          page: currentPage,
+                          pageSize: pageSize,
+                          keyWord: "",
+                          profession: "",
+                          city: "",
+                          gender: "",
+                          currentLongitude: '',
+                          currentLatitude: ''));
+                    });
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ),
                 ],
               ),
               if(Config.profileCompleted)...[

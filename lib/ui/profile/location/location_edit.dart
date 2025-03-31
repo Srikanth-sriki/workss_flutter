@@ -571,20 +571,23 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               customButton(
                                   text: 'SAVE'.tr(),
                                   onPressed: () {
-                                    if (_formKey.currentState!.validate()) {
-                                      profileBloc.add(AddressLocationEdit(
-                                          addressId: widget.addressItem.id!,
-                                          addressType: _selectedType.toLowerCase(),
-                                          addressTypeName: otherName.text,
-                                          houseNo: houseNo.text,
-                                          area: homeAddress.text,
-                                          instructions: Instructions.text,
-                                          isDefault: isChecked,
-                                          latitude: latitude.toString(),
-                                          longitude: longitude.toString()));
+                                    if(homeAddress.text.isNotEmpty){
+                                      if (_formKey.currentState!.validate()) {
+                                        profileBloc.add(AddressLocationEdit(
+                                            addressId: widget.addressItem.id!,
+                                            addressType: _selectedType.toLowerCase(),
+                                            addressTypeName: otherName.text,
+                                            houseNo: houseNo.text,
+                                            area: homeAddress.text,
+                                            instructions: Instructions.text,
+                                            isDefault: isChecked,
+                                            latitude: latitude.toString(),
+                                            longitude: longitude.toString()));
+                                      }
                                     }
                                   },
-                                  backgroundColor: COLORS.primary,
+                                  backgroundColor: homeAddress.text.isNotEmpty?COLORS.primary:
+                                  COLORS.primary.withOpacity(0.4),
                                   showIcon: false,
                                   width: SizeConfig.blockWidth * 42,
                                   height: SizeConfig.blockHeight * 8,

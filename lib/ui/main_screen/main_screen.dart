@@ -65,10 +65,8 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-
-
   Widget _getTabScreen(int index) {
-    if(Config.profileCompleted){
+    if (Config.profileCompleted) {
       switch (index) {
         case 0:
           return BlocProvider(
@@ -106,8 +104,8 @@ class _MainScreenState extends State<MainScreen> {
           return MultiBlocProvider(providers: [
             BlocProvider(
                 create: (context) => FriendsBloc()
-                  ..add(
-                      FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+                  ..add(FetchFriendsListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(
                 create: (context) => ChartBloc()..add(const ChartListEvent()))
           ], child: const ChatMainScreen());
@@ -128,22 +126,26 @@ class _MainScreenState extends State<MainScreen> {
             child: const HomeScreen(),
           );
       }
-    }else{
+    } else {
       switch (index) {
         case 0:
-          return BlocProvider(
-            create: (_) => HomeBloc()
-              ..add(FetchHomeScreenEvent(
-                  page: 1,
-                  pageSize: 10,
-                  keyWord: '',
-                  profession: '',
-                  city: '',
-                  gender: '',
-                  currentLongitude: '',
-                  currentLatitude: '')),
-            child: const HomeScreen(),
-          );
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(FetchFriendsListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (context) => HomeBloc()
+                  ..add(FetchHomeScreenEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: '',
+                      profession: '',
+                      city: '',
+                      gender: '',
+                      currentLongitude: '',
+                      currentLatitude: '')))
+          ], child: const HomeScreen());
         case 1:
           return BlocProvider(
             create: (_) => ProfessionalBloc()
@@ -162,30 +164,33 @@ class _MainScreenState extends State<MainScreen> {
           return MultiBlocProvider(providers: [
             BlocProvider(
                 create: (context) => FriendsBloc()
-                  ..add(
-                      FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+                  ..add(FetchFriendsListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(
                 create: (context) => ChartBloc()..add(const ChartListEvent()))
           ], child: const ChatMainScreen());
         case 3:
           return _cachedProfileScreen;
         default:
-          return BlocProvider(
-            create: (_) => HomeBloc()
-              ..add(FetchHomeScreenEvent(
-                  page: 1,
-                  pageSize: 10,
-                  keyWord: '',
-                  profession: '',
-                  city: '',
-                  gender: '',
-                  currentLongitude: '',
-                  currentLatitude: '')),
-            child: const HomeScreen(),
-          );
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(FetchFriendsListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (context) => HomeBloc()
+                  ..add(FetchHomeScreenEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: '',
+                      profession: '',
+                      city: '',
+                      gender: '',
+                      currentLongitude: '',
+                      currentLatitude: '')))
+          ], child: const HomeScreen());
       }
     }
-
   }
 
   @override

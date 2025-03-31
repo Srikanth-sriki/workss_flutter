@@ -521,23 +521,23 @@ class _AddressScreenState extends State<AddressScreen> {
                               customButton(
                                   text: 'SAVE'.tr(),
                                   onPressed: () {
-                                    if (_formKey.currentState!.validate() &&
-                                        _currentAddress !=
-                                            'Loading address...') {
-                                      profileBloc.add(AddressLocationCreate(
-                                          addressType:
-                                              _selectedType.toLowerCase(),
-                                          addressTypeName: otherName.text,
-                                          houseNo: houseNo.text,
-                                          area: homeAddress.text,
-                                          instructions: Instructions.text,
-                                          isDefault: isChecked,
-                                          latitude: latitude.toString(),
-                                          longitude: longitude.toString()));
+                                    if( _currentAddress != 'Loading address...' && homeAddress.text.isNotEmpty){
+                                      if (_formKey.currentState!.validate()) {
+                                        profileBloc.add(AddressLocationCreate(
+                                            addressType:
+                                            _selectedType.toLowerCase(),
+                                            addressTypeName: otherName.text,
+                                            houseNo: houseNo.text,
+                                            area: homeAddress.text,
+                                            instructions: Instructions.text,
+                                            isDefault: isChecked,
+                                            latitude: latitude.toString(),
+                                            longitude: longitude.toString()));
+                                      }
                                     }
                                   },
                                   backgroundColor:
-                                      _currentAddress != 'Loading address...'
+                                      (_currentAddress != 'Loading address...' && homeAddress.text.isNotEmpty)
                                           ? COLORS.primary
                                           : COLORS.primary.withOpacity(0.2),
                                   showIcon: false,

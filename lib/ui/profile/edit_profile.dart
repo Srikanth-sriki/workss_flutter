@@ -205,12 +205,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         context: context,
         message: 'Profile picture required',
       );
-    } else if (workImages.isEmpty) {
-      print('object');
-      setState(() {
-        imagesList = true;
-      });
-    } else if ((selectedCharge == '' || selectedCharge == null) &&
+    }  else if ((selectedCharge == '' || selectedCharge == null) &&
         widget.profileFetch.userType == 'professional') {
     } else {
       List<String> languageSelect =
