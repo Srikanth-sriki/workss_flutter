@@ -192,8 +192,8 @@ Widget addFriendText({required String textOne, required String textTwo,required 
         child: Container(
           padding: EdgeInsets.all(SizeConfig.blockWidth * 2.25),
           decoration: BoxDecoration(
-              color: COLORS.accent.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.2)),
+              color: COLORS.accent.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2)),
           child: Text(
             textTwo.tr(),
             style: TextStyle(
@@ -210,49 +210,63 @@ Widget addFriendText({required String textOne, required String textTwo,required 
   );
 }
 
-Widget addFriendCard({required bool added,required String image,required String name,}){
-  return Container(
-    width: SizeConfig.blockWidth * 40,
-    margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 4 ),
-    padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-    decoration: BoxDecoration(
-      borderRadius:
-      BorderRadius.circular(SizeConfig.blockWidth * 3.5),
-      color: COLORS.primaryOne.withOpacity(0.1),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(height: SizeConfig.blockHeight*2),
-        Image.asset(
-          image,
-          width: SizeConfig.blockWidth * 18,
-          height: SizeConfig.blockWidth * 18,
-        ),
-        SizedBox(height: SizeConfig.blockHeight*0.5),
-        Text(
-          name,
-          style: TextStyle(
-            color: COLORS.neutralDark,
-            fontSize: SizeConfig.blockWidth * 3.25,
-            fontWeight: FontWeight.w500,
-            fontFamily: "Poppins",
+Widget addFriendCard({required bool added,required String image,required String name,
+  required VoidCallback onTap,required VoidCallback onTapCard
+}){
+  return InkWell(
+    onTap: onTapCard,
+    splashColor: Colors.white.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+    child: Container(
+      width: SizeConfig.blockWidth * 40,
+      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 4 ),
+      padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+      decoration: BoxDecoration(
+        borderRadius:
+        BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+        color: COLORS.primaryOne.withOpacity(0.1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: SizeConfig.blockHeight*2),
+          Container(
+            width: SizeConfig.blockWidth * 18,
+            height: SizeConfig.blockWidth * 18,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(image),
+                  fit: BoxFit.fill,
+                ),
+                borderRadius: BorderRadius.all(
+                    Radius.circular(SizeConfig.blockWidth * 2.5))),
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          // textAlign: TextAlign.end,
-        ),
-        SizedBox(height: SizeConfig.blockHeight*2),
-        customIconButton(
-            text: added?'Request Sent':'Add Friend',
-            onPressed: () {},
-            width: SizeConfig.blockWidth*32,
-            height: SizeConfig.blockHeight * 6.5,
-            backgroundColor: added?COLORS.neutralDarkTwo:COLORS.primary,
-            textColor: added?COLORS.neutralDark:COLORS.white,
-            showIcon: false)
-      ],
+
+          SizedBox(height: SizeConfig.blockHeight*0.5),
+          Text(
+            name,
+            style: TextStyle(
+              color: COLORS.neutralDark,
+              fontSize: SizeConfig.blockWidth * 3.25,
+              fontWeight: FontWeight.w500,
+              fontFamily: "Poppins",
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            // textAlign: TextAlign.end,
+          ),
+          SizedBox(height: SizeConfig.blockHeight*2),
+          customIconButton(
+              text: added?'Request Sent':'Add Friend',
+              onPressed: onTap,
+              width: SizeConfig.blockWidth*32,
+              height: SizeConfig.blockHeight * 6.5,
+              backgroundColor: added?COLORS.neutralDarkTwo:COLORS.primary,
+              textColor: added?COLORS.neutralDark:COLORS.white,
+              showIcon: false)
+        ],
+      ),
     ),
   );
 }

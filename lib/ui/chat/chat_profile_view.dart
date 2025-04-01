@@ -563,8 +563,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                   create: (context) =>
                                                       ChartBloc())
                                             ],
-                                            child: const AddFriendsScreen(
-                                                header: 'Add Friend'),
+                                            child: AddFriendsScreen(
+                                                header: 'Add Friend',refreshPageCallback: _refreshPageAfterEdit,),
                                           )));
                             },
                             child: Icon(
@@ -598,8 +598,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                   create: (context) =>
                                                       ChartBloc())
                                             ],
-                                            child: const AddFriendsScreen(
-                                                header: 'Friend Suggestion'),
+                                            child:  AddFriendsScreen(
+                                                header: 'Friend Suggestion',refreshPageCallback: _refreshPageAfterEdit,),
                                           )));
                             },
                             child: Icon(

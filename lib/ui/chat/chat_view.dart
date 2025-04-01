@@ -28,6 +28,7 @@ import 'package:works_app/ui/chat/remove_friends.dart';
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
+import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
@@ -37,6 +38,7 @@ import '../../helper/socket_service.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/chat/chat_view_modal.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
+import '../friends/friends_details.dart';
 import '../profile/notification.dart';
 import 'component.dart';
 import 'chat_wave_form.dart';
@@ -65,6 +67,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   late ShowInterestedBloc showInterestedBloc;
   late InitialRegisterBloc initialRegisterBloc;
   List<ChatView> chatView = [];
+  List<Participant> filteredParticipants =[];
   ChatViewGroupInfo chatViewGroupInfo = ChatViewGroupInfo();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _messageController = TextEditingController();
@@ -257,7 +260,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -288,6 +290,11 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   isFetchingMore = false;
                   maxPageNumber = state.maxPageNumber;
                   chatViewGroupInfo = state.chatViewGroupInfo;
+                 filteredParticipants =
+                  chatViewGroupInfo.participants
+                      .where((participant) =>
+                  participant.userId != Config.id)
+                      .toList();
 
                   if (currentPage == 1) {
                     chatView = state.chatView;
@@ -425,6 +432,47 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                     refreshPageCallback:
                                                         _refreshPageAfterEdit,
                                                   ))));
+                                } else {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder:
+                                              (context) => MultiBlocProvider(
+                                                    providers: [
+                                                      BlocProvider(
+                                                        create: (context) {
+                                                          final bloc =
+                                                              FriendsBloc();
+                                                          bloc.add(FetchFriendsSingleView(
+                                                              friendId:
+                                                                  filteredParticipants[
+                                                                          0]
+                                                                      .userId));
+                                                          return bloc;
+                                                        },
+                                                      ),
+                                                      BlocProvider(
+                                                        create: (context) =>
+                                                            ShowInterestedBloc(),
+                                                      ),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              ReportPostBloc()),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc()),
+                                                      BlocProvider(
+                                                          create: (context) =>
+                                                              ChartBloc())
+                                                    ],
+                                                    child: FriendsDetailsScreen(
+                                                      refreshPageCallback:
+                                                          _refreshPageAfterEdit,
+                                                      id: chatViewGroupInfo
+                                                          .participants[0]
+                                                          .userId,
+                                                    ),
+                                                  )));
                                 }
                               },
                               splashColor: COLORS.white.withOpacity(0.2),
@@ -474,7 +522,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       SizedBox(
                                         width: SizeConfig.blockWidth * 45,
                                         child: Text(
-                                            chatViewGroupInfo.description!,
+                                            widget.isGroup?chatViewGroupInfo.description!:filteredParticipants[0].user.professionType,
                                             style: TextStyle(
                                               color: COLORS.neutralDarkOne,
                                               fontSize:
@@ -993,7 +1041,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       setState(() {
                         _profileImage = image;
                         profilePicture = '';
-                        initialRegisterBloc.add(UploadImageEvent(imagePath: _profileImage!));
+                        initialRegisterBloc
+                            .add(UploadImageEvent(imagePath: _profileImage!));
                       });
                     }),
                     child: Container(
@@ -1001,7 +1050,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       height: SizeConfig.blockHeight * 8,
                       decoration: BoxDecoration(
                         color: COLORS.primaryOne.withOpacity(0.35),
-                        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                       ),
                       child: Icon(
                         Icons.add,
@@ -1013,20 +1063,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   SizedBox(width: SizeConfig.blockWidth * 4),
                 ],
                 Expanded(
-                  child: isRecording
-                      ? _buildRecordingUI()
-                      : _buildTextInputUI(),
+                  child:
+                      isRecording ? _buildRecordingUI() : _buildTextInputUI(),
                 ),
               ],
             ),
           ),
         ),
-
       ),
     );
   }
-
-
 
   Widget _buildTextInputUI() {
     return Container(
@@ -1062,7 +1108,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   fontFamily: "Poppins",
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -1076,18 +1123,20 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           Padding(
             padding: EdgeInsets.only(right: SizeConfig.blockWidth * 2.5),
             child: InkWell(
-              onTap: _messageController.text.isEmpty ? _startOrStopRecording : onSendMessage,
+              onTap: _messageController.text.isEmpty
+                  ? _startOrStopRecording
+                  : onSendMessage,
               child: _messageController.text.isEmpty
                   ? Image.asset(
-                'assets/images/chat/message.png',
-                width: SizeConfig.blockWidth * 5,
-                height: SizeConfig.blockWidth * 5,
-              )
+                      'assets/images/chat/message.png',
+                      width: SizeConfig.blockWidth * 5,
+                      height: SizeConfig.blockWidth * 5,
+                    )
                   : Icon(
-                Icons.send,
-                color: COLORS.primary,
-                size: SizeConfig.blockWidth * 5,
-              ),
+                      Icons.send,
+                      color: COLORS.primary,
+                      size: SizeConfig.blockWidth * 5,
+                    ),
             ),
           ),
         ],
@@ -1111,7 +1160,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           children: [
             AudioWaveforms(
               enableGesture: true,
-              size: Size(SizeConfig.blockWidth * 70, SizeConfig.blockHeight * 8),
+              size:
+                  Size(SizeConfig.blockWidth * 70, SizeConfig.blockHeight * 8),
               recorderController: recorderController,
               waveStyle: const WaveStyle(
                 waveColor: COLORS.white,
@@ -1134,7 +1184,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                 height: SizeConfig.blockWidth * 10,
                 padding: EdgeInsets.all(SizeConfig.blockWidth * 2.5),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 10),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 10),
                   color: COLORS.white,
                 ),
                 child: Image.asset(
@@ -1150,7 +1201,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       ),
     );
   }
-
 
   void _showPicker(context, onImageSelected) {
     showModalBottomSheet(

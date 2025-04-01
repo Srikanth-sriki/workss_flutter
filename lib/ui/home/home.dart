@@ -30,6 +30,7 @@ import '../../global_helper/reuse_widget.dart';
 import '../../models/friends/global_search_list_modal.dart';
 import '../../models/home_fetch_model.dart';
 import '../chat/addFriends.dart';
+import '../friends/friends_details.dart';
 import '../friends/friends_search.dart';
 import '../post_work/post_work.dart';
 import 'filter.dart';
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late ShowInterestedBloc showInterestedBloc;
   late FriendsBloc friendsBloc;
   late List<HomeFetchModel> homeFetchModel = [];
-  late List<SearchFriendLists> searchFriendLists;
+  late List<SearchFriendLists> searchFriendLists = [];
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
   int currentPage = 1;
@@ -63,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     _fetchData();
+    _fetchFriendList();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -105,6 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
         gender: selectedGender ?? "",
         currentLongitude: '',
         currentLatitude: ''));
+  }
+
+  void _fetchFriendList() {
+    friendsBloc.add(
+      FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''),
+    );
   }
 
   // void _loadMoreData() {
@@ -166,93 +174,93 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: [
                   _buildHeader(),
-          Expanded(
-            child: MultiBlocListener(
-              listeners: [
-                BlocListener<HomeBloc, HomeState>(
-                  listener: (context, state) {
-                    if (state is FetchHomeScreenSuccess) {
-                      setState(() {
-                        if (currentPage == 1) {
-                          homeFetchModel = state.homeFetchModel;
-                        } else {
-                          final newItems = state.homeFetchModel
-                              .where((item) => !homeFetchModel.contains(item));
-                          homeFetchModel.addAll(newItems);
-                        }
-                        maxPageNumber = state.maxPageNumber;
-                        isFetchingMore = false;
-                      });
+                  Expanded(
+                    child: MultiBlocListener(
+                      listeners: [
+                        BlocListener<HomeBloc, HomeState>(
+                          listener: (context, state) {
+                            if (state is FetchHomeScreenSuccess) {
+                              setState(() {
+                                if (currentPage == 1) {
+                                  homeFetchModel = state.homeFetchModel;
+                                } else {
+                                  final newItems = state.homeFetchModel.where(
+                                      (item) => !homeFetchModel.contains(item));
+                                  homeFetchModel.addAll(newItems);
+                                }
+                                maxPageNumber = state.maxPageNumber;
+                                isFetchingMore = false;
+                              });
 
-                      // Trigger FriendsBloc when HomeBloc fetches data successfully
-                      context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
-                    } else if (state is FetchHomeScreenFailed) {
-                      setState(() {
-                        isFetchingMore = false;
-                      });
-                    }
-                  },
-                ),
-                BlocListener<FriendsBloc, FriendsState>(
-                  listener: (context, state) {
-                    if (state is FriendsAddListSuccess) {
-                      setState(() {
-                        searchFriendLists = state.searchFriendLists;
-                      });
-                    } else if (state is FriendsAddListFailed) {
-                      setState(() {
-                        isFetchingMore = false;
-                      });
-                    }
-                  },
-                ),
-              ],
-              child: BlocConsumer<HomeBloc, HomeState>(
-                listener: (context, state) {
-                  if (state is FetchHomeScreenSuccess) {
-                    setState(() {
-                      if (currentPage == 1) {
-                        homeFetchModel = state.homeFetchModel;
-                      } else {
-                        final newItems = state.homeFetchModel
-                            .where((item) => !homeFetchModel.contains(item));
-                        homeFetchModel.addAll(newItems);
-                      }
-                      maxPageNumber = state.maxPageNumber;
-                      isFetchingMore = false;
-                    });
-                  } else if (state is FetchHomeScreenFailed) {
-                    setState(() {
-                      isFetchingMore = false;
-                    });
-                  }
-                },
-                builder: (context, state) {
-                  if (state is HomeScreenLoading && currentPage == 1 || state is HomeInitial) {
-                    return const ShimmerJobCards();
-                  } else if (state is FetchHomeScreenSuccess) {
-                    return _buildListView();
-                  } else if (state is FetchHomeScreenFailed) {
-                    return ErrorScreen(onRetry: () {
-                      context.read<HomeBloc>().add(FetchHomeScreenEvent(
-                          page: currentPage,
-                          pageSize: pageSize,
-                          keyWord: "",
-                          profession: "",
-                          city: "",
-                          gender: "",
-                          currentLongitude: '',
-                          currentLatitude: ''));
-                    });
-                  }
-                  return Container();
-                },
-              ),
-            ),
-          ),
+                              // Trigger FriendsBloc when HomeBloc fetches data successfully
+                              //context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
+                            } else if (state is FetchHomeScreenFailed) {
+                              setState(() {
+                                isFetchingMore = false;
+                              });
+                            }
+                          },
+                        ),
+                        BlocListener<FriendsBloc, FriendsState>(
+                          listener: (context, state) {
+                            if (state is FriendsAddListSuccess) {
+                              setState(() {
+                                searchFriendLists = state.searchFriendLists
+                                    .where((friend) => friend.isFriend == null)
+                                    .toList();
+                                ;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                      child: BlocConsumer<HomeBloc, HomeState>(
+                        listener: (context, state) {
+                          if (state is FetchHomeScreenSuccess) {
+                            setState(() {
+                              if (currentPage == 1) {
+                                homeFetchModel = state.homeFetchModel;
+                              } else {
+                                final newItems = state.homeFetchModel.where(
+                                    (item) => !homeFetchModel.contains(item));
+                                homeFetchModel.addAll(newItems);
+                              }
+                              maxPageNumber = state.maxPageNumber;
+                              isFetchingMore = false;
+                            });
+                          } else if (state is FetchHomeScreenFailed) {
+                            setState(() {
+                              isFetchingMore = false;
+                            });
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state is HomeScreenLoading && currentPage == 1 ||
+                              state is HomeInitial) {
+                            return const ShimmerJobCards();
+                          } else if (state is FetchHomeScreenSuccess) {
+                            return _buildListView();
+                          } else if (state is FetchHomeScreenFailed) {
+                            return ErrorScreen(onRetry: () {
+                              context.read<HomeBloc>().add(FetchHomeScreenEvent(
+                                  page: currentPage,
+                                  pageSize: pageSize,
+                                  keyWord: "",
+                                  profession: "",
+                                  city: "",
+                                  gender: "",
+                                  currentLongitude: '',
+                                  currentLatitude: ''));
+                            });
+                          }
+                          return Container();
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              if(Config.profileCompleted)...[
+              if (Config.profileCompleted) ...[
                 Positioned(
                   bottom: SizeConfig.blockHeight * 2.5,
                   right: SizeConfig.blockHeight * 4,
@@ -262,24 +270,27 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => MultiBlocProvider(
-                                  providers: [
-                                    BlocProvider(
-                                      create: (context) {
-                                        final bloc = PostWorkBloc();
-                                        bloc.add(const FetchWorkPlaceEvent());
-                                        bloc.add(const FetchWorkKnownLanguageEvent());
-                                        return bloc;
-                                      },
-                                    ),
-                                    BlocProvider(
-                                        create: (context) =>
-                                            ProfileBloc()),
-                                    BlocProvider(
-                                        create: (context) =>
-                                            ProfessionalBloc()),
-                                  ],
-                                  child: const PostWorkScreen(arrowBack: true,),
-                                )));
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) {
+                                            final bloc = PostWorkBloc();
+                                            bloc.add(
+                                                const FetchWorkPlaceEvent());
+                                            bloc.add(
+                                                const FetchWorkKnownLanguageEvent());
+                                            return bloc;
+                                          },
+                                        ),
+                                        BlocProvider(
+                                            create: (context) => ProfileBloc()),
+                                        BlocProvider(
+                                            create: (context) =>
+                                                ProfessionalBloc()),
+                                      ],
+                                      child: const PostWorkScreen(
+                                        arrowBack: true,
+                                      ),
+                                    )));
                       },
                       backgroundColor: COLORS.primary,
                       child: Icon(
@@ -317,31 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
-                  addFriendText(
-                      textOne: 'Add Friends',
-                      textTwo: 'View All',
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    const AddFriendsScreen(
-                                        header: 'Friend Suggestion')));
-                      }),
-                  SizedBox(
-                    height: SizeConfig.blockHeight * 33,
-                    child: ListView.builder(
-                        itemCount: 8,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return addFriendCard(
-                              added: index % 2 == 0 ? true : false,
-                              image: 'assets/images/home/dumy1.png',
-                              name: 'Julia Vandervort-Will');
-                        }),
-                  ),
-                  SizedBox(height: SizeConfig.blockHeight * 2),
+                  SizedBox(height: SizeConfig.blockHeight),
                   Padding(
                     padding:
                         EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
@@ -356,6 +343,135 @@ class _HomeScreenState extends State<HomeScreen> {
                       textAlign: TextAlign.end,
                     ),
                   ),
+                ],
+                if ((index == 3 || index == 15 || index == 30 || index == 50) &&
+                    searchFriendLists.isNotEmpty) ...[
+                  SizedBox(height: SizeConfig.blockHeight),
+                  addFriendText(
+                      textOne: 'Add Friends',
+                      textTwo: 'View All',
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => FriendsBloc()
+                                            ..add(FetchFriendsAddListEvent(
+                                                page: 1,
+                                                pageSize: 10,
+                                                keyWord: '')),
+                                        ),
+                                        BlocProvider(
+                                            create: (context) =>
+                                                ShowInterestedBloc()),
+                                        BlocProvider(
+                                            create: (context) => ChartBloc())
+                                      ],
+                                      child: AddFriendsScreen(
+                                        header: 'Friend Suggestion',
+                                        refreshPageCallback: _fetchFriendList,
+                                      ),
+                                    )));
+                      }),
+                  SizedBox(
+                    height: SizeConfig.blockHeight * 33,
+                    child: ListView.builder(
+                        itemCount: searchFriendLists.length >= 6
+                            ? 6
+                            : searchFriendLists.length,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return addFriendCard(
+                              added:
+                                  searchFriendLists[index].friendRequestSent !=
+                                          null
+                                      ? true
+                                      : false,
+                              image: searchFriendLists[index].profilePic,
+                              name: searchFriendLists[index].name,
+                              onTap: () {
+                                if (searchFriendLists[index]
+                                        .friendRequestSent !=
+                                    null) {
+                                  showInterestedBloc.add(UnSendFriendEvent(
+                                      userId: searchFriendLists[index].id,
+                                      onSuccess: (message) {
+                                        setState(() {
+                                          searchFriendLists[index]
+                                              .friendRequestSent = null;
+                                        });
+                                      },
+                                      onError: (message) {
+                                        showCustomSnackBar(
+                                          context: context,
+                                          message: message,
+                                        );
+                                      }));
+                                } else {
+                                  showInterestedBloc.add(AddFriendEvent(
+                                      userId: searchFriendLists[index].id,
+                                      onSuccess: (message) {
+                                        setState(() {
+                                          searchFriendLists[index]
+                                                  .friendRequestSent =
+                                              FriendRequestSent(
+                                            userId: searchFriendLists[index].id,
+                                          );
+                                        });
+                                      },
+                                      onError: (message) {
+                                        showCustomSnackBar(
+                                          context: context,
+                                          message: message,
+                                        );
+                                      }));
+                                }
+                              },
+                              onTapCard: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) {
+                                                    final bloc = FriendsBloc();
+                                                    bloc.add(
+                                                        FetchFriendsSingleView(
+                                                            friendId:
+                                                                searchFriendLists[
+                                                                        index]
+                                                                    .id));
+                                                    return bloc;
+                                                  },
+                                                ),
+                                                BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc(),
+                                                ),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ReportPostBloc()),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ShowInterestedBloc()),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ChartBloc())
+                                              ],
+                                              child: FriendsDetailsScreen(
+                                                refreshPageCallback:
+                                                    _fetchFriendList,
+                                                id: searchFriendLists[index].id,
+                                              ),
+                                            )));
+                              });
+                        }),
+                  ),
+                  SizedBox(height: SizeConfig.blockHeight * 2),
                 ],
                 WorkCard(
                   title: work.requiredProfession ?? '--',
@@ -615,8 +731,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         create: (context) => NotificationBloc()
                                           ..add(const FetchNotificationList()),
                                       ),
-                                      BlocProvider(create: (context)=> ShowInterestedBloc()),
-                                      BlocProvider(create: (context)=> ChartBloc()),
+                                      BlocProvider(
+                                          create: (context) =>
+                                              ShowInterestedBloc()),
+                                      BlocProvider(
+                                          create: (context) => ChartBloc()),
                                       BlocProvider(
                                           create: (context) => FriendsBloc()
                                             ..add(FetchFriendsRequestListEvent(

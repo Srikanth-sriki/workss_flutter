@@ -468,7 +468,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                   create: (context) =>
                                       ChartBloc())
                             ],
-                            child: const AddFriendsScreen(header: 'Add Friend'),
+                            child:  AddFriendsScreen(header: 'Add Friend',refreshPageCallback: _refreshPageAfterEdit),
                           )));
                 },
                 backgroundColor: COLORS.primary,

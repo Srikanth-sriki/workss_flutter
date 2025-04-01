@@ -286,6 +286,13 @@ class _MyAppState extends State<MyApp> {
                 ),
             BlocProvider(
               create: (context) => FriendsBloc()
+                ..add(FetchFriendsAddListEvent(
+                    page: 1,
+                    pageSize: 10,
+                    keyWord: '')),
+            ),
+            BlocProvider(
+              create: (context) => FriendsBloc()
                 ..add(FetchFriendsListEvent(
                     page: 1,
                     pageSize: 10,
@@ -353,6 +360,14 @@ class _AuthenticationState extends State<Authentication> {
                         currentLongitude: '',
                         currentLatitude: '',
                         gender: ''))),
+
+              BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(FetchFriendsAddListEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: '')),
+              ),
               BlocProvider(
                 create: (context) {
                   final bloc = ProfessionalBloc();

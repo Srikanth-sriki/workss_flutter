@@ -178,8 +178,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                       BlocProvider(
                                           create: (context) => ChartBloc())
                                     ],
-                                    child: const AddFriendsScreen(
-                                        header: 'Add Friend'),
+                                    child:  AddFriendsScreen(
+                                        header: 'Add Friend',refreshPageCallback: _refreshPageAfterEdit,),
                                   )))
                     },
                   ),
@@ -524,8 +524,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                     BlocProvider(
                                         create: (context) => ChartBloc())
                                   ],
-                                  child: const AddFriendsScreen(
-                                      header: 'Add Friend'),
+                                  child:  AddFriendsScreen(
+                                      header: 'Add Friend',refreshPageCallback: _refreshPageAfterEdit),
                                 )));
                   },
                   backgroundColor: COLORS.primary,

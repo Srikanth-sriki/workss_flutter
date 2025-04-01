@@ -69,31 +69,43 @@ class _MainScreenState extends State<MainScreen> {
     if (Config.profileCompleted) {
       switch (index) {
         case 0:
-          return BlocProvider(
-            create: (_) => HomeBloc()
-              ..add(FetchHomeScreenEvent(
-                  page: 1,
-                  pageSize: 10,
-                  keyWord: '',
-                  profession: '',
-                  city: '',
-                  gender: '',
-                  currentLongitude: '',
-                  currentLatitude: '')),
-            child: const HomeScreen(),
-          );
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(FetchFriendsAddListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (context) => HomeBloc()
+                  ..add(FetchHomeScreenEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: '',
+                      profession: '',
+                      city: '',
+                      gender: '',
+                      currentLongitude: '',
+                      currentLatitude: '')))
+          ], child: const HomeScreen());
         case 1:
-          return BlocProvider(
-            create: (_) => ProfessionalBloc()
-              ..add(ProfessionalListEvent(
-                  page: 1,
-                  pageSize: 10,
-                  keyWord: "",
-                  profession: "",
-                  city: "",
-                  gender: "",
-                  currentLongitude: '',
-                  currentLatitude: '')),
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                  create: (context) => FriendsBloc()
+                    ..add(FetchFriendsAddListEvent(
+                        page: 1, pageSize: 10, keyWord: ''))),
+              BlocProvider(
+                create: (_) => ProfessionalBloc()
+                  ..add(ProfessionalListEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: "",
+                      profession: "",
+                      city: "",
+                      gender: "",
+                      currentLongitude: '',
+                      currentLatitude: '')),
+              )
+            ],
             child: const ProfessionalsScreen(),
           );
         case 2:
@@ -112,19 +124,23 @@ class _MainScreenState extends State<MainScreen> {
         case 4:
           return _cachedProfileScreen;
         default:
-          return BlocProvider(
-            create: (_) => HomeBloc()
-              ..add(FetchHomeScreenEvent(
-                  page: 1,
-                  pageSize: 10,
-                  keyWord: '',
-                  profession: '',
-                  city: '',
-                  gender: '',
-                  currentLongitude: '',
-                  currentLatitude: '')),
-            child: const HomeScreen(),
-          );
+          return MultiBlocProvider(providers: [
+            BlocProvider(
+                create: (context) => FriendsBloc()
+                  ..add(FetchFriendsAddListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (context) => HomeBloc()
+                  ..add(FetchHomeScreenEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: '',
+                      profession: '',
+                      city: '',
+                      gender: '',
+                      currentLongitude: '',
+                      currentLatitude: '')))
+          ], child: const HomeScreen());
       }
     } else {
       switch (index) {
@@ -132,7 +148,7 @@ class _MainScreenState extends State<MainScreen> {
           return MultiBlocProvider(providers: [
             BlocProvider(
                 create: (context) => FriendsBloc()
-                  ..add(FetchFriendsListEvent(
+                  ..add(FetchFriendsAddListEvent(
                       page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(
                 create: (context) => HomeBloc()
@@ -147,17 +163,25 @@ class _MainScreenState extends State<MainScreen> {
                       currentLatitude: '')))
           ], child: const HomeScreen());
         case 1:
-          return BlocProvider(
-            create: (_) => ProfessionalBloc()
-              ..add(ProfessionalListEvent(
-                  page: 1,
-                  pageSize: 10,
-                  keyWord: "",
-                  profession: "",
-                  city: "",
-                  gender: "",
-                  currentLongitude: '',
-                  currentLatitude: '')),
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                  create: (context) => FriendsBloc()
+                    ..add(FetchFriendsAddListEvent(
+                        page: 1, pageSize: 10, keyWord: ''))),
+              BlocProvider(
+                create: (_) => ProfessionalBloc()
+                  ..add(ProfessionalListEvent(
+                      page: 1,
+                      pageSize: 10,
+                      keyWord: "",
+                      profession: "",
+                      city: "",
+                      gender: "",
+                      currentLongitude: '',
+                      currentLatitude: '')),
+              )
+            ],
             child: const ProfessionalsScreen(),
           );
         case 2:
@@ -175,7 +199,7 @@ class _MainScreenState extends State<MainScreen> {
           return MultiBlocProvider(providers: [
             BlocProvider(
                 create: (context) => FriendsBloc()
-                  ..add(FetchFriendsListEvent(
+                  ..add(FetchFriendsAddListEvent(
                       page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(
                 create: (context) => HomeBloc()

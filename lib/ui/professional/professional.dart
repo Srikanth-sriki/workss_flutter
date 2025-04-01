@@ -22,6 +22,9 @@ import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/category_list_modal.dart';
+import '../../models/friends/global_search_list_modal.dart';
+import '../chat/addFriends.dart';
+import '../friends/friends_details.dart';
 import '../home/filter.dart';
 import '../home/notification_list.dart';
 import 'categories_item.dart';
@@ -36,7 +39,9 @@ class ProfessionalsScreen extends StatefulWidget {
 class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   late ProfessionalBloc professionalBloc;
   late ShowInterestedBloc showInterestedBloc;
+  late FriendsBloc friendsBloc;
   List<ProfessionalsPostedWork> professionalsPostedWork = [];
+  late List<SearchFriendLists> searchFriendLists = [];
   final ScrollController _scrollController = ScrollController();
   bool isFetchingMore = false;
   bool isProfessionalLoad = true;
@@ -54,7 +59,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
     super.initState();
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    friendsBloc = BlocProvider.of<FriendsBloc>(context);
     _fetchData();
+    _fetchFriendList();
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge && !isFetchingMore) {
         final isBottom = _scrollController.position.pixels ==
@@ -87,6 +94,12 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         currentLongitude: '',
         currentLatitude: ''));
     professionalBloc.add(const FetchCategoryListEvent());
+  }
+
+  void _fetchFriendList() {
+    friendsBloc.add(
+      FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''),
+    );
   }
 
   void _loadMoreData() {
@@ -133,46 +146,62 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
-      body: BlocListener<ProfessionalBloc, ProfessionalState>(
-        listener: (context, state) {
-          if (state is ProfessionalLoading && currentPage == 1) {
-            isProfessionalLoad = true;
-          } else if (state is FetchProfessionalListSuccess) {
-            setState(() {
-              if (currentPage == 1) {
-                professionalsPostedWork = state.professionalsPostedWork;
-              } else {
-                // Filter out duplicates by checking ID before adding
-                final newItems = state.professionalsPostedWork.where(
-                    (newItem) => !professionalsPostedWork
-                        .any((existingItem) => existingItem.id == newItem.id));
-                professionalsPostedWork.addAll(newItems);
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ProfessionalBloc, ProfessionalState>(
+            listener: (context, state) {
+              if (state is ProfessionalLoading && currentPage == 1) {
+                isProfessionalLoad = true;
+              } else if (state is FetchProfessionalListSuccess) {
+                setState(() {
+                  if (currentPage == 1) {
+                    professionalsPostedWork = state.professionalsPostedWork;
+                  } else {
+                    // Filter out duplicates by checking ID before adding
+                    final newItems = state.professionalsPostedWork.where(
+                            (newItem) => !professionalsPostedWork
+                            .any((existingItem) => existingItem.id == newItem.id));
+                    professionalsPostedWork.addAll(newItems);
+                  }
+                  maxPageNumber = state.maxPageNumber;
+                  isFetchingMore = false;
+                  isProfessionalLoad = false;
+                });
+              } else if (state is FetchProfessionalListFailed) {
+                setState(() {
+                  isFetchingMore = false;
+                  isProfessionalLoad = false;
+                });
+              } else if (state is FetchCategoryListLoading) {
+                setState(() {
+                  isCategoryLoad = true;
+                });
+              } else if (state is FetchCategoryListSuccess) {
+                setState(() {
+                  categoriesData = state.categories;
+                  isCategoryLoad = false;
+                });
+              } else if (state is FetchCategoryListFailed) {
+                setState(() {
+                  isCategoryLoad = false;
+                });
               }
-              maxPageNumber = state.maxPageNumber;
-              isFetchingMore = false;
-              isProfessionalLoad = false;
-            });
-          } else if (state is FetchProfessionalListFailed) {
-            setState(() {
-              isFetchingMore = false;
-              isProfessionalLoad = false;
-            });
-          } else if (state is FetchCategoryListLoading) {
-            setState(() {
-              isCategoryLoad = true;
-            });
-          } else if (state is FetchCategoryListSuccess) {
-            setState(() {
-              categoriesData = state.categories;
-              isCategoryLoad = false;
-            });
-          } else if (state is FetchCategoryListFailed) {
-            setState(() {
-              isCategoryLoad = false;
-            });
-          }
-          setState(() {});
-        },
+              setState(() {});
+            },
+          ),
+          BlocListener<FriendsBloc, FriendsState>(
+            listener: (context, state) {
+              if (state is FriendsAddListSuccess) {
+                setState(() {
+                  searchFriendLists = state.searchFriendLists
+                      .where((friend) => friend.isFriend == null)
+                      .toList();
+                  ;
+                });
+              }
+            },
+          ),
+        ],
         child: SafeArea(
           child: Container(
             width: SizeConfig.screenWidth,
@@ -208,16 +237,16 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (BuildContext context) =>
-                                        const LanguageSelectionScreen(
-                                          routeType: 'homo',
-                                        )),
+                                    const LanguageSelectionScreen(
+                                      routeType: 'homo',
+                                    )),
                               );
                             },
                             borderRadius: BorderRadius.circular(
                                 SizeConfig.blockWidth * 2.5),
                             child: Container(
                               padding:
-                                  EdgeInsets.all(SizeConfig.blockWidth * 3),
+                              EdgeInsets.all(SizeConfig.blockWidth * 3),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                       SizeConfig.blockWidth * 2.5),
@@ -237,31 +266,31 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) =>
-                                                    NotificationBloc()
-                                                      ..add(
-                                                          const FetchNotificationList()),
-                                              ),
-                                              BlocProvider(create: (context)=> ShowInterestedBloc()),
-                                              BlocProvider(create: (context)=> ChartBloc()),
-                                              BlocProvider(
-                                                  create: (context) => FriendsBloc()
-                                                    ..add(FetchFriendsRequestListEvent(
-                                                        page: 1,
-                                                        pageSize: 10,
-                                                        keyWord: '')))
-                                            ],
-                                            child:
-                                                const NotificationListScreen(),
-                                          )));
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) =>
+                                            NotificationBloc()
+                                              ..add(
+                                                  const FetchNotificationList()),
+                                          ),
+                                          BlocProvider(create: (context)=> ShowInterestedBloc()),
+                                          BlocProvider(create: (context)=> ChartBloc()),
+                                          BlocProvider(
+                                              create: (context) => FriendsBloc()
+                                                ..add(FetchFriendsRequestListEvent(
+                                                    page: 1,
+                                                    pageSize: 10,
+                                                    keyWord: '')))
+                                        ],
+                                        child:
+                                        const NotificationListScreen(),
+                                      )));
                             },
                             borderRadius: BorderRadius.circular(
                                 SizeConfig.blockWidth * 2.5),
                             child: Container(
                               padding:
-                                  EdgeInsets.all(SizeConfig.blockWidth * 3),
+                              EdgeInsets.all(SizeConfig.blockWidth * 3),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                       SizeConfig.blockWidth * 2.5),
@@ -294,29 +323,29 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider(
-                                              create: (context) =>
-                                                  ProfessionalBloc()
-                                                    ..add(ProfessionalListEvent(
-                                                        page: 1,
-                                                        pageSize: 20,
-                                                        profession: '',
-                                                        keyWord: '',
-                                                        city: '',
-                                                        currentLongitude: '',
-                                                        currentLatitude: '',
-                                                        gender: ''))),
-                                          BlocProvider(
-                                            create: (context) =>
-                                                ShowInterestedBloc(),
-                                          )
-                                        ],
-                                        child: const ProfessionalSearchList(),
-                                      )));
+                                    providers: [
+                                      BlocProvider(
+                                          create: (context) =>
+                                          ProfessionalBloc()
+                                            ..add(ProfessionalListEvent(
+                                                page: 1,
+                                                pageSize: 20,
+                                                profession: '',
+                                                keyWord: '',
+                                                city: '',
+                                                currentLongitude: '',
+                                                currentLatitude: '',
+                                                gender: ''))),
+                                      BlocProvider(
+                                        create: (context) =>
+                                            ShowInterestedBloc(),
+                                      )
+                                    ],
+                                    child: const ProfessionalSearchList(),
+                                  )));
                         },
                         borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                        BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                         child: Container(
                           width: SizeConfig.blockWidth * 72,
                           height: SizeConfig.blockHeight * 8,
@@ -366,29 +395,29 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                         SizeConfig.blockWidth * 6)),
                               ),
                               builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (context) {
-                                          final bloc = InitialRegisterBloc();
-                                          bloc.add(const FetchCityEvent());
-                                          bloc.add(
-                                              const FetchChargeFeesEvent());
-                                          bloc.add(
-                                              const FetchWorkKnownLanguageProfileEvent());
-                                          return bloc;
-                                        },
-                                      ),
-                                      BlocProvider(
-                                          create: (context) => ProfessionalBloc()
-                                            ..add(
-                                                const FetchCategoryListEvent())),
-                                    ],
-                                    child: SearchFilterBottomSheet(
-                                      initialProfession: selectedProfession,
-                                      initialCity: selectedCity,
-                                      initialGender: selectedGender,
-                                    ),
-                                  ));
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) {
+                                      final bloc = InitialRegisterBloc();
+                                      bloc.add(const FetchCityEvent());
+                                      bloc.add(
+                                          const FetchChargeFeesEvent());
+                                      bloc.add(
+                                          const FetchWorkKnownLanguageProfileEvent());
+                                      return bloc;
+                                    },
+                                  ),
+                                  BlocProvider(
+                                      create: (context) => ProfessionalBloc()
+                                        ..add(
+                                            const FetchCategoryListEvent())),
+                                ],
+                                child: SearchFilterBottomSheet(
+                                  initialProfession: selectedProfession,
+                                  initialCity: selectedCity,
+                                  initialGender: selectedGender,
+                                ),
+                              ));
 
                           if (result != null) {
                             selectedProfession = result['selectedProfession'];
@@ -462,7 +491,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                         builder: (BuildContext context) =>
                                             CategoriesScreen(
                                                 categoriesData:
-                                                    categoriesData)),
+                                                categoriesData)),
                                   );
                                 },
                                 child: Text(
@@ -481,9 +510,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                         if (isCategoryLoad) ...[
                           Padding(
                             padding: EdgeInsets.only(
-                              left: SizeConfig.blockWidth * 6,
-                              right: SizeConfig.blockWidth * 6,
-                              top:SizeConfig.blockHeight*3
+                                left: SizeConfig.blockWidth * 6,
+                                right: SizeConfig.blockWidth * 6,
+                                top:SizeConfig.blockHeight*3
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -516,7 +545,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                             builder: (BuildContext context) =>
                                                 CategoriesItemScreen(
                                                     categoriesItem:
-                                                        categoriesData[index])),
+                                                    categoriesData[index])),
                                       );
                                     },
                                     child: Container(
@@ -524,9 +553,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                           SizeConfig.blockWidth * 3),
                                       child: Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                         mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                        MainAxisAlignment.start,
                                         children: [
                                           Container(
                                             width: SizeConfig.blockWidth * 19,
@@ -548,7 +577,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                           ),
                                           SizedBox(
                                             height:
-                                                SizeConfig.blockHeight * 0.5,
+                                            SizeConfig.blockHeight * 0.5,
                                           ),
                                           SizedBox(
                                             width: SizeConfig.blockWidth * 19,
@@ -558,7 +587,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               style: TextStyle(
                                                 color: COLORS.neutralDark,
                                                 fontSize:
-                                                    SizeConfig.blockWidth * 3,
+                                                SizeConfig.blockWidth * 3,
                                                 fontWeight: FontWeight.w500,
                                                 fontFamily: "Poppins",
                                                 overflow: TextOverflow.ellipsis,
@@ -600,24 +629,157 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                         ] else ...[
                           professionalsPostedWork.isNotEmpty
                               ? ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: professionalsPostedWork.length!,
-                                  itemBuilder: (context, index) {
-                                    var professionalData =
-                                        professionalsPostedWork![index];
-                                    return Container(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: SizeConfig.blockWidth * 2,
-                                          horizontal:
-                                              SizeConfig.blockWidth * 4),
-                                      child: buildProfessionalCard(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: professionalsPostedWork.length!,
+                              itemBuilder: (context, index) {
+                                var professionalData =
+                                professionalsPostedWork![index];
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: SizeConfig.blockWidth * 2,
+                                      horizontal:
+                                      SizeConfig.blockWidth * 4),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if ((index == 3 || index == 15 || index == 30 || index == 50) &&
+                                          searchFriendLists.isNotEmpty) ...[
+                                        SizedBox(height: SizeConfig.blockHeight),
+                                        addFriendText(
+                                            textOne: 'Add Friends',
+                                            textTwo: 'View All',
+                                            onTap: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MultiBlocProvider(
+                                                        providers: [
+                                                          BlocProvider(
+                                                            create: (context) => FriendsBloc()
+                                                              ..add(FetchFriendsAddListEvent(
+                                                                  page: 1,
+                                                                  pageSize: 10,
+                                                                  keyWord: '')),
+                                                          ),
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  ShowInterestedBloc()),
+                                                          BlocProvider(
+                                                              create: (context) => ChartBloc())
+                                                        ],
+                                                        child: AddFriendsScreen(
+                                                          header: 'Friend Suggestion',
+                                                          refreshPageCallback: _fetchFriendList,
+                                                        ),
+                                                      )));
+                                            }),
+                                        SizedBox(
+                                          height: SizeConfig.blockHeight * 33,
+                                          child: ListView.builder(
+                                              itemCount: searchFriendLists.length >= 6
+                                                  ? 6
+                                                  : searchFriendLists.length,
+                                              shrinkWrap: true,
+                                              scrollDirection: Axis.horizontal,
+                                              itemBuilder: (context, index) {
+                                                return addFriendCard(
+                                                    added:
+                                                    searchFriendLists[index].friendRequestSent !=
+                                                        null
+                                                        ? true
+                                                        : false,
+                                                    image: searchFriendLists[index].profilePic,
+                                                    name: searchFriendLists[index].name,
+                                                    onTap: () {
+                                                      if (searchFriendLists[index]
+                                                          .friendRequestSent !=
+                                                          null) {
+                                                        showInterestedBloc.add(UnSendFriendEvent(
+                                                            userId: searchFriendLists[index].id,
+                                                            onSuccess: (message) {
+                                                              setState(() {
+                                                                searchFriendLists[index]
+                                                                    .friendRequestSent = null;
+                                                              });
+                                                            },
+                                                            onError: (message) {
+                                                              showCustomSnackBar(
+                                                                context: context,
+                                                                message: message,
+                                                              );
+                                                            }));
+                                                      } else {
+                                                        showInterestedBloc.add(AddFriendEvent(
+                                                            userId: searchFriendLists[index].id,
+                                                            onSuccess: (message) {
+                                                              setState(() {
+                                                                searchFriendLists[index]
+                                                                    .friendRequestSent =
+                                                                    FriendRequestSent(
+                                                                      userId: searchFriendLists[index].id,
+                                                                    );
+                                                              });
+                                                            },
+                                                            onError: (message) {
+                                                              showCustomSnackBar(
+                                                                context: context,
+                                                                message: message,
+                                                              );
+                                                            }));
+                                                      }
+                                                    },
+                                                    onTapCard: () {
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) => MultiBlocProvider(
+                                                                providers: [
+                                                                  BlocProvider(
+                                                                    create: (context) {
+                                                                      final bloc = FriendsBloc();
+                                                                      bloc.add(
+                                                                          FetchFriendsSingleView(
+                                                                              friendId:
+                                                                              searchFriendLists[
+                                                                              index]
+                                                                                  .id));
+                                                                      return bloc;
+                                                                    },
+                                                                  ),
+                                                                  BlocProvider(
+                                                                    create: (context) =>
+                                                                        ShowInterestedBloc(),
+                                                                  ),
+                                                                  BlocProvider(
+                                                                      create: (context) =>
+                                                                          ReportPostBloc()),
+                                                                  BlocProvider(
+                                                                      create: (context) =>
+                                                                          ShowInterestedBloc()),
+                                                                  BlocProvider(
+                                                                      create: (context) =>
+                                                                          ChartBloc())
+                                                                ],
+                                                                child: FriendsDetailsScreen(
+                                                                  refreshPageCallback:
+                                                                  _fetchFriendList,
+                                                                  id: searchFriendLists[index].id,
+                                                                ),
+                                                              )));
+                                                    });
+                                              }),
+                                        ),
+                                        SizedBox(height: SizeConfig.blockHeight * 2),
+                                      ],
+                                      buildProfessionalCard(
                                           accountVerified:
-                                              professionalData!.isVerified!,
+                                          professionalData!.isVerified!,
                                           image: professionalData!.profilePic!,
                                           name: professionalData!.name!,
                                           profession:
-                                              professionalData.professionType!,
+                                          professionalData.professionType!,
                                           location: professionalData.city!,
                                           languages: professionalData
                                               .knownLanguages!
@@ -625,24 +787,24 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                           gender: professionalData.gender!,
                                           price: professionalData.charges!,
                                           paymentType:
-                                              professionalData.chargeType!,
+                                          professionalData.chargeType!,
                                           contacted: professionalData.isContacted !=
                                               null,
                                           saved:
-                                              professionalData.isSaved != null,
+                                          professionalData.isSaved != null,
                                           experience: professionalData
                                               .experiencedYears!,
                                           experienceImage:
-                                              'assets/images/home/work_select.png',
+                                          'assets/images/home/work_select.png',
                                           genderImage:
-                                              'assets/images/home/gender.png',
+                                          'assets/images/home/gender.png',
                                           jobTypeImage:
-                                              'assets/images/profile/prof.png',
+                                          'assets/images/profile/prof.png',
                                           language: professionalData
                                               .knownLanguages!
                                               .join(", "),
                                           languageImage:
-                                              'assets/images/home/speak.png',
+                                          'assets/images/home/speak.png',
                                           onShowInterest: () {
                                             if (professionalData.isContacted ==
                                                 null) {
@@ -652,7 +814,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 onSuccess: () {
                                                   setState(() {
                                                     professionalData
-                                                            .isContacted =
+                                                        .isContacted =
                                                         IsContacted(id: '');
                                                     makePhoneCall(
                                                         professionalData
@@ -667,7 +829,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                             }
                                           },
                                           jobType:
-                                              professionalData.professionType!,
+                                          professionalData.professionType!,
                                           onShare: () {
                                             shareJobDetails(
                                               experience: professionalData
@@ -686,10 +848,10 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                           providers: [
                                                             BlocProvider(
                                                               create: (context) =>
-                                                                  ProfessionalBloc()
-                                                                    ..add(FetchProfessionalView(
-                                                                        professionalData
-                                                                            .id!)),
+                                                              ProfessionalBloc()
+                                                                ..add(FetchProfessionalView(
+                                                                    professionalData
+                                                                        .id!)),
                                                             ),
                                                             BlocProvider(
                                                               create: (context) =>
@@ -700,14 +862,14 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                                     ReportPostBloc())
                                                           ],
                                                           child:
-                                                              ProfessionalViewScreen(
+                                                          ProfessionalViewScreen(
                                                             id: professionalData
                                                                 .id!,
                                                             refreshPageCallback:
                                                                 () {
                                                               _fetchData(
                                                                   isNewFetch:
-                                                                      true);
+                                                                  true);
                                                             },
                                                           ),
                                                         )));
@@ -728,7 +890,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                   showCustomSnackBar(
                                                     context: context,
                                                     message:
-                                                        "Something Went wrong",
+                                                    "Something Went wrong",
                                                   );
                                                 },
                                               ));
@@ -739,26 +901,28 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 onSuccess: () {
                                                   setState(() {
                                                     professionalData.isSaved =
-                                                        null;
+                                                    null;
                                                   });
                                                 },
                                                 onError: () {
                                                   showCustomSnackBar(
                                                     context: context,
                                                     message:
-                                                        "Something Went wrong",
+                                                    "Something Went wrong",
                                                   );
                                                 },
                                               ));
                                             }
                                           }),
-                                    );
-                                  })
+                                    ],
+                                  ),
+                                );
+                              })
                               : Padding(
-                                  padding: EdgeInsets.only(
-                                      top: SizeConfig.blockHeight * 6),
-                                  child: emptyComponent(),
-                                )
+                            padding: EdgeInsets.only(
+                                top: SizeConfig.blockHeight * 6),
+                            child: emptyComponent(),
+                          )
                         ],
                       ],
                     ),

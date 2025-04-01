@@ -462,3 +462,262 @@ class _WaveBubbleState extends State<WaveBubble> {
         : const SizedBox.shrink();
   }
 }
+
+
+
+
+// class WaveBubble extends StatefulWidget {
+//   final bool isSender;
+//   final String? audioUrl;
+//   final Function(PlayerController)? onPlay; // Callback to notify parent
+//
+//   const WaveBubble({
+//     super.key,
+//     required this.audioUrl,
+//     this.isSender = false,
+//     this.onPlay,
+//   });
+//
+//   @override
+//   State<WaveBubble> createState() => _WaveBubbleState();
+// }
+//
+// class _WaveBubbleState extends State<WaveBubble> {
+//   late PlayerController controller;
+//   StreamSubscription<PlayerState>? playerStateSubscription;
+//   bool isPlaying = false;
+//   bool isDownloading = false;
+//   String? localFilePath;
+//
+//   static PlayerController?
+//   _currentlyPlayingController; // Keep track of playing controller
+//
+//   final playerWaveStyle = const PlayerWaveStyle(
+//     fixedWaveColor: COLORS.neutralDark,
+//     liveWaveColor: COLORS.neutralDark,
+//     spacing: 6,
+//     waveThickness: 1,
+//     backgroundColor: COLORS.neutralDark,
+//     waveCap: StrokeCap.square,
+//     showSeekLine: true,
+//   );
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     controller = PlayerController();
+//     _checkLocalFile();
+//
+//     playerStateSubscription = controller.onPlayerStateChanged.listen((state) {
+//       setState(() {
+//         isPlaying = state.isPlaying;
+//       });
+//
+//       if (!state.isPlaying && _currentlyPlayingController == controller) {
+//         _currentlyPlayingController = null; // Reset if audio stops
+//       }
+//     });
+//   }
+//
+//   Future<void> _checkLocalFile() async {
+//     if (widget.audioUrl == null) return;
+//
+//     final directory = await getApplicationDocumentsDirectory();
+//     final filePath = '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
+//     final file = File(filePath);
+//
+//     if (await file.exists()) {
+//       debugPrint("🟢 Audio file found locally: $filePath");
+//       setState(() {
+//         localFilePath = filePath;
+//       });
+//       await _preparePlayer();
+//     } else {
+//       debugPrint("❌ Audio file not found, requires download.");
+//     }
+//   }
+//
+//   Future<void> _downloadAudio() async {
+//     if (widget.audioUrl == null || isDownloading) return;
+//
+//     final directory = await getApplicationDocumentsDirectory();
+//     final filePath = '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
+//     final file = File(filePath);
+//
+//     if (await file.exists()) {
+//       debugPrint("🟢 Audio already exists: $filePath");
+//       setState(() {
+//         localFilePath = filePath;
+//       });
+//       await _preparePlayer();
+//       return;
+//     }
+//
+//     setState(() {
+//       isDownloading = true;
+//     });
+//
+//     try {
+//       debugPrint("📥 Downloading audio: ${widget.audioUrl}");
+//       final response = await http.get(Uri.parse(widget.audioUrl!));
+//
+//       if (response.statusCode == 200) {
+//         await file.writeAsBytes(response.bodyBytes);
+//         debugPrint("✅ Download complete: $filePath");
+//
+//         if (await file.exists()) {
+//           setState(() {
+//             localFilePath = filePath;
+//           });
+//           await _preparePlayer();
+//         } else {
+//           debugPrint("❌ File not found after download!");
+//         }
+//       } else {
+//         debugPrint("❌ Failed to download audio: ${response.statusCode}");
+//       }
+//     } catch (e) {
+//       debugPrint("❌ Error downloading audio: $e");
+//     }
+//
+//     setState(() {
+//       isDownloading = false;
+//     });
+//   }
+//
+//   Future<void> _preparePlayer() async {
+//     if (localFilePath == null) return;
+//
+//     try {
+//       await controller.preparePlayer(
+//         path: localFilePath!,
+//         shouldExtractWaveform: true,
+//         noOfSamples: 100,
+//       );
+//       debugPrint("🎵 Audio ready to play: $localFilePath");
+//     } catch (e) {
+//       debugPrint("❌ Error preparing audio: $e");
+//     }
+//   }
+//
+//   // void _togglePlayPause() async {
+//   //   if (isPlaying) {
+//   //     await controller.pausePlayer();
+//   //     return;
+//   //   }
+//   //
+//   //   // Stop previously playing audio
+//   //   if (_currentlyPlayingController != null &&
+//   //       _currentlyPlayingController != controller) {
+//   //     await _currentlyPlayingController!.pausePlayer();
+//   //   }
+//   //
+//   //   await controller.startPlayer();
+//   //   controller.setFinishMode(finishMode: FinishMode.stop);
+//   //
+//   //   _currentlyPlayingController = controller; // Set current controller
+//   //
+//   //   // Notify parent widget (if applicable)
+//   //   widget.onPlay?.call(controller);
+//   // }
+//
+//   void _togglePlayPause() async {
+//     if (isPlaying) {
+//       await controller.pausePlayer();
+//       return;
+//     }
+//
+//     if (_currentlyPlayingController != null &&
+//         _currentlyPlayingController != controller) {
+//       await _currentlyPlayingController!.pausePlayer();
+//     }
+//
+//     if (localFilePath != null) {
+//       await _preparePlayer(); // Ensure player is ready before playing
+//     }
+//
+//     await controller.startPlayer();
+//     controller.setFinishMode(finishMode: FinishMode.stop);
+//
+//     _currentlyPlayingController = controller;
+//     widget.onPlay?.call(controller);
+//   }
+//
+//
+//   @override
+//   void dispose() {
+//     playerStateSubscription?.cancel();
+//     controller.dispose();
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return widget.audioUrl != null
+//         ? Align(
+//       alignment:
+//       widget.isSender ? Alignment.centerRight : Alignment.centerLeft,
+//       child: Container(
+//         padding: EdgeInsets.symmetric(
+//           vertical: SizeConfig.blockWidth * 0.2,
+//           horizontal: SizeConfig.blockWidth * 0.5,
+//         ),
+//         child: Row(
+//           children: [
+//             if (localFilePath == null)
+//               isDownloading
+//                   ? Center(
+//                 child: LoadingAnimationWidget.hexagonDots(
+//                   color: COLORS.primary,
+//                   size: SizeConfig.blockHeight * 3,
+//                 ),
+//               )
+//                   : Row(
+//                 mainAxisAlignment: MainAxisAlignment.start,
+//                 crossAxisAlignment: CrossAxisAlignment.center,
+//                 children: [
+//                   InkWell(
+//                       onTap: _downloadAudio,
+//                       child: Icon(
+//                         Icons.download,
+//                         color: COLORS.neutralDark,
+//                         size: SizeConfig.blockHeight * 3.5,
+//                       )),
+//                   SizedBox(width: SizeConfig.blockWidth,),
+//                   Text(
+//                     'audio.mp3',
+//                     style: TextStyle(
+//                       color: COLORS.neutralDarkOne,
+//                       fontSize: SizeConfig.blockWidth * 2.5,
+//                       fontWeight: FontWeight.w400,
+//                       fontFamily: "Poppins",
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             if (localFilePath != null) ...[
+//               InkWell(
+//                 onTap: _togglePlayPause,
+//                 child: Icon(
+//                   isPlaying ? Icons.pause : Icons.play_circle,
+//                   color: COLORS.neutralDark,
+//                   size: SizeConfig.blockWidth * 8,
+//                 ),
+//               ),
+//               AudioFileWaveforms(
+//                 size: Size(SizeConfig.blockWidth * 40,
+//                     SizeConfig.blockHeight * 3),
+//                 playerController: controller,
+//                 waveformType: WaveformType.fitWidth,
+//                 playerWaveStyle: playerWaveStyle,
+//                 continuousWaveform: true,
+//                 enableSeekGesture: true,
+//               ),
+//             ],
+//           ],
+//         ),
+//       ),
+//     )
+//         : const SizedBox.shrink();
+//   }
+// }
