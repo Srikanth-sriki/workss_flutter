@@ -89,6 +89,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   bool textFiledChange = false;
   final String serverUrl = 'https://43.204.94.146';
   bool _isMounted = false;
+  bool sentAudio = false;
+  bool sentAudioSent = false;
 
   @override
   void initState() {
@@ -108,21 +110,24 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         _loadMoreData();
       }
     });
-
-    SocketService().reconnect();
-    connectToSocket();
-  }
-
-  void connectToSocket() {
     socket = io.io('https://43.204.94.146', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
 
+    if (!socket.connected) {
+      SocketService().reconnect();
+    }
+    connectToSocket();
+  }
+
+  void connectToSocket() {
+
     socket.on('new_message', (data) {
       if (_isMounted) {
         setState(() {
           _fetchData();
+          print(data);
         });
       }
     });
@@ -178,6 +183,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   }
 
   void _startOrStopRecording() async {
+    setState(() {
+      sentAudio = false;
+      sentAudioSent = false;
+    });
     try {
       if (isRecording) {
         recorderController.reset();
@@ -189,6 +198,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           debugPrint(path);
           debugPrint("Recorded file size: ${File(path!).lengthSync()}");
           chartBloc.add(UploadFileEvent(filePath: File(path!)));
+          setState(() {
+            sentAudioSent = true;
+          });
         }
       } else {
         await recorderController.record(path: path);
@@ -220,33 +232,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     _messageController.clear();
   }
 
-  // void onSendMessage() {
-  //   if (_messageController.text.isNotEmpty) {
-  //     final messageData = {
-  //       'chatId': widget.chatId,
-  //       'content': _messageController.text,
-  //       'messageType': 'text',
-  //       'fileName': null,
-  //       'fileUrl': null,
-  //       'fileType': null,
-  //       'fileSize': null,
-  //     };
-  //
-  //     socket.emit('send_message', messageData);
-  //     setState(() {
-  //       print(messageData);
-  //     });
-  //
-  //     _messageController.clear();
-  //   }
-  // }
-
-  void _onMessageChanged(String keyword) {
-    setState(() {
-      textFiledChange = true;
-      print(textFiledChange);
-    });
-  }
 
   @override
   void dispose() {
@@ -321,6 +306,14 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         existingChat.messages.addAll(newMessages);
                       }
                     }
+                  }
+                  if(sentAudioSent){
+                    sentAudio = true;
+                    sentAudioSent = false;
+                  }
+                  else{
+                    sentAudio = false;
+                    sentAudioSent = false;
                   }
                 });
               } else if (state is ChatViewFailed) {
@@ -947,6 +940,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                         .fileUrl!
                                                     : '',
                                                 isSender: true,
+                                                downloaded: sentAudio,
                                               ),
                                             )
                                           ] else ...[

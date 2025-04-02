@@ -58,11 +58,13 @@ class ChatBubble extends StatelessWidget {
 class WaveBubble extends StatefulWidget {
   final bool isSender;
   final String? audioUrl;
+  final bool? downloaded;
 
   const WaveBubble({
     super.key,
     required this.audioUrl,
     this.isSender = false,
+    this.downloaded = false
   });
 
   @override
@@ -120,6 +122,9 @@ class _WaveBubbleState extends State<WaveBubble> {
     });
 
     _checkLocalFile();
+    if(widget.downloaded == true){
+      _downloadAudio();
+    }
   }
 
   Future<void> _checkLocalFile() async {
@@ -213,12 +218,30 @@ class _WaveBubbleState extends State<WaveBubble> {
                 children: [
                   if (localFilePath == null)
                     isDownloading
-                        ? Center(
-                            child: LoadingAnimationWidget.hexagonDots(
-                              color: COLORS.primary,
-                              size: SizeConfig.blockHeight * 3,
+                        ? Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Center(
+                                child: LoadingAnimationWidget.hexagonDots(
+                                  color: COLORS.primary,
+                                  size: SizeConfig.blockHeight * 3,
+                                ),
+                              ),
+                            SizedBox(
+                              width: SizeConfig.blockWidth*3,
                             ),
-                          )
+                            Text(
+                              'downloading....',
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 2.5,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ],
+                        )
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,

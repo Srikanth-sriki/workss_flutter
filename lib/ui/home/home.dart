@@ -260,46 +260,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              if (Config.profileCompleted) ...[
-                Positioned(
-                  bottom: SizeConfig.blockHeight * 2.5,
-                  right: SizeConfig.blockHeight * 4,
-                  child: FloatingActionButton(
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) {
-                                            final bloc = PostWorkBloc();
-                                            bloc.add(
-                                                const FetchWorkPlaceEvent());
-                                            bloc.add(
-                                                const FetchWorkKnownLanguageEvent());
-                                            return bloc;
-                                          },
-                                        ),
-                                        BlocProvider(
-                                            create: (context) => ProfileBloc()),
-                                        BlocProvider(
-                                            create: (context) =>
-                                                ProfessionalBloc()),
-                                      ],
-                                      child: const PostWorkScreen(
-                                        arrowBack: true,
-                                      ),
-                                    )));
-                      },
-                      backgroundColor: COLORS.primary,
-                      child: Icon(
-                        Icons.add,
-                        color: COLORS.white,
-                        size: SizeConfig.blockWidth * 6.5,
-                      )),
-                )
-              ]
+              // if (Config.profileCompleted) ...[
+              //   Positioned(
+              //     bottom: SizeConfig.blockHeight * 2.5,
+              //     right: SizeConfig.blockHeight * 4,
+              //     child: FloatingActionButton(
+              //         onPressed: () {
+              //           Navigator.push(
+              //               context,
+              //               MaterialPageRoute(
+              //                   builder: (context) => MultiBlocProvider(
+              //                         providers: [
+              //                           BlocProvider(
+              //                             create: (context) {
+              //                               final bloc = PostWorkBloc();
+              //                               bloc.add(
+              //                                   const FetchWorkPlaceEvent());
+              //                               bloc.add(
+              //                                   const FetchWorkKnownLanguageEvent());
+              //                               return bloc;
+              //                             },
+              //                           ),
+              //                           BlocProvider(
+              //                               create: (context) => ProfileBloc()),
+              //                           BlocProvider(
+              //                               create: (context) =>
+              //                                   ProfessionalBloc()),
+              //                         ],
+              //                         child: const PostWorkScreen(
+              //                           arrowBack: true,
+              //                         ),
+              //                       )));
+              //         },
+              //         backgroundColor: COLORS.primary,
+              //         child: Icon(
+              //           Icons.add,
+              //           color: COLORS.white,
+              //           size: SizeConfig.blockWidth * 6.5,
+              //         )),
+              //   )
+              // ]
             ],
           ),
         ),

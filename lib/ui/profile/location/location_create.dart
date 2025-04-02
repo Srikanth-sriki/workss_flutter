@@ -566,7 +566,6 @@ class _AddressScreenState extends State<AddressScreen> {
       onTap: () => _setSelectedType(type),
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
       child: Container(
-
         padding: EdgeInsets.symmetric(
           vertical: SizeConfig.blockWidth * 2,
           horizontal: SizeConfig.blockWidth * 4,
