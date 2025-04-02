@@ -353,8 +353,28 @@
   "Ex: Search": "उदा: खोजें",
   "Remove People": "लोगों को हटाएं",
   "Please enter description": "विवरण दर्ज करें",
-  "Please enter group name": "समूह का नाम दर्ज करें"
+  "Please enter group name": "समूह का नाम दर्ज करें",
+  "Search your chats": "अपनी चैट खोजें",
+  "Delete Group": "समूह हटाएं",
+  "Invite": "आमंत्रित करें",
+  "Select All": "सभी चुनें",
+  "Cancel": "रद्द करें",
+  "Are you sure you want to leave \nthe group?": "क्या आप वाकई समूह छोड़ना चाहते हैं?",
+  "Before leaving the group, ensure you assign \nsomeone as the group admin.": "समूह छोड़ने से पहले किसी को एडमिन बनाएं।",
+  "MARK ADMIN": "एडमिन बनाएं",
+  "Mark as admin": "एडमिन बनाएं",
+  "LEAVE GROUP": "समूह छोड़ें",
+  "At least one admin is required before leaving.": "छोड़ने से पहले कम से कम एक एडमिन आवश्यक है।",
+  "Are you sure you want to \n delete the group?": "क्या आप वाकई समूह हटाना चाहते हैं?",
+  "Write a reason for report or block group": "रिपोर्ट या समूह ब्लॉक करने का कारण लिखें",
+  "REPORT GROUP": "समूह रिपोर्ट करें",
+  "Remove (${participants.user!.name})": "हटाएं (${participants.user!.name})",
+  "Instructions (Optional)": "निर्देश (वैकल्पिक)",
+  "REPORT": "रिपोर्ट करें",
+  "Upload your work images (Optional) \n(max 2 pictures)": "अपने कार्य की छवियां अपलोड करें (वैकल्पिक) \n(अधिकतम 2 चित्र)",
+  "No Chats Found": "कोई चैट नहीं मिली"
 }
+
 
 
 

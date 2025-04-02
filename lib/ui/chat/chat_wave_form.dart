@@ -11,7 +11,6 @@ import '../../components/size_config.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
-import 'package:just_waveform/just_waveform.dart';
 
 class ChatBubble extends StatelessWidget {
   final String text;
@@ -56,11 +55,6 @@ class ChatBubble extends StatelessWidget {
   }
 }
 
-
-
-
-
-
 class WaveBubble extends StatefulWidget {
   final bool isSender;
   final String? audioUrl;
@@ -77,18 +71,29 @@ class WaveBubble extends StatefulWidget {
 
 class _WaveBubbleState extends State<WaveBubble> {
   static AudioPlayer? _globalAudioPlayer;
-
   late AudioPlayer _audioPlayer;
+  late PlayerController _playerController;
   bool isPlaying = false;
   bool isDownloading = false;
   String? localFilePath;
+  double progress = 0.0;
+  final List<double> waveformData = [];
 
+  final playerWaveStyle = const PlayerWaveStyle(
+    fixedWaveColor: COLORS.primary,
+    liveWaveColor: COLORS.primary,
+    spacing: 4,
+    waveThickness: 1.25,
+    backgroundColor: COLORS.neutralDark,
+    waveCap: StrokeCap.square,
+    showSeekLine: true,
+  );
 
   @override
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-
+    _playerController = PlayerController();
     _audioPlayer.playerStateStream.listen((state) {
       if (mounted) {
         setState(() {
@@ -99,17 +104,23 @@ class _WaveBubbleState extends State<WaveBubble> {
 
     _audioPlayer.positionStream.listen((position) async {
       final duration = await _audioPlayer.duration;
+      if (duration != null && position.inMilliseconds > 0) {
+        setState(() {
+          progress = position.inMilliseconds / duration.inMilliseconds;
+        });
+      }
+
       if (duration != null && position >= duration) {
         setState(() {
           isPlaying = false;
+          progress = 0.0;
         });
-        await _audioPlayer.stop(); // Ensures audio doesn't replay
+        await _audioPlayer.stop();
       }
     });
 
     _checkLocalFile();
   }
-
 
   Future<void> _checkLocalFile() async {
     if (widget.audioUrl == null) return;
@@ -166,6 +177,7 @@ class _WaveBubbleState extends State<WaveBubble> {
   Future<void> _preparePlayer() async {
     if (localFilePath != null) {
       await _audioPlayer.setFilePath(localFilePath!);
+      _playerController.preparePlayer(path: localFilePath!);
     }
   }
 
@@ -185,6 +197,7 @@ class _WaveBubbleState extends State<WaveBubble> {
   @override
   void dispose() {
     _audioPlayer.dispose();
+    _playerController.dispose();
     super.dispose();
   }
 
@@ -192,60 +205,98 @@ class _WaveBubbleState extends State<WaveBubble> {
   Widget build(BuildContext context) {
     return widget.audioUrl != null
         ? Align(
-      alignment: widget.isSender
-          ? Alignment.centerRight
-          : Alignment.centerLeft,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: SizeConfig.blockWidth * 0.2,
-          horizontal: SizeConfig.blockWidth * 0.5,
-        ),
-        child: Row(
-          children: [
-            if (localFilePath == null)
-              isDownloading
-                  ? Center(
-                child: LoadingAnimationWidget.hexagonDots(
-                  color: COLORS.primary,
-                  size: SizeConfig.blockHeight * 3,
-                ),
-              )
-                  : InkWell(
-                  onTap: _downloadAudio,
-                  child: Icon(
-                    Icons.download,
-                    color: COLORS.neutralDark,
-                    size: SizeConfig.blockHeight * 3.5,
-                  )),
-            if (localFilePath != null) ...[
-              InkWell(
-                onTap: _togglePlayPause,
-                child: Icon(
-                  isPlaying ? Icons.pause : Icons.play_circle,
-                  color: COLORS.neutralDark,
-                  size: SizeConfig.blockWidth * 8,
-                ),
+            alignment:
+                widget.isSender ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: Row(
+                children: [
+                  if (localFilePath == null)
+                    isDownloading
+                        ? Center(
+                            child: LoadingAnimationWidget.hexagonDots(
+                              color: COLORS.primary,
+                              size: SizeConfig.blockHeight * 3,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                  onTap: _downloadAudio,
+                                  child: Icon(
+                                    Icons.download,
+                                    color: COLORS.neutralDark,
+                                    size: SizeConfig.blockHeight * 3.25,
+                                  )),
+                              SizedBox(
+                                width: SizeConfig.blockWidth,
+                              ),
+                              Text(
+                                'audio.mp3',
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 2.5,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ],
+                          ),
+                  if (localFilePath != null) ...[
+                    Row(
+                      mainAxisSize:
+                          MainAxisSize.min, // Ensures minimal required space
+                      children: [
+                        InkWell(
+                          onTap: _togglePlayPause,
+                          child: Icon(
+                            isPlaying ? Icons.pause : Icons.play_circle,
+                            color: COLORS.neutralDark,
+                            size: SizeConfig.blockWidth * 8,
+                          ),
+                        ),
+                        SizedBox(width: SizeConfig.blockWidth * 1.5),
+                        AudioFileWaveforms(
+                          size: Size(SizeConfig.blockWidth * 40,
+                              SizeConfig.blockHeight * 3),
+                          playerController: _playerController,
+                          waveformType: WaveformType.fitWidth,
+                          playerWaveStyle: playerWaveStyle,
+                          continuousWaveform: true,
+                          enableSeekGesture: true,
+                        ),
+
+                        // Reduce width if needed
+                        // AudioFileWaveforms(
+                        //   size: Size(SizeConfig.blockWidth * 30, SizeConfig.blockHeight * 3),
+                        //   padding: EdgeInsets.zero,
+                        //   margin: EdgeInsets.zero,
+                        //   backgroundColor: Colors.transparent, // Try removing background if it has extra padding
+                        //   continuousWaveform: true,
+                        //   playerController: _playerController,
+                        //   playerWaveStyle: PlayerWaveStyle(
+                        //     fixedWaveColor: COLORS.neutralDark,
+                        //     liveWaveColor: COLORS.neutralDark,
+                        //     spacing: 3,  // Reduce spacing if the waves are pushing apart
+                        //     waveThickness: 1.5,
+                        //     waveCap: StrokeCap.round,
+                        //     showSeekLine: false,
+                        //     showBottom: true,
+                        //     showTop: true,
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
-              Text(
-                'audio.mp3',
-                style: TextStyle(
-                  color: COLORS.neutralDarkOne,
-                  fontSize: SizeConfig.blockWidth * 2.5,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    )
+            ),
+          )
         : const SizedBox.shrink();
   }
 }
-
-
-
 
 // class WaveBubble extends StatefulWidget {
 //   final bool isSender;

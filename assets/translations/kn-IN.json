@@ -355,7 +355,26 @@
   "Ex: Search": "ಹುಡುಕಿ",
   "Remove People": "ವ್ಯಕ್ತಿಗಳನ್ನು ತೆಗೆದುಹಾಕಿ",
   "Please enter description": "ವಿವರಣೆ ನಮೂದಿಸಿ",
-  "Please enter group name": "ಗುಂಪಿನ ಹೆಸರು ನಮೂದಿಸಿ"
+  "Please enter group name": "ಗುಂಪಿನ ಹೆಸರು ನಮೂದಿಸಿ",
+  "Search your chats": "ನಿಮ್ಮ ಚಾಟ್‌ಗಳನ್ನು ಹುಡುಕಿ",
+  "Delete Group": "ಗುಂಪು ಅಳಿಸಿ",
+  "Invite": "ಆಹ್ವಾನಿಸಿ",
+  "Select All": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ",
+  "Cancel": "ರದ್ದುಗೊಳಿಸಿ",
+  "Are you sure you want to leave \nthe group?": "ನೀವು ಖಚಿತವಾಗಿಯೂ ಗುಂಪನ್ನು ಬಿಡಬೇಕೆ?",
+  "Before leaving the group, ensure you assign \nsomeone as the group admin.": "ಗುಂಪನ್ನು ಬಿಡುವ ಮೊದಲು ಒಬ್ಬರನ್ನು ಆಡಳಿತಗಾರನಾಗಿ ನೇಮಕ ಮಾಡಿ.",
+  "MARK ADMIN": "ಆಡಳಿತಗಾರ ಮಾಡ",
+  "Mark as admin": "ಆಡಳಿತಗಾರ ಮಾಡು",
+  "LEAVE GROUP": "ಗುಂಪನ್ನು ಬಿಟ್ಟುಹೋಗಿ",
+  "At least one admin is required before leaving.": "ಗುಂಪು ಬಿಡುವ ಮೊದಲು ಕನಿಷ್ಟ ಒಬ್ಬ ಆಡಳಿತಗಾರ ಅಗತ್ಯವಿದೆ.",
+  "Are you sure you want to \n delete the group?": "ನೀವು ಗುಂಪನ್ನು ಅಳಿಸಲು ಖಚಿತವೇ?",
+  "Write a reason for report or block group": "ರಿಪೋರ್ಟ್ ಅಥವಾ ಗುಂಪು ನಿಷೇಧಕ್ಕೆ ಕಾರಣವನ್ನು ಬರೆಯಿರಿ",
+  "REPORT GROUP": "ಗುಂಪನ್ನು ವರದಿ ಮಾಡಿ",
+  "Remove ${participants.user!.name}": "ತೆಗೆದುಹಾಕಿ ${participants.user!.name}",
+  "Instructions (Optional)": "ಸೂಚನೆಗಳು (ಐಚ್ಛಿಕ)",
+  "REPORT": "ವರದಿ",
+  "Upload your work images (Optional) \n(max 2 pictures)": "ನಿಮ್ಮ ಕೆಲಸದ ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ (ಐಚ್ಛಿಕ) \n(ಗರಿಷ್ಠ 2 ಚಿತ್ರಗಳು)",
+  "No Chats Found": "ಚಾಟ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
 }
 
 

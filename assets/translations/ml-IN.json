@@ -315,6 +315,26 @@
   "Ex: Search": "ഉദാ: തിരയുക",
   "Remove People": "ആളുകളെ നീക്കം ചെയ്യുക",
   "Please enter description": "വിവരണം നൽകുക",
-  "Please enter group name": "ഗ്രൂപ്പ് പേര് നൽകുക"
+  "Please enter group name": "ഗ്രൂപ്പ് പേര് നൽകുക",
+  "Search your chats": "നിങ്ങളുടെ ചാറ്റുകൾ തിരയുക",
+  "Delete Group": "ഗ്രൂപ്പ് നീക്കം ചെയ്യുക",
+  "Invite": "ആഹ്വാനിക്കുക",
+  "Select All": "എല്ലാം തിരഞ്ഞെടുക്കുക",
+  "Cancel": "റദ്ദാക്കുക",
+  "Are you sure you want to leave \nthe group?": "നിങ്ങൾക്ക് തീർച്ചയായും ഗ്രൂപ്പ് വിടണമോ?",
+  "Before leaving the group, ensure you assign \nsomeone as the group admin.": "ഗ്രൂപ്പ് വിടുന്നതിന് മുമ്പ് ഒരാളെ അഡ്മിനായി നിശ്ചയിക്കുക.",
+  "MARK ADMIN": "അഡ്മിന്‍ ആക്കുക",
+  "Mark as admin": "അഡ്മിന്‍ ആക്കുക",
+  "LEAVE GROUP": "ഗ്രൂപ്പ് വിടുക",
+  "At least one admin is required before leaving.": "വിടുന്നതിന് മുമ്പ് കുറഞ്ഞത് ഒരാൾ അഡ്മിൻ ആവണം.",
+  "Are you sure you want to \n delete the group?": "നിങ്ങൾക്ക് ഗ്രൂപ്പ് ഇല്ലാതാക്കണമോ?",
+  "Write a reason for report or block group": "റിപ്പോർട്ട് ചെയ്യാൻ അല്ലെങ്കിൽ ബ്ലോക്ക് ചെയ്യാൻ കാരണം എഴുതുക",
+  "REPORT GROUP": "ഗ്രൂപ്പ് റിപ്പോര്‍ട്ട് ചെയ്യുക",
+  "Remove (${participants.user!.name})": "നീക്കം ചെയ്യുക (${participants.user!.name})",
+  "Instructions (Optional)": "നിർദ്ദേശങ്ങൾ (ഐച്ഛികം)",
+  "REPORT": "റിപ്പോർട്ട്",
+  "Upload your work images (Optional) \n(max 2 pictures)": "നിങ്ങളുടെ ജോലിയുടെ ചിത്രങ്ങൾ അപ്‌ലോഡ് ചെയ്യുക (ഐച്ഛികം) \n(ഏറ്റവും അധികം 2 ചിത്രങ്ങൾ)",
+  "No Chats Found": "ചാറ്റുകൾ കണ്ടെത്താനായില്ല"
 }
+
 

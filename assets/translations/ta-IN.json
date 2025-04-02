@@ -354,8 +354,26 @@
   "Ex: Search": "எ.கா: தேடுக",
   "Remove People": "ஆள்களை நீக்கவும்",
   "Please enter description": "விவரத்தை உள்ளிடவும்",
-  "Please enter group name": "குழு பெயரை உள்ளிடவும்"
-
+  "Please enter group name": "குழு பெயரை உள்ளிடவும்",
+  "Search your chats": "உங்கள் அரட்டைகளை தேடுங்கள்",
+  "Delete Group": "குழுவை நீக்கு",
+  "Invite": "அழைக்க",
+  "Select All": "அனைத்தையும் தேர்வு செய்",
+  "Cancel": "ரத்து செய்",
+  "Are you sure you want to leave \nthe group?": "நீங்கள் உண்மையிலேயே குழுவை விட்டு செல்ல விரும்புகிறீர்களா?",
+  "Before leaving the group, ensure you assign \nsomeone as the group admin.": "குழுவை விட்டு செல்லும் முன் நிர்வாகியை நியமிக்கவும்.",
+  "MARK ADMIN": "நிர்வாகி ஆக்கு",
+  "Mark as admin": "நிர்வாகி ஆக்கு",
+  "LEAVE GROUP": "குழுவை விட்டு செல்லவும்",
+  "At least one admin is required before leaving.": "விடுவதற்கு முன் குறைந்தது ஒரு நிர்வாகி தேவை.",
+  "Are you sure you want to \n delete the group?": "நீங்கள் குழுவை அழிக்க விரும்புகிறீர்களா?",
+  "Write a reason for report or block group": "புகார் செய்ய அல்லது குழுவைத் தடுக்க காரணம் எழுதுங்கள்",
+  "REPORT GROUP": "குழுவை புகார் செய்யவும்",
+  "Remove (${participants.user!.name})": "நீக்கு (${participants.user!.name})",
+  "Instructions (Optional)": "வழிமுறைகள் (விரும்பினால்)",
+  "REPORT": "புகார்",
+  "Upload your work images (Optional) \n(max 2 pictures)": "உங்கள் வேலை படங்களை பதிவேற்றவும் (விரும்பினால்) \n(அதிகபட்சம் 2 படங்கள்)",
+  "No Chats Found": "சாட் இல்லை"
 }
 
 

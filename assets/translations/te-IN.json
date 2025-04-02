@@ -315,8 +315,28 @@
   "Ex: Search": "ఉదా: శోధించండి",
   "Remove People": "వ్యక్తులను తొలగించండి",
   "Please enter description": "వివరణను నమోదు చేయండి",
-  "Please enter group name": "గృహం పేరు నమోదు చేయండి"
+  "Please enter group name": "గృహం పేరు నమోదు చేయండి",
+  "Search your chats": "మీ చాట్స్‌ను వెతకండి",
+  "Delete Group": "గ్రూప్‌ని తొలగించండి",
+  "Invite": "ఆహ్వానించండి",
+  "Select All": "అన్నీ ఎంచుకోండి",
+  "Cancel": "రద్దు చేయండి",
+  "Are you sure you want to leave \nthe group?": "మీరు ఖచ్చితంగా గ్రూప్ విడిచిపోవాలనుకుంటున్నారా?",
+  "Before leaving the group, ensure you assign \nsomeone as the group admin.": "గ్రూప్ విడిచిపోవడానికి ముందు ఎడ్మిన్‌ని నియమించండి.",
+  "MARK ADMIN": "అడ్మిన్ చేయండి",
+  "Mark as admin": "అడ్మిన్ చేయండి",
+  "LEAVE GROUP": "గ్రూప్ విడిచి వెళ్లండి",
+  "At least one admin is required before leaving.": "విడిచిపోవడానికి ముందు కనీసం ఒక అడ్మిన్ అవసరం.",
+  "Are you sure you want to \n delete the group?": "మీరు ఖచ్చితంగా గ్రూప్‌ని తొలగించాలనుకుంటున్నారా?",
+  "Write a reason for report or block group": "రిపోర్ట్ చేయడానికి లేదా బ్లాక్ చేయడానికి కారణాన్ని వ్రాయండి",
+  "REPORT GROUP": "గ్రూప్‌ని రిపోర్ట్ చేయండి",
+  "Remove (${participants.user!.name})": "తొలగించు (${participants.user!.name})",
+  "Instructions (Optional)": "సూచనలు (ఐచ్ఛికం)",
+  "REPORT": "రిపోర్ట్",
+  "Upload your work images (Optional) \n(max 2 pictures)": "మీ పని చిత్రాలను అప్లోడ్ చేయండి (ఐచ్ఛికం) \n(గరిష్టంగా 2 చిత్రాలు)",
+  "No Chats Found": "చాట్‌లు కనబడలేదు"
 }
+
 
 
 

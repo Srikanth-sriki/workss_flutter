@@ -491,7 +491,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               }
                           ),
                           buildBioTextField(
-                              label: 'Instructions'.tr(),
+                              label: 'Instructions (Optional)'.tr(),
                               controller: Instructions,
                               hintText:
                                   "Write instructions to reach out you".tr(),
@@ -633,7 +633,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
         fit: BoxFit.contain,color: _selectedType == type ? COLORS.white : COLORS.primary,
       ),
       label: Text(
-        type,
+        type.tr(),
         style: TextStyle(
           fontSize: SizeConfig.blockWidth * 3.5,
           fontWeight: FontWeight.w400,

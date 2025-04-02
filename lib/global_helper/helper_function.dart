@@ -233,3 +233,32 @@ String formatTime(String dateTimeString) {
   DateTime dateTime = DateTime.parse(dateTimeString).toLocal();
   return DateFormat('hh:mm a').format(dateTime);
 }
+
+
+Future<void> shareGroupInvite({
+  required String groupName,
+  required String groupDescription,
+}) async {
+  final String inviteMessage = '''🎉 Join our group chat on Works! 🎉
+
+Be a part of **$groupName**!  
+📢 **About:** $groupDescription  
+
+Stay connected, share updates, and chat with amazing people.
+
+Click below to join now:  
+👉 https://play.google.com/store/apps/details?id=com.workss.works_app 👈''';
+
+  final ByteData bytes = await rootBundle.load('assets/images/home/group-invite.png');
+  final Uint8List list = bytes.buffer.asUint8List();
+
+  final tempDir = await getTemporaryDirectory();
+  final file = await File('${tempDir.path}/group-invite.png').create();
+  file.writeAsBytesSync(list);
+
+  // Share the group invite with the image
+  await Share.shareXFiles(
+    [XFile(file.path)],
+    text: inviteMessage,
+  );
+}

@@ -562,32 +562,44 @@ class _AddressScreenState extends State<AddressScreen> {
   }
 
   Widget _buildTypeButton(String type, String icon) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor:
-            _selectedType == type ? COLORS.primary : COLORS.neutralDarkTwo,
-        foregroundColor: _selectedType == type ? Colors.white : Colors.black,
-        shape: RoundedRectangleBorder(
+    return InkWell(
+      onTap: () => _setSelectedType(type),
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+      child: Container(
+
+        padding: EdgeInsets.symmetric(
+          vertical: SizeConfig.blockWidth * 2,
+          horizontal: SizeConfig.blockWidth * 4,
+        ),
+        decoration: BoxDecoration(
+          color: _selectedType == type ? COLORS.primary : COLORS.neutralDarkTwo,
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
         ),
-        elevation: 0
-      ),
-      onPressed: () => _setSelectedType(type),
-      icon: Image.asset(
-        icon,
-        width: SizeConfig.blockWidth * 4,
-        height: SizeConfig.blockWidth * 4,
-        fit: BoxFit.contain,
-        color: _selectedType == type ? COLORS.white : COLORS.primary,
-      ),
-      label: Text(
-        type.tr(),
-        style: TextStyle(
-          fontSize: SizeConfig.blockWidth * 3.5,
-          fontWeight: FontWeight.w400,
-          fontFamily: "Poppins",
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              icon,
+              width: SizeConfig.blockWidth * 4,
+              height: SizeConfig.blockWidth * 4,
+              fit: BoxFit.contain,
+              color: _selectedType == type ? COLORS.white : COLORS.primary,
+            ),
+            SizedBox(width: SizeConfig.blockWidth * 2),
+            Text(
+              type.tr(),
+              style: TextStyle(
+                fontSize: SizeConfig.blockWidth * 3.5,
+                fontWeight: FontWeight.w400,
+                fontFamily: "Poppins",
+                color: _selectedType == type ? Colors.white : Colors.black,
+              ),
+              textAlign: TextAlign.center,
+              // textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        textAlign: TextAlign.center,
       ),
     );
   }

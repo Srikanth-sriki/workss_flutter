@@ -209,7 +209,7 @@ Widget friendSearchDetailsCards({
                     horizontal: SizeConfig.blockWidth * 4,
                   ),
                   child: Text(
-                    'Messaage'.tr(),
+                    'Message'.tr(),
                     style: TextStyle(
                       color: COLORS.neutralDark,
                       fontSize: SizeConfig.blockWidth * 3.5,

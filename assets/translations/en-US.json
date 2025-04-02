@@ -320,28 +320,26 @@
   "CREATE": "CREATE",
   "Ex: Search": "Ex: Search",
   "Please enter description": "Please enter description",
-  "Please enter group name": "Please enter group name"
+  "Please enter group name": "Please enter group name",
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  "Search your chats": "Search your chats",
+  "Delete Group": "Delete Group",
+  "Invite": "Invite",
+  "Select All": "Select All",
+  "Cancel": "Cancel",
+  "Are you sure you want to leave \nthe group?": "Are you sure you want to leave \nthe group?",
+  "Before leaving the group, ensure you assign \nsomeone as the group admin.": "Before leaving the group, ensure you assign \nsomeone as the group admin.",
+  "MARK ADMIN": "MARK ADMIN",
+  "Mark as admin": "Mark as admin",
+  "LEAVE GROUP": "LEAVE GROUP",
+  "At least one admin is required before leaving.": "At least one admin is required before leaving.",
+  "Are you sure you want to \n delete the group?": "Are you sure you want to \n delete the group?",
+  "Write a reason for report or block group": "Write a reason for report or block group",
+  "REPORT GROUP": "REPORT GROUP",
+  "Remove (${participants.user!.name})": "Remove (${participants.user!.name})",
+  "Instructions (Optional)": "Instructions (Optional)",
+  "REPORT": "REPORT",
+  "Upload your work images (Optional) \n(max 2 pictures)": "Upload your work images (Optional) \n(max 2 pictures),",
+  "No Chats Found": "No Chats Found"
 }
