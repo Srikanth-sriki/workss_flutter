@@ -117,7 +117,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                         ));
                       } else {
                         _pageController.nextPage(
-                          duration: const Duration(milliseconds: 400),
+                          duration: const Duration(milliseconds: 200),
                           curve: Curves.easeInOut,
                         );
                       }
@@ -170,7 +170,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
             children: [
               AnimatedScale(
                 scale: scale,
-                duration: const Duration(milliseconds: 400),
+                duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOut,
                 child: Image.asset(
                   image,
@@ -189,10 +189,10 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
               ),
               SizedBox(height: SizeConfig.blockHeight * 4),
               AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 300),
                 opacity: opacity,
                 child: AnimatedSlide(
-                  duration: const Duration(milliseconds: 500),
+                  duration: const Duration(milliseconds: 300),
                   offset: offset,
                   curve: Curves.easeOut,
                   child: Column(
@@ -231,7 +231,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
 
   Widget buildDot(int index, BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
       height: _currentIndex == index
           ? SizeConfig.blockWidth * 2.5
           : SizeConfig.blockWidth * 2,

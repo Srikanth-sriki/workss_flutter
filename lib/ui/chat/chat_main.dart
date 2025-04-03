@@ -238,21 +238,23 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ChatListSearch(chatList: chatList),
-                        ));
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                        left: SizeConfig.blockWidth * 4.5,
-                        top: SizeConfig.blockHeight * 2,
-                        right: SizeConfig.blockWidth * 4.5,
-                        bottom: SizeConfig.blockHeight),
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: SizeConfig.blockWidth * 4.5,
+                      top: SizeConfig.blockHeight * 2,
+                      right: SizeConfig.blockWidth * 4.5,
+                      bottom: SizeConfig.blockHeight),
+                  child: InkWell(
+                    splashColor: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ChatListSearch(chatList: chatList),
+                          ));
+                    },
                     child: Container(
                       height: SizeConfig.blockHeight * 7,
                       padding: EdgeInsets.symmetric(
@@ -265,10 +267,11 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.search,
-                            color: COLORS.neutralDarkOne,
-                            size: SizeConfig.blockWidth * 5,
+                          Image.asset(
+                            'assets/images/home/search.png',
+                            width: SizeConfig.blockWidth * 5.5,
+                            height: SizeConfig.blockWidth * 5.5,
+                            fit: BoxFit.contain,
                           ),
                           SizedBox(
                             width: SizeConfig.blockWidth * 4,

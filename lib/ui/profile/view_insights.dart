@@ -232,11 +232,11 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                 ),
               ],
             ),
-            Icon(
-              Icons.more_vert,
-              color: COLORS.white,
-              size: SizeConfig.blockHeight * 4,
-            ),
+            // Icon(
+            //   Icons.more_vert,
+            //   color: COLORS.white,
+            //   size: SizeConfig.blockHeight * 4,
+            // ),
           ],
         ),
         Container(

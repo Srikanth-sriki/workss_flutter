@@ -907,48 +907,50 @@ class _RegisterFormState extends State<RegisterForm> {
                           ],
                           if (knowLanguageLoading) ...[
                             dropDownLoader(hintText: 'Select Languages')
-                          ]
+                          ],
+
+                          SizedBox(
+                            height: SizeConfig.blockHeight * 2.5,
+                          ),
+                          _buildBioTextField(
+                              label: 'Bio'.tr(),
+                              controller: bioController,
+                              hintText: "Write about you and your work".tr(),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  setState(() => bioError = true);
+                                  return 'Please enter Bio'.tr();
+                                }
+                                setState(() => bioError = false);
+                                return null;
+                              },
+                              error: bioError,
+                              onChanged: (value) {
+                                _validateForm();
+                                if(value!.isNotEmpty){
+                                  setState(() {
+                                    bioSelected = true;
+                                  });
+                                }
+                                else{
+                                  setState(() {
+                                    bioSelected = false;
+                                  });
+                                }
+                              },
+                              title: 'Bio'.tr(),
+                              color: bioSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
+                              fontWeight: bioSelected?FontWeight.w400:FontWeight.w500
+                          ),
+
+
+                          MultipleImagePickerComponent(
+                            onImagesSelected: _onImagesSelected,
+                            error: imagesList,
+                            removeImage: _removeImage,
+                          ),
                         ],
-                        SizedBox(
-                          height: SizeConfig.blockHeight * 2.5,
-                        ),
-                        _buildBioTextField(
-                            label: 'Bio'.tr(),
-                            controller: bioController,
-                            hintText: "Write about you and your work".tr(),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                setState(() => bioError = true);
-                                return 'Please enter Bio'.tr();
-                              }
-                              setState(() => bioError = false);
-                              return null;
-                            },
-                            error: bioError,
-                            onChanged: (value) {
-                              _validateForm();
-                              if(value!.isNotEmpty){
-                                setState(() {
-                                  bioSelected = true;
-                                });
-                              }
-                              else{
-                                setState(() {
-                                  bioSelected = false;
-                                });
-                              }
-                            },
-                            title: 'Bio'.tr(),
-                            color: bioSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                            fontWeight: bioSelected?FontWeight.w400:FontWeight.w500
-                        ),
 
-
-                        MultipleImagePickerComponent(
-                          onImagesSelected: _onImagesSelected,
-                          error: imagesList,
-                          removeImage: _removeImage,
-                        ),
                       ],
                     ),
                   )),
