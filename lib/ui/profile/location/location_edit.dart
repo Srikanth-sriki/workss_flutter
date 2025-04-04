@@ -596,7 +596,6 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               ),
                             ],
                           ),
-
                           SizedBox(height: SizeConfig.blockHeight * 2),
                         ],
                       ),
