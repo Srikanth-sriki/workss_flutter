@@ -360,19 +360,24 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                               Padding(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: SizeConfig.blockWidth * 4),
-                                child: Icon(
-                                  Icons.search,
-                                  color: COLORS.neutralDarkOne,
-                                  size: SizeConfig.blockWidth * 6,
+                                child: Image.asset(
+                                  'assets/images/home/search.png',
+                                  width: SizeConfig.blockWidth * 5.5,
+                                  height: SizeConfig.blockWidth * 5.5,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
-                              Text(
-                                'Search by Profession type'.tr(),
-                                style: TextStyle(
-                                  color: COLORS.neutralDarkOne,
-                                  fontSize: SizeConfig.blockWidth * 3.3,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: "Poppins",
+                              SizedBox(
+                                width: SizeConfig.blockWidth*50,
+                                child: Text(
+                                  'Search by Profession type'.tr(),
+                                  style: TextStyle(
+                                    color: COLORS.neutralDarkOne,
+                                    fontSize: SizeConfig.blockWidth * 3.3,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                  ),
+                                  maxLines: 1,overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -528,16 +533,18 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                         ],
                         if (!isCategoryLoad) ...[
                           SizedBox(
-                            height: SizeConfig.blockHeight * 23,
+                            height: SizeConfig.blockHeight * 20.5,
                             child: ListView.builder(
                                 itemCount: categoriesData.length,
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
                                 padding: EdgeInsets.symmetric(
                                     horizontal: SizeConfig.blockWidth * 5,
-                                    vertical: SizeConfig.blockHeight),
+                                    vertical: SizeConfig.blockHeight*0.5),
                                 itemBuilder: (context, index) {
                                   return InkWell(
+                                    splashColor: Colors.white.withOpacity(0),
+                                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 4),
                                     onTap: () {
                                       Navigator.push(
                                         context,
@@ -549,8 +556,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                       );
                                     },
                                     child: Container(
-                                      padding: EdgeInsets.all(
-                                          SizeConfig.blockWidth * 3),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: SizeConfig.blockWidth *3,vertical: SizeConfig.blockHeight),
                                       child: Column(
                                         crossAxisAlignment:
                                         CrossAxisAlignment.center,

@@ -79,9 +79,7 @@ dependencies:
   just_audio: ^0.9.42
   photo_view: ^0.15.0
   socket_io_client: ^3.0.2
-  just_waveform: ^0.0.7
-  audioplayers: ^6.4.0
-  flutter_audio_waveforms: ^1.2.1+8
+
 
 
 

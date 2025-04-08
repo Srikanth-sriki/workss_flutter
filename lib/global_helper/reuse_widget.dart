@@ -393,6 +393,7 @@ Widget _buildButtonContent({
                         ),
                         overflow: TextOverflow.clip,
                         softWrap: true,
+                        maxLines: 1,
                       ),
                     ),
                     if (prefixIconBool! && prefixIcon != null) ...[
@@ -455,13 +456,18 @@ Widget customIconButton(
                 SizedBox(width: SizeConfig.blockWidth * 2),
               ],
               if (image == true) ...[imageChild!],
-              Text(
-                text.tr(),
-                style: TextStyle(
-                  color: textColor ?? COLORS.white,
-                  fontSize: SizeConfig.blockWidth * 3.5,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: "Poppins",
+              Flexible(
+                child: Text(
+                  text.tr(),
+                  style: TextStyle(
+                    color: textColor ?? COLORS.white,
+                    fontSize: SizeConfig.blockWidth * 3.5,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Poppins",
+                  ),
+                  maxLines: 1,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
