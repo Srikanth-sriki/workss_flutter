@@ -487,30 +487,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   languageImage: 'assets/images/home/speak.png',
                   onShowInterest: () {},
                   onCardClick: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MultiBlocProvider(
-                                  providers: [
-                                    BlocProvider(
-                                      create: (context) => HomeBloc()
-                                        ..add(FetchWorkSingleView(
-                                            workId: work.id!)),
-                                    ),
-                                    BlocProvider(
-                                      create: (context) => ShowInterestedBloc(),
-                                    ),
-                                    BlocProvider(
-                                        create: (context) => ReportPostBloc())
-                                  ],
-                                  child: WorkDetailsScreen(
-                                    id: work.id!,
-                                    refreshPageCallback: () {
-                                      _fetchData(isNewFetch: true);
-                                    },
-                                    routeType: 'general',
+                    if(Config.isRegistered){
+
+                    }
+                    else{
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) => HomeBloc()
+                                      ..add(FetchWorkSingleView(
+                                          workId: work.id!)),
                                   ),
-                                )));
+                                  BlocProvider(
+                                    create: (context) => ShowInterestedBloc(),
+                                  ),
+                                  BlocProvider(
+                                      create: (context) => ReportPostBloc())
+                                ],
+                                child: WorkDetailsScreen(
+                                  id: work.id!,
+                                  refreshPageCallback: () {
+                                    _fetchData(isNewFetch: true);
+                                  },
+                                  routeType: 'general',
+                                ),
+                              )));
+                    }
+
                   },
                   actionRows: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

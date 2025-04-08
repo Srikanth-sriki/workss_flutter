@@ -4,11 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 import 'package:works_app/ui/profile/component.dart';
 
 import '../ui/main_screen/main_screen.dart';
+import '../ui/onboarding/select_user_type.dart';
 
 SystemUiOverlayStyle customSystemOverlayStyle({
   Color statusBarColor = COLORS.white,
@@ -48,7 +50,11 @@ PreferredSizeWidget customAppBar({
           visible: skipVisible,
           child: TextButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/main_screen');
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/main_screen',
+                    (Route<dynamic> route) => false,
+              );
             },
             child: Row(
               children: [
@@ -411,6 +417,59 @@ Widget _buildButtonContent({
   );
 }
 
+
+void loginUserBottomSheet(BuildContext context) {
+  showModalBottomSheet(
+    constraints: BoxConstraints(
+        maxWidth: SizeConfig.blockWidth * 100,
+        minWidth: SizeConfig.blockWidth * 100),
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SizeConfig.blockWidth * 5)),
+    ),
+    backgroundColor: COLORS.primaryTwo,
+    builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Please login to explore app!'.tr(),
+              style: TextStyle(
+                color: COLORS.white,
+                fontSize: SizeConfig.blockWidth * 3.8,
+                fontWeight: FontWeight.w400,
+                fontFamily: "Poppins",
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: SizeConfig.blockHeight * 3),
+            customButton(
+              text: 'LOGIN'.tr(),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                      const SelectUserType())
+                );
+              },
+              backgroundColor: COLORS.primary,
+              showIcon: false,
+              width: SizeConfig.blockWidth * 100,
+              height: SizeConfig.blockHeight * 8,
+              textColor: COLORS.white,
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 Widget customIconButton(
     {required String text,
     IconData? icon,
@@ -432,7 +491,7 @@ Widget customIconButton(
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
       rippleColor: Colors.white60,
       child: InkWell(
-        onTap: onPressed,
+        onTap:  onPressed,
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
         child: Container(
           decoration: BoxDecoration(

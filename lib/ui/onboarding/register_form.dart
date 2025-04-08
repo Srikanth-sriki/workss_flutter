@@ -111,8 +111,7 @@ class _RegisterFormState extends State<RegisterForm> {
     if (widget.userType != 'jobs' &&
         _enterName.text.isNotEmpty &&
         (_selectedCity?.isNotEmpty ?? false) &&
-        pinCodeController.text.isNotEmpty &&
-        bioController.text.isNotEmpty ) {
+        pinCodeController.text.isNotEmpty ) {
       isValid = true;
     }
 

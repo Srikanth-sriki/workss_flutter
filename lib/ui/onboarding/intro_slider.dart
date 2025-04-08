@@ -79,8 +79,16 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                 children: [
                   if (_currentIndex != 2) ...[
                     TextButton(
-                      onPressed: () {
-                        _pageController.jumpToPage(2);
+                      onPressed: () async{
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool(LocalConstant.intoChecked, true);
+                        Navigator.pop(context);
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) => BlocProvider(
+                            create: (context) => LoginBloc(),
+                            child: const LoginScreen(),
+                          ),
+                        ));
                       },
                       child: Row(
                         children: [

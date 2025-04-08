@@ -102,7 +102,7 @@ Widget friendSearchDetailsCards({
   required VoidCallback onTapButtonCard,
   bool sendMessageButtonRequired = false,
   Widget? widgetButton,
-  bool widgetButtonRequired = false
+  bool widgetButtonRequired = false,
 }) {
   return InkWell(
     onTap: onTapCard,
