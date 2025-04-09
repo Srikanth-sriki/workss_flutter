@@ -210,14 +210,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                     friendRequest: value);
                               },
                             ),
-                            buildSwitchTile(
-                              title: 'New Clips from Friends',
-                              value: settingFetchModelList.newClipsFromFriends!,
-                              onChanged: (value) {
-                                _updateNotificationSetting(
-                                    newClipsFromFriends: value);
-                              },
-                            ),
+                            // buildSwitchTile(
+                            //   title: 'New Clips from Friends',
+                            //   value: settingFetchModelList.newClipsFromFriends!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(
+                            //         newClipsFromFriends: value);
+                            //   },
+                            // ),
                             buildSwitchTile(
                               title: 'New Friends and Suggestions',
                               value:
@@ -235,14 +235,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 _updateNotificationSetting(msgRecevied: value);
                               },
                             ),
-                            buildSwitchTile(
-                              title: 'Comments or Likes on Your Posts',
-                              value: settingFetchModelList.cmtOrLikeOnYourPost!,
-                              onChanged: (value) {
-                                _updateNotificationSetting(
-                                    cmtOrLikeOnYourPost: value);
-                              },
-                            ),
+                            // buildSwitchTile(
+                            //   title: 'Comments or Likes on Your Posts',
+                            //   value: settingFetchModelList.cmtOrLikeOnYourPost!,
+                            //   onChanged: (value) {
+                            //     _updateNotificationSetting(
+                            //         cmtOrLikeOnYourPost: value);
+                            //   },
+                            // ),
                             buildSwitchTile(
                               title: 'Group Alerts',
                               value: settingFetchModelList.groupAlert!,

@@ -300,22 +300,60 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                     ),
                     BottomSheetItem(
                       title: 'Report or Block',
-                      onTap: () => {
-                        showMaterialModalBottomSheet(
-                          enableDrag: true,
-                          expand: false,
-                          isDismissible: true,
-                          backgroundColor: COLORS.white,
-                          context: context,
-                          closeProgressThreshold: 0,
-                          duration: const Duration(seconds: 0),
-                          useRootNavigator: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          builder: (context) => const ReportOrBlockModal(),
-                        ),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        final result =
+                        await showMaterialModalBottomSheet(
+                            enableDrag: true,
+                            expand: false,
+                            isDismissible: true,
+                            backgroundColor: COLORS.white,
+                            closeProgressThreshold: 0,
+                            duration:
+                            const Duration(seconds: 0),
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.vertical(
+                                  top: Radius.circular(
+                                      SizeConfig
+                                          .blockWidth *
+                                          6)),
+                            ),
+                            builder: (context) =>
+                            const ReportOrBlockModal(
+                              message: '',
+                            ));
+
+                        if (result != null) {
+                          setState(() {
+                            chartBloc.add(BlocChartGroupEvent(
+                              reason: result['message']!,
+                              chatId: chatViewGroupInfo.id,
+                              onSuccess: (message) {
+
+                                showCustomSnackBar(
+                                    context: context,
+                                    message: message,
+                                    backgroundColor:
+                                    COLORS.neutralDarkOne);
+                                Navigator.pushNamed(
+                                  context,
+                                  '/main_screen',
+                                  arguments: {'selectedIndex': 3},
+                                );
+                              },
+                              onError: (message) {
+                                // Navigator.pop(context);
+                                showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                );
+                              },
+                            ));
+                          });
+                        }
+
                       },
                     ),
                   ],
@@ -350,13 +388,18 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    chatViewGroupInfo.name!,
-                                    style: TextStyle(
-                                      color: COLORS.neutralDark,
-                                      fontSize: SizeConfig.blockWidth * 4,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: "Poppins",
+                                  Flexible(
+                                    child: Text(
+                                      chatViewGroupInfo.name!,
+                                      style: TextStyle(
+                                        color: COLORS.neutralDark,
+                                        fontSize: SizeConfig.blockWidth * 4,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: "Poppins",
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   SizedBox(

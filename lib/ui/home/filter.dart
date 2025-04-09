@@ -143,7 +143,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             ),
             buildDropdown(
               label: 'profession_type'.tr(),
-              hintText: 'Select your Profession'.tr(),
+              hintText: 'Select profession type.'.tr(),
               items: professionalTypesItem,
               onChanged: (value) => setState(() {
                 selectedProfession = value;
@@ -162,7 +162,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             ),
             buildDropdown(
               label: 'city'.tr(),
-              hintText: 'Select your city'.tr(),
+              hintText: 'Select city'.tr(),
               items: dropdownCityItem,
               onChanged: (value) => setState(() {
                 selectedCity = value;

@@ -368,12 +368,14 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                               reason: result['message']!,
                                               userId: state.friendsSearchList[index].id!,
                                               onSuccess: (message) {
+                                                Navigator.pop(context);
                                                 showCustomSnackBar(
                                                     context: context,
                                                     message: message,backgroundColor: COLORS.neutralDarkOne
                                                 );
                                               },
                                               onError: (message) {
+                                                Navigator.pop(context);
                                                 showCustomSnackBar(
                                                   context: context,
                                                   message: message,
@@ -435,9 +437,12 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                           }),
                     );
                   } else if (state is FriendsListFailed) {
-                    return ErrorScreen(onRetry: () {
-                      _fetchData();
-                    });
+                    return Padding(
+                      padding: EdgeInsets.only(top: SizeConfig.blockHeight*15),
+                      child: ErrorScreen(onRetry: () {
+                        _fetchData();
+                      }),
+                    );
                   }
                   return Container();
                 },

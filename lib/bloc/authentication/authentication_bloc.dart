@@ -58,6 +58,7 @@ class AuthenticationBloc
       Config.phoneNumber = phoneNumber;
       Config.name = name;
       Config.profileCompleted = profileCompleted;
+      Config.isRegistered = profileCompleted;
       Config.userType =userType;
       print(token);
       print(profileCompleted);

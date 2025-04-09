@@ -67,7 +67,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   late ShowInterestedBloc showInterestedBloc;
   late InitialRegisterBloc initialRegisterBloc;
   List<ChatView> chatView = [];
-  List<Participant> filteredParticipants =[];
+  List<Participant> filteredParticipants = [];
   ChatViewGroupInfo chatViewGroupInfo = ChatViewGroupInfo();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _messageController = TextEditingController();
@@ -122,7 +122,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   }
 
   void connectToSocket() {
-
     socket.on('new_message', (data) {
       if (_isMounted) {
         setState(() {
@@ -232,7 +231,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     _messageController.clear();
   }
 
-
   @override
   void dispose() {
     _isMounted = false;
@@ -247,10 +245,12 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        widget.refreshPageCallback();
-        return true;
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          widget.refreshPageCallback();
+        }
       },
       child: Scaffold(
         backgroundColor: COLORS.white,
@@ -275,10 +275,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   isFetchingMore = false;
                   maxPageNumber = state.maxPageNumber;
                   chatViewGroupInfo = state.chatViewGroupInfo;
-                 filteredParticipants =
-                  chatViewGroupInfo.participants
-                      .where((participant) =>
-                  participant.userId != Config.id)
+                  filteredParticipants = chatViewGroupInfo.participants
+                      .where((participant) => participant.userId != Config.id)
                       .toList();
 
                   if (currentPage == 1) {
@@ -307,11 +305,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       }
                     }
                   }
-                  if(sentAudioSent){
+                  if (sentAudioSent) {
                     sentAudio = true;
                     sentAudioSent = false;
-                  }
-                  else{
+                  } else {
                     sentAudio = false;
                     sentAudioSent = false;
                   }
@@ -515,7 +512,11 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       SizedBox(
                                         width: SizeConfig.blockWidth * 45,
                                         child: Text(
-                                            widget.isGroup?chatViewGroupInfo.description!:filteredParticipants[0].user.professionType,
+                                            widget.isGroup
+                                                ? chatViewGroupInfo.description!
+                                                : filteredParticipants[0]
+                                                    .user
+                                                    .professionType,
                                             style: TextStyle(
                                               color: COLORS.neutralDarkOne,
                                               fontSize:
@@ -817,23 +818,57 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                 ],
                                 BottomSheetItem(
                                   title: 'Report or Block',
-                                  onTap: () => {
-                                    showMaterialModalBottomSheet(
-                                      enableDrag: true,
-                                      expand: false,
-                                      isDismissible: true,
-                                      backgroundColor: COLORS.white,
-                                      context: context,
-                                      closeProgressThreshold: 0,
-                                      duration: const Duration(seconds: 0),
-                                      useRootNavigator: true,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(20)),
-                                      ),
-                                      builder: (context) =>
-                                          const ReportOrBlockModal(),
-                                    ),
+                                  onTap: () async {
+                                    final result =
+                                        await showMaterialModalBottomSheet(
+                                            enableDrag: true,
+                                            expand: false,
+                                            isDismissible: true,
+                                            backgroundColor: COLORS.white,
+                                            closeProgressThreshold: 0,
+                                            duration:
+                                                const Duration(seconds: 0),
+                                            context: context,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(
+                                                          SizeConfig
+                                                                  .blockWidth *
+                                                              6)),
+                                            ),
+                                            builder: (context) =>
+                                                const ReportOrBlockModal(
+                                                  message: '',
+                                                ));
+
+                                    if (result != null) {
+                                      setState(() {
+                                        chartBloc.add(BlocChartGroupEvent(
+                                          reason: result['message']!,
+                                          chatId: chatViewGroupInfo.id,
+                                          onSuccess: (message) {
+                                            showCustomSnackBar(
+                                                context: context,
+                                                message: message,
+                                                backgroundColor:
+                                                    COLORS.neutralDarkOne);
+                                            Navigator.pushNamed(
+                                              context,
+                                              '/main_screen',
+                                              arguments: {'selectedIndex': 3},
+                                            );
+                                          },
+                                          onError: (message) {
+                                            Navigator.pop(context);
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message: message,
+                                            );
+                                          },
+                                        ));
+                                      });
+                                    }
                                   },
                                 )
                               ],

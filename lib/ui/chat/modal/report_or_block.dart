@@ -5,7 +5,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../global_helper/reuse_widget.dart';
 
 class ReportOrBlockModal extends StatefulWidget {
-  const ReportOrBlockModal({super.key});
+  final String? message;
+  const ReportOrBlockModal({super.key,required this.message});
 
   @override
   _ReportOrBlockModalState createState() => _ReportOrBlockModalState();
@@ -115,7 +116,11 @@ class _ReportOrBlockModalState extends State<ReportOrBlockModal> {
                       customButton(
                         text: 'REPORT GROUP'.tr(),
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {}
+                          if (_formKey.currentState!.validate()) {
+                            Navigator.of(context).pop({
+                              'message': messageController.text,
+                            });
+                          }
                         },
                         backgroundColor: COLORS.primary,
                         showIcon: false,

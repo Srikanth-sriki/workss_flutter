@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
@@ -30,6 +31,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
+  DateTime? _lastPressed;
 
   late final Widget _cachedProfileScreen;
 
@@ -37,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Retrieve arguments from Navigator
+
     final args =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
@@ -217,61 +219,48 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<bool> _handlePop() async {
+    if (_selectedIndex != 0) {
+      setState(() {
+        _selectedIndex = 0;
+      });
+      return false; // Don't pop
+    } else {
+      final now = DateTime.now();
+      if (_lastPressed == null || now.difference(_lastPressed!) > const Duration(seconds: 2)) {
+        _lastPressed = now;
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(content: Text('Press back again to exit',style: TextStyle(
+            color: COLORS.neutralDark,
+            fontSize: SizeConfig.blockWidth * 3,
+            fontWeight: FontWeight.w500,
+            fontFamily: "Poppins",
+          ),),backgroundColor: COLORS.primaryOne,),
+
+        );
+        // Fluttertoast.showToast(
+        //   msg: "Press back again to exit",
+        //   toastLength: Toast.LENGTH_SHORT,
+        //   gravity: ToastGravity.BOTTOM,
+        //   backgroundColor: Colors.black87,
+        //   textColor: Colors.white,
+        // );
+        return false;
+      }
+      return true; // Pop (exit app)
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_selectedIndex == 0) {
-          bool shouldExit = await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: COLORS.white,
-              title: Text(
-                'Exit App',
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 4.25,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: "Poppins",
-                ),
-              ),
-              content: Text('Are you sure you want to exit?',
-                  style: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.6,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                  )),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('Cancel',
-                      style: TextStyle(
-                        color: COLORS.primary,
-                        fontSize: SizeConfig.blockWidth * 3.8,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
-                      )),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text('Exit',
-                      style: TextStyle(
-                        color: COLORS.primary,
-                        fontSize: SizeConfig.blockWidth * 3.8,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
-                      )),
-                ),
-              ],
-            ),
-          );
-          return shouldExit ?? false;
-        } else {
-          setState(() {
-            _selectedIndex = 0;
-          });
-          return false;
+    return PopScope(
+      canPop: false,
+        onPopInvokedWithResult: (didPop,result) async {
+        if (!didPop) {
+          bool shouldExit = await _handlePop();
+          if (shouldExit) {
+            SystemNavigator.pop();
+          }
         }
       },
       child: Scaffold(

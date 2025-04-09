@@ -545,7 +545,7 @@ class _RegisterFormState extends State<RegisterForm> {
                               fontWeight: experienceSelected?FontWeight.w400:FontWeight.w500
                           ),
                           normalTextField(
-                              hintText: "Experience".tr(),
+                              hintText: "Enter your experience(In years)".tr(),
                               controller: experienceController,
                               inputType: TextInputType.number,
                               maxLength: 4,
@@ -578,6 +578,37 @@ class _RegisterFormState extends State<RegisterForm> {
                               suffix: true,
                               prefix: false,
                               hasError: yearError,
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      left: BorderSide(
+                                        width: SizeConfig.blockWidth * 0.3,
+                                        color: COLORS.neutralDarkTwo,
+                                      ),
+                                    ),
+                                  ),
+                                  height: SizeConfig.blockHeight * 5,
+                                  width: SizeConfig.blockWidth * 20,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: SizeConfig.blockWidth * 2.5,
+                                      vertical: SizeConfig.blockWidth * 1),
+                                  child: Text(
+                                    'Years',
+                                    style: TextStyle(
+                                        color: COLORS.accent,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
+                                        fontSize:
+                                        SizeConfig.blockWidth * 3.5),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
+                            ),
 
                           ),
                           SizedBox(height: SizeConfig.blockHeight),
@@ -762,9 +793,17 @@ class _RegisterFormState extends State<RegisterForm> {
                                   setState(() => ageError = true);
                                   return 'Please enter your age'.tr();
                                 }
+
+                                final age = int.tryParse(value);
+                                if (age == null || age < 14) {
+                                  setState(() => ageError = true);
+                                  return 'Age must be 14 or above'.tr();
+                                }
+
                                 setState(() => ageError = false);
                                 return null;
                               },
+
                               fontWeight: FontWeight.w400,
                               errorMessage: '',
                               suffix: true,

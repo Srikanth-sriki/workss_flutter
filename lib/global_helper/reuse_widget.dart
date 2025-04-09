@@ -436,10 +436,10 @@ void loginUserBottomSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Please login to explore app!'.tr(),
+              "It looks like you haven't registered yet. \nPlease complete your registration!".tr(),
               style: TextStyle(
                 color: COLORS.white,
-                fontSize: SizeConfig.blockWidth * 3.8,
+                fontSize: SizeConfig.blockWidth * 3.6,
                 fontWeight: FontWeight.w400,
                 fontFamily: "Poppins",
               ),
@@ -447,7 +447,7 @@ void loginUserBottomSheet(BuildContext context) {
             ),
             SizedBox(height: SizeConfig.blockHeight * 3),
             customButton(
-              text: 'LOGIN'.tr(),
+              text: 'REGISTER NOW'.tr(),
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
@@ -915,7 +915,7 @@ Widget buildProfessionalCard(
                                 imageSize: 3.4,
                                 textFontSize: 3),
                             registerTextCard(
-                                text: experience,
+                                text: "${experience}y experience",
                                 image: experienceImage,
                                 imageSize: 3.4,
                                 textFontSize: 3),

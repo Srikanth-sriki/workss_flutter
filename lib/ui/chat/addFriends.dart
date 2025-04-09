@@ -107,11 +107,13 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-       widget.refreshPageCallback();
-        return true;
-      },
+    return PopScope(
+    canPop: true,
+    onPopInvokedWithResult: (didPop, result) {
+      if (didPop) {
+        widget.refreshPageCallback();
+      }
+    },
       child: Scaffold(
         backgroundColor: COLORS.white,
         appBar: CustomAppBar(

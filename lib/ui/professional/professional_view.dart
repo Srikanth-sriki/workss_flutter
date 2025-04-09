@@ -298,12 +298,14 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                         reason: result['message']!,
                                         userId: professional.id!,
                                         onSuccess: (message) {
+                                          Navigator.pop(context);
                                           showCustomSnackBar(
                                               context: context,
                                               message: message,backgroundColor: COLORS.neutralDarkOne
                                           );
                                         },
                                         onError: (message) {
+                                          Navigator.pop(context);
                                           showCustomSnackBar(
                                             context: context,
                                             message: message,
@@ -353,7 +355,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                 color: COLORS.primary,
                                 textColor: COLORS.neutralDark),
                             registerTextCard(
-                                text: professional.experiencedYears!,
+                                text: "${professional.experiencedYears!}y experience",
                                 image: 'assets/images/home/work_select.png',
                                 color: COLORS.primary,
                                 textColor: COLORS.neutralDark),

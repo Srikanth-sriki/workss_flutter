@@ -727,6 +727,13 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                   setState(() => ageError = true);
                                   return 'Please enter your age'.tr();
                                 }
+
+                                final age = int.tryParse(value);
+                                if (age == null || age < 14) {
+                                  setState(() => ageError = true);
+                                  return 'Age must be 14 or above'.tr();
+                                }
+
                                 setState(() => ageError = false);
                                 return null;
                               },

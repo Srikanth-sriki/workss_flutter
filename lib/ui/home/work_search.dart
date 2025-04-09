@@ -401,28 +401,32 @@ class _WorkSearchListState extends State<WorkSearchList> {
               languageImage: 'assets/images/home/speak.png',
               onShowInterest: () {},
               onCardClick: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MultiBlocProvider(
-                              providers: [
-                                BlocProvider(
-                                  create: (context) => HomeBloc()
-                                    ..add(
-                                        FetchWorkSingleView(workId: work.id!)),
+                if (Config.profileCompleted) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) => HomeBloc()
+                                      ..add(FetchWorkSingleView(
+                                          workId: work.id!)),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) => ShowInterestedBloc(),
+                                  ),
+                                  BlocProvider(
+                                      create: (context) => ReportPostBloc())
+                                ],
+                                child: WorkDetailsScreen(
+                                  id: work.id!,
+                                  refreshPageCallback: _fetchData,
+                                  routeType: 'general',
                                 ),
-                                BlocProvider(
-                                  create: (context) => ShowInterestedBloc(),
-                                ),
-                                BlocProvider(
-                                    create: (context) => ReportPostBloc())
-                              ],
-                              child: WorkDetailsScreen(
-                                id: work.id!,
-                                refreshPageCallback: _fetchData,
-                                routeType: 'general',
-                              ),
-                            )));
+                              )));
+                } else {
+                  loginUserBottomSheet(context);
+                }
               },
               actionRows: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -434,53 +438,57 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           ? 'INTERESTED'
                           : 'SHOW INTEREST',
                       onPressed: () {
-                        if (Config.userType == 'professional') {
-                          if (work.intrestShown == null) {
-                            showInterestedBloc.add(SaveInterestedWork(
-                              workID: work.id!,
-                              contact: true,
-                              onSuccess: () {
-                                setState(() {
-                                  work.intrestShown = IntrestShown(
-                                    isContacted: true,
-                                  );
-                                });
-                              },
-                              onError: () {},
-                            ));
-                          } else {
-                            showCustomAlertDialog(
-                              context: context,
-                              title: 'Are you Sure?',
-                              message: 'Do you want to Uninterest this Work?',
-                              positiveButtonText: 'YES',
-                              negativeButtonText: 'NO',
-                              onPositivePressed: () {
-                                showInterestedBloc.add(SaveInterestedWork(
-                                  workID: work.id!,
-                                  contact: true,
-                                  onSuccess: () {
-                                    setState(() {
-                                      work.intrestShown = null;
-                                      Navigator.of(context).pop();
-                                    });
-                                  },
-                                  onError: () {
-                                    showCustomSnackBar(
-                                      context: context,
-                                      message: "Something Went wrong",
+                        if (Config.profileCompleted) {
+                          if (Config.userType == 'professional') {
+                            if (work.intrestShown == null) {
+                              showInterestedBloc.add(SaveInterestedWork(
+                                workID: work.id!,
+                                contact: true,
+                                onSuccess: () {
+                                  setState(() {
+                                    work.intrestShown = IntrestShown(
+                                      isContacted: true,
                                     );
-                                    Navigator.of(context).pop();
-                                  },
-                                ));
-                              },
-                              onNegativePressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            );
+                                  });
+                                },
+                                onError: () {},
+                              ));
+                            } else {
+                              showCustomAlertDialog(
+                                context: context,
+                                title: 'Are you Sure?',
+                                message: 'Do you want to Uninterest this Work?',
+                                positiveButtonText: 'YES',
+                                negativeButtonText: 'NO',
+                                onPositivePressed: () {
+                                  showInterestedBloc.add(SaveInterestedWork(
+                                    workID: work.id!,
+                                    contact: true,
+                                    onSuccess: () {
+                                      setState(() {
+                                        work.intrestShown = null;
+                                        Navigator.of(context).pop();
+                                      });
+                                    },
+                                    onError: () {
+                                      showCustomSnackBar(
+                                        context: context,
+                                        message: "Something Went wrong",
+                                      );
+                                      Navigator.of(context).pop();
+                                    },
+                                  ));
+                                },
+                                onNegativePressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            }
+                          } else {
+                            showInterestBottomSheet(context);
                           }
                         } else {
-                          showInterestBottomSheet(context);
+                          loginUserBottomSheet(context);
                         }
                       },
                       backgroundColor: work.intrestShown != null
@@ -523,7 +531,11 @@ class _WorkSearchListState extends State<WorkSearchList> {
                             fit: BoxFit.contain,
                           ),
                           onTap: () {
-                            makePhoneCall(work.user!.mobile!);
+                            if (Config.profileCompleted) {
+                              makePhoneCall(work.user!.mobile!);
+                            } else {
+                              loginUserBottomSheet(context);
+                            }
                           },
                         ),
                       ],
@@ -536,11 +548,15 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           fit: BoxFit.contain,
                         ),
                         onTap: () {
-                          shareJobDetails(
-                            experience: work.experienceLevel!,
-                            location: work.location!,
-                            jobTitle: work.requiredProfession!,
-                          );
+                          if (Config.profileCompleted) {
+                            shareJobDetails(
+                              experience: work.experienceLevel!,
+                              location: work.location!,
+                              jobTitle: work.requiredProfession!,
+                            );
+                          } else {
+                            loginUserBottomSheet(context);
+                          }
                         },
                       ),
                     ],

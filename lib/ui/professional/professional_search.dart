@@ -6,6 +6,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:location/location.dart';
 import 'package:works_app/bloc/home/home_bloc.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/ui/home/work_details.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
@@ -214,74 +215,79 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 onChanged: _onSearchChanged,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 4.8,
-                  vertical: SizeConfig.blockHeight * 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: SizeConfig.blockWidth * 90,
-                    padding: EdgeInsets.symmetric(
-                        vertical: mapLoading
-                            ? SizeConfig.blockWidth * 3
-                            : SizeConfig.blockWidth * 1,
-                        horizontal: SizeConfig.blockWidth * 3),
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                      color: COLORS.primaryTwo,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_rounded,
-                          size: SizeConfig.blockWidth * 5.5,
-                          color: COLORS.accent,
-                        ),
-                        SizedBox(width: SizeConfig.blockWidth * 4),
-                        Expanded(
-                          child: Text(
-                            'Professionals Near Your',
-                            style: TextStyle(
-                              color: COLORS.white,
-                              fontSize: SizeConfig.blockWidth * 3.25,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                            ),
-                            softWrap: true,
+            if(Config.profileCompleted)...[
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 4.8,
+                    vertical: SizeConfig.blockHeight * 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: SizeConfig.blockWidth * 90,
+                      padding: EdgeInsets.symmetric(
+                          vertical: mapLoading
+                              ? SizeConfig.blockWidth * 3
+                              : SizeConfig.blockWidth * 1,
+                          horizontal: SizeConfig.blockWidth * 3),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                        color: COLORS.primaryTwo,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_rounded,
+                            size: SizeConfig.blockWidth * 5.5,
+                            color: COLORS.accent,
                           ),
-                        ),
-                        if (mapLoading) ...[
-                          LoadingAnimationWidget.discreteCircle(
-                            color: COLORS.primary,
-                            size: SizeConfig.blockWidth * 5,
-                          )
-                        ] else ...[
-                          Switch(
-                            value: isLiveLocationEnabled,
-                            onChanged: _toggleLiveLocation,
-                            activeColor: COLORS.primary,
-                            inactiveThumbColor: COLORS.neutralDarkOne,
-                            trackOutlineColor:
-                                const WidgetStatePropertyAll(COLORS.primaryTwo),
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          )
+                          SizedBox(width: SizeConfig.blockWidth * 4),
+                          Expanded(
+                            child: Text(
+                              'Professionals Near Your',
+                              style: TextStyle(
+                                color: COLORS.white,
+                                fontSize: SizeConfig.blockWidth * 3.25,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                              softWrap: true,
+                            ),
+                          ),
+                          if (mapLoading) ...[
+                            LoadingAnimationWidget.discreteCircle(
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 5,
+                            )
+                          ] else ...[
+                            Switch(
+                              value: isLiveLocationEnabled,
+                              onChanged: _toggleLiveLocation,
+                              activeColor: COLORS.primary,
+                              inactiveThumbColor: COLORS.neutralDarkOne,
+                              trackOutlineColor:
+                              const WidgetStatePropertyAll(COLORS.primaryTwo),
+                              materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                            )
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            // Divider(
-            //   height: SizeConfig.blockHeight*0,
-            //   color: COLORS.neutralDarkTwo,
-            // ),
-            // SizedBox(height: SizeConfig.blockHeight*2,),
+                  ],
+                ),
+              )
+            ]
+            else...[
+              // Divider(
+              //   height: SizeConfig.blockHeight*0,
+              //   color: COLORS.neutralDarkTwo,
+              // ),
+              SizedBox(height: SizeConfig.blockHeight*2,),
+            ],
+
             Expanded(
               child: BlocConsumer<ProfessionalBloc, ProfessionalState>(
                 listener: (context, state) {
@@ -353,85 +359,109 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 language: professionalData.knownLanguages!.join(", "),
                 languageImage: 'assets/images/home/speak.png',
                 onShowInterest: () {
-                  if (professionalData.isContacted == null) {
-                    showInterestedBloc.add(ProfessionalContactUs(
-                      PropId: professionalData.id!,
-                      onSuccess: () {
-                        setState(() {
-                          professionalData.isContacted = IsContacted(id: '');
-                        });
-                        makePhoneCall(professionalData.mobile!);
-                      },
-                      onError: () {},
-                    ));
-                  } else {
-                    makePhoneCall(professionalData.mobile!);
+                  if(Config.profileCompleted){
+                    if (professionalData.isContacted == null) {
+                      showInterestedBloc.add(ProfessionalContactUs(
+                        PropId: professionalData.id!,
+                        onSuccess: () {
+                          setState(() {
+                            professionalData.isContacted = IsContacted(id: '');
+                          });
+                          makePhoneCall(professionalData.mobile!);
+                        },
+                        onError: () {},
+                      ));
+                    } else {
+                      makePhoneCall(professionalData.mobile!);
+                    }
                   }
+                  else{
+                    loginUserBottomSheet(context);
+                  }
+
                 },
                 jobType: professionalData.professionType!,
                 onShare: () {
-                  shareJobDetails(
-                    experience: professionalData.experiencedYears!,
-                    location: professionalData.city!,
-                    jobTitle: professionalData.professionType!,
-                  );
+    if(Config.profileCompleted){
+      shareJobDetails(
+        experience: professionalData.experiencedYears!,
+        location: professionalData.city!,
+        jobTitle: professionalData.professionType!,
+      );
+    }
+    else{
+      loginUserBottomSheet(context);
+    }
+
                 },
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                    create: (context) => ProfessionalBloc()
-                                      ..add(FetchProfessionalView(
-                                          professionalData.id!)),
-                                  ),
-                                  BlocProvider(
-                                    create: (context) => ShowInterestedBloc(),
-                                  ),
-                                  BlocProvider(create:(context)=>ReportPostBloc() )
-                                ],
-                                child: ProfessionalViewScreen(
-                                  id: professionalData.id!,
-                                  refreshPageCallback: () {
-                                    _fetchData(isNewFetch: true);
-                                  },
+                  if(Config.profileCompleted){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (context) => ProfessionalBloc()
+                                    ..add(FetchProfessionalView(
+                                        professionalData.id!)),
                                 ),
-                              )));
+                                BlocProvider(
+                                  create: (context) => ShowInterestedBloc(),
+                                ),
+                                BlocProvider(create:(context)=>ReportPostBloc() )
+                              ],
+                              child: ProfessionalViewScreen(
+                                id: professionalData.id!,
+                                refreshPageCallback: () {
+                                  _fetchData(isNewFetch: true);
+                                },
+                              ),
+                            )));
+                  }
+                  else{
+                    loginUserBottomSheet(context);
+                  }
+
                 },
                 savedTap: () {
-                  if (professionalData.isSaved == null) {
-                    showInterestedBloc.add(ProfessionalSavedUs(
-                      PropId: professionalData.id!,
-                      onSuccess: () {
-                        setState(() {
-                          professionalData.isSaved = IsContacted(id: '');
-                        });
-                      },
-                      onError: () {
-                        showCustomSnackBar(
-                          context: context,
-                          message: "Something Went wrong",
-                        );
-                      },
-                    ));
-                  } else {
-                    showInterestedBloc.add(ProfessionalSavedUs(
-                      PropId: professionalData.id!,
-                      onSuccess: () {
-                        setState(() {
-                          professionalData.isSaved = null;
-                        });
-                      },
-                      onError: () {
-                        showCustomSnackBar(
-                          context: context,
-                          message: "Something Went wrong",
-                        );
-                      },
-                    ));
+                  if(Config.profileCompleted){
+                    if (professionalData.isSaved == null) {
+                      showInterestedBloc.add(ProfessionalSavedUs(
+                        PropId: professionalData.id!,
+                        onSuccess: () {
+                          setState(() {
+                            professionalData.isSaved = IsContacted(id: '');
+                          });
+                        },
+                        onError: () {
+                          showCustomSnackBar(
+                            context: context,
+                            message: "Something Went wrong",
+                          );
+                        },
+                      ));
+                    } else {
+                      showInterestedBloc.add(ProfessionalSavedUs(
+                        PropId: professionalData.id!,
+                        onSuccess: () {
+                          setState(() {
+                            professionalData.isSaved = null;
+                          });
+                        },
+                        onError: () {
+                          showCustomSnackBar(
+                            context: context,
+                            message: "Something Went wrong",
+                          );
+                        },
+                      ));
+                    }
                   }
+                  else{
+                    loginUserBottomSheet(context);
+                  }
+
                 }),
           );
         } else if (isFetchingMore) {
