@@ -841,13 +841,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           fit: BoxFit.contain,
                         ),
                       ),
-                      Text(
-                        'Search by Profession type'.tr(),
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.25,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                      SizedBox(
+                        width: SizeConfig.blockWidth * 50,
+                        child: Text(
+                          'Search by Profession type'.tr(),
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.25,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
