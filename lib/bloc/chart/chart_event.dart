@@ -313,11 +313,7 @@ class UnBlocChartGroupEvent extends ChartEvent {
 }
 
 class BlockedChatList extends ChartEvent {
-  String chatId;
-  CallbackWithMessage onSuccess;
-  CallbackWithMessage onError;
-  BlockedChatList(
-      {required this.onSuccess, required this.onError,required this.chatId});
+  const BlockedChatList();
   @override
-  List<Object> get props => [onSuccess, onError,chatId];
+  List<Object> get props => [];
 }

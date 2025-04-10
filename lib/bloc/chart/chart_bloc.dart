@@ -763,20 +763,38 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
+
+
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
-        List<ChatBlockedList> chatBlockedList = [];
-        for (var i in jsonDecoded["data"]) {
-          chatBlockedList.add(ChatBlockedList.fromJson(i));
+        List<ChatList> chatList = [];
+
+        if (jsonDecoded["data"] is List) {
+          for (var i in jsonDecoded["data"]) {
+            try {
+              chatList.add(ChatList.fromJson(i));
+            } catch (e) {
+              customLog("Error parsing chatList item: $e");
+            }
+          }
+        } else {
+          emit(ChatBlockedListFalied(message: "Invalid data format"));
+          return;
         }
 
-        emit(ChatBlockedListSuccess(chatBlockedList: chatBlockedList));
+        if (chatList.isNotEmpty) {
+          emit(ChatBlockedListSuccess(chatBlockedList: chatList));
+        } else {
+          emit(ChatBlockedListFalied(message: "No chats found"));
+        }
       } else {
-        emit(ChatBlockedListFalied(message: jsonDecoded["message"] ?? 'Error'));
-        customLog(jsonDecoded["message"]);
+        emit(ChatBlockedListFalied(
+            message: jsonDecoded["message"] ?? 'Error'));
       }
     } catch (error) {
       emit(ChatBlockedListFalied(message: "Something went wrong"));
       customLog('jsonDecoded["message"]');
     }
   }
+
+
 }

@@ -34,6 +34,8 @@ import '../profile/notification.dart';
 import 'addFriends.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import 'blocked_chat_list.dart';
+
 class ChatMainScreen extends StatefulWidget {
   const ChatMainScreen({super.key});
 
@@ -225,6 +227,24 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                 _refreshPageAfterEdit,
                                           ),
                                         )))
+                          },
+                        ),
+                        BottomSheetItem(
+                          title: 'Blocked Chats/Friends',
+                          onTap: () => {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ChartBloc()
+                                            ..add(
+                                                const BlockedChatList()),
+                                        ),
+                                      ],
+                                      child:  BlockedChatsScreen(refreshPageCallback: _refreshPageAfterEdit,),
+                                    )))
                           },
                         ),
                       ],

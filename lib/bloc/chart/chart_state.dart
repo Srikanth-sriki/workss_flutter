@@ -447,7 +447,7 @@ class GroupUnBlocChatSuccess extends ChartState {
 
 
 class ChatBlockedListSuccess extends ChartState {
-  List<ChatBlockedList> chatBlockedList = [];
+  List<ChatList> chatBlockedList = [];
   ChatBlockedListSuccess(
       {required this.chatBlockedList});
   @override

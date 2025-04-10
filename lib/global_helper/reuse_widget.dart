@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
@@ -621,34 +622,41 @@ Widget bottomTabIcon({required String icon}) {
 }
 
 Widget buildGenderSelection({
+  required List<Map<String, String>> options,
   required void Function(String?)? onChanged,
-  required String? groupValue,Color?color =COLORS.neutralDark,
-  FontWeight? fontWeight = FontWeight. w500,
-  FontWeight? textFontWeight = FontWeight. w500
+  required String? groupValue,
+  Color? color = COLORS.neutralDark,
+  FontWeight? fontWeight = FontWeight.w500,
+  FontWeight? textFontWeight = FontWeight.w500,
+  String? header = 'select_gender'
 }) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      registerText(text: 'select_gender'.tr(),color: color,fontWeight: fontWeight),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () => onChanged?.call('male'),
+      registerText(
+        text: header!.tr(),
+        color: color,
+        fontWeight: fontWeight,
+      ),
+      Wrap(
+        spacing: SizeConfig.blockWidth * 5,
+        children: options.map((option) {
+          final label = option['label']!;
+          final value = option['value']!;
+          return GestureDetector(
+            onTap: () => onChanged?.call(value),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Radio<String>(
-                  value: 'male',
+                  value: value,
                   groupValue: groupValue,
                   onChanged: onChanged,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   fillColor: const MaterialStatePropertyAll(COLORS.primary),
                 ),
                 Text(
-                  'Male'.tr(),
+                  label.tr(),
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.8,
@@ -658,33 +666,8 @@ Widget buildGenderSelection({
                 ),
               ],
             ),
-          ),
-          SizedBox(width: SizeConfig.blockWidth * 5),
-          GestureDetector(
-            onTap: () => onChanged?.call('female'),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Radio<String>(
-                  value: 'female',
-                  groupValue: groupValue,
-                  onChanged: onChanged,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  fillColor: const MaterialStatePropertyAll(COLORS.primary),
-                ),
-                Text(
-                  'Female'.tr(),
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontSize: SizeConfig.blockWidth * 3.8,
-                    fontWeight: textFontWeight,
-                    fontFamily: "Poppins",
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     ],
   );
@@ -1473,4 +1456,89 @@ class ErrorScreen extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+class LiveLocationCard extends StatelessWidget {
+  final bool mapLoading;
+  final bool isLiveLocationEnabled;
+  final Function(bool) onToggleLiveLocation;
+  final String header;
+
+  const LiveLocationCard({
+    super.key,
+    required this.mapLoading,
+    required this.isLiveLocationEnabled,
+    required this.onToggleLiveLocation,
+    required this.header
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: SizeConfig.blockWidth * 4.8,
+        vertical: SizeConfig.blockHeight * 2,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: SizeConfig.blockWidth * 90,
+            padding: EdgeInsets.symmetric(
+              vertical: mapLoading
+                  ? SizeConfig.blockWidth * 3
+                  : SizeConfig.blockWidth * 1,
+              horizontal: SizeConfig.blockWidth * 3,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+              color: COLORS.primaryTwo,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.location_on_rounded,
+                  size: SizeConfig.blockWidth * 5.5,
+                  color: COLORS.accent,
+                ),
+                SizedBox(width: SizeConfig.blockWidth * 4),
+                Expanded(
+                  child: Text(header,
+                    style: TextStyle(
+                      color: COLORS.white,
+                      fontSize: SizeConfig.blockWidth * 3.25,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                    softWrap: true,
+                  ),
+                ),
+                if (mapLoading)
+                  LoadingAnimationWidget.discreteCircle(
+                    color: COLORS.primary,
+                    size: SizeConfig.blockWidth * 5,
+                  )
+                else
+                  Switch(
+                    value: isLiveLocationEnabled,
+                    onChanged: onToggleLiveLocation,
+                    activeColor: COLORS.primary,
+                    inactiveThumbColor: COLORS.neutralDarkOne,
+                    trackOutlineColor:
+                    const WidgetStatePropertyAll(COLORS.primaryTwo),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 

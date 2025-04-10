@@ -216,69 +216,13 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
               ),
             ),
             if(Config.profileCompleted)...[
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 4.8,
-                    vertical: SizeConfig.blockHeight * 2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: SizeConfig.blockWidth * 90,
-                      padding: EdgeInsets.symmetric(
-                          vertical: mapLoading
-                              ? SizeConfig.blockWidth * 3
-                              : SizeConfig.blockWidth * 1,
-                          horizontal: SizeConfig.blockWidth * 3),
-                      decoration: BoxDecoration(
-                        borderRadius:
-                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                        color: COLORS.primaryTwo,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.location_on_rounded,
-                            size: SizeConfig.blockWidth * 5.5,
-                            color: COLORS.accent,
-                          ),
-                          SizedBox(width: SizeConfig.blockWidth * 4),
-                          Expanded(
-                            child: Text(
-                              'Professionals Near Your',
-                              style: TextStyle(
-                                color: COLORS.white,
-                                fontSize: SizeConfig.blockWidth * 3.25,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
-                              softWrap: true,
-                            ),
-                          ),
-                          if (mapLoading) ...[
-                            LoadingAnimationWidget.discreteCircle(
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 5,
-                            )
-                          ] else ...[
-                            Switch(
-                              value: isLiveLocationEnabled,
-                              onChanged: _toggleLiveLocation,
-                              activeColor: COLORS.primary,
-                              inactiveThumbColor: COLORS.neutralDarkOne,
-                              trackOutlineColor:
-                              const WidgetStatePropertyAll(COLORS.primaryTwo),
-                              materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                            )
-                          ],
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )
+              LiveLocationCard(
+                mapLoading: mapLoading,
+                isLiveLocationEnabled: isLiveLocationEnabled,
+                onToggleLiveLocation: _toggleLiveLocation,
+                header: 'Professionals Near Your',
+              ),
+
             ]
             else...[
               // Divider(

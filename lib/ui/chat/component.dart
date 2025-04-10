@@ -1236,3 +1236,91 @@ void _showImageDialog(BuildContext context, String imageUrl) {
     },
   );
 }
+
+
+
+Widget BlockedChartCards({
+  required String image,
+  required String name,
+  required VoidCallback onPressed,
+  required bool isGroup,
+}) {
+  return Container(
+    margin: EdgeInsets.symmetric(
+      vertical: SizeConfig.blockHeight * 1,
+    ),
+    padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+      color: COLORS.primaryOne.withOpacity(0.1),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if(image.isNotEmpty)...[
+              Container(
+                width: SizeConfig.blockWidth * 14,
+                height: SizeConfig.blockWidth * 14,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(image),
+                      fit: BoxFit.fill,
+                    ),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(SizeConfig.blockWidth * 2))),
+              ),
+
+            ]
+            else...[
+              Container(
+                width: SizeConfig.blockWidth * 14,
+                height: SizeConfig.blockWidth * 14,
+                decoration: BoxDecoration(
+                    color: COLORS.neutralDarkTwo,
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3)
+                ),
+                child: Icon(isGroup?Icons.people:Icons.person,color: COLORS.neutralDark,size: SizeConfig.blockWidth*7,),
+              )
+            ]
+            ,
+            SizedBox(width: SizeConfig.blockWidth * 3),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: SizeConfig.blockWidth * 30,
+                  child: Text(
+                    capitalizeEachWord(name),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.3,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    // textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        customIconButton(
+            text: 'UNBLOCK',
+            onPressed: onPressed,
+            width: SizeConfig.blockWidth * 25,
+            height: SizeConfig.blockHeight * 6.25,
+            backgroundColor: COLORS.primary,
+            textColor: COLORS.white,
+            showIcon: false)
+      ],
+    ),
+  );
+}

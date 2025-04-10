@@ -705,7 +705,11 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                 _selectedGender = value;
                               });
                             },
-                            textFontWeight: FontWeight.w400
+                            textFontWeight: FontWeight.w400,
+                            options: [
+                              {'label': 'Male', 'value': 'male'},
+                              {'label': 'Female', 'value': 'female'},
+                            ],
                           ),
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
