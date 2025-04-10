@@ -23,6 +23,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:works_app/components/config.dart';
 
 import '../../components/global_handle.dart';
 import '../../dao/home_dao.dart';
@@ -54,6 +55,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         List<NotificationModel> notifications = (jsonDecoded['data']['notifications'] as List)
             .map((notification) => NotificationModel.fromJson(notification))
             .toList();
+         Config.notificationCount = notifications.where((item) => item.isRead == false).length;
         emit(NotificationFetchSuccess(notifications: notifications));
       } else {
         emit(NotificationFetchFailure(message: jsonDecoded['message']));

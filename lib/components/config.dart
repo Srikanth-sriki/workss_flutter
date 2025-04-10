@@ -14,6 +14,7 @@ class Config {
   static bool isRegistered = false;
   static String userType = "";
   static String fcmToken = "";
+  static int notificationCount =0;
 
   static Map<String, String> headers() {
     return {

@@ -177,7 +177,7 @@ Widget registerTextCard(
             ),
             overflow: TextOverflow.ellipsis,
             softWrap: true,
-            maxLines: 1,
+            maxLines: 2,
           ),
         ),
       ],
