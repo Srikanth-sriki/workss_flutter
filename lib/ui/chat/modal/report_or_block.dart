@@ -6,7 +6,12 @@ import '../../../global_helper/reuse_widget.dart';
 
 class ReportOrBlockModal extends StatefulWidget {
   final String? message;
-  const ReportOrBlockModal({super.key,required this.message});
+  final String? header;
+  final String? subText;
+  final String? buttonText;
+  const ReportOrBlockModal({super.key,required this.message,
+  required this.header,required this.buttonText,required this.subText
+  });
 
   @override
   _ReportOrBlockModalState createState() => _ReportOrBlockModalState();
@@ -50,7 +55,7 @@ class _ReportOrBlockModalState extends State<ReportOrBlockModal> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Report or Block'.tr(),
+                      widget.header!.tr(),
                       style: TextStyle(
                         color: COLORS.neutralDark,
                         fontSize: SizeConfig.blockWidth * 4,
@@ -75,7 +80,7 @@ class _ReportOrBlockModalState extends State<ReportOrBlockModal> {
                 buildBioTextField(
                     label: ''.tr(),
                     controller: messageController,
-                    hintText: "Write a reason for report or block group".tr(),
+                    hintText: widget.subText!.tr(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         setState(() => messageError = true);
@@ -114,7 +119,7 @@ class _ReportOrBlockModalState extends State<ReportOrBlockModal> {
                         textColor: COLORS.neutralDark,
                       ),
                       customButton(
-                        text: 'REPORT GROUP'.tr(),
+                        text: widget.buttonText!.tr(),
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             Navigator.of(context).pop({

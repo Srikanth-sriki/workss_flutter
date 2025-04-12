@@ -54,6 +54,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   int pageSize = 10;
   int maxPageNumber = 1;
   bool showSearchBar = false;
+  bool selectAll = false;
+  List<Map<String, dynamic>> selectedItems = [];
 
   @override
   void initState() {
@@ -104,6 +106,22 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     _fetchData();
   }
 
+  void _toggleSelectAll(bool value) {
+    setState(() {
+      selectAll = value;
+      for (var item in selectedItems) {
+        item["selected"] = value;
+      }
+      print(selectedItems);
+    });
+  }
+
+  void _updateSelectedItemsList() {
+    selectedItems = friends
+        .map((friend) => {"id": friend.friends.id, "selected": false})
+        .toList();
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -135,11 +153,33 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   }
 
   void _submitButton() {
+    List<String> selectedUserIds = selectedItems
+        .where((user) => user["selected"] == true)
+        .map((user) => user["id"] as String)
+        .toList();
+
+    setState(() {
+      if (selectAll) {
+        selectedFriends = selectedUserIds;
+      }
+    });
     chartBloc.add(ChartGroupCreateEvent(
         picture: profilePicture,
         name: groupName.text,
         description: groupDescription.text,
         invitedUsers: selectedFriends));
+  }
+
+  void checkSelectedId() {
+    List<String> selectedUserIds = selectedItems
+        .where((user) => user["selected"] == true)
+        .map((user) => user["id"] as String)
+        .toList();
+    if (selectedUserIds.isEmpty) {
+      setState(() {
+        selectAll = false;
+      });
+    }
   }
 
   @override
@@ -237,6 +277,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                   friends = state.friendsSearchList;
                   isFriendsListLoad = false;
                   isFriendsListError = false;
+                  _updateSelectedItemsList();
                 });
               } else if (state is FriendsListFailed) {
                 setState(() {
@@ -363,14 +404,31 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              'Select Friends',
-                              style: TextStyle(
-                                color: COLORS.neutralDarkOne,
-                                fontSize: SizeConfig.blockWidth * 3.8,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Checkbox(
+                                    side: BorderSide(
+                                        color: COLORS.neutralDarkOne,
+                                        width: SizeConfig.blockWidth * 0.5),
+                                    checkColor: COLORS.white,
+                                    activeColor: COLORS.primary,
+                                    value: selectAll,
+                                    onChanged: (value) {
+                                      _toggleSelectAll(value ?? false);
+                                      selectedFriends = [];
+                                    }),
+                                Text(
+                                  'Select Friends',
+                                  style: TextStyle(
+                                    color: COLORS.neutralDarkOne,
+                                    fontSize: SizeConfig.blockWidth * 3.8,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                  ),
+                                ),
+                              ],
                             ),
                             IconButton(
                               icon: Icon(
@@ -467,13 +525,42 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                   final isSelected =
                                       selectedFriends.contains(friend.id);
                                   if (index < friends.length) {
-                                    return createGroupInviteCard(
-                                      image: friend.profilePic,
-                                      name: friend.name,
-                                      disc: friend.bio,
-                                      added: isSelected,
-                                      onTapCard: () =>
-                                          toggleSelection(friend.id),
+                                    return Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (selectAll) ...[
+                                          Checkbox(
+                                            side: BorderSide(
+                                              color: COLORS.neutralDarkOne,
+                                              width:
+                                                  SizeConfig.blockWidth * 0.5,
+                                            ),
+                                            checkColor: COLORS.white,
+                                            activeColor: COLORS.primary,
+                                            value: selectedItems[index]
+                                                ["selected"],
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                selectedItems[index]
+                                                        ["selected"] =
+                                                    value ?? false;
+                                                checkSelectedId();
+                                              });
+                                            },
+                                          )
+                                        ],
+                                        createGroupInviteCard(
+                                            image: friend.profilePic,
+                                            name: friend.name,
+                                            disc: friend.bio,
+                                            added: isSelected,
+                                            onTapCard: () =>
+                                                toggleSelection(friend.id),
+                                            checkSelected: selectAll),
+                                      ],
                                     );
                                   } else if (isFetchingMore) {
                                     return Center(
@@ -492,7 +579,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                           )
                         ] else if (friends.isEmpty) ...[
                           SizedBox(
-                            height: SizeConfig.blockHeight*60,
+                            height: SizeConfig.blockHeight * 60,
                             child: emptyComponent(),
                           )
                         ],

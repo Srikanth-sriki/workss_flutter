@@ -438,6 +438,20 @@ class GroupUnBlocChatFailed extends ChartState {
   List<Object> get props => [message];
 }
 
+class ReportChatSuccess extends ChartState {
+  String message;
+  ReportChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ReportChatFailed extends ChartState {
+  String message;
+  ReportChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
 class GroupUnBlocChatSuccess extends ChartState {
   String message;
   GroupUnBlocChatSuccess({required this.message});

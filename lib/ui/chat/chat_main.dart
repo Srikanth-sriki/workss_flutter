@@ -394,7 +394,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                 ),
                                 child: addFriendText(
                                     textOne: 'Friends',
-                                    textTwo: 'View All',
+                                    textTwo: 'View All(${friends.length})',
                                     onTap: () {
                                       Navigator.push(
                                           context,

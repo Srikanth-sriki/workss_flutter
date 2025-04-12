@@ -302,6 +302,17 @@ class BlocChartGroupEvent extends ChartEvent {
   List<Object> get props => [onSuccess, onError, reason,chatId];
 }
 
+class ReportChartGroupEvent extends ChartEvent {
+  String reason;
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  ReportChartGroupEvent(
+      {required this.onSuccess, required this.onError, required this.reason,required this.chatId});
+  @override
+  List<Object> get props => [onSuccess, onError, reason,chatId];
+}
+
 class UnBlocChartGroupEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;

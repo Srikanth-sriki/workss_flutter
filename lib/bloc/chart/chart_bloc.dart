@@ -107,6 +107,10 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<BlockedChatList>((event, emit) async {
       await mapChatBlockedListEvent(event, emit);
     });
+
+    on<ReportChartGroupEvent>((event, emit) async {
+      await mapChatReportGroupEvent(event, emit);
+    });
   }
 
   Future<void> mapCharListEvent(
@@ -708,7 +712,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
   Future<void> mapBlocChatGroupEvent(
       BlocChartGroupEvent event, Emitter<ChartState> emit) async {
     try {
-      var response = await friendsDao.reportGroupChat(
+      var response = await friendsDao.blockGroupChat(
           chatId: event.chatId, reason: event.reason);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
@@ -751,6 +755,33 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       emit(GroupUnBlocChatFailed(message: "Something went wrong"));
+    }
+  }
+
+
+  Future<void> mapChatReportGroupEvent(
+      ReportChartGroupEvent event, Emitter<ChartState> emit) async {
+    try {
+      var response = await friendsDao.reportGroupChat(
+        chatId: event.chatId,
+        reason: event.reason
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess(message);
+        emit(ReportChatSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError(message);
+        emit(ReportChatFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError(message);
+        emit(ReportChatFailed(message: message));
+      }
+    } catch (error) {
+      emit(ReportChatFailed(message: "Something went wrong"));
     }
   }
 

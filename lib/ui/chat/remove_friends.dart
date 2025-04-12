@@ -106,9 +106,11 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
                 chatViewGroupInfo = state.chatViewGroupInfo;
                 _updateSelectedItemsList();
                 filteredParticipants = state.chatViewGroupInfo.participants!
-                    .where((p) => p.user!.name!
-                        .toLowerCase()
-                        .contains(searchKeyword.toLowerCase()))
+                    .where((p) =>
+                        p.isAdmin != true &&
+                        p.user!.name!
+                            .toLowerCase()
+                            .contains(searchKeyword.toLowerCase()))
                     .toList();
               });
             } else if (state is ChatViewProfileFailed) {
@@ -138,113 +140,114 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 3.5,
-                    vertical: SizeConfig.blockHeight),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Checkbox(
-                          side: BorderSide(
-                              color: COLORS.neutralDarkOne,
-                              width: SizeConfig.blockWidth * 0.5),
-                          checkColor: COLORS.white,
-                          activeColor: COLORS.primary,
-                          value: selectAll,
-                          onChanged: (value) =>
-                              _toggleSelectAll(value ?? false),
-                        ),
-                        Text(
-                          'Select All',
-                          style: TextStyle(
-                            color: COLORS.neutralDarkOne,
-                            fontSize: SizeConfig.blockWidth * 3.5,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        showSearchBar ? Icons.close : Icons.search,
-                        color: COLORS.neutralDarkOne,
-                        size: SizeConfig.blockHeight * 4,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          showSearchBar = !showSearchBar;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              // Search Bar
-              if (showSearchBar)
+              if (!isMemberLoading && filteredParticipants.isNotEmpty) ...[
                 Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 5.5,
-                  ),
-                  child: Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3.25,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+                  padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 3.5,
+                      vertical: SizeConfig.blockHeight),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Checkbox(
+                            side: BorderSide(
+                                color: COLORS.neutralDarkOne,
+                                width: SizeConfig.blockWidth * 0.5),
+                            checkColor: COLORS.white,
+                            activeColor: COLORS.primary,
+                            value: selectAll,
+                            onChanged: (value) =>
+                                _toggleSelectAll(value ?? false),
+                          ),
+                          Text(
+                            'Select All',
+                            style: TextStyle(
+                              color: COLORS.neutralDarkOne,
+                              fontSize: SizeConfig.blockWidth * 3.5,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ],
                       ),
-                      cursorColor: COLORS.black,
-                      decoration: InputDecoration(
-                        fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        filled: true,
-                        hintText: 'Ex: Search'.tr(),
-                        hintStyle: TextStyle(
+                      IconButton(
+                        icon: Icon(
+                          showSearchBar ? Icons.close : Icons.search,
+                          color: COLORS.neutralDarkOne,
+                          size: SizeConfig.blockHeight * 4,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            showSearchBar = !showSearchBar;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                // Search Bar
+                if (showSearchBar)
+                  Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 5.5,
+                    ),
+                    child: Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        style: TextStyle(
                           color: COLORS.neutralDarkOne,
                           fontSize: SizeConfig.blockWidth * 3.25,
                           fontWeight: FontWeight.w400,
                           fontFamily: "Poppins",
                         ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: COLORS.neutralDarkOne,
-                          size: SizeConfig.blockWidth * 5,
+                        cursorColor: COLORS.black,
+                        decoration: InputDecoration(
+                          fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                          focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                          filled: true,
+                          hintText: 'Ex: Search'.tr(),
+                          hintStyle: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.25,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: COLORS.neutralDarkOne,
+                            size: SizeConfig.blockWidth * 5,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.25),
+                            borderSide: BorderSide(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.25),
+                            borderSide: BorderSide(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.25),
+                            borderSide: BorderSide(
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                                width: SizeConfig.blockWidth * 0.1),
+                          ),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
+                        onChanged: _onSearchChanged,
                       ),
-                      onChanged: _onSearchChanged,
                     ),
                   ),
-                ),
-
+              ],
               if (isMemberLoading == true) ...[
                 friendsListLoading()
               ] else if (!isMemberLoading &&
@@ -330,7 +333,7 @@ class _RemoveFriendsChatState extends State<RemoveFriendsChat> {
               ] else if (isMemberLoading == false && isError) ...[
                 ErrorScreen(onRetry: () {
                   _fetchData();
-                })
+                }),
               ]
             ],
           ),
