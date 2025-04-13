@@ -158,13 +158,17 @@ Widget registerText({required String text, required String image}) {
           height: SizeConfig.blockWidth * 3.4,
         ),
         SizedBox(width: SizeConfig.blockWidth * 2),
-        Text(
-          capitalizeEachWord(text),
-          style: TextStyle(
-            color: COLORS.neutralDarkOne,
-            fontSize: SizeConfig.blockWidth * 3.3,
-            fontWeight: FontWeight.w400,
-            fontFamily: "Poppins",
+        Flexible(
+          child: Text(
+            capitalizeEachWord(text),
+            style: TextStyle(
+              color: COLORS.neutralDarkOne,
+              fontSize: SizeConfig.blockWidth * 3.3,
+              fontWeight: FontWeight.w400,
+              fontFamily: "Poppins",
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

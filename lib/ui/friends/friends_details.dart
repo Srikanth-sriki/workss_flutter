@@ -48,6 +48,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
   List<FriendDataList> filteredFriendList = [];
   final bool saved = false;
   late String usertype;
+  List<FriendDataList> validFriends =[];
   bool verified = true;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -345,6 +346,8 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
               friendList = state.friendData.friends!;
               filteredFriendList = state.friendData.friends!;
               usertype = friendView.userType;
+              validFriends = friendList.where((friend) => friend.user != null).toList();
+
             });
           }
         },
@@ -354,6 +357,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
           } else if (state is FetchFriendsViewSuccess) {
             friendView = state.friendData.user!;
             friendList = state.friendData.friends!;
+            validFriends = friendList.where((friend) => friend.user != null).toList();
             return SafeArea(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -682,12 +686,14 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                                 userId: friendView
                                                     .id,
                                                 onSuccess: (message) {
+                                                  Navigator.pop(context);
                                                   showCustomSnackBar(
                                                       context: context,
                                                       message: message,backgroundColor: COLORS.neutralDarkOne
                                                   );
                                                 },
                                                 onError: (message) {
+                                                  Navigator.pop(context);
                                                   showCustomSnackBar(
                                                     context: context,
                                                     message: message,
@@ -699,10 +705,10 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                           }
                                         },
                                       ),
-                                      BottomSheetItem(
-                                        title: 'Block',
-                                        onTap: () => {},
-                                      ),
+                                      // BottomSheetItem(
+                                      //   title: 'Block',
+                                      //   onTap: () => {},
+                                      // ),
                                     ],
                                   );
                                 },
@@ -1103,7 +1109,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Friends',
+                                  'Friends (${validFriends.length})',
                                   style: TextStyle(
                                     color: COLORS.neutralDarkOne,
                                     fontSize: SizeConfig.blockWidth * 3.8,

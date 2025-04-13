@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
@@ -85,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (Config.isRegistered != false) ...[
+              if (Config.profileCompleted != false) ...[
                 Stack(
                   children: [
                     Container(
@@ -204,6 +205,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             )
+                          ]
+                          else...[
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth),
+                              child:
+                              LoadingAnimationWidget.hexagonDots(
+                                color: COLORS.accent,
+                                size: SizeConfig.blockWidth * 5,
+                              ),
+                            )
                           ],
                         ],
                       ),
@@ -251,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 )
               ] else ...[
-                if (loading == true && Config.isRegistered == false) ...[
+                if (loading == true && Config.profileCompleted == false) ...[
                   Shimmer.fromColors(
                     baseColor: COLORS.primary.withOpacity(0.8),
                     highlightColor: COLORS.primary.withOpacity(0.5),
@@ -355,80 +367,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Expanded(
                 child: ListView(
                   children: [
-                    _buildListItem('assets/images/profile/other_location.png',
-                        'My Addresses', () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                          create: (context) => ProfileBloc()
-                                            ..add(
-                                                const AddressLocationListEvent())),
-                                    ],
-                                    child: LocationListScreen(),
-                                  )));
-                    }),
-                    _buildListItem(
-                        'assets/images/profile/posted_work.png', 'Posted Works',
-                        () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (context) => ProfileBloc()
-                                          ..add(const FetchPostedEvent()),
-                                      ),
-                                    ],
-                                    child: PostedWorkList(),
-                                  )));
-                    }),
-                    _buildListItem('assets/images/profile/bookmark.png',
-                        'Saved Professionals', () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (context) => ProfileBloc()
-                                          ..add(
-                                              const FetchSavedProfessionalEvent()),
-                                      ),
-                                      BlocProvider(
-                                        create: (context) =>
-                                            ShowInterestedBloc(),
-                                      ),
-                                    ],
-                                    child: const BookMarkListScreen(),
-                                  )));
-                    }),
-                    if (Config.userType == 'professional') ...[
+                    if(Config.profileCompleted)...[
+                      _buildListItem('assets/images/profile/other_location.png',
+                          'My Addresses', () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                            create: (context) => ProfileBloc()
+                                              ..add(
+                                                  const AddressLocationListEvent())),
+                                      ],
+                                      child: LocationListScreen(),
+                                    )));
+                          }),
                       _buildListItem(
-                          'assets/images/profile/like.png', 'Interested Works',
-                          () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MultiBlocProvider(
+                          'assets/images/profile/posted_work.png', 'Posted Works',
+                              () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
+                                      providers: [
+                                        BlocProvider(
+                                          create: (context) => ProfileBloc()
+                                            ..add(const FetchPostedEvent()),
+                                        ),
+                                      ],
+                                      child: PostedWorkList(),
+                                    )));
+                          }),
+                      _buildListItem('assets/images/profile/bookmark.png',
+                          'Saved Professionals', () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MultiBlocProvider(
                                       providers: [
                                         BlocProvider(
                                           create: (context) => ProfileBloc()
                                             ..add(
-                                                const FetchInterestedWorkEvent()),
+                                                const FetchSavedProfessionalEvent()),
                                         ),
                                         BlocProvider(
                                           create: (context) =>
                                               ShowInterestedBloc(),
-                                        )
+                                        ),
                                       ],
-                                      child: InterestedWorkList(),
+                                      child: const BookMarkListScreen(),
                                     )));
-                      }),
+                          }),
+                      if (Config.userType == 'professional') ...[
+                        _buildListItem(
+                            'assets/images/profile/like.png', 'Interested Works',
+                                () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => ProfileBloc()
+                                              ..add(
+                                                  const FetchInterestedWorkEvent()),
+                                          ),
+                                          BlocProvider(
+                                            create: (context) =>
+                                                ShowInterestedBloc(),
+                                          )
+                                        ],
+                                        child: InterestedWorkList(),
+                                      )));
+                            }),
+                      ]
                     ],
+              if(Config.profileCompleted == false)...[
+                SizedBox(height: SizeConfig.blockHeight*2,),
+              ],
                     _buildListItem(
                         'assets/images/profile/share.png', 'Share with Friends',
                         () {

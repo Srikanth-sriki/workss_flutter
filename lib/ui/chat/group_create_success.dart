@@ -38,12 +38,14 @@ class _GroupCreateSuccessState extends State<GroupCreateSuccess>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+    canPop: true,
+    onPopInvokedWithResult: (didPop, result) {
+      if (didPop) {
         Navigator.pushNamedAndRemoveUntil(
             context, '/main_screen', (route) => false);
-        return true;
-      },
+      }
+    },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(

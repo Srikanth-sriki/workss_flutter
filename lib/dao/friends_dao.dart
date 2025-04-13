@@ -522,6 +522,57 @@ class FriendsDao {
     return response;
   }
 
+  Future blockGroupChat({required String reason, required String chatId}) async {
+    var url = '${Config.url}/user/chat/block';
+    Map<String, dynamic> body = {"chat_id": chatId, "reason": reason};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
+  Future reportGroupChat({required String reason, required String chatId}) async {
+    var url = '${Config.url}/user/chat/report';
+    Map<String, dynamic> body = {"chat_id": chatId, "reason": reason};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
+
+  Future unReportGroupChat({required String chatId}) async {
+    var url = '${Config.url}/user/chat/un-block';
+    Map<String, dynamic> body = {"chat_id": chatId};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
+
+
+  Future blockedUserListChat() async {
+    var url = '${Config.url}/user/chat/blocked-list';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.body}");
+    return response;
+  }
+
 
 
 }

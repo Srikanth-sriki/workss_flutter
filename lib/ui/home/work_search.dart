@@ -44,6 +44,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
   bool isLiveLocationEnabled = false;
   String currentLatitude = '';
   String currentLongitude = '';
+  bool mapLoading = false;
 
   @override
   void initState() {
@@ -98,9 +99,9 @@ class _WorkSearchListState extends State<WorkSearchList> {
     _fetchData();
   }
 
-  void _toggleLiveLocation() {
+  void _toggleLiveLocation(bool value) {
     setState(() {
-      isLiveLocationEnabled = !isLiveLocationEnabled;
+      isLiveLocationEnabled = value;
     });
 
     if (isLiveLocationEnabled) {
@@ -110,11 +111,14 @@ class _WorkSearchListState extends State<WorkSearchList> {
         currentLatitude = '';
         currentLongitude = '';
       });
+      _fetchData();
     }
   }
 
   Future<void> _getCurrentLocation() async {
-    setState(() {});
+    setState(() {
+      mapLoading = true;
+    });
 
     PermissionStatus permissionGranted = await _location.requestPermission();
     print("Permission status: $permissionGranted");
@@ -127,6 +131,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
         currentLongitude = locationData.longitude.toString();
         print(currentLatitude);
         _fetchData();
+        mapLoading = false;
       });
     } else {
       print("Location permission not granted");
@@ -134,6 +139,8 @@ class _WorkSearchListState extends State<WorkSearchList> {
 
     setState(() {});
   }
+
+
 
   // Future<void> _getCurrentLocation() async {
   //   bool serviceEnabled = await _location.serviceEnabled();
@@ -165,6 +172,8 @@ class _WorkSearchListState extends State<WorkSearchList> {
   //   }
   // }
 
+
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -189,9 +198,10 @@ class _WorkSearchListState extends State<WorkSearchList> {
           children: [
             Container(
               // width: SizeConfig.blockWidth * 80,
-              padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 4.5,
-                  vertical: SizeConfig.blockHeight * 2),
+              padding: EdgeInsets.only(
+                  right: SizeConfig.blockWidth * 4.5,
+                  left: SizeConfig.blockWidth * 4.5,
+                  top: SizeConfig.blockHeight * 2),
               child: Row(
                 children: [
                   Expanded(
@@ -257,84 +267,20 @@ class _WorkSearchListState extends State<WorkSearchList> {
                 ],
               ),
             ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   crossAxisAlignment: CrossAxisAlignment.center,
-            //   children: [
-            //     Container(
-            //       // width: SizeConfig.blockWidth * 80,
-            //       padding: EdgeInsets.symmetric(
-            //           horizontal: SizeConfig.blockWidth * 4.5,
-            //           vertical: SizeConfig.blockHeight * 2),
-            //       child: TextField(
-            //         controller: _searchController,
-            //         style: TextStyle(
-            //           color: COLORS.neutralDarkOne,
-            //           fontSize: SizeConfig.blockWidth * 3.25,
-            //           fontWeight: FontWeight.w400,
-            //           fontFamily: "Poppins",
-            //         ),
-            //         cursorColor: COLORS.black,
-            //         decoration: InputDecoration(
-            //           fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-            //           focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-            //           filled: true,
-            //           hintText: 'Ex: Plumber, Swimming Coach'.tr(),
-            //           hintStyle: TextStyle(
-            //             color: COLORS.neutralDarkOne,
-            //             fontSize: SizeConfig.blockWidth * 3.25,
-            //             fontWeight: FontWeight.w400,
-            //             fontFamily: "Poppins",
-            //           ),
-            //           prefixIcon: Icon(
-            //             Icons.search,
-            //             color: COLORS.neutralDarkOne,
-            //             size: SizeConfig.blockWidth * 5,
-            //           ),
-            //           border: OutlineInputBorder(
-            //             borderRadius:
-            //                 BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-            //             borderSide: BorderSide(
-            //                 color: COLORS.neutralDarkTwo.withOpacity(0.6),
-            //                 width: SizeConfig.blockWidth * 0.1),
-            //           ),
-            //           focusedBorder: OutlineInputBorder(
-            //             borderRadius:
-            //                 BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-            //             borderSide: BorderSide(
-            //                 color: COLORS.neutralDarkTwo.withOpacity(0.6),
-            //                 width: SizeConfig.blockWidth * 0.1),
-            //           ),
-            //           enabledBorder: OutlineInputBorder(
-            //             borderRadius:
-            //                 BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-            //             borderSide: BorderSide(
-            //                 color: COLORS.neutralDarkTwo.withOpacity(0.6),
-            //                 width: SizeConfig.blockWidth * 0.1),
-            //           ),
-            //         ),
-            //         onChanged: _onSearchChanged,
-            //       ),
-            //     ),
-            //     // Container(
-            //     //   margin: EdgeInsets.symmetric(
-            //     //       horizontal: SizeConfig.blockWidth * 4.5),
-            //     //   child: IconButton(
-            //     //       onPressed: () {
-            //     //         _getCurrentLocation();
-            //     //       },
-            //     //       icon: Icon(
-            //     //         Icons.my_location,
-            //     //         size: SizeConfig.blockWidth * 5,
-            //     //       )),
-            //     // )
-            //   ],
-            // ),
-            // Divider(
-            //   height: SizeConfig.blockHeight*0,
-            //   color: COLORS.neutralDarkTwo,
-            // ),
-            // SizedBox(height: SizeConfig.blockHeight*2,),
+
+
+            if(Config.profileCompleted)...[
+              LiveLocationCard(
+                mapLoading: mapLoading,
+                isLiveLocationEnabled: isLiveLocationEnabled,
+                onToggleLiveLocation: _toggleLiveLocation,
+                header: 'Works Near Your',
+              ),
+
+            ]
+            else...[
+              SizedBox(height: SizeConfig.blockHeight*2,),
+            ],
             Expanded(
               child: BlocConsumer<HomeBloc, HomeState>(
                 listener: (context, state) {
@@ -401,28 +347,32 @@ class _WorkSearchListState extends State<WorkSearchList> {
               languageImage: 'assets/images/home/speak.png',
               onShowInterest: () {},
               onCardClick: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MultiBlocProvider(
-                              providers: [
-                                BlocProvider(
-                                  create: (context) => HomeBloc()
-                                    ..add(
-                                        FetchWorkSingleView(workId: work.id!)),
+                if (Config.profileCompleted) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) => HomeBloc()
+                                      ..add(FetchWorkSingleView(
+                                          workId: work.id!)),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) => ShowInterestedBloc(),
+                                  ),
+                                  BlocProvider(
+                                      create: (context) => ReportPostBloc())
+                                ],
+                                child: WorkDetailsScreen(
+                                  id: work.id!,
+                                  refreshPageCallback: _fetchData,
+                                  routeType: 'general',
                                 ),
-                                BlocProvider(
-                                  create: (context) => ShowInterestedBloc(),
-                                ),
-                                BlocProvider(
-                                    create: (context) => ReportPostBloc())
-                              ],
-                              child: WorkDetailsScreen(
-                                id: work.id!,
-                                refreshPageCallback: _fetchData,
-                                routeType: 'general',
-                              ),
-                            )));
+                              )));
+                } else {
+                  loginUserBottomSheet(context);
+                }
               },
               actionRows: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -434,53 +384,57 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           ? 'INTERESTED'
                           : 'SHOW INTEREST',
                       onPressed: () {
-                        if (Config.userType == 'professional') {
-                          if (work.intrestShown == null) {
-                            showInterestedBloc.add(SaveInterestedWork(
-                              workID: work.id!,
-                              contact: true,
-                              onSuccess: () {
-                                setState(() {
-                                  work.intrestShown = IntrestShown(
-                                    isContacted: true,
-                                  );
-                                });
-                              },
-                              onError: () {},
-                            ));
-                          } else {
-                            showCustomAlertDialog(
-                              context: context,
-                              title: 'Are you Sure?',
-                              message: 'Do you want to Uninterest this Work?',
-                              positiveButtonText: 'YES',
-                              negativeButtonText: 'NO',
-                              onPositivePressed: () {
-                                showInterestedBloc.add(SaveInterestedWork(
-                                  workID: work.id!,
-                                  contact: true,
-                                  onSuccess: () {
-                                    setState(() {
-                                      work.intrestShown = null;
-                                      Navigator.of(context).pop();
-                                    });
-                                  },
-                                  onError: () {
-                                    showCustomSnackBar(
-                                      context: context,
-                                      message: "Something Went wrong",
+                        if (Config.profileCompleted) {
+                          if (Config.userType == 'professional') {
+                            if (work.intrestShown == null) {
+                              showInterestedBloc.add(SaveInterestedWork(
+                                workID: work.id!,
+                                contact: true,
+                                onSuccess: () {
+                                  setState(() {
+                                    work.intrestShown = IntrestShown(
+                                      isContacted: true,
                                     );
-                                    Navigator.of(context).pop();
-                                  },
-                                ));
-                              },
-                              onNegativePressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            );
+                                  });
+                                },
+                                onError: () {},
+                              ));
+                            } else {
+                              showCustomAlertDialog(
+                                context: context,
+                                title: 'Are you Sure?',
+                                message: 'Do you want to Uninterest this Work?',
+                                positiveButtonText: 'YES',
+                                negativeButtonText: 'NO',
+                                onPositivePressed: () {
+                                  showInterestedBloc.add(SaveInterestedWork(
+                                    workID: work.id!,
+                                    contact: true,
+                                    onSuccess: () {
+                                      setState(() {
+                                        work.intrestShown = null;
+                                        Navigator.of(context).pop();
+                                      });
+                                    },
+                                    onError: () {
+                                      showCustomSnackBar(
+                                        context: context,
+                                        message: "Something Went wrong",
+                                      );
+                                      Navigator.of(context).pop();
+                                    },
+                                  ));
+                                },
+                                onNegativePressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            }
+                          } else {
+                            showInterestBottomSheet(context);
                           }
                         } else {
-                          showInterestBottomSheet(context);
+                          loginUserBottomSheet(context);
                         }
                       },
                       backgroundColor: work.intrestShown != null
@@ -523,7 +477,11 @@ class _WorkSearchListState extends State<WorkSearchList> {
                             fit: BoxFit.contain,
                           ),
                           onTap: () {
-                            makePhoneCall(work.user!.mobile!);
+                            if (Config.profileCompleted) {
+                              makePhoneCall(work.user!.mobile!);
+                            } else {
+                              loginUserBottomSheet(context);
+                            }
                           },
                         ),
                       ],
@@ -536,11 +494,15 @@ class _WorkSearchListState extends State<WorkSearchList> {
                           fit: BoxFit.contain,
                         ),
                         onTap: () {
-                          shareJobDetails(
-                            experience: work.experienceLevel!,
-                            location: work.location!,
-                            jobTitle: work.requiredProfession!,
-                          );
+                          if (Config.profileCompleted) {
+                            shareJobDetails(
+                              experience: work.experienceLevel!,
+                              location: work.location!,
+                              jobTitle: work.requiredProfession!,
+                            );
+                          } else {
+                            loginUserBottomSheet(context);
+                          }
                         },
                       ),
                     ],

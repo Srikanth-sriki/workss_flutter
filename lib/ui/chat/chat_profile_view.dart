@@ -47,6 +47,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
   File? _profileImage;
   String profilePic = '';
   late ChatViewGroupInfo chatViewGroupInfo;
+  bool isCurrentUserAdmin = false;
 
   @override
   void initState() {
@@ -107,6 +108,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
             setState(() {
               chatViewGroupInfo = state.chatViewGroupInfo;
               profilePic = state.chatViewGroupInfo.picture!;
+              isCurrentUserAdmin = chatViewGroupInfo.participants.any((participant) =>
+              participant.userId == Config.id && participant.isAdmin);
             });
           } else if (state is ChatViewProfileFailed) {
             setState(() {
@@ -144,50 +147,53 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                   context,
                   'Group Options',
                   [
-                    BottomSheetItem(
-                      title: 'Invite People',
-                      onTap: () => {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => ChartBloc()
-                                            ..add(InviteMemberChartEvent(
-                                                page: 1,
-                                                pageSize: 10,
-                                                groupId: chatViewGroupInfo.id!,
-                                                keyWord: '')),
-                                        ),
-                                      ],
-                                      child: InviteFriendsList(
-                                        groupId: chatViewGroupInfo.id!,
+                    if(isCurrentUserAdmin)...[
+                      BottomSheetItem(
+                        title: 'Invite People',
+                        onTap: () => {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => ChartBloc()
+                                          ..add(InviteMemberChartEvent(
+                                              page: 1,
+                                              pageSize: 10,
+                                              groupId: chatViewGroupInfo.id!,
+                                              keyWord: '')),
                                       ),
-                                    )))
-                      },
-                    ),
-                    BottomSheetItem(
-                      title: 'Remove People',
-                      onTap: () => {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => ChartBloc()
-                                            ..add(FetchChartViewProfileEvent(
-                                                chatId: widget
-                                                    .chatViewGroupInfo.id!)),
-                                        ),
-                                      ],
-                                      child: RemoveFriendsChat(
-                                          chatViewGroupInfo:
-                                              chatViewGroupInfo),
-                                    )))
-                      },
-                    ),
+                                    ],
+                                    child: InviteFriendsList(
+                                      groupId: chatViewGroupInfo.id!,
+                                    ),
+                                  )))
+                        },
+                      ),
+                      BottomSheetItem(
+                        title: 'Remove People',
+                        onTap: () => {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                        create: (context) => ChartBloc()
+                                          ..add(FetchChartViewProfileEvent(
+                                              chatId: widget
+                                                  .chatViewGroupInfo.id!)),
+                                      ),
+                                    ],
+                                    child: RemoveFriendsChat(
+                                        chatViewGroupInfo:
+                                        chatViewGroupInfo),
+                                  )))
+                        },
+                      ),
+                    ],
+
                     BottomSheetItem(
                       title: 'Archive',
                       onTap: () => {
@@ -229,10 +235,13 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                     )))
                       },
                     ),
+                      BottomSheetItem(
+                          title: 'Share Joining Link',
+                          onTap: () => {}),
                     BottomSheetItem(
                       title: 'Leave Group',
                       onTap: () => {
-                        if (chatViewGroupInfo.createdBy == Config.id)
+                        if (isCurrentUserAdmin)
                           {
                             showMaterialModalBottomSheet(
                               enableDrag: true,
@@ -247,7 +256,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(20)),
                               ),
-                              builder: (context) =>  MarkasAdminModal(members:chatViewGroupInfo.participants!),
+                              builder: (context) =>  MarkasAdminModal(members:chatViewGroupInfo.participants),
                             ),
                           }
                         else
@@ -298,26 +307,130 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                             }))
                       },
                     ),
-                    BottomSheetItem(
-                      title: 'Report or Block',
-                      onTap: () => {
-                        showMaterialModalBottomSheet(
+                if(!isCurrentUserAdmin)...[
+                  BottomSheetItem(
+                    title: 'Report',
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final result =
+                      await showMaterialModalBottomSheet(
                           enableDrag: true,
                           expand: false,
                           isDismissible: true,
                           backgroundColor: COLORS.white,
-                          context: context,
                           closeProgressThreshold: 0,
-                          duration: const Duration(seconds: 0),
-                          useRootNavigator: true,
-                          shape: const RoundedRectangleBorder(
+                          duration:
+                          const Duration(seconds: 0),
+                          context: context,
+                          shape: RoundedRectangleBorder(
                             borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
+                            BorderRadius.vertical(
+                                top: Radius.circular(
+                                    SizeConfig
+                                        .blockWidth *
+                                        6)),
                           ),
-                          builder: (context) => const ReportOrBlockModal(),
-                        ),
-                      },
-                    ),
+                          builder: (context) =>
+                          const ReportOrBlockModal(
+                            message: '',
+                            buttonText: "REPORT GROUP",
+                            header: 'Report',
+                            subText: 'Write a reason for report group',
+                          ));
+
+                      if (result != null) {
+                        setState(() {
+                          chartBloc.add(ReportChartGroupEvent(
+                            reason: result['message']!,
+                            chatId: chatViewGroupInfo.id,
+                            onSuccess: (message) {
+
+                              showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                  backgroundColor:
+                                  COLORS.neutralDarkOne);
+                              Navigator.pushNamed(
+                                context,
+                                '/main_screen',
+                                arguments: {'selectedIndex': 3},
+                              );
+                            },
+                            onError: (message) {
+                              // Navigator.pop(context);
+                              showCustomSnackBar(
+                                context: context,
+                                message: message,
+                              );
+                            },
+                          ));
+                        });
+                      }
+
+                    },
+                  ),
+                  BottomSheetItem(
+                    title: 'Block',
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final result =
+                      await showMaterialModalBottomSheet(
+                          enableDrag: true,
+                          expand: false,
+                          isDismissible: true,
+                          backgroundColor: COLORS.white,
+                          closeProgressThreshold: 0,
+                          duration:
+                          const Duration(seconds: 0),
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.vertical(
+                                top: Radius.circular(
+                                    SizeConfig
+                                        .blockWidth *
+                                        6)),
+                          ),
+                          builder: (context) =>
+                          const ReportOrBlockModal(
+                            message: '',
+                            buttonText: "BLOCK GROUP",
+                            header: 'Block',
+                            subText: 'Write a reason for block group',
+                          ));
+
+                      if (result != null) {
+                        setState(() {
+                          chartBloc.add(BlocChartGroupEvent(
+                            reason: result['message']!,
+                            chatId: chatViewGroupInfo.id,
+                            onSuccess: (message) {
+
+                              showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                  backgroundColor:
+                                  COLORS.neutralDarkOne);
+                              Navigator.pushNamed(
+                                context,
+                                '/main_screen',
+                                arguments: {'selectedIndex': 3},
+                              );
+                            },
+                            onError: (message) {
+                              // Navigator.pop(context);
+                              showCustomSnackBar(
+                                context: context,
+                                message: message,
+                              );
+                            },
+                          ));
+                        });
+                      }
+
+                    },
+                  )
+                ],
                   ],
                 );
               },
@@ -350,13 +463,18 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    chatViewGroupInfo.name!,
-                                    style: TextStyle(
-                                      color: COLORS.neutralDark,
-                                      fontSize: SizeConfig.blockWidth * 4,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: "Poppins",
+                                  Flexible(
+                                    child: Text(
+                                      chatViewGroupInfo.name!,
+                                      style: TextStyle(
+                                        color: COLORS.neutralDark,
+                                        fontSize: SizeConfig.blockWidth * 4,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: "Poppins",
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   SizedBox(

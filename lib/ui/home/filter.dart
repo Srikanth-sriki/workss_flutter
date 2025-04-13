@@ -33,6 +33,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
   String? selectedProfession;
   String? selectedCity;
   String? selectedGender;
+  String? _experienceLevel;
   late InitialRegisterBloc initialRegisterBloc;
   late ProfessionalBloc professionalBloc;
   bool cityLoading = true;
@@ -143,7 +144,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             ),
             buildDropdown(
               label: 'profession_type'.tr(),
-              hintText: 'Select your Profession'.tr(),
+              hintText: 'Select profession type.'.tr(),
               items: professionalTypesItem,
               onChanged: (value) => setState(() {
                 selectedProfession = value;
@@ -162,7 +163,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
             ),
             buildDropdown(
               label: 'city'.tr(),
-              hintText: 'Select your city'.tr(),
+              hintText: 'Select city'.tr(),
               items: dropdownCityItem,
               onChanged: (value) => setState(() {
                 selectedCity = value;
@@ -180,10 +181,29 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                   : null, // Ensure value is valid
             ),
             buildGenderSelection(
+              options: [
+                {'label': 'Male', 'value': 'male'},
+                {'label': 'Female', 'value': 'female'},
+              ],
               groupValue: selectedGender,
               onChanged: (value) {
                 setState(() {
                   selectedGender = value!;
+                });
+              },
+            ),
+            SizedBox(height: SizeConfig.blockHeight,),
+            buildGenderSelection(
+              header: 'Experience Level'.tr(),
+              options: [
+                {'label': 'Fresher', 'value': 'Fresher'},
+                {'label': 'Experienced', 'value': 'Experienced'},
+                {'label': 'Any', 'value': 'Any'},
+              ],
+              groupValue: _experienceLevel,
+              onChanged: (value) {
+                setState(() {
+                  _experienceLevel = value!;
                 });
               },
             ),

@@ -381,14 +381,19 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                           title: 'Experience Level'.tr(),
                         ),
 
-                        //SizedBox(height: SizeConfig.blockHeight * 1),
-                        buildGenderSelection(
+                        SizedBox(height: SizeConfig.blockHeight * 1),
+                        buildDynamicRadioSelection(
+                          options: [
+                            {'label': 'Male', 'value': 'male'},
+                            {'label': 'Female', 'value': 'female'},
+                          ],
                           groupValue: _selectedGender,
                           onChanged: (value) {
                             setState(() {
                               _selectedGender = value;
                             });
                           },
+                          title: 'Select Gender'.tr(),
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 1),
                         registerText(text: 'known_language'.tr()),

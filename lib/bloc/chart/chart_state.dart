@@ -416,3 +416,66 @@ class UnArchiveChatFailed extends ChartState {
   @override
   List<Object> get props => [message];
 }
+
+class GroupBlocChatFailed extends ChartState {
+  String message;
+  GroupBlocChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class GroupBlocChatSuccess extends ChartState {
+  String message;
+  GroupBlocChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class GroupUnBlocChatFailed extends ChartState {
+  String message;
+  GroupUnBlocChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ReportChatSuccess extends ChartState {
+  String message;
+  ReportChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ReportChatFailed extends ChartState {
+  String message;
+  ReportChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class GroupUnBlocChatSuccess extends ChartState {
+  String message;
+  GroupUnBlocChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class ChatBlockedListSuccess extends ChartState {
+  List<ChatList> chatBlockedList = [];
+  ChatBlockedListSuccess(
+      {required this.chatBlockedList});
+  @override
+  List<Object> get props => [chatBlockedList];
+}
+
+class ChatBlockedListFalied extends ChartState {
+  String message;
+  ChatBlockedListFalied({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class GroupUnBlocChatLoading extends ChartState {
+  const GroupUnBlocChatLoading();
+  @override
+  List<Object> get props => [];
+}

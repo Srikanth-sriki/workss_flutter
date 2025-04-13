@@ -273,97 +273,102 @@ Widget createGroupInviteCard({
   required bool added,
   required VoidCallback onTapCard,
   required String disc,
+  required bool checkSelected
 }) {
-  return Container(
-    padding: EdgeInsets.symmetric(
-        horizontal: SizeConfig.blockWidth * 4,
-        vertical: SizeConfig.blockWidth * 1),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: SizeConfig.blockWidth * 12,
-                  height: SizeConfig.blockWidth * 12,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: COLORS.primary,
-                        width: SizeConfig.blockWidth * 0.3,
-                      ),
-                      image: DecorationImage(
-                          image: NetworkImage(
-                            image
-                                .isEmpty
-                                ? 'https://via.placeholder.com/150'
-                                : image,
-                          ),
-                          fit: BoxFit.cover),
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(
-                              SizeConfig.blockWidth * 3))),
-                ),
-                SizedBox(width: SizeConfig.blockWidth * 2),
-                SizedBox(
-                  width: SizeConfig.blockWidth * 30,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 3.5,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+  return Expanded(
+    child: Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.blockWidth * 4,
+          vertical: SizeConfig.blockWidth * 1),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: SizeConfig.blockWidth * 12,
+                    height: SizeConfig.blockWidth * 12,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: COLORS.primary,
+                          width: SizeConfig.blockWidth * 0.3,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        // textAlign: TextAlign.end,
-                      ),
-                      Text(
-                        disc,
-                        style: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        // textAlign: TextAlign.end,
-                      ),
-                    ],
+                        image: DecorationImage(
+                            image: NetworkImage(
+                              image
+                                  .isEmpty
+                                  ? 'https://via.placeholder.com/150'
+                                  : image,
+                            ),
+                            fit: BoxFit.cover),
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(
+                                SizeConfig.blockWidth * 3))),
                   ),
-                ),
-              ],
-            ),
-            customIconButton(
-                text: added ? 'Request Sent' : 'Invite',
-                onPressed: onTapCard,
-                width: SizeConfig.blockWidth * 32,
-                height: SizeConfig.blockHeight * 6.25,
-                backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
-                textColor: added ? COLORS.neutralDark : COLORS.white,
-                showIcon: false)
-          ],
-        ),
-        SizedBox(
-          height: SizeConfig.blockHeight * 1.5,
-        ),
-        Divider(
-          color: COLORS.neutralDarkTwo,
-          height: SizeConfig.blockHeight * 4,
-        )
-      ],
+                  SizedBox(width: SizeConfig.blockWidth * 2),
+                  SizedBox(
+                    width: SizeConfig.blockWidth * 30,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: TextStyle(
+                            color: COLORS.neutralDark,
+                            fontSize: SizeConfig.blockWidth * 3.5,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // textAlign: TextAlign.end,
+                        ),
+                        Text(
+                          disc,
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // textAlign: TextAlign.end,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if(!checkSelected)...[
+                customIconButton(
+                    text: added ? 'Request Sent' : 'Invite',
+                    onPressed: onTapCard,
+                    width: SizeConfig.blockWidth * 32,
+                    height: SizeConfig.blockHeight * 6.25,
+                    backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
+                    textColor: added ? COLORS.neutralDark : COLORS.white,
+                    showIcon: false)
+              ]
+            ],
+          ),
+          SizedBox(
+            height: SizeConfig.blockHeight * 1.5,
+          ),
+          Divider(
+            color: COLORS.neutralDarkTwo,
+            height: SizeConfig.blockHeight * 4,
+          )
+        ],
+      ),
     ),
   );
 }
@@ -1234,5 +1239,93 @@ void _showImageDialog(BuildContext context, String imageUrl) {
         ),
       );
     },
+  );
+}
+
+
+
+Widget BlockedChartCards({
+  required String image,
+  required String name,
+  required VoidCallback onPressed,
+  required bool isGroup,
+}) {
+  return Container(
+    margin: EdgeInsets.symmetric(
+      vertical: SizeConfig.blockHeight * 1,
+    ),
+    padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+      color: COLORS.primaryOne.withOpacity(0.1),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if(image.isNotEmpty)...[
+              Container(
+                width: SizeConfig.blockWidth * 14,
+                height: SizeConfig.blockWidth * 14,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(image),
+                      fit: BoxFit.fill,
+                    ),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(SizeConfig.blockWidth * 2))),
+              ),
+
+            ]
+            else...[
+              Container(
+                width: SizeConfig.blockWidth * 14,
+                height: SizeConfig.blockWidth * 14,
+                decoration: BoxDecoration(
+                    color: COLORS.neutralDarkTwo,
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3)
+                ),
+                child: Icon(isGroup?Icons.people:Icons.person,color: COLORS.neutralDark,size: SizeConfig.blockWidth*7,),
+              )
+            ]
+            ,
+            SizedBox(width: SizeConfig.blockWidth * 3),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: SizeConfig.blockWidth * 30,
+                  child: Text(
+                    capitalizeEachWord(name),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.3,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    // textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        customIconButton(
+            text: 'UNBLOCK',
+            onPressed: onPressed,
+            width: SizeConfig.blockWidth * 25,
+            height: SizeConfig.blockHeight * 6.25,
+            backgroundColor: COLORS.primary,
+            textColor: COLORS.white,
+            showIcon: false)
+      ],
+    ),
   );
 }

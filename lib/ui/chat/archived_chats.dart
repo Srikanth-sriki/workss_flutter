@@ -34,7 +34,7 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
   }
 
   void _refreshPageAfterEdit() {
-    // _fetchData();
+    chartBloc.add(ArchivedChartListEvent());
   }
 
   @override
@@ -75,56 +75,58 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
               if (isChatListLoading) ...[
                 friendsListLoading()
               ] else if (!isChatListLoading && chatList.isNotEmpty) ...[
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 5.5,
-                      vertical: SizeConfig.blockHeight * 2),
-                  child: ListView.builder(
-                      itemCount: chatList.length,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      itemBuilder: (context, index) {
-                        return chartSearchCards(
-                            image: chatList[index].picture!,
-                            name: chatList[index].name!,
-                            onTapCard: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) => ChartBloc()
-                                                  ..add(FetchChartViewEvent(
-                                                      page: 1,
-                                                      pageSize: 10,
-                                                      chatId: chatList[index]
-                                                          .chatId!)),
-                                              ),
-                                              BlocProvider(
-                                                  create: (context) =>
-                                                      InitialRegisterBloc()),
-                                              BlocProvider(
-                                                  create: (context) =>
-                                                      ShowInterestedBloc()),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 5.5,
+                        vertical: SizeConfig.blockHeight * 2),
+                    child: ListView.builder(
+                        itemCount: chatList.length,
+                        shrinkWrap: true,
+                        physics: AlwaysScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        itemBuilder: (context, index) {
+                          return chartSearchCards(
+                              image: chatList[index].picture!,
+                              name: chatList[index].name!,
+                              onTapCard: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => MultiBlocProvider(
+                                              providers: [
+                                                BlocProvider(
+                                                  create: (context) => ChartBloc()
+                                                    ..add(FetchChartViewEvent(
+                                                        page: 1,
+                                                        pageSize: 10,
+                                                        chatId: chatList[index]
+                                                            .chatId!)),
+                                                ),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        InitialRegisterBloc()),
+                                                BlocProvider(
+                                                    create: (context) =>
+                                                        ShowInterestedBloc()),
 
-                                            ],
-                                            child: ChatViewScreen(
-                                              refreshPageCallback:
-                                                  _refreshPageAfterEdit,
-                                              chatId: chatList[index].chatId!,
-                                              isGroup: chatList[index].isGroup!,
-                                            ),
-                                          )));
-                            },
-                            message: chatList[index].latestMessage != null
-                                ? chatList[index].latestMessage!.content!
-                                : "",
-                            count: chatList[index].unreadCount!,
-                            isGroup: chatList[index].isGroup!,
-                            date: formatChatDate(chatList[index].updatedAt!));
-                      }),
+                                              ],
+                                              child: ChatViewScreen(
+                                                refreshPageCallback:
+                                                    _refreshPageAfterEdit,
+                                                chatId: chatList[index].chatId!,
+                                                isGroup: chatList[index].isGroup!,
+                                              ),
+                                            )));
+                              },
+                              message: chatList[index].latestMessage != null
+                                  ? chatList[index].latestMessage!.content!
+                                  : "",
+                              count: chatList[index].unreadCount!,
+                              isGroup: chatList[index].isGroup!,
+                              date: formatChatDate(chatList[index].updatedAt!));
+                        }),
+                  ),
                 ),
               ] else if (!isChatListLoading && chatList.isEmpty) ...[
                 Expanded(child: emptyComponent(errorText: "No Chats Found"))

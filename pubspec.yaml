@@ -79,6 +79,7 @@ dependencies:
   just_audio: ^0.9.42
   photo_view: ^0.15.0
   socket_io_client: ^3.0.2
+  fluttertoast: ^8.2.12
 
 
 
@@ -189,6 +190,7 @@ flutter:
      - assets/images/chat/chat_create.png
      - assets/images/profile/clip_bord.png
      - assets/images/profile/logout_outline.png
+     - assets/images/chat/user_register.png
 
 
   #   - images/a_dot_ham.jpeg

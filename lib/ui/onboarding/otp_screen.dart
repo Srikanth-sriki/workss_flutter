@@ -291,7 +291,7 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                             child: Text(
                               'resend_otp'.tr(),
                               style: TextStyle(
-                                color: COLORS.neutralDark,
+                                color: COLORS.accent,
                                 fontSize: SizeConfig.blockWidth * 3.4,
                                 fontWeight: FontWeight.w500,
                                 fontFamily: "Poppins",

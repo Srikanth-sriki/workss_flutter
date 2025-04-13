@@ -290,3 +290,41 @@ class UnArchiveChatEvent extends ChartEvent {
   @override
   List<Object> get props => [chatId,onError,onSuccess ];
 }
+
+class BlocChartGroupEvent extends ChartEvent {
+  String reason;
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  BlocChartGroupEvent(
+      {required this.onSuccess, required this.onError, required this.reason,required this.chatId});
+  @override
+  List<Object> get props => [onSuccess, onError, reason,chatId];
+}
+
+class ReportChartGroupEvent extends ChartEvent {
+  String reason;
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  ReportChartGroupEvent(
+      {required this.onSuccess, required this.onError, required this.reason,required this.chatId});
+  @override
+  List<Object> get props => [onSuccess, onError, reason,chatId];
+}
+
+class UnBlocChartGroupEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  UnBlocChartGroupEvent(
+      {required this.onSuccess, required this.onError,required this.chatId});
+  @override
+  List<Object> get props => [onSuccess, onError,chatId];
+}
+
+class BlockedChatList extends ChartEvent {
+  const BlockedChatList();
+  @override
+  List<Object> get props => [];
+}
