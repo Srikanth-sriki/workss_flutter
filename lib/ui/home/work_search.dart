@@ -87,6 +87,8 @@ class _WorkSearchListState extends State<WorkSearchList> {
         profession: "",
         city: "",
         gender: "",
+        knownLanguages: [],
+        experienceLevel: '',
         currentLongitude: currentLongitude,
         currentLatitude: currentLatitude));
   }

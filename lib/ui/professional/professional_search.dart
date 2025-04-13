@@ -86,7 +86,7 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
         city: "",
         gender: "",
         currentLongitude: currentLatitude,
-        currentLatitude: currentLongitude));
+        currentLatitude: currentLongitude,knownLanguages: [],));
   }
 
   void _loadMoreData() {

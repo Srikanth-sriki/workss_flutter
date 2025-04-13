@@ -51,6 +51,8 @@ class Professional {
   bool? isVerified;
   IsContacted?isSaved;
   IsContacted? isContacted;
+  IsFriend? isFriend;
+  FriendRequestSent? friendRequestSent;
 
 
   Professional({
@@ -78,6 +80,8 @@ class Professional {
     this.isVerified,
     this.isSaved,
     this.isContacted,
+    this.isFriend,
+    this.friendRequestSent,
   });
 
   factory Professional.fromJson(Map<String, dynamic> json) => Professional(
@@ -113,6 +117,11 @@ class Professional {
     isContacted: json["isContacted"] != null
         ? IsContacted.fromJson(json["isContacted"])
         : null,
+    isFriend: json["isFriend"] != null
+        ? IsFriend.fromJson(json["isFriend"]):null,
+    friendRequestSent: json.containsKey('friendRequestSent') && json['friendRequestSent'] != null
+        ?FriendRequestSent.fromJson(json["friendRequestSent"])
+        : null,
 
   );
 
@@ -141,8 +150,62 @@ class Professional {
     "is_verified": isVerified,
     "isSaved":isSaved,
     "isContacted": isContacted?.toJson(),
+    "isFriend": isFriend?.toJson(),
+    "friendRequestSent": friendRequestSent?.toJson(),
   };
 
+}
+
+class IsFriend {
+  String id;
+  String userId;
+  String friendId;
+
+  IsFriend({
+    required this.id,
+    required this.userId,
+    required this.friendId,
+  });
+
+  factory IsFriend.fromJson(Map<String, dynamic> json) => IsFriend(
+    id: json["id"]??"",
+    userId: json["userId"]??"",
+    friendId: json["friendId"]??"",
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "userId": userId,
+    "friendId": friendId,
+  };
+}
+
+class FriendRequestSent {
+  String? id;
+  String? userId;
+  String? senderId;
+  String? friendId;
+
+  FriendRequestSent({
+    this.id,
+    this.userId,
+    this.senderId,
+    this.friendId,
+  });
+
+  factory FriendRequestSent.fromJson(Map<String, dynamic> json) => FriendRequestSent(
+    id: json["id"],
+    userId: json["userId"],
+    senderId: json["senderId"],
+    friendId: json["friendId"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "userId": userId,
+    "senderId": senderId,
+    "friendId": friendId,
+  };
 }
 
 class IsContacted {

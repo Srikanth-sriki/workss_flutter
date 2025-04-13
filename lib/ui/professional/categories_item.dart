@@ -131,7 +131,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                                                       keyWord: '',
                                                       city: '',
                                                       currentLongitude: '',
-                                                      currentLatitude: '',
+                                                      currentLatitude: '',knownLanguages: [],
                                                       gender: ''))),
                                         BlocProvider(
                                           create: (context) =>

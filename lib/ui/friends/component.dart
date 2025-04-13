@@ -106,10 +106,9 @@ Widget friendSearchDetailsCards({
 }) {
   return InkWell(
     onTap: onTapCard,
+    splashColor: COLORS.white.withOpacity(0.1),
+    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
     child: Container(
-      margin: EdgeInsets.symmetric(
-        vertical: SizeConfig.blockHeight * 1,
-      ),
       padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),

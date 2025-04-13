@@ -86,7 +86,8 @@ class _MainScreenState extends State<MainScreen> {
                       city: '',
                       gender: '',
                       currentLongitude: '',
-                      currentLatitude: '')))
+                      currentLatitude: '',knownLanguages: [],
+                      experienceLevel: '')))
           ], child: const HomeScreen());
         case 1:
           return MultiBlocProvider(
@@ -104,7 +105,7 @@ class _MainScreenState extends State<MainScreen> {
                       profession: "",
                       city: "",
                       gender: "",
-                      currentLongitude: '',
+                      currentLongitude: '',knownLanguages: [],
                       currentLatitude: '')),
               )
             ],
@@ -141,7 +142,10 @@ class _MainScreenState extends State<MainScreen> {
                       city: '',
                       gender: '',
                       currentLongitude: '',
-                      currentLatitude: '')))
+                      currentLatitude: '',
+                      knownLanguages: [],
+                      experienceLevel: ''
+                  )))
           ], child: const HomeScreen());
       }
     } else {
@@ -162,7 +166,10 @@ class _MainScreenState extends State<MainScreen> {
                       city: '',
                       gender: '',
                       currentLongitude: '',
-                      currentLatitude: '')))
+                      currentLatitude: '',
+                      knownLanguages: [],
+                      experienceLevel: ''
+                  )))
           ], child: const HomeScreen());
         case 1:
           return MultiBlocProvider(
@@ -181,7 +188,7 @@ class _MainScreenState extends State<MainScreen> {
                       city: "",
                       gender: "",
                       currentLongitude: '',
-                      currentLatitude: '')),
+                      currentLatitude: '',knownLanguages: [],)),
               )
             ],
             child: const ProfessionalsScreen(),
@@ -213,7 +220,8 @@ class _MainScreenState extends State<MainScreen> {
                       city: '',
                       gender: '',
                       currentLongitude: '',
-                      currentLatitude: '')))
+                      currentLatitude: '', knownLanguages: [],
+                      experienceLevel: '')))
           ], child: const HomeScreen());
       }
     }

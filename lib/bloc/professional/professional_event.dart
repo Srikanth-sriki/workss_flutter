@@ -16,6 +16,7 @@ class ProfessionalListEvent extends ProfessionalEvent {
   String city;
   String currentLongitude;
   String currentLatitude;
+  List<String> knownLanguages;
    ProfessionalListEvent(  {required this.page,
      required this.pageSize,
      required this.keyWord,
@@ -24,9 +25,10 @@ class ProfessionalListEvent extends ProfessionalEvent {
      required this.gender,
      required this.currentLongitude,
      required this.currentLatitude,
+     required this.knownLanguages
    });
   @override
-  List<Object> get props => [page, pageSize, keyWord, gender, profession, city,currentLongitude,currentLatitude];
+  List<Object> get props => [page, pageSize, keyWord, gender, profession, city,currentLongitude,currentLatitude,knownLanguages];
 }
 
 

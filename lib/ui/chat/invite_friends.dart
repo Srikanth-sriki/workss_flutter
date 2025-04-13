@@ -34,6 +34,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
   bool showSearchBar = false;
   bool selectAll = false;
   List<InviteFriend> inviteFriendsList = [];
+  List<InviteFriend> filteredInviteList = [];
   List<Map<String, dynamic>> selectedItems = [];
   final ScrollController _scrollController = ScrollController();
 
@@ -52,10 +53,13 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
   }
 
   void _updateSelectedItemsList() {
-    selectedItems = inviteFriendsList
+    final filtered = inviteFriendsList.where((e) => e.user != null).toList();
+    selectedItems = filtered
         .map((friend) => {"id": friend.user!.id!, "selected": false})
         .toList();
   }
+
+
 
   void _onSearchChanged(String keyword) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
@@ -172,6 +176,31 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
 
                   _updateSelectedItemsList();
                 });
+
+                setState(() {
+                  isInviteMemberLoading = false;
+                  isFetchingMore = false;
+                  isError = false;
+                  maxPageNumber = state.maxPageNumber;
+
+                  if (currentPage == 1) {
+                    inviteFriendsList = state.inviteFriend;
+                  } else {
+                    final newItems = state.inviteFriend.where(
+                          (newItem) => !inviteFriendsList.any(
+                            (existingItem) => existingItem.id == newItem.id,
+                      ),
+                    );
+                    inviteFriendsList.addAll(newItems);
+                  }
+
+                  // Filter out null users to avoid mismatch with selectedItems
+                  filteredInviteList = inviteFriendsList.where((item) => item.user != null).toList();
+
+                  // Then update selected items only based on filtered list
+                  _updateSelectedItemsList();
+                });
+
               } else if (state is InviteMemberFailed) {
                 setState(() {
                   isInviteMemberLoading = false;
@@ -199,117 +228,118 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 3.5,
-                    vertical: SizeConfig.blockHeight),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Checkbox(
-                          side: BorderSide(
-                              color: COLORS.neutralDarkOne,
-                              width: SizeConfig.blockWidth * 0.5),
-                          checkColor: COLORS.white,
-                          activeColor: COLORS.primary,
-                          value: selectAll,
-                          onChanged: (value) =>
-                              _toggleSelectAll(value ?? false),
-                        ),
-                        Text(
-                          'Select All',
-                          style: TextStyle(
-                            color: COLORS.neutralDarkOne,
-                            fontSize: SizeConfig.blockWidth * 3.5,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        showSearchBar ? Icons.close : Icons.search,
-                        color: COLORS.neutralDarkOne,
-                        size: SizeConfig.blockHeight * 4,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _searchController.clear();
-                          showSearchBar = !showSearchBar;
-                          if (!showSearchBar) {
-                            setState(() {
-                              searchKeyword = '';
-                              currentPage = 1;
-                              _fetchData(isNewFetch: true);
-                            });
-                          }
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              if (showSearchBar)
+              // Container(
+              //   padding: EdgeInsets.symmetric(
+              //       horizontal: SizeConfig.blockWidth * 3.5,
+              //       vertical: SizeConfig.blockHeight),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     crossAxisAlignment: CrossAxisAlignment.center,
+              //     children: [
+              //       Row(
+              //         crossAxisAlignment: CrossAxisAlignment.center,
+              //         mainAxisAlignment: MainAxisAlignment.start,
+              //         children: [
+              //           Checkbox(
+              //             side: BorderSide(
+              //                 color: COLORS.neutralDarkOne,
+              //                 width: SizeConfig.blockWidth * 0.5),
+              //             checkColor: COLORS.white,
+              //             activeColor: COLORS.primary,
+              //             value: selectAll,
+              //             onChanged: (value) =>
+              //                 _toggleSelectAll(value ?? false),
+              //           ),
+              //           Text(
+              //             'Select All',
+              //             style: TextStyle(
+              //               color: COLORS.neutralDarkOne,
+              //               fontSize: SizeConfig.blockWidth * 3.5,
+              //               fontWeight: FontWeight.w400,
+              //               fontFamily: "Poppins",
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //       IconButton(
+              //         icon: Icon(
+              //           showSearchBar ? Icons.close : Icons.search,
+              //           color: COLORS.neutralDarkOne,
+              //           size: SizeConfig.blockHeight * 4,
+              //         ),
+              //         onPressed: () {
+              //           setState(() {
+              //             _searchController.clear();
+              //             showSearchBar = !showSearchBar;
+              //             if (!showSearchBar) {
+              //               setState(() {
+              //                 searchKeyword = '';
+              //                 currentPage = 1;
+              //                 _fetchData(isNewFetch: true);
+              //               });
+              //             }
+              //           });
+              //         },
+              //       ),
+              //     ],
+              //   ),
+              // ),
+              if (!showSearchBar)
                 Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 5.5,
+                  margin: EdgeInsets.only(
+                    left: SizeConfig.blockWidth * 5.5,
+                    right: SizeConfig.blockWidth * 5.5,
+                    top: SizeConfig.blockHeight*2
+
                   ),
-                  child: Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      style: TextStyle(
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
+                      color: COLORS.neutralDarkOne,
+                      fontSize: SizeConfig.blockWidth * 3.25,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                    cursorColor: COLORS.black,
+                    decoration: InputDecoration(
+                      fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      filled: true,
+                      hintText: 'Ex: Search'.tr(),
+                      hintStyle: TextStyle(
                         color: COLORS.neutralDarkOne,
                         fontSize: SizeConfig.blockWidth * 3.25,
                         fontWeight: FontWeight.w400,
                         fontFamily: "Poppins",
                       ),
-                      cursorColor: COLORS.black,
-                      decoration: InputDecoration(
-                        fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
-                        filled: true,
-                        hintText: 'Ex: Search'.tr(),
-                        hintStyle: TextStyle(
-                          color: COLORS.neutralDarkOne,
-                          fontSize: SizeConfig.blockWidth * 3.25,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: COLORS.neutralDarkOne,
-                          size: SizeConfig.blockWidth * 5,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.25),
-                          borderSide: BorderSide(
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                              width: SizeConfig.blockWidth * 0.1),
-                        ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: COLORS.neutralDarkOne,
+                        size: SizeConfig.blockWidth * 5,
                       ),
-                      onChanged: _onSearchChanged,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.blockWidth * 3.25),
+                        borderSide: BorderSide(
+                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                            width: SizeConfig.blockWidth * 0.1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.blockWidth * 3.25),
+                        borderSide: BorderSide(
+                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                            width: SizeConfig.blockWidth * 0.1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            SizeConfig.blockWidth * 3.25),
+                        borderSide: BorderSide(
+                            color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                            width: SizeConfig.blockWidth * 0.1),
+                      ),
                     ),
+                    onChanged: _onSearchChanged,
                   ),
                 ),
               // Divider(
@@ -328,11 +358,12 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                         vertical: SizeConfig.blockHeight * 0.2,
                       ),
                       child: ListView.builder(
-                        itemCount: inviteFriendsList.length,
+                        itemCount: filteredInviteList.length,
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {
                           InviteFriend inviteList = inviteFriendsList![index];
+                          if (inviteList.user == null) return SizedBox();
                           return Column(
                             children: [
                               friendSearchDetailsCards(
@@ -350,11 +381,13 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                       chartBloc.add(CancelInviteChatEvent(
                                           id: inviteList.user!.isInvited!.id!,
                                           onSuccess: (message) {
+                                            setState(() {
+                                              inviteList.user!.isInvited = null;
+                                            });
                                             _fetchData();
                                             showCustomSnackBar(
                                             context: context,
-                                      message:message,
-                                      backgroundColor: COLORS.neutralDarkTwo);
+                                            message:message, backgroundColor: COLORS.neutralDarkTwo);
                                           }, onError: (String message) {
                                         showCustomSnackBar(
                                             context: context,
@@ -370,6 +403,9 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                           ],
                                           onSuccess: (message) {
                                             _fetchData();
+                                           setState(() {
+                                             inviteList.user!.isInvited = IsInvited(chatId: widget.groupId);
+                                           });
                                           }));
                                     }
 
@@ -394,18 +430,19 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                         horizontal: SizeConfig.blockWidth * 4.5,
                       ),
                       child: ListView.builder(
-                        itemCount: inviteFriendsList
-                            .length, // Use inviteFriendsList length
+                        itemCount: filteredInviteList
+                            .length,
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {
                           InviteFriend inviteList = inviteFriendsList[
-                              index]; // Get the correct object
-
+                              index];
+                          if (inviteList.user == null) return const SizedBox();
                           return Column(
                             children: [
                               Row(
                                 children: [
+                                  if(inviteList.user != null)
                                   Checkbox(
                                     side: BorderSide(
                                       color: COLORS.neutralDarkOne,
@@ -413,10 +450,10 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                     ),
                                     checkColor: COLORS.white,
                                     activeColor: COLORS.primary,
-                                    value: selectedItems[index]["selected"],
+                                    value: selectedItems![index]["selected"],
                                     onChanged: (bool? value) {
                                       setState(() {
-                                        selectedItems[index]["selected"] =
+                                        selectedItems![index]["selected"] =
                                             value ?? false;
                                         checkSelectedId();
                                       });

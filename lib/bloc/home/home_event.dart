@@ -16,6 +16,8 @@ class FetchHomeScreenEvent extends HomeEvent {
   String city;
   String currentLongitude;
   String currentLatitude;
+  String experienceLevel;
+  List<String> knownLanguages;
 
   FetchHomeScreenEvent({
     required this.page,
@@ -26,9 +28,11 @@ class FetchHomeScreenEvent extends HomeEvent {
     required this.gender,
     required this.currentLongitude,
     required this.currentLatitude,
+    required this.experienceLevel,
+    required this.knownLanguages
   });
   @override
-  List<Object> get props => [page, pageSize, keyWord, gender, profession, city,currentLongitude,currentLatitude];
+  List<Object> get props => [page, pageSize, keyWord, gender, profession, city,currentLongitude,currentLatitude,experienceLevel,knownLanguages];
 }
 
 class FetchWorkSingleView extends HomeEvent {

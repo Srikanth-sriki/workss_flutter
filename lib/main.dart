@@ -253,7 +253,8 @@ class _MyAppState extends State<MyApp> {
                           city: '',
                           currentLongitude: '',
                           currentLatitude: '',
-                          gender: ''))),
+                          gender: '', knownLanguages: [],
+                          experienceLevel: ''))),
                 BlocProvider(
                   create: (context) {
                     final bloc = PostWorkBloc();
@@ -359,7 +360,8 @@ class _AuthenticationState extends State<Authentication> {
                         city: '',
                         currentLongitude: '',
                         currentLatitude: '',
-                        gender: ''))),
+                        gender: '', knownLanguages: [],
+                        experienceLevel: ''))),
 
               BlocProvider(
                 create: (context) => FriendsBloc()

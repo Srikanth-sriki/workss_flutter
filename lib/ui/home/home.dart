@@ -32,6 +32,7 @@ import '../../models/home_fetch_model.dart';
 import '../chat/addFriends.dart';
 import '../friends/friends_details.dart';
 import '../friends/friends_search.dart';
+import '../onboarding/register_form.dart';
 import '../post_work/post_work.dart';
 import 'filter.dart';
 
@@ -56,6 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String? selectedProfession = '';
   String? selectedCity = '';
   String selectedGender = '';
+  String experienceLevel ='';
+  List<String> selectedLanguage = [];
 
   @override
   void initState() {
@@ -105,6 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
         profession: selectedProfession ?? "",
         city: selectedCity ?? "",
         gender: selectedGender ?? "",
+        knownLanguages: [],
+        experienceLevel: experienceLevel??'',
         currentLongitude: '',
         currentLatitude: ''));
   }
@@ -132,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void filterHomeScreenData(String? profession, String? city, String gender) {
+  void filterHomeScreenData(String? profession, String? city, String gender,String experienceLevel, List<String>selectedLanguages) {
     setState(() {
       currentPage = 1;
       isFetchingMore = false;
@@ -144,7 +149,10 @@ class _HomeScreenState extends State<HomeScreen> {
           city: city ?? "",
           gender: gender ?? "",
           currentLongitude: '',
-          currentLatitude: ''));
+          currentLatitude: '',
+        knownLanguages: selectedLanguages,
+        experienceLevel: experienceLevel??""
+      ));
     });
   }
 
@@ -192,7 +200,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 isFetchingMore = false;
                               });
 
-                              // Trigger FriendsBloc when HomeBloc fetches data successfully
                               //context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
                             } else if (state is FetchHomeScreenFailed) {
                               setState(() {
@@ -250,7 +257,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   city: "",
                                   gender: "",
                                   currentLongitude: '',
-                                  currentLatitude: ''));
+                                  currentLatitude: '',
+                                  knownLanguages: [],
+                                  experienceLevel: ''
+                              ));
                             });
                           }
                           return Container();
@@ -810,7 +820,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                             city: '',
                                             currentLongitude: '',
                                             currentLatitude: '',
-                                            gender: ''))),
+                                            gender: '',
+                                            knownLanguages: [],
+                                            experienceLevel: ''
+                                        ))),
                                   BlocProvider(
                                     create: (context) => ShowInterestedBloc(),
                                   )
@@ -893,6 +906,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               initialProfession: selectedProfession,
                               initialCity: selectedCity,
                               initialGender: selectedGender,
+                              experienceLevel: experienceLevel,
+                              experienceLevelVisible: true,
+                              selectedLanguageVisible: false,
                             ),
                           ));
 
@@ -900,10 +916,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     selectedProfession = result['selectedProfession'];
                     selectedCity = result['selectedCity'];
                     selectedGender = result['selectedGender'];
+                    experienceLevel = result['_experienceLevel'];
+                    selectedLanguage = result['selectedLanguage'];
                     filterHomeScreenData(
                       selectedProfession,
                       selectedCity,
                       selectedGender,
+                        experienceLevel,
+                        selectedLanguage
                     );
                   }
                 },

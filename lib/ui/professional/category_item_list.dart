@@ -59,7 +59,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
         profession: widget.subCategory,
         city: "",
         gender: "",
-        currentLongitude: '',
+        currentLongitude: '',knownLanguages: [],
         currentLatitude: ''));
   }
 

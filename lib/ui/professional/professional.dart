@@ -28,6 +28,7 @@ import '../chat/addFriends.dart';
 import '../friends/friends_details.dart';
 import '../home/filter.dart';
 import '../home/notification_list.dart';
+import '../onboarding/register_form.dart';
 import 'categories_item.dart';
 
 class ProfessionalsScreen extends StatefulWidget {
@@ -54,6 +55,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   String? selectedCity = '';
   String selectedGender = '';
   late List<CategorySub> categoriesData = [];
+  List<String> selectedLanguage = [];
 
   @override
   void initState() {
@@ -92,7 +94,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         profession: "",
         city: "",
         gender: "",
-        currentLongitude: '',
+        currentLongitude: '',knownLanguages: [],
         currentLatitude: ''));
     professionalBloc.add(const FetchCategoryListEvent());
   }
@@ -114,7 +116,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   }
 
   void filterProfessionalScreenData(
-      String? profession, String? city, String gender) {
+      String? profession, String? city, String gender,List<String>selectedLanguages) {
     setState(() {
       currentPage = 1;
       isFetchingMore = false;
@@ -125,7 +127,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
           profession: profession ?? "",
           city: city ?? "",
           gender: gender ?? "",
-          currentLongitude: '',
+          currentLongitude: '', knownLanguages: selectedLanguages,
           currentLatitude: ''));
     });
   }
@@ -342,7 +344,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                         keyWord: '',
                                                         city: '',
                                                         currentLongitude: '',
-                                                        currentLatitude: '',
+                                                        currentLatitude: '',knownLanguages: [],
                                                         gender: ''))),
                                           BlocProvider(
                                             create: (context) =>
@@ -430,6 +432,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                       initialProfession: selectedProfession,
                                       initialCity: selectedCity,
                                       initialGender: selectedGender,
+                                      selectedLanguage: selectedLanguage,
+                                      experienceLevelVisible: false,
+                                      selectedLanguageVisible: true,
                                     ),
                                   ));
 
@@ -437,10 +442,11 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                             selectedProfession = result['selectedProfession'];
                             selectedCity = result['selectedCity'];
                             selectedGender = result['selectedGender'];
+                            selectedLanguage = List<String>.from(result['selectedLanguage'] ?? []);
                             filterProfessionalScreenData(
                               selectedProfession,
                               selectedCity,
-                              selectedGender,
+                              selectedGender, selectedLanguage
                             );
                           }
                         },

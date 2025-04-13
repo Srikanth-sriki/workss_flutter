@@ -23,7 +23,7 @@ class InviteFriend {
     id: json["id"],
     userId: json["userId"],
     friendId: json["friendId"],
-    user: User.fromJson(json["user"]),
+    user: json.containsKey('user') && json['user'] != null?User.fromJson(json["user"]):null,
   );
 
   Map<String, dynamic> toJson() => {

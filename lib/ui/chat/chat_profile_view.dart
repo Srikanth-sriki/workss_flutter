@@ -665,25 +665,20 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => MultiBlocProvider(
-                                            providers: [
-                                              BlocProvider(
-                                                create: (context) => FriendsBloc()
-                                                  ..add(
-                                                      FetchFriendsAddListEvent(
-                                                          page: 1,
-                                                          pageSize: 10,
-                                                          keyWord: '')),
-                                              ),
-                                              BlocProvider(
-                                                  create: (context) =>
-                                                      ShowInterestedBloc()),
-                                              BlocProvider(
-                                                  create: (context) =>
-                                                      ChartBloc())
-                                            ],
-                                            child: AddFriendsScreen(
-                                                header: 'Add Friend',refreshPageCallback: _refreshPageAfterEdit,),
-                                          )));
+                                        providers: [
+                                          BlocProvider(
+                                            create: (context) => ChartBloc()
+                                              ..add(InviteMemberChartEvent(
+                                                  page: 1,
+                                                  pageSize: 10,
+                                                  groupId: chatViewGroupInfo.id!,
+                                                  keyWord: '')),
+                                          ),
+                                        ],
+                                        child: InviteFriendsList(
+                                          groupId: chatViewGroupInfo.id!,
+                                        ),
+                                      )));
                             },
                             child: Icon(
                               Icons.add_circle_outline,

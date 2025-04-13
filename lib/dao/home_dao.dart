@@ -15,14 +15,19 @@ class HomeDao {
       required String city,
       required String currentLongitude,
       required String currentLatitude,
-      required String gender}) async {
+      required String gender,
+        required String experienceLevel,
+        required List<String> knownLanguages
+      }) async {
+    final knownLanguagesParam = knownLanguages.join(',');
     var url =
-        '${Config.url}/user/home/fetch-works?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize&currentLatitude=$currentLatitude&currentLongitude=$currentLongitude';
+        '${Config.url}/user/home/fetch-works?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize&currentLatitude=$currentLatitude&currentLongitude=$currentLongitude&experience_level=$experienceLevel&known_languages=$knownLanguagesParam';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
     );
     customLog("Response Status Code : ${response.statusCode}");
+    customLog("Response Status Code : ${response.request}");
     return response;
   }
 
@@ -213,9 +218,12 @@ class HomeDao {
       required String city,
       required String currentLongitude,
       required String currentLatitude,
-      required String gender}) async {
+      required String gender,
+        required List<String> knownLanguages
+      }) async {
+    final knownLanguagesParam = knownLanguages.join(',');
     var url =
-        '${Config.url}/user/professional/fetch-professionals?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize&currentLatitude=$currentLatitude&currentLongitude=$currentLongitude';
+        '${Config.url}/user/professional/fetch-professionals?search=$keyWord&profession=$profession&gender=$gender&city=$city&page=$page&page_size=$pageSize&currentLatitude=$currentLatitude&currentLongitude=$currentLongitude&known_languages=$knownLanguagesParam';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),

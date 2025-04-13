@@ -39,7 +39,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           keyWord: event.keyWord,
           profession: event.profession,
           currentLatitude: event.currentLatitude,
-          currentLongitude: event.currentLongitude);
+          currentLongitude: event.currentLongitude,
+        experienceLevel: event.experienceLevel,
+        knownLanguages: event.knownLanguages
+      );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
