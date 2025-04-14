@@ -32,7 +32,7 @@ import '../home/component.dart';
 import '../onboarding/select_user_type.dart';
 import '../profile/notification.dart';
 import 'addFriends.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import 'blocked_chat_list.dart';
 
@@ -56,13 +56,22 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   Timer? _debounce;
   String searchKeyword = "";
   int friendListCount = 0;
+  late io.Socket socket;
 
   @override
   void initState() {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
-    SocketService().reconnect();
+    socket = io.io(Config.socketUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true,
+    });
+
+    if (!socket.connected) {
+      SocketService().reconnect();
+    }
+
   }
 
   void _refreshPageAfterEdit() {
@@ -515,6 +524,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                           image: chatList[index].picture!,
                                           name: chatList[index].name!,
                                           onTapCard: () {
+                                            socket.emit("open_chat", {
+                                              Config.id,
+                                              chatList[index].chatId!
+                                            });
                                             Navigator.push(
                                                 context,
                                                 MaterialPageRoute(

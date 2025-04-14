@@ -164,7 +164,7 @@ class _MyAppState extends State<MyApp> {
     print('-----------------------------check notification');
     getMessage(context);
     analyticsService.logScreenEvent('main_screen');
-    initializeNotifications(context);
+    initializeNotifications(navigatorKey);
   }
 
   ///permission for notifications
@@ -219,12 +219,14 @@ class _MyAppState extends State<MyApp> {
     ));
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
     return OverlaySupport.global(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
+        navigatorKey: navigatorKey,
         builder: (context, child) {
           SizeConfig().init(context);
           return MediaQuery(

@@ -12,7 +12,7 @@ class SocketService {
   }
 
   void _initializeSocket() {
-    socket = io.io('https://43.204.94.146', <String, dynamic>{
+    socket = io.io(Config.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
       'reconnection': true,

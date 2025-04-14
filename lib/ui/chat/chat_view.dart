@@ -112,7 +112,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         _loadMoreData();
       }
     });
-    socket = io.io('https://43.204.94.146', <String, dynamic>{
+    socket = io.io(Config.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
@@ -252,6 +252,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           widget.refreshPageCallback();
+          socket.emit("close_chat", Config.id);
         }
       },
       child: Scaffold(
@@ -399,6 +400,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   size: SizeConfig.blockWidth * 4.5),
                               onPressed: () {
                                 widget.refreshPageCallback();
+                                socket.emit("close_chat", Config.id);
                                 Navigator.pop(context);
                               },
                             ),
@@ -575,7 +577,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   ),
                                   if (widget.isGroup == false) ...[
                                     BottomSheetItem(
-                                      title: 'Unfriend',
+                                      title: chatViewGroupInfo.participantsDetails?.user.isFriend != null ? 'UNFRIEND'.tr() : chatViewGroupInfo.participantsDetails?.user.friendRequestSent != null ? 'REQUEST SENT'.tr() : 'ADD FRIEND',
                                       onTap: () => {
                                         showInterestedBloc.add(UnfriendsEvent(
                                             friendId: filteredParticipants![0]

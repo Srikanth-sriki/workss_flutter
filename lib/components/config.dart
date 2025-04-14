@@ -2,6 +2,7 @@ import 'dart:io';
 
 class Config {
   static String url = "https://43.204.94.146/api";
+  static String socketUrl = "https://43.204.94.146";
   static String accessToken = '';
   static String id = '';
   static bool profileCompleted = false;

@@ -1,5 +1,4 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,29 +8,24 @@ import '../bloc/chart/chart_bloc.dart';
 import '../bloc/friends/friends_bloc.dart';
 import '../bloc/notification/notification_bloc.dart';
 import '../bloc/show_interested/show_interested_bloc.dart';
-import '../main.dart';
 import '../ui/home/notification_list.dart';
 
-void initializeNotifications(BuildContext context) async {
-  // Create a notification channel for Android
+void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'high_importance_channel', // This is the id of the channel
-    'High Importance Notifications', // This is the name of the channel
-    description: 'This channel is used for important notifications.', // Optional description
+    'high_importance_channel',
+    'High Importance Notifications',
+    description: 'This channel is used for important notifications.',
     importance: Importance.max,
   );
 
-  // Initialize FlutterLocalNotificationsPlugin
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
-  // Create the notification channel on Android
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
-  // Request permission for notifications
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
     announcement: false,
@@ -42,81 +36,50 @@ void initializeNotifications(BuildContext context) async {
     sound: true,
   );
 
-  // Foreground message handling
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print("The live : ${message.notification?.android?.imageUrl}");
-    print("The live : ${message.data['notification_type']}");
-    print("The live : ${message.notification?.android?.link}");
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
     if (notification != null && !kIsWeb) {
-      print(notification.body);
-      print("The message notification ${message.data}");
-     // _handleNotificationNavigation(navigatorKey);
-
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,
         notification.title,
         notification.body,
         NotificationDetails(
           android: AndroidNotificationDetails(
-            channel.id, // Use the defined channel
+            channel.id,
             channel.name,
             channelDescription: channel.description,
             color: Colors.blue,
             playSound: true,
             icon: '@mipmap/ic_launcher',
-            styleInformation: const BigTextStyleInformation(''),
             importance: Importance.max,
             priority: Priority.high,
             ongoing: true,
+            styleInformation: BigTextStyleInformation(''),
           ),
         ),
       );
     }
   });
 
-  // Handle background message interactions
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     RemoteNotification? notification = message.notification;
-    AndroidNotification? android = message.notification?.android;
     if (notification != null && !kIsWeb) {
-      print("Notification: ${message.notification}");
-      print("Notification Title: ${message.notification!.title}");
-      print("Notification Body: ${message.notification!.body}");
-
-      print(notification.body);
-      print("The message ${message.data}");
-
-      // _handleNotificationNavigation(navigatorKey);
-
-      // Navigate to the desired screen based on the custom data
+      _handleNotificationNavigation(navigatorKey);
     }
   });
 
-  // If the app is opened from a terminated state
   FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-    print("The message is : $message");
     if (message != null) {
-      print("Inside the message");
-
       RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-
-      print("The values are notification : $notification kIsWeb $kIsWeb");
       if (notification != null && !kIsWeb) {
-        print("When the app is completely terminated");
-
-        print(notification.body);
-        print("The message ${message.data}");
-
         flutterLocalNotificationsPlugin.show(
           notification.hashCode,
-          notification?.title,
-          notification?.body,
+          notification.title,
+          notification.body,
           NotificationDetails(
             android: AndroidNotificationDetails(
-              channel.id, // Use the defined channel
+              channel.id,
               channel.name,
               channelDescription: channel.description,
               color: Colors.blue,
@@ -125,17 +88,15 @@ void initializeNotifications(BuildContext context) async {
               importance: Importance.max,
               priority: Priority.high,
               ongoing: true,
-              styleInformation: const BigTextStyleInformation(''),
+              styleInformation: BigTextStyleInformation(''),
             ),
           ),
         );
-      } else {
-        print("Message is null");
+        _handleNotificationNavigation(navigatorKey);
       }
     }
   });
 }
-
 
 void _handleNotificationNavigation(GlobalKey<NavigatorState> navigatorKey) {
   final context = navigatorKey.currentContext;
@@ -146,12 +107,19 @@ void _handleNotificationNavigation(GlobalKey<NavigatorState> navigatorKey) {
     MaterialPageRoute(
       builder: (context) => MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => NotificationBloc()..add(const FetchNotificationList())),
+          BlocProvider(
+            create: (_) => NotificationBloc()..add(const FetchNotificationList()),
+          ),
           BlocProvider(create: (_) => ShowInterestedBloc()),
           BlocProvider(create: (_) => ChartBloc()),
           BlocProvider(
-              create: (_) => FriendsBloc()
-                ..add(FetchFriendsRequestListEvent(page: 1, pageSize: 10, keyWord: '')))
+            create: (_) => FriendsBloc()
+              ..add(FetchFriendsRequestListEvent(
+                page: 1,
+                pageSize: 10,
+                keyWord: '',
+              )),
+          ),
         ],
         child: const NotificationListScreen(),
       ),
