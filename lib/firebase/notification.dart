@@ -2,9 +2,15 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../bloc/chart/chart_bloc.dart';
+import '../bloc/friends/friends_bloc.dart';
+import '../bloc/notification/notification_bloc.dart';
+import '../bloc/show_interested/show_interested_bloc.dart';
 import '../main.dart';
+import '../ui/home/notification_list.dart';
 
 void initializeNotifications(BuildContext context) async {
   // Create a notification channel for Android
@@ -46,6 +52,7 @@ void initializeNotifications(BuildContext context) async {
     if (notification != null && !kIsWeb) {
       print(notification.body);
       print("The message notification ${message.data}");
+     // _handleNotificationNavigation(navigatorKey);
 
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,
@@ -80,6 +87,8 @@ void initializeNotifications(BuildContext context) async {
 
       print(notification.body);
       print("The message ${message.data}");
+
+      // _handleNotificationNavigation(navigatorKey);
 
       // Navigate to the desired screen based on the custom data
     }
@@ -125,4 +134,27 @@ void initializeNotifications(BuildContext context) async {
       }
     }
   });
+}
+
+
+void _handleNotificationNavigation(GlobalKey<NavigatorState> navigatorKey) {
+  final context = navigatorKey.currentContext;
+  if (context == null) return;
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => NotificationBloc()..add(const FetchNotificationList())),
+          BlocProvider(create: (_) => ShowInterestedBloc()),
+          BlocProvider(create: (_) => ChartBloc()),
+          BlocProvider(
+              create: (_) => FriendsBloc()
+                ..add(FetchFriendsRequestListEvent(page: 1, pageSize: 10, keyWord: '')))
+        ],
+        child: const NotificationListScreen(),
+      ),
+    ),
+  );
 }

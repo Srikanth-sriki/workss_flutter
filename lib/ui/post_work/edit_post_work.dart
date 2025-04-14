@@ -265,9 +265,17 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                     if (state is PostWorkLoading) {
                       loading = true;
                     } else if (state is UploadMultipleImageSuccess) {
+                      FocusScopeNode currentFocus = FocusScope.of(context);
+                      if (!currentFocus.hasPrimaryFocus) {
+                        currentFocus.unfocus();
+                      }
                       loading = false;
                       workImages.add(state.filePath);
                     } else if (state is UploadImageFailed) {
+                      FocusScopeNode currentFocus = FocusScope.of(context);
+                      if (!currentFocus.hasPrimaryFocus) {
+                        currentFocus.unfocus();
+                      }
                       loading = false;
                       showCustomSnackBar(
                         context: context,

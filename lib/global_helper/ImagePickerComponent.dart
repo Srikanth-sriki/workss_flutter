@@ -740,123 +740,6 @@ class _MultipleImagePickerComponentState
     _displayImages = List<String>.from(widget.defaultImages);
   }
 
-  // void _showPicker(BuildContext context) {
-  //   showModalBottomSheet(
-  //     backgroundColor: COLORS.white,
-  //     context: context,
-  //     showDragHandle: true,
-  //     builder: (BuildContext context) {
-  //       return SafeArea(
-  //         child: Wrap(
-  //           children: <Widget>[
-  //             ListTile(
-  //               dense: true,
-  //               contentPadding: EdgeInsets.symmetric(
-  //                   horizontal: SizeConfig.blockWidth * 10),
-  //               leading: Icon(
-  //                 Icons.photo_library,
-  //                 color: COLORS.black,
-  //                 size: SizeConfig.blockWidth * 6,
-  //               ),
-  //               title: Text(
-  //                 'Gallery'.tr(),
-  //                 style: TextStyle(
-  //                   color: COLORS.neutralDark,
-  //                   fontWeight: FontWeight.w400,
-  //                   fontFamily: "Poppins",
-  //                   fontSize: SizeConfig.blockWidth * 4.1,
-  //                 ),
-  //               ),
-  //               // onTap: () async {
-  //               //   XFile? image =
-  //               //       await _picker.pickImage(source: ImageSource.gallery);
-  //               //   if (image != null && _displayImages.length < 3) {
-  //               //     setState(() {
-  //               //       _displayImages.add(image.path);
-  //               //     });
-  //               //     _updateSelectedImages();
-  //               //   }
-  //               //   Navigator.of(context).pop();
-  //               // },
-  //               onTap: () async {
-  //                 try {
-  //                   XFile? image =
-  //                       await _picker.pickImage(source: ImageSource.gallery);
-  //                   print(image!.path!);
-  //                   if (image != null &&
-  //                       image.path.isNotEmpty &&
-  //                       _displayImages.length < 3) {
-  //                     setState(() {
-  //                       _displayImages.add(image.path);
-  //                     });
-  //                     _updateSelectedImages();
-  //                   } else {
-  //                     print('Invalid image path or selection canceled');
-  //                   }
-  //                   Navigator.of(context).pop();
-  //                 } catch (e) {
-  //                   print('Error picking image: $e');
-  //                 }
-  //               },
-  //             ),
-  //             ListTile(
-  //               dense: true,
-  //               contentPadding: EdgeInsets.symmetric(
-  //                   horizontal: SizeConfig.blockWidth * 10),
-  //               leading: Icon(
-  //                 Icons.photo_camera,
-  //                 color: COLORS.black,
-  //                 size: SizeConfig.blockWidth * 6,
-  //               ),
-  //               title: Text(
-  //                 'Camera'.tr(),
-  //                 style: TextStyle(
-  //                   color: COLORS.neutralDark,
-  //                   fontWeight: FontWeight.w400,
-  //                   fontFamily: "Poppins",
-  //                   fontSize: SizeConfig.blockWidth * 4.1,
-  //                 ),
-  //               ),
-  //               // onTap: () async {
-  //               //   XFile? photo =
-  //               //       await _picker.pickImage(source: ImageSource.camera);
-  //               //   if (photo != null && _displayImages.length < 3) {
-  //               //     setState(() {
-  //               //       _displayImages.add(photo.path);
-  //               //     });
-  //               //     _updateSelectedImages();
-  //               //   }
-  //               //   Navigator.of(context).pop();
-  //               // },
-  //
-  //               onTap: () async {
-  //                 try {
-  //                   XFile? photo =
-  //                       await _picker.pickImage(source: ImageSource.camera);
-  //                   print(photo!.path!);
-  //                   if (photo != null &&
-  //                       photo.path.isNotEmpty &&
-  //                       _displayImages.length < 3) {
-  //                     setState(() {
-  //                       _displayImages.add(photo.path);
-  //                     });
-  //                     _updateSelectedImages();
-  //                   } else {
-  //                     print('Invalid image path or selection canceled');
-  //                   }
-  //                   Navigator.of(context).pop();
-  //                 } catch (e) {
-  //                   print('Error picking image: $e');
-  //                 }
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   void _showPicker(context) {
     showModalBottomSheet(
       backgroundColor: COLORS.white,
@@ -1095,14 +978,15 @@ class _MultipleImagePickerComponentState
   Widget _buildEmptyImagePicker(BuildContext context) {
     return InkWell(
       onTap: () {
-        Future.delayed(const Duration(seconds: 2), () {
-          FocusScopeNode currentFocus = FocusScope.of(context);
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-          }
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+          currentFocus.unfocus();
+        }
+        Future.delayed(const Duration(milliseconds: 300), () {
+          _showPicker(context);
         });
-        _showPicker(context);
       },
+
       borderRadius: BorderRadius.all(
         Radius.circular(SizeConfig.blockWidth * 3),
       ),

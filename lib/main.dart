@@ -210,7 +210,7 @@ class _MyAppState extends State<MyApp> {
       Config.fcmToken = apnId;
     });
   }
-
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

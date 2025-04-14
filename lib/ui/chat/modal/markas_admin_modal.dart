@@ -10,7 +10,11 @@ import '../../../models/chat/chat_view_pro_modal.dart';
 
 class MarkasAdminModal extends StatefulWidget {
   final List<Participant> members;
-   MarkasAdminModal({super.key,required this.members});
+  final String header;
+  final String subHeader;
+  final bool leaveGroup;
+  final  VoidCallback onTapCalled;
+   MarkasAdminModal({super.key,required this.members, required this.header,required this.subHeader,required this.leaveGroup,required this.onTapCalled});
 
   @override
   _MarkasAdminModalState createState() => _MarkasAdminModalState();
@@ -45,7 +49,7 @@ class _MarkasAdminModalState extends State<MarkasAdminModal> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Are you sure you want to leave \nthe group?'.tr(),
+                widget.header.tr(),
                 style: TextStyle(
                   color: COLORS.neutralDark,
                   fontSize: SizeConfig.blockWidth * 4,
@@ -54,18 +58,19 @@ class _MarkasAdminModalState extends State<MarkasAdminModal> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: SizeConfig.blockHeight,),
-              Text(
-                'Before leaving the group, ensure you assign \nsomeone as the group admin.'
-                    .tr(),
-                style: TextStyle(
-                  color: COLORS.neutralDarkOne,
-                  fontSize: SizeConfig.blockWidth * 3.25,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
+              if(widget.subHeader.isNotEmpty)...[
+                SizedBox(height: SizeConfig.blockHeight,),
+                Text(
+                  widget.subHeader.tr(),
+                  style: TextStyle(
+                    color: COLORS.neutralDarkOne,
+                    fontSize: SizeConfig.blockWidth * 3.25,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
+              ],
               Container(
                 margin: EdgeInsets.only(top: SizeConfig.blockHeight * 2),
                 padding: EdgeInsets.only(
@@ -90,18 +95,22 @@ class _MarkasAdminModalState extends State<MarkasAdminModal> {
                     customButton(
                       text: 'MARK ADMIN'.tr(),
                       onPressed: () {
-                        Navigator.pop(context);
-
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MultiBlocProvider(
-                                  providers: [
-                                    BlocProvider(
-                                      create: (context) => ChartBloc()),
-                                  ],
-                                  child: MarkAsAdminList(members: widget.members,),
-                                )));
+                        if(widget.leaveGroup){
+                          Navigator.pop(context);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
+                                    providers: [
+                                      BlocProvider(
+                                          create: (context) => ChartBloc()),
+                                    ],
+                                    child: MarkAsAdminList(members: widget.members,),
+                                  )));
+                        }
+                        else{
+                          widget.onTapCalled();
+                        }
                       },
                       backgroundColor: COLORS.primary,
                       showIcon: false,

@@ -305,9 +305,11 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                   borderRadius: BorderRadius.circular(
                                       SizeConfig.blockWidth * 2.5),
                                   color: COLORS.primaryOne.withOpacity(0.3)),
-                              child: Icon(
-                                Icons.notifications_none,
-                                size: SizeConfig.blockWidth * 5.5,
+                              child: Image.asset(
+                                'assets/images/home/notification.png',
+                                width: SizeConfig.blockWidth * 5.5,
+                                height: SizeConfig.blockWidth * 5.5,
+                                fit: BoxFit.contain,
                               ),
                             ),
                           ),

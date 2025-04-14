@@ -33,6 +33,7 @@ import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/helper_function.dart';
+import '../../global_helper/popup.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../helper/socket_service.dart';
 import '../../models/chat/charts_list_modal.dart';
@@ -279,8 +280,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   filteredParticipants = chatViewGroupInfo.participants
                       .where((participant) => participant.userId != Config.id)
                       .toList();
-                  isCurrentUserAdmin = chatViewGroupInfo.participants.any((participant) =>
-                  participant.userId == Config.id && participant.isAdmin);
+                  isCurrentUserAdmin = chatViewGroupInfo.participants.any(
+                      (participant) =>
+                          participant.userId == Config.id &&
+                          participant.isAdmin);
 
                   if (currentPage == 1) {
                     chatView = state.chatView;
@@ -537,7 +540,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                             ),
                           ],
                         ),
-                        if (!widget.isGroup || isCurrentUserAdmin)...[
+                        if (!widget.isGroup || isCurrentUserAdmin) ...[
                           IconButton(
                             icon: Icon(
                               Icons.more_vert,
@@ -560,13 +563,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                     providers: [
                                                       BlocProvider(
                                                         create: (context) =>
-                                                        ProfileBloc()
-                                                          ..add(
-                                                              const FetchSettingEvent()),
+                                                            ProfileBloc()
+                                                              ..add(
+                                                                  const FetchSettingEvent()),
                                                       ),
                                                     ],
                                                     child:
-                                                    const NotificationScreen(),
+                                                        const NotificationScreen(),
                                                   )))
                                     },
                                   ),
@@ -575,8 +578,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       title: 'Unfriend',
                                       onTap: () => {
                                         showInterestedBloc.add(UnfriendsEvent(
-                                            friendId: chatViewGroupInfo
-                                                .participants![0].userId!,
+                                            friendId: filteredParticipants![0]
+                                                .userId!,
                                             onSuccess: (message) {
                                               Navigator.pushNamed(
                                                 context,
@@ -586,9 +589,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                               showCustomSnackBar(
                                                   context: context,
                                                   message:
-                                                  "Successfully unfriended!",
+                                                      "Successfully unfriended!",
                                                   backgroundColor:
-                                                  COLORS.semanticTwo);
+                                                      COLORS.semanticTwo);
                                               widget.refreshPageCallback();
                                             },
                                             onError: (message) {
@@ -620,7 +623,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             child: DeleteGroupModal(
                                               buttonText: 'DELETE',
                                               header:
-                                              'Are you sure you want to \n delete the group?',
+                                                  'Are you sure you want to \n delete the group?',
                                               chatId: chatViewGroupInfo!.id!,
                                             ),
                                           ),
@@ -631,30 +634,31 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       title: 'Report',
                                       onTap: () async {
                                         final result =
-                                        await showMaterialModalBottomSheet(
-                                            enableDrag: true,
-                                            expand: false,
-                                            isDismissible: true,
-                                            backgroundColor: COLORS.white,
-                                            closeProgressThreshold: 0,
-                                            duration:
-                                            const Duration(seconds: 0),
-                                            context: context,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                              BorderRadius.vertical(
-                                                  top: Radius.circular(
-                                                      SizeConfig
-                                                          .blockWidth *
-                                                          6)),
-                                            ),
-                                            builder: (context) =>
-                                            const ReportOrBlockModal(
-                                              message: '',
-                                              buttonText: "REPORT",
-                                              header: 'Report',
-                                              subText: 'Write a reason for report ',
-                                            ));
+                                            await showMaterialModalBottomSheet(
+                                                enableDrag: true,
+                                                expand: false,
+                                                isDismissible: true,
+                                                backgroundColor: COLORS.white,
+                                                closeProgressThreshold: 0,
+                                                duration:
+                                                    const Duration(seconds: 0),
+                                                context: context,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.vertical(
+                                                          top: Radius.circular(
+                                                              SizeConfig
+                                                                      .blockWidth *
+                                                                  6)),
+                                                ),
+                                                builder: (context) =>
+                                                    const ReportOrBlockModal(
+                                                      message: '',
+                                                      buttonText: "REPORT",
+                                                      header: 'Report',
+                                                      subText:
+                                                          'Write a reason for report ',
+                                                    ));
 
                                         if (result != null) {
                                           setState(() {
@@ -666,11 +670,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                     context: context,
                                                     message: message,
                                                     backgroundColor:
-                                                    COLORS.neutralDarkOne);
+                                                        COLORS.neutralDarkOne);
                                                 Navigator.pushNamed(
                                                   context,
                                                   '/main_screen',
-                                                  arguments: {'selectedIndex': 3},
+                                                  arguments: {
+                                                    'selectedIndex': 3
+                                                  },
                                                 );
                                               },
                                               onError: (message) {
@@ -689,30 +695,31 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       title: 'Block',
                                       onTap: () async {
                                         final result =
-                                        await showMaterialModalBottomSheet(
-                                            enableDrag: true,
-                                            expand: false,
-                                            isDismissible: true,
-                                            backgroundColor: COLORS.white,
-                                            closeProgressThreshold: 0,
-                                            duration:
-                                            const Duration(seconds: 0),
-                                            context: context,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                              BorderRadius.vertical(
-                                                  top: Radius.circular(
-                                                      SizeConfig
-                                                          .blockWidth *
-                                                          6)),
-                                            ),
-                                            builder: (context) =>
-                                            const ReportOrBlockModal(
-                                              message: '',
-                                              buttonText: "BLOCK",
-                                              header: 'Block',
-                                              subText: 'Write a reason for block ',
-                                            ));
+                                            await showMaterialModalBottomSheet(
+                                                enableDrag: true,
+                                                expand: false,
+                                                isDismissible: true,
+                                                backgroundColor: COLORS.white,
+                                                closeProgressThreshold: 0,
+                                                duration:
+                                                    const Duration(seconds: 0),
+                                                context: context,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.vertical(
+                                                          top: Radius.circular(
+                                                              SizeConfig
+                                                                      .blockWidth *
+                                                                  6)),
+                                                ),
+                                                builder: (context) =>
+                                                    const ReportOrBlockModal(
+                                                      message: '',
+                                                      buttonText: "BLOCK",
+                                                      header: 'Block',
+                                                      subText:
+                                                          'Write a reason for block ',
+                                                    ));
 
                                         if (result != null) {
                                           setState(() {
@@ -724,11 +731,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                     context: context,
                                                     message: message,
                                                     backgroundColor:
-                                                    COLORS.neutralDarkOne);
+                                                        COLORS.neutralDarkOne);
                                                 Navigator.pushNamed(
                                                   context,
                                                   '/main_screen',
-                                                  arguments: {'selectedIndex': 3},
+                                                  arguments: {
+                                                    'selectedIndex': 3
+                                                  },
                                                 );
                                               },
                                               onError: (message) {
@@ -890,31 +899,45 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   //     title: 'Share Joining Link',
                                   //     onTap: () => {}),
 
-
-                                  if(widget.isGroup == true && isCurrentUserAdmin)...[
+                                  if (widget.isGroup == true &&
+                                      isCurrentUserAdmin) ...[
                                     BottomSheetItem(
                                       title: 'Clear Chat',
                                       onTap: () => {
-                                        chartBloc.add(ClearChatEvent(
-                                            chatId: widget.chatId,
-                                            onSuccess: (message) {
-                                              showCustomSnackBar(
-                                                  context: context,
-                                                  message: message,
-                                                  backgroundColor:
-                                                  COLORS.neutralDarkTwo);
-                                              Navigator.pushNamed(
-                                                context,
-                                                '/main_screen',
-                                                arguments: {'selectedIndex': 3},
-                                              );
-                                            },
-                                            onError: (message) {
-                                              showCustomSnackBar(
-                                                context: context,
-                                                message: message,
-                                              );
-                                            }))
+                                        showCustomAlertDialog(
+                                          context: context,
+                                          title: 'Are you Sure?',
+                                          message: 'Do you want to clear chat',
+                                          positiveButtonText: 'YES',
+                                          negativeButtonText: 'NO',
+                                          onPositivePressed: () {
+                                            chartBloc.add(ClearChatEvent(
+                                                chatId: widget.chatId,
+                                                onSuccess: (message) {
+                                                  showCustomSnackBar(
+                                                      context: context,
+                                                      message: message,
+                                                      backgroundColor: COLORS
+                                                          .neutralDarkTwo);
+                                                  Navigator.pushNamed(
+                                                    context,
+                                                    '/main_screen',
+                                                    arguments: {
+                                                      'selectedIndex': 3
+                                                    },
+                                                  );
+                                                },
+                                                onError: (message) {
+                                                  showCustomSnackBar(
+                                                    context: context,
+                                                    message: message,
+                                                  );
+                                                }));
+                                          },
+                                          onNegativePressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        )
                                       },
                                     ),
                                     if (chatViewGroupInfo.archivedFor!
@@ -929,11 +952,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                     context: context,
                                                     message: message,
                                                     backgroundColor:
-                                                    COLORS.neutralDarkTwo);
+                                                        COLORS.neutralDarkTwo);
                                                 Navigator.pushNamed(
                                                   context,
                                                   '/main_screen',
-                                                  arguments: {'selectedIndex': 3},
+                                                  arguments: {
+                                                    'selectedIndex': 3
+                                                  },
                                                 );
                                               },
                                               onError: (message) {
@@ -955,11 +980,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                     context: context,
                                                     message: message,
                                                     backgroundColor:
-                                                    COLORS.neutralDarkTwo);
+                                                        COLORS.neutralDarkTwo);
                                                 Navigator.pushNamed(
                                                   context,
                                                   '/main_screen',
-                                                  arguments: {'selectedIndex': 3},
+                                                  arguments: {
+                                                    'selectedIndex': 3
+                                                  },
                                                 );
                                               },
                                               onError: (message) {
@@ -972,7 +999,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       )
                                     ]
                                   ],
-
                                 ],
                               );
                             },
