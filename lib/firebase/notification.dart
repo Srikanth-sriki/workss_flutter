@@ -39,6 +39,8 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
+    print('22222222222222222222222222222222222222');
+    print('22222222222222222222222222222222222222');
     if (notification != null && !kIsWeb) {
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,
@@ -64,36 +66,39 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     RemoteNotification? notification = message.notification;
+    print('1111111111111111111111111111111111111111111111111');
     if (notification != null && !kIsWeb) {
       _handleNotificationNavigation(navigatorKey);
     }
   });
 
   FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    print('5555555555555555555555555555555555');
     if (message != null) {
       RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
       if (notification != null && !kIsWeb) {
-        flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              channel.id,
-              channel.name,
-              channelDescription: channel.description,
-              color: Colors.blue,
-              playSound: true,
-              icon: '@mipmap/ic_launcher',
-              importance: Importance.max,
-              priority: Priority.high,
-              ongoing: true,
-              styleInformation: BigTextStyleInformation(''),
-            ),
-          ),
-        );
         _handleNotificationNavigation(navigatorKey);
       }
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification?.title,
+        notification?.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            color: Colors.blue,
+            playSound: true,
+            icon: '@mipmap/ic_launcher',
+            importance: Importance.max,
+            priority: Priority.high,
+            ongoing: true,
+            styleInformation: BigTextStyleInformation(''),
+          ),
+        ),
+      );
     }
   });
 }

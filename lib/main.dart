@@ -106,6 +106,17 @@ Future<void> main() async {
     badge: true,
     sound: true,
   );
+  if (!kIsWeb) {
+    channel = const AndroidNotificationChannel(
+        'flutter_notification', // id
+        'flutter_notification_title', // title// description
+        importance: Importance.high,
+        enableLights: true,
+        enableVibration: true,
+        showBadge: true,
+        playSound: true);
+  }
+
 
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
