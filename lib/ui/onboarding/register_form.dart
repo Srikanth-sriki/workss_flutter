@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:works_app/dao/get_user_location.dart';
+import 'package:works_app/models/dropDown_modal.dart';
 import 'package:works_app/ui/onboarding/login_success.dart';
 import 'package:works_app/ui/onboarding/phone_number.dart';
 import 'package:works_app/ui/profile/component.dart';
@@ -62,6 +63,7 @@ class _RegisterFormState extends State<RegisterForm> {
   String? selectedCharges;
   String? _selectedCity;
   String? _selectedProfession;
+  String? _SelectedPinCode;
   bool buttonVisible = true;
   bool nameError = false;
   bool emailError = false;
@@ -84,9 +86,12 @@ class _RegisterFormState extends State<RegisterForm> {
   String? latitude = "0.0";
   String? longitude = "0.0";
   bool cityLoading = true;
-  List<String> dropdownCityItem = [];
+  bool pinCodeLoading = true;
+  List<String>  dropdownCityItem = [];
+  Map<String, String> cityMap ={};
   bool feesChargesLoading = true;
   List<String> feesChargesItem = [];
+  List<String> pinCodeListItem = [];
   bool knowLanguageLoading = true;
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
@@ -103,6 +108,7 @@ class _RegisterFormState extends State<RegisterForm> {
   bool bioSelected =false;
   bool imagesSelected =false;
   bool citySelected = false;
+  String? cityIdSelected = '';
 
   void _validateForm() {
 
@@ -318,8 +324,10 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   } else if (state is FetchCitySuccess) {
                     setState(() {
-                      dropdownCityItem =
-                          state.dropDownItems.map((item) => item.city).toList();
+                       cityMap = {
+                        for (var city in state.dropDownItems) city.city: city.id,
+                      };
+                      dropdownCityItem = cityMap.keys.toList();
                       cityLoading = false;
                     });
                   } else if (state is FetchCityFailed) {
@@ -336,6 +344,23 @@ class _RegisterFormState extends State<RegisterForm> {
                   } else if (state is FetchChargeFeesFailed) {
                     setState(() {
                       feesChargesLoading = false;
+                    });
+                  }
+                  else if(state is FetchPinListLoading){
+                    setState(() {
+                      pinCodeLoading = true;
+                    });
+                  }
+                  else if(state is FetchPinListSuccess){
+                    setState(() {
+                      pinCodeListItem =
+                          state.dropDownItems.map((item) => item.pincode).toList();
+                      pinCodeLoading = false;
+                    });
+                  }
+                  else if(state is FetchPinListFailed){
+                    setState(() {
+                      pinCodeLoading = false;
                     });
                   }
                   if (state is FetchDropDownLoading) {
@@ -512,6 +537,9 @@ class _RegisterFormState extends State<RegisterForm> {
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
                             citySelected = true;
+                            print(cityMap[value]);
+                            pinCodeLoading = true;
+                            initialRegisterBloc.add(FetchPinListEvent(cityId: cityMap[value]!));
                             _validateForm();
                           }),
                           itemLoading: cityLoading,
@@ -521,6 +549,28 @@ class _RegisterFormState extends State<RegisterForm> {
                             }
                             return null;
                           },
+                            color: citySelected?COLORS.neutralDarkOne:COLORS.neutralDark,
+                            fontWeight: citySelected?FontWeight.w400:FontWeight.w500
+                        ),
+
+                        buildDropdown(
+                            label: 'Pincode'.tr(),
+                            hintText: 'Select your city pincode'.tr(),
+                            items: pinCodeListItem,
+                            onChanged: (value) => setState(() {
+                              _SelectedPinCode = value;
+                              setState(() {
+                                pincodeSelected = true;
+                              });
+                              _validateForm();
+                            }),
+                            itemLoading: pinCodeLoading,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your city'.tr();
+                              }
+                              return null;
+                            },
                             color: citySelected?COLORS.neutralDarkOne:COLORS.neutralDark,
                             fontWeight: citySelected?FontWeight.w400:FontWeight.w500
                         ),
