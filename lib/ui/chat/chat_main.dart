@@ -48,6 +48,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   late ChartBloc chartBloc;
   List<Friend> friends = [];
   List<ChatList> chatList = [];
+  List<ChatList> filteredChatList = [];
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isFriendsListLoad = true;
@@ -57,6 +58,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   String searchKeyword = "";
   int friendListCount = 0;
   late io.Socket socket;
+  String selectedTab = 'All';
+
 
   @override
   void initState() {
@@ -293,6 +296,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                     } else if (state is ChartListSuccess) {
                       setState(() {
                         chatList = state.chatList;
+                        filteredChatList = state.chatList;
                         isChatListLoading = false;
                         isError = false;
                       });
@@ -504,29 +508,50 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                           });
                                     }),
                               ),
-                              const Divider(
-                                color: COLORS.neutralDarkTwo,
-                              ),
+                              // const Divider(
+                              //   color: COLORS.neutralDarkTwo,
+                              // ),
                             ],
                             if (!isChatListLoading && chatList.isNotEmpty) ...[
+                              Container(
+
+                                decoration: BoxDecoration(
+                                  color:  COLORS.primaryOne.withOpacity(0.1),
+                                  border: Border(top: BorderSide(color: COLORS.neutralDarkTwo,width: SizeConfig.blockWidth*0.3))
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 4.5,
+                                  vertical: SizeConfig.blockHeight * 1,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    _buildTabButton('All'),
+                                    _buildTabButton('Chart'),
+                                    _buildTabButton('Groups')
+                                  ],
+                                ),
+                              )
+                           ,
                               Padding(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: SizeConfig.blockWidth * 4.5,
                                   vertical: SizeConfig.blockHeight * 0.2,
                                 ),
                                 child: ListView.builder(
-                                    itemCount: chatList.length,
+                                    itemCount: filteredChatList.length,
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
                                     scrollDirection: Axis.vertical,
                                     itemBuilder: (context, index) {
                                       return chartSearchCards(
-                                          image: chatList[index].picture!,
-                                          name: chatList[index].name!,
+                                          image: filteredChatList[index].picture!,
+                                          name: filteredChatList[index].name!,
                                           onTapCard: () {
                                             socket.emit("open_chat", {
                                               Config.id,
-                                              chatList[index].chatId!
+                                              filteredChatList[index].chatId!
                                             });
                                             Navigator.push(
                                                 context,
@@ -540,7 +565,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                                     page: 1,
                                                                     pageSize:
                                                                         10,
-                                                                    chatId: chatList[
+                                                                    chatId: filteredChatList[
                                                                             index]
                                                                         .chatId!)),
                                                             ),
@@ -555,25 +580,25 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                             refreshPageCallback:
                                                                 _refreshPageAfterEdit,
                                                             chatId:
-                                                                chatList[index]
+                                                            filteredChatList[index]
                                                                     .chatId!,
                                                             isGroup:
-                                                                chatList[index]
+                                                            filteredChatList[index]
                                                                     .isGroup!,
                                                           ),
                                                         )));
                                           },
                                           message:
-                                              chatList[index].latestMessage !=
+                                          filteredChatList[index].latestMessage !=
                                                       null
-                                                  ? chatList[index]
+                                                  ? filteredChatList[index]
                                                       .latestMessage!
                                                       .content!
                                                   : "",
-                                          count: chatList[index].unreadCount!,
-                                          isGroup: chatList[index].isGroup!,
+                                          count: filteredChatList[index].unreadCount!,
+                                          isGroup: filteredChatList[index].isGroup!,
                                           date: formatChatDate(
-                                              chatList[index].updatedAt!));
+                                              filteredChatList[index].updatedAt!));
                                     }),
                               )
                             ],
@@ -721,5 +746,72 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
               ),
             ),
           );
+  }
+
+  // Widget _buildTabButton(String label) {
+  //   final isSelected = selectedTab == label;
+  //   return ElevatedButton(
+  //     onPressed: () {
+  //       setState(() {
+  //         selectedTab = label;
+  //         if (selectedTab == 'Chart') {
+  //           filteredChatList = chatList
+  //               .where((item) => item.isGroup == false)
+  //               .toList();
+  //         } else if (selectedTab == 'Group') {
+  //           filteredChatList = chatList
+  //               .where((item) => item.isGroup == true)
+  //               .toList();
+  //         } else {
+  //           filteredChatList = chatList;
+  //         }
+  //       });
+  //     },
+  //     style: ElevatedButton.styleFrom(
+  //       backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
+  //       foregroundColor: isSelected ? Colors.white : Colors.black,
+  //     ),
+  //     child: Text(label),
+  //   );
+  // }
+
+  Widget _buildTabButton(String label) {
+    final isSelected = selectedTab == label;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectedTab = label;
+          if (selectedTab == 'Chart') {
+            filteredChatList = chatList
+                .where((item) => item.isGroup == false)
+                .toList();
+          } else if (selectedTab == 'Group') {
+            filteredChatList = chatList
+                .where((item) => item.isGroup == true)
+                .toList();
+          } else {
+            filteredChatList = chatList;
+          }
+        });
+      },
+      child: Container(
+padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight*1.5,horizontal: SizeConfig.blockWidth*3),
+        decoration: BoxDecoration(
+          color: isSelected?COLORS.primary:COLORS.neutralDarkTwo,
+          borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3)
+        ),
+        margin: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth),
+        child:    Text(
+          label,
+          style: TextStyle(
+              color: isSelected?COLORS.white:COLORS.neutralDark,
+              fontSize: SizeConfig.blockWidth * 3.4,
+              fontWeight: FontWeight.w500,
+              fontFamily: "Poppins",
+              height: SizeConfig.blockHeight * 0.2),
+        ),
+      ),
+    );
+
   }
 }
