@@ -316,6 +316,13 @@ class ProfileDao {
     return response;
   }
 
+  Future fetchPinCodeList({required String cityID}) async {
+    var url = '${Config.url}/common/pincodes?city_id=$cityID';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+    return response;
+  }
 
 
 }

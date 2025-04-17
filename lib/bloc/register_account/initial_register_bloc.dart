@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:works_app/models/pincode_list_modal.dart';
 import 'package:works_app/ui/onboarding/register_form.dart';
 import '../../components/config.dart';
 import '../../components/local_constant.dart';
@@ -44,6 +45,9 @@ class InitialRegisterBloc
     });
     on<FetchWorkKnownLanguageProfileEvent>((event, emit) async {
       await mapFetchKnownLanguagePlace(event, emit);
+    });
+    on<FetchPinListEvent>((event, emit) async {
+      await mapFetchPinCodeListPlace(event, emit);
     });
   }
 
@@ -217,6 +221,35 @@ class InitialRegisterBloc
           emit(FetchKnownLanguageSuccess(
             dropDownItems: fetchKnownLanguageDropDown.data,
             message: fetchKnownLanguageDropDown.message,
+          ));
+        } else {
+          emit(FetchDropDownFailed(
+              message: jsonDecoded["message"] ?? "Failed to fetch data"));
+        }
+      } else {
+        emit(FetchDropDownFailed(message: "Error: ${response.statusCode}"));
+      }
+    } catch (error) {
+      emit(FetchDropDownFailed(message: "Something went wrong: $error"));
+    }
+  }
+
+
+  Future<void> mapFetchPinCodeListPlace(FetchPinListEvent event,
+      Emitter<InitialRegisterState> emit) async {
+    try {
+      emit(const FetchPinListLoading());
+      var response = await profileDao.fetchPinCodeList(cityID: event.cityId);
+      customLog(response);
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+        if (jsonDecoded['status'] == true) {
+          List<PincodeListModal> dropDownItems = (jsonDecoded['data'] as List)
+              .map((notification) => PincodeListModal.fromJson(notification))
+              .toList();
+          emit(FetchPinListSuccess(
+            dropDownItems: dropDownItems,message: jsonDecoded["message"]
           ));
         } else {
           emit(FetchDropDownFailed(

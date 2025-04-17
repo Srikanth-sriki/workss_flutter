@@ -102,3 +102,10 @@ class FetchWorkKnownLanguageProfileEvent extends InitialRegisterEvent {
   @override
   List<Object> get props => [];
 }
+
+class FetchPinListEvent extends InitialRegisterEvent {
+  String cityId;
+  FetchPinListEvent({required this.cityId});
+  @override
+  List<Object> get props => [cityId];
+}
