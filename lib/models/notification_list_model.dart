@@ -13,6 +13,7 @@ class NotificationModel {
   String? description;
   bool? isRead;
   Content? content;
+  DateTime ?createdAt;
 
 
   NotificationModel({
@@ -24,6 +25,7 @@ class NotificationModel {
      this.description,
      this.isRead,
      this.content,
+    this.createdAt
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) => NotificationModel(
@@ -35,6 +37,9 @@ class NotificationModel {
     description: json["description"]??"",
     isRead: json["is_read"]??"",
     content: json.containsKey('content') && json['content'] != null?Content.fromJson(json["content"]):null,
+    createdAt: json["createdAt"] != null
+        ? DateTime.parse(json["createdAt"])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -46,6 +51,7 @@ class NotificationModel {
     "description": description,
     "is_read": isRead,
     "content": content?.toJson(),
+    "createdAt": createdAt!.toIso8601String(),
   };
 }
 

@@ -140,7 +140,7 @@ class ChatViewGroupInfo {
   bool isGroup;
   List<String> archivedFor;
   List<Participant> participants;
-  ParticipantsDetails? participantsDetails;
+  // ParticipantsDetails? participantsDetails;
 
   ChatViewGroupInfo({
     this.id = "",
@@ -151,7 +151,7 @@ class ChatViewGroupInfo {
     this.isGroup = false,
     List<String>? archivedFor,
     List<Participant>? participants,
-    this.participantsDetails,
+    // this.participantsDetails,
   })  : archivedFor = archivedFor ?? [],
         participants = participants ?? [];
 
@@ -170,9 +170,9 @@ class ChatViewGroupInfo {
             ? List<Participant>.from(
             json["participants"].map((x) => Participant.fromJson(x)))
             : [],
-        participantsDetails: json["participantsDetails"] != null
-            ? ParticipantsDetails.fromJson(json["participantsDetails"])
-            : null,
+        // participantsDetails: json["participantsDetails"] != null
+        //     ? ParticipantsDetails.fromJson(json["participantsDetails"])
+        //     : null,
 
       );
 
@@ -186,7 +186,7 @@ class ChatViewGroupInfo {
     "archived_for": List<dynamic>.from(archivedFor.map((x) => x)),
     "participants":
     List<dynamic>.from(participants.map((x) => x.toJson())),
-    "participantsDetails": participantsDetails!.toJson(),
+    // "participantsDetails": participantsDetails!.toJson(),
   };
 }
 

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/bloc/chart/chart_bloc.dart';
@@ -7,6 +8,7 @@ import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
+import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/popup.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -36,6 +38,13 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     return hasProfilePic
         ? (isRead ? SizeConfig.blockWidth * 65 : SizeConfig.blockWidth * 33)
         : (isRead ? SizeConfig.blockWidth * 53 : SizeConfig.blockWidth * 45);
+  }
+
+  bool isToday(DateTime dateTime) {
+    final now = DateTime.now();
+    return dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day;
   }
 
   @override
@@ -136,184 +145,173 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                       height: SizeConfig.blockHeight * 80,
                       child: emptyComponent());
                 }
+                final Map<String, List<NotificationModel>> grouped = {};
+                for (var notification in state.notifications) {
+                  String key = formatChatDate(notification.createdAt!);
+                  grouped.putIfAbsent(key, () => []).add(notification);
+                }
+
+
+
+                final List<GroupedNotificationItem> displayList = [];
+                grouped.forEach((key, value) {
+                  displayList.add(GroupedNotificationItem.header(key));
+                  for (var notif in value) {
+                    displayList.add(GroupedNotificationItem.item(notif));
+                  }
+                });
                 return ListView.builder(
                   padding: EdgeInsets.symmetric(
                       vertical: SizeConfig.blockHeight * 2,
                       horizontal: SizeConfig.blockWidth * 4.5),
-                  itemCount: state.notifications.length,
+                  itemCount: displayList.length,
                   itemBuilder: (context, index) {
-                    final notification = state.notifications[index];
-                    return Dismissible(
-                        key: Key(notification.id!),
-                        direction: DismissDirection.horizontal,
-                        onDismissed: (direction) {
-                          context.read<NotificationBloc>().add(
-                              FetchNotificationSingleClear(
-                                  notification.id!));
-                        },
-                        background: Container(
-                          margin: EdgeInsets.symmetric(
-                              vertical: SizeConfig.blockHeight),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(
-                                      SizeConfig.blockWidth * 3)),
-                              color: COLORS.semantic),
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 4),
-                          child: Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Swipe to delete',
-                                style: TextStyle(
-                                  color: COLORS.white,
-                                  fontSize: SizeConfig.blockWidth * 3.25,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: "Poppins",
-                                ),
-                                softWrap: true,
-                              ),
-                              Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                                size: SizeConfig.blockWidth * 5,
-                              ),
-                            ],
+                    final item = displayList[index];
+                    if (item.isHeader) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: SizeConfig.blockHeight,
+                          top: SizeConfig.blockHeight,
+                        ),
+                        child: Text(
+                          item.header!,
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.25,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
                           ),
                         ),
-                        child: Container(
-                          width: SizeConfig.blockWidth * 100,
-                          margin: EdgeInsets.symmetric(
-                              vertical: SizeConfig.blockHeight),
-                          padding: EdgeInsets.symmetric(
-                              vertical: SizeConfig.blockHeight * 2,
-                              horizontal: SizeConfig.blockWidth * 4),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(
-                                      SizeConfig.blockWidth * 3)),
-                              color: COLORS.primaryOne.withOpacity(0.3)),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (notification.type == 'friend_request' ||
-                                  notification.type == 'group_invite') ...[
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                      children: [
-                                        if (notification!.content!
-                                            .profilePic!.isNotEmpty)
-                                          Container(
-                                            width: SizeConfig.blockWidth * 12,
-                                            height: SizeConfig.blockWidth * 12,
-                                            decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(notification.content!.profilePic!),
-                                                  fit: BoxFit.fill,
-                                                ),
-                                                borderRadius: BorderRadius.all(Radius.circular(SizeConfig.blockWidth * 3))),
-                                          ),
-                                        SizedBox(width: SizeConfig.blockWidth * 2,),
-                                        SizedBox(
-                                          width: getWidth(notification),
-                                          child: Text(
-                                            notification.content!.body!,
-                                            style: TextStyle(
-                                              color: COLORS.neutralDark,
-                                              fontSize: SizeConfig.blockWidth * 3,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Poppins",
-                                            ),
-                                            softWrap: true,
-                                            overflow: TextOverflow.clip,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    if(notification.isRead! == false)...[
+                      );
+                    }else{
+                      final notification = item.notification!;
+                      return Dismissible(
+                          key: Key(notification.id!),
+                          direction: DismissDirection.horizontal,
+                          onDismissed: (direction) {
+                            context.read<NotificationBloc>().add(
+                                FetchNotificationSingleClear(
+                                    notification.id!));
+                          },
+                          background: Container(
+                            margin: EdgeInsets.symmetric(
+                                vertical: SizeConfig.blockHeight),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(
+                                        SizeConfig.blockWidth * 3)),
+                                color: COLORS.semantic),
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: SizeConfig.blockWidth * 4),
+                            child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Swipe to delete',
+                                  style: TextStyle(
+                                    color: COLORS.white,
+                                    fontSize: SizeConfig.blockWidth * 3.25,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Poppins",
+                                  ),
+                                  softWrap: true,
+                                ),
+                                Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                  size: SizeConfig.blockWidth * 5,
+                                ),
+                              ],
+                            ),
+                          ),
+                          child: Container(
+                            width: SizeConfig.blockWidth * 100,
+                            margin: EdgeInsets.symmetric(
+                                vertical: SizeConfig.blockHeight),
+                            padding: EdgeInsets.symmetric(
+                                vertical: SizeConfig.blockHeight * 2,
+                                horizontal: SizeConfig.blockWidth * 4),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(
+                                        SizeConfig.blockWidth * 3)),
+                                color: COLORS.primaryOne.withOpacity(0.3)),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (notification.type == 'friend_request' ||
+                                    notification.type == 'group_invite') ...[
+                                  Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.center,
+                                    children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                         children: [
-                                          InkWell(
-                                            onTap: (){
-                                              if(notification.type == 'friend_request'){
-                                                showInterestedBloc.add(RejectRequestFriendsEvent(
-                                                    id: notification.content!.requestId!,
-                                                    onSuccess: (message) {
-                                                      showCustomSnackBar(
-                                                          context: context,
-                                                          message: message,
-                                                          backgroundColor: COLORS.neutralDarkTwo);
-                                                      notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
-                                                    },
-                                                    onError: (message) {
-                                                      showCustomSnackBar(
-                                                        context: context,
-                                                        message: message,
-                                                      );
-                                                    })
-                                                );
-                                              }
-                                              if(notification.type == 'group_invite'){
-                                                chartBloc.add(RejectGroupChatEvent(chatId: notification.content!.inviteId!,
-                                                    onSuccess: (message) {
-                                                      showCustomSnackBar(
-                                                          context: context,
-                                                          message: message,
-                                                          backgroundColor: COLORS.neutralDarkTwo);
-                                                      notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
-                                                    },
-                                                    onError: (message) {
-                                                      showCustomSnackBar(
-                                                        context: context,
-                                                        message: message,
-                                                      );
-                                                    }
-                                                ));
-                                              }
-                                            },
-                                            child: Container(
-                                              height: SizeConfig.blockHeight * 5,
-                                              width: SizeConfig.blockWidth * 10,
+                                          if (notification!.content!
+                                              .profilePic!.isNotEmpty)
+                                            Container(
+                                              width: SizeConfig.blockWidth * 12,
+                                              height: SizeConfig.blockWidth * 12,
                                               decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius
-                                                      .circular(SizeConfig
-                                                      .blockWidth *
-                                                      2),
-                                                  color:
-                                                  COLORS.neutralDarkTwo),
-                                              child: Icon(
-                                                Icons.clear,
-                                                size:
-                                                SizeConfig.blockWidth * 6,
-                                                color: COLORS.neutralDark,
-                                              ),
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(notification.content!.profilePic!),
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                  borderRadius: BorderRadius.all(Radius.circular(SizeConfig.blockWidth * 3))),
                                             ),
-                                          ),
-                                          SizedBox(
-                                            width:
-                                            SizeConfig.blockWidth * 2,
-                                          ),
-                                          customIconButton(
-                                              text: notification.type == 'friend_request'?'Accept':notification.type == 'group_invite'?'Join':'',
-                                              onPressed: () {
+                                          SizedBox(width: SizeConfig.blockWidth * 2,),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                width: getWidth(notification),
+                                                child: Text(
+                                                  notification.content!.body!,
+                                                  style: TextStyle(
+                                                    color: COLORS.neutralDark,
+                                                    fontSize: SizeConfig.blockWidth * 3,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Poppins",
+                                                  ),
+                                                  softWrap: true,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: isToday(notification.createdAt!) ? 1 : 4,
+                                                ),
+                                              ),
+                                              if (isToday(notification.createdAt!))
+                                              Text(
+                                                DateFormat('h:mm a').format(notification.createdAt!),
+                                                style: TextStyle(
+                                                  color: COLORS.neutralDarkOne,
+                                                  fontSize: SizeConfig.blockWidth * 3,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontFamily: "Poppins",
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      if(notification.isRead! == false)...[
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            InkWell(
+                                              onTap: (){
                                                 if(notification.type == 'friend_request'){
-                                                  showInterestedBloc.add(AcceptRequestFriendsEvent(
+                                                  showInterestedBloc.add(RejectRequestFriendsEvent(
                                                       id: notification.content!.requestId!,
                                                       onSuccess: (message) {
                                                         showCustomSnackBar(
@@ -327,12 +325,11 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                                                           context: context,
                                                           message: message,
                                                         );
-                                                      }
-                                                  )
+                                                      })
                                                   );
                                                 }
                                                 if(notification.type == 'group_invite'){
-                                                  chartBloc.add(AcceptChatEvent(chatId: notification.content!.inviteId!,
+                                                  chartBloc.add(RejectGroupChatEvent(chatId: notification.content!.inviteId!,
                                                       onSuccess: (message) {
                                                         showCustomSnackBar(
                                                             context: context,
@@ -349,32 +346,95 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                                                   ));
                                                 }
                                               },
-                                              width: SizeConfig.blockWidth * 23,
-                                              height: SizeConfig.blockHeight * 6.5,
-                                              backgroundColor: COLORS.primary,
-                                              textColor: COLORS.white,
+                                              child: Container(
+                                                height: SizeConfig.blockHeight * 5,
+                                                width: SizeConfig.blockWidth * 10,
+                                                decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius
+                                                        .circular(SizeConfig
+                                                        .blockWidth *
+                                                        2),
+                                                    color:
+                                                    COLORS.neutralDarkTwo),
+                                                child: Icon(
+                                                  Icons.clear,
+                                                  size:
+                                                  SizeConfig.blockWidth * 6,
+                                                  color: COLORS.neutralDark,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                              SizeConfig.blockWidth * 2,
+                                            ),
+                                            customIconButton(
+                                                text: notification.type == 'friend_request'?'Accept':notification.type == 'group_invite'?'Join':'',
+                                                onPressed: () {
+                                                  if(notification.type == 'friend_request'){
+                                                    showInterestedBloc.add(AcceptRequestFriendsEvent(
+                                                        id: notification.content!.requestId!,
+                                                        onSuccess: (message) {
+                                                          showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                              backgroundColor: COLORS.neutralDarkTwo);
+                                                          notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                        },
+                                                        onError: (message) {
+                                                          showCustomSnackBar(
+                                                            context: context,
+                                                            message: message,
+                                                          );
+                                                        }
+                                                    )
+                                                    );
+                                                  }
+                                                  if(notification.type == 'group_invite'){
+                                                    chartBloc.add(AcceptChatEvent(chatId: notification.content!.inviteId!,
+                                                        onSuccess: (message) {
+                                                          showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                              backgroundColor: COLORS.neutralDarkTwo);
+                                                          notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                        },
+                                                        onError: (message) {
+                                                          showCustomSnackBar(
+                                                            context: context,
+                                                            message: message,
+                                                          );
+                                                        }
+                                                    ));
+                                                  }
+                                                },
+                                                width: SizeConfig.blockWidth * 23,
+                                                height: SizeConfig.blockHeight * 6.5,
+                                                backgroundColor: COLORS.primary,
+                                                textColor: COLORS.white,
 
-                                              showIcon: false)
-                                        ],
-                                      )
-                                    ]
-                                  ],
-                                )
-                              ] else ...[
-                                Text(
-                                  notification.description!,
-                                  style: TextStyle(
-                                    color: COLORS.neutralDark,
-                                    fontSize: SizeConfig.blockWidth * 3.15,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: "Poppins",
+                                                showIcon: false)
+                                          ],
+                                        )
+                                      ]
+                                    ],
+                                  )
+                                ] else ...[
+                                  Text(
+                                    notification.description!,
+                                    style: TextStyle(
+                                      color: COLORS.neutralDark,
+                                      fontSize: SizeConfig.blockWidth * 3.15,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: "Poppins",
+                                    ),
+                                    softWrap: true,
                                   ),
-                                  softWrap: true,
-                                ),
-                              ]
-                            ],
-                          ),
-                        ));
+                                ]
+                              ],
+                            ),
+                          ));
+                    }
                   },
                 );
               } else if (state is NotificationFetchFailure) {
@@ -434,3 +494,18 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
         ]),);
   }
 }
+
+class GroupedNotificationItem {
+  final String? header;
+  final NotificationModel? notification;
+  final bool isHeader;
+
+  GroupedNotificationItem.header(this.header)
+      : notification = null,
+        isHeader = true;
+
+  GroupedNotificationItem.item(this.notification)
+      : header = null,
+        isHeader = false;
+}
+
