@@ -228,6 +228,8 @@ class User {
   String profilePic;
   String userType;
   String professionType;
+  FriendRequestSent ?isFriend;
+  FriendRequestSent? friendRequestSent;
 
   User({
     this.id = "",
@@ -235,6 +237,8 @@ class User {
     this.profilePic = "",
     this.userType = "",
     this.professionType = "",
+     this.isFriend,
+     this.friendRequestSent,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -243,6 +247,11 @@ class User {
     profilePic: json["profile_pic"] ?? "",
     userType: json["user_type"] ?? "",
     professionType: json["profession_type"] ?? "",
+    isFriend: json["isFriend"] != null
+        ? FriendRequestSent.fromJson(json["isFriend"]):null,
+    friendRequestSent: json.containsKey('friendRequestSent') && json['friendRequestSent'] != null
+        ?FriendRequestSent.fromJson(json["friendRequestSent"])
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -251,6 +260,8 @@ class User {
     "profile_pic": profilePic,
     "user_type": userType,
     "profession_type": professionType,
+    "isFriend": isFriend,
+    "friendRequestSent": friendRequestSent!.toJson(),
   };
 }
 
@@ -321,20 +332,20 @@ class ParticipantsDetailsUser {
 }
 
 class FriendRequestSent {
-  String id;
-  String userId;
-  String senderId;
+  String? id;
+  String? userId;
+  String? senderId;
 
   FriendRequestSent({
-    required this.id,
-    required this.userId,
-    required this.senderId,
+     this.id,
+     this.userId,
+     this.senderId,
   });
 
   factory FriendRequestSent.fromJson(Map<String, dynamic> json) => FriendRequestSent(
-    id: json["id"],
-    userId: json["userId"],
-    senderId: json["senderId"],
+    id: json["id"]??"",
+    userId: json["userId"]??"",
+    senderId: json["senderId"]??"",
   );
 
   Map<String, dynamic> toJson() => {

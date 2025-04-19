@@ -18,14 +18,16 @@ class ChartGroupCreateEvent extends ChartEvent {
   String name;
   String description;
   List<String> invitedUsers;
+  String type;
   ChartGroupCreateEvent({
     required this.picture,
     required this.name,
     required this.description,
     required this.invitedUsers,
+    required this.type
   });
   @override
-  List<Object> get props => [picture, name, description, invitedUsers];
+  List<Object> get props => [picture, name, description, invitedUsers,type];
 }
 
 

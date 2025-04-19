@@ -59,10 +59,13 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   int friendListCount = 0;
   late io.Socket socket;
   String selectedTab = 'All';
+  bool _isMounted = false;
+  bool screenReload = true;
 
   @override
   void initState() {
     super.initState();
+    _isMounted = true;
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
     socket = io.io(Config.socketUrl, <String, dynamic>{
@@ -73,10 +76,29 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     if (!socket.connected) {
       SocketService().reconnect();
     }
+    connectToSocket();
+  }
+  void connectToSocket() {
+    socket.on('new_message', (data) {
+      if (_isMounted) {
+        setState(() {
+          setState(() {
+            screenReload = false;
+          });
+          _fetchData();
+
+          print(data);
+        });
+      }
+    });
   }
 
   void _refreshPageAfterEdit() {
+    setState(() {
+      screenReload = true;
+    });
     _fetchData();
+
   }
 
   void _fetchData() {
@@ -91,7 +113,20 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    setState(() {
+      screenReload = true;
+    });
     _fetchData();
+  }
+
+  @override
+  void dispose() {
+    _isMounted = false;
+
+    socket.off('new_message');
+    socket.disconnect();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -293,7 +328,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                   listener: (context, state) {
                     if (state is ChartListLoading) {
                       setState(() {
-                        isChatListLoading = true;
+                        if(screenReload){
+                          isChatListLoading = true;
+                        }
                       });
                     } else if (state is ChartListSuccess) {
                       setState(() {
@@ -318,62 +355,72 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            left: SizeConfig.blockWidth * 4.5,
-                            top: SizeConfig.blockHeight * 2,
-                            right: SizeConfig.blockWidth * 4.5,
-                            bottom: SizeConfig.blockHeight),
-                        child: InkWell(
-                          splashColor: Colors.white.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3.5),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChatListSearch(chatList: chatList),
-                                ));
-                          },
-                          child: Container(
-                            height: SizeConfig.blockHeight * 7,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 4.5,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 3),
-                              color: COLORS.neutralDarkTwo.withOpacity(0.6),
-                            ),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/home/search.png',
-                                  width: SizeConfig.blockWidth * 5.5,
-                                  height: SizeConfig.blockWidth * 5.5,
-                                  fit: BoxFit.contain,
-                                ),
-                                SizedBox(
-                                  width: SizeConfig.blockWidth * 4,
-                                ),
-                                Text(
-                                  'Search your chats'.tr(),
-                                  style: TextStyle(
-                                    color: COLORS.neutralDarkOne,
-                                    fontSize: SizeConfig.blockWidth * 3.25,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: "Poppins",
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: COLORS.neutralDarkTwo,
+                              width: SizeConfig.blockWidth*0.15
+                            )
+                          )
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              left: SizeConfig.blockWidth * 4.5,
+                              top: SizeConfig.blockHeight * 2,
+                              right: SizeConfig.blockWidth * 4.5,
+                              bottom: SizeConfig.blockHeight),
+                          child: InkWell(
+                            splashColor: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3.5),
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChatListSearch(chatList: chatList),
+                                  ));
+                            },
+                            child: Container(
+                              height: SizeConfig.blockHeight * 7,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: SizeConfig.blockWidth * 4.5,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    SizeConfig.blockWidth * 3),
+                                color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                              ),
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/home/search.png',
+                                    width: SizeConfig.blockWidth * 5.5,
+                                    height: SizeConfig.blockWidth * 5.5,
+                                    fit: BoxFit.contain,
                                   ),
-                                )
-                              ],
+                                  SizedBox(
+                                    width: SizeConfig.blockWidth * 4,
+                                  ),
+                                  Text(
+                                    'Search your chats'.tr(),
+                                    style: TextStyle(
+                                      color: COLORS.neutralDarkOne,
+                                      fontSize: SizeConfig.blockWidth * 3.25,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: "Poppins",
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                      const Divider(
-                        color: COLORS.neutralDarkTwo,
-                      ),
+                      // const Divider(
+                      //   color: COLORS.neutralDarkTwo,
+                      // ),
                       Expanded(
                           child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -382,7 +429,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: SizeConfig.blockHeight),
+
                             if (isChatListLoading && isFriendsListLoad) ...[
                               SizedBox(
                                 height: SizeConfig.blockHeight * 60,
@@ -403,6 +450,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                               )
                             ],
                             if (!isFriendsListLoad && friends.isNotEmpty) ...[
+                              SizedBox(height: SizeConfig.blockHeight),
                               Padding(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: SizeConfig.blockWidth * 4.5,

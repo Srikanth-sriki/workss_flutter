@@ -155,6 +155,13 @@ class _AddressListModalBottomSheetState
                                                 BlocProvider(
                                                     create: (context) =>
                                                         ProfileBloc()),
+                                                BlocProvider(
+                                                  create: (context) {
+                                                    final bloc = InitialRegisterBloc();
+                                                    bloc.add(const FetchCityEvent());
+                                                    return bloc;
+                                                  },
+                                                ),
                                               ],
                                               child: AddressScreen(
                                                 refreshPageCallback:
@@ -194,7 +201,7 @@ class _AddressListModalBottomSheetState
                                 // );
                                 widget.onAddressSelected(
                                   addressItem.id!,
-                                  '${addressItem.locality ?? ''} ${addressItem.city ?? ''} }',
+                                  '${addressItem.locality ?? ''} ${addressItem.city ?? ''} ',
                                   addressItem.latitude!,addressItem.longitude!,
                                 );
                                 Navigator.pop(context);
@@ -390,6 +397,13 @@ class _AddressListModalBottomSheetState
                                                   BlocProvider(
                                                       create: (context) =>
                                                           ProfileBloc()),
+                                                  BlocProvider(
+                                                    create: (context) {
+                                                      final bloc = InitialRegisterBloc();
+                                                      bloc.add(const FetchCityEvent());
+                                                      return bloc;
+                                                    },
+                                                  ),
                                                 ],
                                                 child: AddressScreen(
                                                   refreshPageCallback:

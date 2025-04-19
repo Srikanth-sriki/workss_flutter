@@ -237,8 +237,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   void dispose() {
     _isMounted = false;
 
-    socket.off('new_message');
-    socket.disconnect();
+    // socket.off('new_message');
+    // socket.disconnect();
     recorderController.dispose();
     _messageController.dispose();
     _scrollController.dispose();
@@ -576,34 +576,143 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                     },
                                   ),
                                   if (widget.isGroup == false) ...[
-                                    // BottomSheetItem(
-                                    //   title: chatViewGroupInfo.participantsDetails?.user.isFriend != null ? 'UNFRIEND'.tr() : chatViewGroupInfo.participantsDetails?.user.friendRequestSent != null ? 'REQUEST SENT'.tr() : 'ADD FRIEND',
-                                    //   onTap: () => {
-                                    //     showInterestedBloc.add(UnfriendsEvent(
-                                    //         friendId: filteredParticipants![0]
-                                    //             .userId!,
-                                    //         onSuccess: (message) {
-                                    //           Navigator.pushNamed(
-                                    //             context,
-                                    //             '/main_screen',
-                                    //             arguments: {'selectedIndex': 3},
-                                    //           );
-                                    //           showCustomSnackBar(
-                                    //               context: context,
-                                    //               message:
-                                    //                   "Successfully unfriended!",
-                                    //               backgroundColor:
-                                    //                   COLORS.semanticTwo);
-                                    //           widget.refreshPageCallback();
-                                    //         },
-                                    //         onError: (message) {
-                                    //           showCustomSnackBar(
-                                    //             context: context,
-                                    //             message: message,
-                                    //           );
-                                    //         }))
-                                    //   },
-                                    // ),
+                                    BottomSheetItem(
+                                      title: filteredParticipants[0]
+                                                  .user
+                                                  .isFriend !=
+                                              null
+                                          ? 'Unfriend'.tr()
+                                          : filteredParticipants[0]
+                                                      .user
+                                                      .friendRequestSent !=
+                                                  null
+                                              ? 'Request Sent'.tr()
+                                              : 'Add Friend',
+                                      onTap: () => {
+                                        if (filteredParticipants[0]
+                                                .user
+                                                .isFriend !=
+                                            null)
+                                          {
+                                            showInterestedBloc.add(
+                                                UnfriendsEvent(
+                                                    friendId:
+                                                        filteredParticipants![0]
+                                                            .userId!,
+                                                    onSuccess: (message) {
+                                                      Navigator.pushNamed(
+                                                        context,
+                                                        '/main_screen',
+                                                        arguments: {
+                                                          'selectedIndex': 3
+                                                        },
+                                                      );
+                                                      showCustomSnackBar(
+                                                          context: context,
+                                                          message:
+                                                              "Successfully unfriended!",
+                                                          backgroundColor:
+                                                              COLORS
+                                                                  .semanticTwo);
+                                                      widget
+                                                          .refreshPageCallback();
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    }))
+                                          }
+                                        else if (filteredParticipants[0]
+                                                .user
+                                                .friendRequestSent !=
+                                            null)
+                                          {
+                                            showInterestedBloc.add(
+                                                UnSendFriendEvent(
+                                                    userId:
+                                                        filteredParticipants![0]
+                                                            .userId!,
+                                                    onSuccess: (message) {
+                                                      setState(() {
+                                                        filteredParticipants[
+                                                        0]
+                                                            .user
+                                                            .isFriend = null;
+                                                        filteredParticipants[
+                                                        0]
+                                                            .user
+                                                            .friendRequestSent =
+                                                        null;
+                                                        Navigator.pushNamed(
+                                                          context,
+                                                          '/main_screen',
+                                                          arguments: {
+                                                            'selectedIndex': 3
+                                                          },
+                                                        );
+                                                        showCustomSnackBar(
+                                                            context: context,
+                                                            message: message,
+                                                            backgroundColor:
+                                                            COLORS.semanticTwo);
+                                                        widget
+                                                            .refreshPageCallback();
+                                                      });
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    }))
+                                          }
+                                        else
+                                          {
+                                            showInterestedBloc.add(
+                                                AddFriendEvent(
+                                                    userId:
+                                                        filteredParticipants![0]
+                                                            .userId!,
+                                                    onSuccess: (message) {
+                                                      widget
+                                                          .refreshPageCallback();
+                                                      setState(() {
+                                                        filteredParticipants[0]
+                                                                .user
+                                                                .friendRequestSent =
+                                                            FriendRequestSent(
+                                                          id: filteredParticipants[
+                                                                  0]
+                                                              .user
+                                                              .id,
+                                                        );
+                                                        Navigator.pushNamed(
+                                                          context,
+                                                          '/main_screen',
+                                                          arguments: {
+                                                            'selectedIndex': 3
+                                                          },
+                                                        );
+                                                        showCustomSnackBar(
+                                                            context: context,
+                                                            message: message,
+                                                            backgroundColor:
+                                                            COLORS.semanticTwo);
+                                                        widget
+                                                            .refreshPageCallback();
+                                                      });
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    }))
+                                          }
+                                      },
+                                    ),
                                     BottomSheetItem(
                                       title: 'Delete Chat',
                                       onTap: () => {

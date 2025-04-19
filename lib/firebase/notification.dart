@@ -41,6 +41,7 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
     AndroidNotification? android = message.notification?.android;
     print('22222222222222222222222222222222222222');
     print('22222222222222222222222222222222222222');
+    print(notification!.body);
     if (notification != null && !kIsWeb) {
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,
@@ -68,7 +69,7 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
     RemoteNotification? notification = message.notification;
     print('1111111111111111111111111111111111111111111111111');
     if (notification != null && !kIsWeb) {
-      _handleNotificationNavigation(navigatorKey);
+      _handleNotificationNavigation(navigatorKey,message);
     }
   });
 
@@ -78,7 +79,7 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && !kIsWeb) {
-        _handleNotificationNavigation(navigatorKey);
+        _handleNotificationNavigation(navigatorKey,message);
       }
       flutterLocalNotificationsPlugin.show(
         notification.hashCode,
@@ -103,31 +104,72 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
   });
 }
 
-void _handleNotificationNavigation(GlobalKey<NavigatorState> navigatorKey) {
+// void _handleNotificationNavigation(GlobalKey<NavigatorState> navigatorKey) {
+//   final context = navigatorKey.currentContext;
+//   if (context == null) return;
+//
+//   Navigator.push(
+//     context,
+//     MaterialPageRoute(
+//       builder: (context) => MultiBlocProvider(
+//         providers: [
+//           BlocProvider(
+//             create: (_) => NotificationBloc()..add(const FetchNotificationList()),
+//           ),
+//           BlocProvider(create: (_) => ShowInterestedBloc()),
+//           BlocProvider(create: (_) => ChartBloc()),
+//           BlocProvider(
+//             create: (_) => FriendsBloc()
+//               ..add(FetchFriendsRequestListEvent(
+//                 page: 1,
+//                 pageSize: 10,
+//                 keyWord: '',
+//               )),
+//           ),
+//         ],
+//         child: const NotificationListScreen(),
+//       ),
+//     ),
+//   );
+// }
+
+
+void _handleNotificationNavigation(GlobalKey<NavigatorState> navigatorKey, RemoteMessage message) {
   final context = navigatorKey.currentContext;
   if (context == null) return;
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (_) => NotificationBloc()..add(const FetchNotificationList()),
-          ),
-          BlocProvider(create: (_) => ShowInterestedBloc()),
-          BlocProvider(create: (_) => ChartBloc()),
-          BlocProvider(
-            create: (_) => FriendsBloc()
-              ..add(FetchFriendsRequestListEvent(
-                page: 1,
-                pageSize: 10,
-                keyWord: '',
-              )),
-          ),
-        ],
-        child: const NotificationListScreen(),
+  final notificationBody = message.notification?.body ?? '';
+  final data = message.data;
+
+  if (notificationBody.contains('new message')) {
+    Navigator.pushNamed(
+      context,
+      '/main_screen',
+      arguments: {'selectedIndex': 3},
+    );
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => NotificationBloc()..add(const FetchNotificationList()),
+            ),
+            BlocProvider(create: (_) => ShowInterestedBloc()),
+            BlocProvider(create: (_) => ChartBloc()),
+            BlocProvider(
+              create: (_) => FriendsBloc()
+                ..add(FetchFriendsRequestListEvent(
+                  page: 1,
+                  pageSize: 10,
+                  keyWord: '',
+                )),
+            ),
+          ],
+          child: const NotificationListScreen(),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

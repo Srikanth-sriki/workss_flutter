@@ -171,7 +171,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         picture: profilePicture,
         name: groupName.text,
         description: groupDescription.text,
-        invitedUsers: selectedFriends));
+        invitedUsers: selectedFriends,type: _selectedGroupType!));
   }
 
   void checkSelectedId() {

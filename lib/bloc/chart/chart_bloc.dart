@@ -164,6 +164,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
           picture: event.picture,
           name: event.name,
           invitedUsers: event.invitedUsers,
+          type: event.type,
           description: event.description);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {

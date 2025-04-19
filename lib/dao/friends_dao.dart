@@ -149,6 +149,7 @@ class FriendsDao {
     required String name,
     required String description,
     required List<dynamic> invitedUsers,
+    required String type,
   }) async {
     var url = '${Config.url}/user/chat/create-group';
     Map<String, dynamic> body = {
@@ -156,6 +157,7 @@ class FriendsDao {
       "name": name,
       "description": description,
       "invitedUsers": invitedUsers,
+      "type":type
     };
     final response = await http.post(
       Uri.parse(url),
