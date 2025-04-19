@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:works_app/ui/profile/logout_success.dart';
 
 import '../../../bloc/profile/profile_bloc.dart';
+import '../../../bloc/register_account/initial_register_bloc.dart';
 import '../../../components/global_handle.dart';
 import '../../../global_helper/helper_function.dart';
 import '../../../global_helper/loading_placeholder/home_layout.dart';
@@ -186,10 +187,15 @@ class _AddressListModalBottomSheetState
                                 setState(() {
                                   selectedAddressId = addressItem.id;
                                 });
+                                // widget.onAddressSelected(
+                                //   addressItem.id!,
+                                //   '${addressItem.houseNo ?? ''} ${addressItem.area ?? ''} ${addressItem.instructions ?? ''}',
+                                //     addressItem.latitude!,addressItem.longitude!,
+                                // );
                                 widget.onAddressSelected(
                                   addressItem.id!,
-                                  '${addressItem.houseNo ?? ''} ${addressItem.area ?? ''} ${addressItem.instructions ?? ''}',
-                                    addressItem.latitude!,addressItem.longitude!,
+                                  '${addressItem.locality ?? ''} ${addressItem.city ?? ''} }',
+                                  addressItem.latitude!,addressItem.longitude!,
                                 );
                                 Navigator.pop(context);
                               },
@@ -304,6 +310,13 @@ class _AddressListModalBottomSheetState
                                                             BlocProvider(
                                                                 create: (context) =>
                                                                     ProfileBloc()),
+                                                            BlocProvider(
+                                                              create: (context) {
+                                                                final bloc = InitialRegisterBloc();
+                                                                bloc.add(const FetchCityEvent());
+                                                                return bloc;
+                                                              },
+                                                            ),
                                                           ],
                                                           child: EditAddressScreen(
                                                               routeType:"modal",

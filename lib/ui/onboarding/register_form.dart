@@ -63,7 +63,7 @@ class _RegisterFormState extends State<RegisterForm> {
   String? selectedCharges;
   String? _selectedCity;
   String? _selectedProfession;
-  String? _SelectedPinCode;
+  String? _selectedPinCode;
   bool buttonVisible = true;
   bool nameError = false;
   bool emailError = false;
@@ -87,8 +87,8 @@ class _RegisterFormState extends State<RegisterForm> {
   String? longitude = "0.0";
   bool cityLoading = true;
   bool pinCodeLoading = true;
-  List<String>  dropdownCityItem = [];
-  Map<String, String> cityMap ={};
+  List<String> dropdownCityItem = [];
+  Map<String, String> cityMap = {};
   bool feesChargesLoading = true;
   List<String> feesChargesItem = [];
   List<String> pinCodeListItem = [];
@@ -96,28 +96,27 @@ class _RegisterFormState extends State<RegisterForm> {
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
   List<String> professionalTypesItem = [];
-  bool profileSelected =false;
-  bool nameSelected =false;
-  bool emailSelected =false;
-  bool pincodeSelected =false;
-  bool professionalSelected =false;
-  bool experienceSelected =false;
-  bool chargesSelected =false;
-  bool ageSelected =false;
-  bool languageSelected =false;
-  bool bioSelected =false;
-  bool imagesSelected =false;
+  bool profileSelected = false;
+  bool nameSelected = false;
+  bool emailSelected = false;
+  bool pincodeSelected = false;
+  bool professionalSelected = false;
+  bool experienceSelected = false;
+  bool chargesSelected = false;
+  bool ageSelected = false;
+  bool languageSelected = false;
+  bool bioSelected = false;
+  bool imagesSelected = false;
   bool citySelected = false;
-  String? cityIdSelected = '';
+
 
   void _validateForm() {
-
     bool isValid = false;
 
     if (widget.userType != 'jobs' &&
         _enterName.text.isNotEmpty &&
         (_selectedCity?.isNotEmpty ?? false) &&
-        pinCodeController.text.isNotEmpty ) {
+        _selectedPinCode!.isNotEmpty) {
       isValid = true;
     }
 
@@ -129,9 +128,9 @@ class _RegisterFormState extends State<RegisterForm> {
         chargesController.text.isNotEmpty &&
         (_selectedGender != null) &&
         bioController.text.isNotEmpty &&
-        pinCodeController.text.isNotEmpty &&
+        _selectedPinCode!.isNotEmpty &&
         ageController.text.isNotEmpty &&
-        selectedLanguage.isNotEmpty ) {
+        selectedLanguage.isNotEmpty) {
       isValid = true;
     }
 
@@ -139,7 +138,6 @@ class _RegisterFormState extends State<RegisterForm> {
       isSubmitButtonEnabled = isValid;
     });
   }
-
 
   void _submitButton() {
     if (_profileImage == null) {
@@ -155,7 +153,7 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }  else {
+    } else {
       if (isSubmitButtonEnabled == true) {
         List<String> languageSelect =
             selectedLanguage.map((lang) => lang.name).toList();
@@ -168,7 +166,7 @@ class _RegisterFormState extends State<RegisterForm> {
               widget.userType == 'jobs' ? 'professional' : 'non_professional',
           profession_type:
               widget.userType == 'jobs' ? _selectedProfession : null,
-          pincode: pinCodeController.text,
+          pincode: _selectedPinCode!,
           city: _selectedCity!,
           gender:
               widget.userType == 'jobs' ? _selectedGender!.toLowerCase() : null,
@@ -324,8 +322,9 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   } else if (state is FetchCitySuccess) {
                     setState(() {
-                       cityMap = {
-                        for (var city in state.dropDownItems) city.city: city.id,
+                      cityMap = {
+                        for (var city in state.dropDownItems)
+                          city.city: city.id,
                       };
                       dropdownCityItem = cityMap.keys.toList();
                       cityLoading = false;
@@ -345,20 +344,18 @@ class _RegisterFormState extends State<RegisterForm> {
                     setState(() {
                       feesChargesLoading = false;
                     });
-                  }
-                  else if(state is FetchPinListLoading){
+                  } else if (state is FetchPinListLoading) {
                     setState(() {
                       pinCodeLoading = true;
                     });
-                  }
-                  else if(state is FetchPinListSuccess){
+                  } else if (state is FetchPinListSuccess) {
                     setState(() {
-                      pinCodeListItem =
-                          state.dropDownItems.map((item) => item.pincode).toList();
+                      pinCodeListItem = state.dropDownItems
+                          .map((item) => item.pincode)
+                          .toList();
                       pinCodeLoading = false;
                     });
-                  }
-                  else if(state is FetchPinListFailed){
+                  } else if (state is FetchPinListFailed) {
                     setState(() {
                       pinCodeLoading = false;
                     });
@@ -431,21 +428,23 @@ class _RegisterFormState extends State<RegisterForm> {
                             error: nameError,
                             onChanged: (value) {
                               _validateForm();
-                              if(value!.isNotEmpty){
+                              if (value!.isNotEmpty) {
                                 setState(() {
                                   nameSelected = true;
                                 });
-                              }
-                              else{
+                              } else {
                                 setState(() {
                                   nameSelected = false;
                                 });
                               }
                             },
                             title: 'name'.tr(),
-                            color: nameSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                            fontWeight: nameSelected?FontWeight.w400:FontWeight.w500
-                        ),
+                            color: nameSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark,
+                            fontWeight: nameSelected
+                                ? FontWeight.w400
+                                : FontWeight.w500),
                         _buildMobileNumber(),
                         _buildTextField(
                             label: 'Email Address',
@@ -465,177 +464,209 @@ class _RegisterFormState extends State<RegisterForm> {
                             error: emailError,
                             onChanged: (value) {
                               _validateForm();
-                              if(value!.isNotEmpty){
+                              if (value!.isNotEmpty) {
                                 setState(() {
                                   emailSelected = true;
                                 });
-                              }
-                              else{
+                              } else {
                                 setState(() {
                                   emailSelected = false;
                                 });
                               }
                             },
                             title: 'email'.tr(),
-                            color: emailSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                            fontWeight: emailSelected?FontWeight.w400:FontWeight.w500
-                        ),
-                        buildTextField(
-                          label: 'Pincode',
-                          inputNameType: TextInputType.phone,
-                          maxLength: 6,
-                          controller: pinCodeController,
-                          hintText: _isLoadingMap
-                              ? "Fetching current pincode..."
-                              : "Enter your pincode".tr(),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              setState(() => pinError = true);
-                              return 'Please enter a pincode'.tr();
-                            } else if (value!.length != 6) {
-                              setState(() => pinError = true);
-                              return 'Please enter valid pincode'.tr();
-                            }
-                            setState(() => pinError = false);
-                            return null;
-                          },
-                          prefix: true,
-                          prefixIcon: _isLoadingMap
-                              ? Container(
-                                  height: SizeConfig.blockHeight,
-                                  width: SizeConfig.blockHeight,
-                                  padding: EdgeInsets.all(
-                                      SizeConfig.blockWidth * 3.5),
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: SizeConfig.blockWidth * 0.5,
-                                      color: COLORS.accent))
-                              : null,
-                          onTap: () async {},
-                          error: pinError,
-                          onChanged: (value) {
-                            _onPinCodeChanged(value);
-                            if(value!.isNotEmpty){
-                              setState(() {
-                                pincodeSelected = true;
-                              });
-                            }
-                            else{
-                              setState(() {
-                                pincodeSelected = false;
-                              });
-                            }
-                            return null;
-                          },
-                          title: 'Pincode'.tr(),
-                            color: pincodeSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                            fontWeight: pincodeSelected?FontWeight.w400:FontWeight.w500
-                        ),
+                            color: emailSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark,
+                            fontWeight: emailSelected
+                                ? FontWeight.w400
+                                : FontWeight.w500),
+                        // buildTextField(
+                        //   label: 'Pincode',
+                        //   inputNameType: TextInputType.phone,
+                        //   maxLength: 6,
+                        //   controller: pinCodeController,
+                        //   hintText: _isLoadingMap
+                        //       ? "Fetching current pincode..."
+                        //       : "Enter your pincode".tr(),
+                        //   validator: (value) {
+                        //     if (value == null || value.isEmpty) {
+                        //       setState(() => pinError = true);
+                        //       return 'Please enter a pincode'.tr();
+                        //     } else if (value!.length != 6) {
+                        //       setState(() => pinError = true);
+                        //       return 'Please enter valid pincode'.tr();
+                        //     }
+                        //     setState(() => pinError = false);
+                        //     return null;
+                        //   },
+                        //   prefix: true,
+                        //   prefixIcon: _isLoadingMap
+                        //       ? Container(
+                        //           height: SizeConfig.blockHeight,
+                        //           width: SizeConfig.blockHeight,
+                        //           padding: EdgeInsets.all(
+                        //               SizeConfig.blockWidth * 3.5),
+                        //           child: CircularProgressIndicator(
+                        //               strokeWidth: SizeConfig.blockWidth * 0.5,
+                        //               color: COLORS.accent))
+                        //       : null,
+                        //   onTap: () async {},
+                        //   error: pinError,
+                        //   onChanged: (value) {
+                        //     _onPinCodeChanged(value);
+                        //     if(value!.isNotEmpty){
+                        //       setState(() {
+                        //         pincodeSelected = true;
+                        //       });
+                        //     }
+                        //     else{
+                        //       setState(() {
+                        //         pincodeSelected = false;
+                        //       });
+                        //     }
+                        //     return null;
+                        //   },
+                        //   title: 'Pincode'.tr(),
+                        //     color: pincodeSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
+                        //     fontWeight: pincodeSelected?FontWeight.w400:FontWeight.w500
+                        // ),
                         buildDropdown(
-                          label: 'city'.tr(),
-                          hintText: 'Select your city'.tr(),
-                          items: dropdownCityItem,
-                          onChanged: (value) => setState(() {
-                            _selectedCity = value;
-                            citySelected = true;
-                            print(cityMap[value]);
-                            pinCodeLoading = true;
-                            initialRegisterBloc.add(FetchPinListEvent(cityId: cityMap[value]!));
-                            _validateForm();
-                          }),
-                          itemLoading: cityLoading,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select your city'.tr();
-                            }
-                            return null;
-                          },
-                            color: citySelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                            fontWeight: citySelected?FontWeight.w400:FontWeight.w500
-                        ),
-
-                        buildDropdown(
-                            label: 'Pincode'.tr(),
-                            hintText: 'Select your city pincode'.tr(),
-                            items: pinCodeListItem,
+                            label: 'city'.tr(),
+                            hintText: 'Select your city'.tr(),
+                            items: dropdownCityItem,
                             onChanged: (value) => setState(() {
-                              _SelectedPinCode = value;
-                              setState(() {
-                                pincodeSelected = true;
-                              });
-                              _validateForm();
-                            }),
-                            itemLoading: pinCodeLoading,
+                                  _selectedCity = value;
+                                  citySelected = true;
+                                  print(cityMap[value]);
+
+                                  _selectedPinCode = '';
+                                  pincodeSelected = false;
+                                  pinCodeListItem = [];
+
+                                  pinCodeLoading = true;
+
+                                  initialRegisterBloc.add(FetchPinListEvent(
+                                      cityId: cityMap[value]!));
+
+                                  _validateForm();
+                                }),
+                            itemLoading: cityLoading,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please select your city'.tr();
                               }
                               return null;
                             },
-                            color: citySelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                            fontWeight: citySelected?FontWeight.w400:FontWeight.w500
-                        ),
-                        if (widget.userType == 'jobs') ...[
-                          SizedBox(height: SizeConfig.blockHeight),
+                            color: citySelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark,
+                            fontWeight: citySelected
+                                ? FontWeight.w400
+                                : FontWeight.w500),
+                        if (pinCodeLoading == true) ...[
+                          registerText(
+                              text: 'Pincode'.tr(), color: COLORS.neutralDark),
+                          dropDownLoader(hintText: 'Select your city pincode')
+                        ],
+                        if (pinCodeLoading == false) ...[
                           buildDropdown(
-                            label: 'profession_type'.tr(),
-                            hintText: 'Select your Profession'.tr(),
-                            items: professionalTypesItem,
-                            onChanged: (value) => setState(() {
-                              _selectedProfession = value;
-                              profileSelected = true;
-                              _validateForm();
-                            }),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select your profession'.tr();
-                              }
-                              return null;
-                            },
-                            itemLoading: professionalTypesLoading,
-                              color: profileSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                              fontWeight: profileSelected?FontWeight.w400:FontWeight.w500
-                          )
+                              label: 'Pincode'.tr(),
+                              hintText: 'Select your city pincode'.tr(),
+                              items: pinCodeListItem,
+                              onChanged: (value) => setState(() {
+                                _selectedPinCode = value;
+                                    setState(() {
+                                      pincodeSelected = true;
+                                      if(value!.isNotEmpty) {
+                                          _onPinCodeChanged(value);
+                                      }
+                                    });
+                                    _validateForm();
+                                  }),
+                              itemLoading: pinCodeLoading,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select your city pincode'.tr();
+                                }
+                                return null;
+                              },
+                              color: pincodeSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: pincodeSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500)
                         ],
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          registerText(text: 'years_of_experience'.tr(),
-                              color: experienceSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                              fontWeight: experienceSelected?FontWeight.w400:FontWeight.w500
-                          ),
-                          normalTextField(
-                              hintText: "Enter your experience(In years)".tr(),
-                              controller: experienceController,
-                              inputType: TextInputType.number,
-                              maxLength: 4,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}$')),
-                              ],
-                              onChanged: (value) {
-                                _validateForm();
-                                if(value!.isNotEmpty){
-                                  setState(() {
-                                    experienceSelected = true;
-                                  });
-                                }
-                                else{
-                                  setState(() {
-                                    experienceSelected = false;
-                                  });
-                                }
-                              },
+                          buildDropdown(
+                              label: 'profession_type'.tr(),
+                              hintText: 'Select your Profession'.tr(),
+                              items: professionalTypesItem,
+                              onChanged: (value) => setState(() {
+                                    _selectedProfession = value;
+                                    professionalSelected = true;
+                                    _validateForm();
+                                  }),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  setState(() => yearError = true);
-                                  return 'Please enter a valid experience'.tr();
+                                  return 'Please select your profession'.tr();
                                 }
-                                setState(() => yearError = false);
                                 return null;
                               },
-                              fontWeight: FontWeight.w400,
-                              errorMessage: '',
-                              suffix: true,
-                              prefix: false,
-                              hasError: yearError,
+                              itemLoading: professionalTypesLoading,
+                              color: professionalSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: professionalSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500)
+                        ],
+                        if (widget.userType == 'jobs') ...[
+                          SizedBox(height: SizeConfig.blockHeight),
+                          registerText(
+                              text: 'years_of_experience'.tr(),
+                              color: experienceSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: experienceSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500),
+                          normalTextField(
+                            hintText: "Enter your experience(In years)".tr(),
+                            controller: experienceController,
+                            inputType: TextInputType.number,
+                            maxLength: 4,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d{0,2}$')),
+                            ],
+                            onChanged: (value) {
+                              _validateForm();
+                              if (value!.isNotEmpty) {
+                                setState(() {
+                                  experienceSelected = true;
+                                });
+                              } else {
+                                setState(() {
+                                  experienceSelected = false;
+                                });
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                setState(() => yearError = true);
+                                return 'Please enter a valid experience'.tr();
+                              }
+                              setState(() => yearError = false);
+                              return null;
+                            },
+                            fontWeight: FontWeight.w400,
+                            errorMessage: '',
+                            suffix: true,
+                            prefix: false,
+                            hasError: yearError,
                             suffixIcon: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -660,22 +691,24 @@ class _RegisterFormState extends State<RegisterForm> {
                                         color: COLORS.accent,
                                         fontWeight: FontWeight.w400,
                                         fontFamily: "Poppins",
-                                        fontSize:
-                                        SizeConfig.blockWidth * 3.5),
+                                        fontSize: SizeConfig.blockWidth * 3.5),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                               ],
                             ),
-
                           ),
                           SizedBox(height: SizeConfig.blockHeight),
                         ],
                         if (widget.userType == 'jobs') ...[
-                          registerText(text: 'charges_daily_wages'.tr(),
-                              color: chargesSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                              fontWeight: chargesSelected?FontWeight.w400:FontWeight.w500
-                          ),
+                          registerText(
+                              text: 'charges_daily_wages'.tr(),
+                              color: chargesSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: chargesSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500),
                           normalTextField(
                             hintText: "Charges".tr(),
                             controller: chargesController,
@@ -686,12 +719,11 @@ class _RegisterFormState extends State<RegisterForm> {
                             ],
                             onChanged: (value) {
                               _validateForm();
-                              if(value!.isNotEmpty){
+                              if (value!.isNotEmpty) {
                                 setState(() {
                                   chargesSelected = true;
                                 });
-                              }
-                              else{
+                              } else {
                                 setState(() {
                                   chargesSelected = false;
                                 });
@@ -743,7 +775,8 @@ class _RegisterFormState extends State<RegisterForm> {
                                       maxWidth: SizeConfig.blockWidth *
                                           35, // Add constraints
                                     ),
-                                    padding: EdgeInsets.only(right: SizeConfig.blockWidth*3),
+                                    padding: EdgeInsets.only(
+                                        right: SizeConfig.blockWidth * 3),
                                     child: CustomDropdownButtonFormField(
                                       selectedValue: selectedCharge,
                                       items: feesChargesItem,
@@ -805,26 +838,28 @@ class _RegisterFormState extends State<RegisterForm> {
                           //   },
                           // ),
                           buildDynamicRadioSelection(
-                            options: [
-                              {'label': 'Male', 'value': 'male'},
-                              {'label': 'Female', 'value': 'female'},
-
-                            ],
-                            onChanged: (value) => setState(() {
-                              _selectedGender = value;
-                            }),
-                            groupValue: _selectedGender,
-                            title: 'select_gender'.tr(),
+                              options: [
+                                {'label': 'Male', 'value': 'male'},
+                                {'label': 'Female', 'value': 'female'},
+                              ],
+                              onChanged: (value) => setState(() {
+                                    _selectedGender = value;
+                                  }),
+                              groupValue: _selectedGender,
+                              title: 'select_gender'.tr(),
                               color: COLORS.neutralDarkOne,
-                              fontWeight: FontWeight.w400
-                          ),
+                              fontWeight: FontWeight.w400),
                         ],
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          registerText(text: 'Age'.tr(),
-                              color: ageSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                              fontWeight: ageSelected?FontWeight.w400:FontWeight.w500
-                          ),
+                          registerText(
+                              text: 'Age'.tr(),
+                              color: ageSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: ageSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500),
                           normalTextField(
                               hintText: "Enter your age".tr(),
                               controller: ageController,
@@ -835,12 +870,11 @@ class _RegisterFormState extends State<RegisterForm> {
                               ],
                               onChanged: (value) {
                                 _validateForm();
-                                if(value!.isNotEmpty){
+                                if (value!.isNotEmpty) {
                                   setState(() {
                                     ageSelected = true;
                                   });
-                                }
-                                else{
+                                } else {
                                   setState(() {
                                     ageSelected = false;
                                   });
@@ -861,7 +895,6 @@ class _RegisterFormState extends State<RegisterForm> {
                                 setState(() => ageError = false);
                                 return null;
                               },
-
                               fontWeight: FontWeight.w400,
                               errorMessage: '',
                               suffix: true,
@@ -901,10 +934,14 @@ class _RegisterFormState extends State<RegisterForm> {
                         ],
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          registerText(text: 'known_language'.tr(),
-                              color: languageSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                              fontWeight: languageSelected?FontWeight.w400:FontWeight.w500
-                          ),
+                          registerText(
+                              text: 'known_language'.tr(),
+                              color: languageSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: languageSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500),
                           if (!knowLanguageLoading) ...[
                             MultiDropdown<Language>(
                               items: knownLanguageItems,
@@ -937,7 +974,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   )),
                               fieldDecoration: FieldDecoration(
                                 animateSuffixIcon: true,
-                                borderRadius:  SizeConfig.blockWidth * 4,
+                                borderRadius: SizeConfig.blockWidth * 4,
                                 padding: EdgeInsets.only(
                                   top: SizeConfig.blockHeight * 2.7,
                                   bottom: SizeConfig.blockHeight * 2.7,
@@ -1004,7 +1041,6 @@ class _RegisterFormState extends State<RegisterForm> {
                           if (knowLanguageLoading) ...[
                             dropDownLoader(hintText: 'Select Languages')
                           ],
-
                           SizedBox(
                             height: SizeConfig.blockHeight * 2.5,
                           ),
@@ -1023,30 +1059,29 @@ class _RegisterFormState extends State<RegisterForm> {
                               error: bioError,
                               onChanged: (value) {
                                 _validateForm();
-                                if(value!.isNotEmpty){
+                                if (value!.isNotEmpty) {
                                   setState(() {
                                     bioSelected = true;
                                   });
-                                }
-                                else{
+                                } else {
                                   setState(() {
                                     bioSelected = false;
                                   });
                                 }
                               },
                               title: 'Bio'.tr(),
-                              color: bioSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-                              fontWeight: bioSelected?FontWeight.w400:FontWeight.w500
-                          ),
-
-
+                              color: bioSelected
+                                  ? COLORS.neutralDarkOne
+                                  : COLORS.neutralDark,
+                              fontWeight: bioSelected
+                                  ? FontWeight.w400
+                                  : FontWeight.w500),
                           MultipleImagePickerComponent(
                             onImagesSelected: _onImagesSelected,
                             error: imagesList,
                             removeImage: _removeImage,
                           ),
                         ],
-
                       ],
                     ),
                   )),
@@ -1079,12 +1114,11 @@ class _RegisterFormState extends State<RegisterForm> {
               customButton(
                 text: 'submit_button'.tr(),
                 onPressed: () {
-                  if(isSubmitButtonEnabled) {
+                  if (isSubmitButtonEnabled) {
                     if (_formKey.currentState!.validate()) {
                       _submitButton();
                     }
                   }
-
                 },
                 backgroundColor: isSubmitButtonEnabled
                     ? COLORS.primary
@@ -1134,9 +1168,10 @@ class _RegisterFormState extends State<RegisterForm> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: 'profile_picture'.tr(),color: profileSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
-        fontWeight: profileSelected?FontWeight.w400:FontWeight.w500
-        ),
+        registerText(
+            text: 'profile_picture'.tr(),
+            color: profileSelected ? COLORS.neutralDarkOne : COLORS.neutralDark,
+            fontWeight: profileSelected ? FontWeight.w400 : FontWeight.w500),
         _profileImage == null
             ? ImagePickerComponent(
                 onImageSelected: (File image) {
@@ -1185,21 +1220,21 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildTextField(
-      {required String label,
-      required TextEditingController controller,
-      required String hintText,
-      required String? Function(String?) validator,
-      required String? Function(String?) onChanged,
-      required bool error,
-      required String title,
-        Color? color = COLORS.neutralDark,
-        FontWeight? fontWeight = FontWeight. w500,
-      }) {
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required String? Function(String?) validator,
+    required String? Function(String?) onChanged,
+    required bool error,
+    required String title,
+    Color? color = COLORS.neutralDark,
+    FontWeight? fontWeight = FontWeight.w500,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: title,color: color,fontWeight: fontWeight),
+        registerText(text: title, color: color, fontWeight: fontWeight),
         normalTextField(
           hintText: hintText,
           controller: controller,
@@ -1279,21 +1314,21 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildBioTextField(
-      {required String label,
-      required TextEditingController controller,
-      required String hintText,
-      required String? Function(String?) validator,
-      required String? Function(String?) onChanged,
-      required bool error,
-      required String title,
-        Color? color = COLORS.neutralDark,
-        FontWeight? fontWeight = FontWeight. w500,
-      }) {
+  Widget _buildBioTextField({
+    required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required String? Function(String?) validator,
+    required String? Function(String?) onChanged,
+    required bool error,
+    required String title,
+    Color? color = COLORS.neutralDark,
+    FontWeight? fontWeight = FontWeight.w500,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: title,color: color,fontWeight: fontWeight),
+        registerText(text: title, color: color, fontWeight: fontWeight),
         normalTextField(
             hintText: hintText,
             controller: controller,

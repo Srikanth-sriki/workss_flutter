@@ -56,6 +56,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   bool showSearchBar = false;
   bool selectAll = false;
   List<Map<String, dynamic>> selectedItems = [];
+  String? _selectedGroupType = 'private';
+  bool profileSelected = false;
+  bool nameSelected = false;
+  bool descriptionSelected = false;
 
   @override
   void initState() {
@@ -333,6 +337,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
             listener: (context, state) {
               if (state is UploadImageSuccess) {
                 profilePicture = state.filePath;
+                profileSelected = true;
               } else if (state is UploadImageFailed) {
                 showCustomSnackBar(
                   context: context,
@@ -370,8 +375,39 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                   error: groupNameError,
                                   onChanged: (value) {
                                     _validateForm();
+                                    if (value!.isNotEmpty) {
+                                      setState(() {
+                                        nameSelected = true;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        nameSelected = false;
+                                      });
+                                    }
                                   },
-                                  title: 'Group Name'.tr()),
+                                  title: 'Group Name'.tr(),
+                                  color: nameSelected
+                                      ? COLORS.neutralDarkOne
+                                      : COLORS.neutralDark,
+                                  fontWeight: nameSelected
+                                      ? FontWeight.w400
+                                      : FontWeight.w500),
+                              buildDynamicRadioSelection(
+                                  title: 'Gender'.tr(),
+                                  options: [
+                                    {'label': 'Private', 'value': 'private'},
+                                    {'label': 'Public', 'value': 'public'}
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedGroupType = value;
+                                      _validateForm();
+                                    });
+                                  },
+                                  groupValue: _selectedGroupType,
+                                  color: COLORS.neutralDarkOne ,fontWeight:  FontWeight.w400
+                              ),
+                              SizedBox(height: SizeConfig.blockHeight * 1),
                               _buildBioTextField(
                                   label: 'Group Description'.tr(),
                                   controller: groupDescription,
@@ -389,8 +425,24 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                   error: groupDescriptionError,
                                   onChanged: (value) {
                                     _validateForm();
+                                    if (value!.isNotEmpty) {
+                                      setState(() {
+                                        descriptionSelected = true;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        descriptionSelected = false;
+                                      });
+                                    }
                                   },
-                                  title: 'Group Description'.tr()),
+                                  title: 'Group Description'.tr(),
+                                  color: descriptionSelected
+                                      ? COLORS.neutralDarkOne
+                                      : COLORS.neutralDark,
+                                  fontWeight: descriptionSelected
+                                      ? FontWeight.w400
+                                      : FontWeight.w500
+                              ),
                             ])),
                   ))
                 : Container(
@@ -667,7 +719,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: 'Group Picture'.tr()),
+        registerText(text: 'Group Picture'.tr(),color: profileSelected ? COLORS.neutralDarkOne : COLORS.neutralDark,
+    fontWeight: profileSelected ? FontWeight.w400 : FontWeight.w500),
         _profileImage == null
             ? ImagePickerComponent(
                 onImageSelected: (File image) {
@@ -722,11 +775,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       required String? Function(String?) validator,
       required String? Function(String?) onChanged,
       required bool error,
-      required String title}) {
+      required String title, Color? color = COLORS.neutralDark,
+        FontWeight? fontWeight = FontWeight.w500,}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: title),
+        registerText(text: title, color: color, fontWeight: fontWeight),
         normalTextField(
           hintText: hintText,
           controller: controller,
@@ -749,11 +803,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       required String? Function(String?) validator,
       required String? Function(String?) onChanged,
       required bool error,
-      required String title}) {
+      required String title,Color? color = COLORS.neutralDark,
+        FontWeight? fontWeight = FontWeight.w500,}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: title),
+        registerText(text: title, color: color, fontWeight: fontWeight),
         normalTextField(
             hintText: hintText,
             controller: controller,

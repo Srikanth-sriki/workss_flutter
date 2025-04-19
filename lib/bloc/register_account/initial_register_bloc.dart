@@ -49,6 +49,9 @@ class InitialRegisterBloc
     on<FetchPinListEvent>((event, emit) async {
       await mapFetchPinCodeListPlace(event, emit);
     });
+    on<FetchLocalitiesListEvent>((event, emit) async {
+      await mapFetchLocalityListPlace(event, emit);
+    });
   }
 
   Future<void> mapUploadImageEvent(
@@ -260,6 +263,33 @@ class InitialRegisterBloc
       }
     } catch (error) {
       emit(FetchDropDownFailed(message: "Something went wrong: $error"));
+    }
+  }
+
+  Future<void> mapFetchLocalityListPlace(FetchLocalitiesListEvent event,
+      Emitter<InitialRegisterState> emit) async {
+    try {
+      emit(const FetchLocalitiesListLoading());
+      var response = await profileDao.fetchLocalitieCodeList(cityID: event.cityId);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+        if (jsonDecoded['status'] == true) {
+          List<PincodeListModal> dropDownItems = (jsonDecoded['data'] as List)
+              .map((notification) => PincodeListModal.fromJson(notification))
+              .toList();
+          emit(FetchLocalitiesListSuccess(
+              dropDownItems: dropDownItems,message: jsonDecoded["message"]
+          ));
+        } else {
+          emit(FetchLocalitiesListFailed(
+              message: jsonDecoded["message"] ?? "Failed to fetch data"));
+        }
+      } else {
+        emit(FetchLocalitiesListFailed(message: "Error: ${response.statusCode}"));
+      }
+    } catch (error) {
+      emit(FetchLocalitiesListFailed(message: "Something went wrong: $error"));
     }
   }
 }

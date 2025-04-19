@@ -576,34 +576,34 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                     },
                                   ),
                                   if (widget.isGroup == false) ...[
-                                    BottomSheetItem(
-                                      title: chatViewGroupInfo.participantsDetails?.user.isFriend != null ? 'UNFRIEND'.tr() : chatViewGroupInfo.participantsDetails?.user.friendRequestSent != null ? 'REQUEST SENT'.tr() : 'ADD FRIEND',
-                                      onTap: () => {
-                                        showInterestedBloc.add(UnfriendsEvent(
-                                            friendId: filteredParticipants![0]
-                                                .userId!,
-                                            onSuccess: (message) {
-                                              Navigator.pushNamed(
-                                                context,
-                                                '/main_screen',
-                                                arguments: {'selectedIndex': 3},
-                                              );
-                                              showCustomSnackBar(
-                                                  context: context,
-                                                  message:
-                                                      "Successfully unfriended!",
-                                                  backgroundColor:
-                                                      COLORS.semanticTwo);
-                                              widget.refreshPageCallback();
-                                            },
-                                            onError: (message) {
-                                              showCustomSnackBar(
-                                                context: context,
-                                                message: message,
-                                              );
-                                            }))
-                                      },
-                                    ),
+                                    // BottomSheetItem(
+                                    //   title: chatViewGroupInfo.participantsDetails?.user.isFriend != null ? 'UNFRIEND'.tr() : chatViewGroupInfo.participantsDetails?.user.friendRequestSent != null ? 'REQUEST SENT'.tr() : 'ADD FRIEND',
+                                    //   onTap: () => {
+                                    //     showInterestedBloc.add(UnfriendsEvent(
+                                    //         friendId: filteredParticipants![0]
+                                    //             .userId!,
+                                    //         onSuccess: (message) {
+                                    //           Navigator.pushNamed(
+                                    //             context,
+                                    //             '/main_screen',
+                                    //             arguments: {'selectedIndex': 3},
+                                    //           );
+                                    //           showCustomSnackBar(
+                                    //               context: context,
+                                    //               message:
+                                    //                   "Successfully unfriended!",
+                                    //               backgroundColor:
+                                    //                   COLORS.semanticTwo);
+                                    //           widget.refreshPageCallback();
+                                    //         },
+                                    //         onError: (message) {
+                                    //           showCustomSnackBar(
+                                    //             context: context,
+                                    //             message: message,
+                                    //           );
+                                    //         }))
+                                    //   },
+                                    // ),
                                     BottomSheetItem(
                                       title: 'Delete Chat',
                                       onTap: () => {

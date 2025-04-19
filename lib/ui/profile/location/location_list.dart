@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 
 import 'package:works_app/ui/profile/location/location_create.dart';
@@ -221,6 +222,13 @@ class _LocationListScreenState extends State<LocationListScreen> {
                                                                 MultiBlocProvider(
                                                                   providers: [
                                                                     BlocProvider(
+                                                                      create: (context) {
+                                                                        final bloc = InitialRegisterBloc();
+                                                                        bloc.add(const FetchCityEvent());
+                                                                        return bloc;
+                                                                      },
+                                                                    ),
+                                                                    BlocProvider(
                                                                         create: (context) =>
                                                                             ProfileBloc()),
                                                                   ],
@@ -323,6 +331,13 @@ class _LocationListScreenState extends State<LocationListScreen> {
                               providers: [
                                 BlocProvider(
                                     create: (context) => ProfileBloc()),
+                                BlocProvider(
+                                  create: (context) {
+                                    final bloc = InitialRegisterBloc();
+                                    bloc.add(const FetchCityEvent());
+                                    return bloc;
+                                  },
+                                ),
                               ],
                               child: AddressScreen(
                                 refreshPageCallback: _refreshPageAfterEdit,

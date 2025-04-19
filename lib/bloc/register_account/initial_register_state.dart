@@ -140,3 +140,28 @@ class FetchPinListFailed extends InitialRegisterState {
   @override
   List<Object> get props => [message];
 }
+
+
+class FetchLocalitiesListSuccess extends InitialRegisterState {
+  List<PincodeListModal> dropDownItems = [];
+  final String message;
+
+  FetchLocalitiesListSuccess(
+      {required this.dropDownItems, required this.message});
+
+  @override
+  List<Object> get props => [dropDownItems, message];
+}
+
+class FetchLocalitiesListLoading extends InitialRegisterState {
+  const FetchLocalitiesListLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class FetchLocalitiesListFailed extends InitialRegisterState {
+  String message;
+  FetchLocalitiesListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

@@ -48,6 +48,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   late ChartBloc chartBloc;
   List<Friend> friends = [];
   List<ChatList> chatList = [];
+  List<ChatList> filteredChatList = [];
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool isFriendsListLoad = true;
@@ -57,6 +58,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   String searchKeyword = "";
   int friendListCount = 0;
   late io.Socket socket;
+  String selectedTab = 'All';
 
   @override
   void initState() {
@@ -71,7 +73,6 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     if (!socket.connected) {
       SocketService().reconnect();
     }
-
   }
 
   void _refreshPageAfterEdit() {
@@ -111,7 +112,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                       context,
                       'Chat Options',
                       [
-                        if(friendListCount != 0)...[
+                        if (friendListCount != 0) ...[
                           BottomSheetItem(
                             title: 'Friends(${friendListCount})',
                             onTap: () => {
@@ -119,29 +120,31 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => MultiBlocProvider(
-                                        providers: [
-                                          BlocProvider(
-                                            create: (context) => FriendsBloc()
-                                              ..add(FetchFriendsListEvent(
-                                                  page: 1,
-                                                  pageSize: 10,
-                                                  keyWord: '')),
-                                          ),
-                                          BlocProvider(
-                                              create: (context) =>
-                                                  ReportPostBloc()),
-                                          BlocProvider(
-                                              create: (context) =>
-                                                  ChartBloc()),
-                                          BlocProvider(
-                                              create: (context) =>
-                                                  ShowInterestedBloc())
-                                        ],
-                                        child: FriendsSearchListScreen(
-                                          refreshPageCallback:
-                                          _refreshPageAfterEdit,
-                                        ),
-                                      )))
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) =>
+                                                    FriendsBloc()
+                                                      ..add(
+                                                          FetchFriendsListEvent(
+                                                              page: 1,
+                                                              pageSize: 10,
+                                                              keyWord: '')),
+                                              ),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ReportPostBloc()),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ChartBloc()),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc())
+                                            ],
+                                            child: FriendsSearchListScreen(
+                                              refreshPageCallback:
+                                                  _refreshPageAfterEdit,
+                                            ),
+                                          )))
                             },
                           ),
                         ],
@@ -245,15 +248,17 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => ChartBloc()
-                                            ..add(
-                                                const BlockedChatList()),
-                                        ),
-                                      ],
-                                      child:  BlockedChatsScreen(refreshPageCallback: _refreshPageAfterEdit,),
-                                    )))
+                                          providers: [
+                                            BlocProvider(
+                                              create: (context) => ChartBloc()
+                                                ..add(const BlockedChatList()),
+                                            ),
+                                          ],
+                                          child: BlockedChatsScreen(
+                                            refreshPageCallback:
+                                                _refreshPageAfterEdit,
+                                          ),
+                                        )))
                           },
                         ),
                       ],
@@ -293,6 +298,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                     } else if (state is ChartListSuccess) {
                       setState(() {
                         chatList = state.chatList;
+                        filteredChatList = state.chatList;
                         isChatListLoading = false;
                         isError = false;
                       });
@@ -504,83 +510,112 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                           });
                                     }),
                               ),
-                              const Divider(
-                                color: COLORS.neutralDarkTwo,
-                              ),
+                              // const Divider(
+                              //   color: COLORS.neutralDarkTwo,
+                              // ),
                             ],
                             if (!isChatListLoading && chatList.isNotEmpty) ...[
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: COLORS.primaryOne.withOpacity(0.1),
+                                    border: Border(
+                                        top: BorderSide(
+                                            color: COLORS.neutralDarkTwo,
+                                            width:
+                                                SizeConfig.blockWidth * 0.3))),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 4.5,
+                                  vertical: SizeConfig.blockHeight * 1,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    _buildTabButton('All'),
+                                    _buildTabButton('Chart'),
+                                    _buildTabButton('Groups')
+                                  ],
+                                ),
+                              ),
                               Padding(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: SizeConfig.blockWidth * 4.5,
                                   vertical: SizeConfig.blockHeight * 0.2,
                                 ),
                                 child: ListView.builder(
-                                    itemCount: chatList.length,
+                                    itemCount: filteredChatList.length,
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
                                     scrollDirection: Axis.vertical,
                                     itemBuilder: (context, index) {
                                       return chartSearchCards(
-                                          image: chatList[index].picture!,
-                                          name: chatList[index].name!,
+                                          image:
+                                              filteredChatList[index].picture!,
+                                          name: filteredChatList[index].name!,
                                           onTapCard: () {
                                             socket.emit("open_chat", {
                                               Config.id,
-                                              chatList[index].chatId!
+                                              filteredChatList[index].chatId!
                                             });
                                             Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        MultiBlocProvider(
-                                                          providers: [
-                                                            BlocProvider(
-                                                              create: (context) => ChartBloc()
-                                                                ..add(FetchChartViewEvent(
-                                                                    page: 1,
-                                                                    pageSize:
-                                                                        10,
-                                                                    chatId: chatList[
+                                                    builder:
+                                                        (context) =>
+                                                            MultiBlocProvider(
+                                                              providers: [
+                                                                BlocProvider(
+                                                                  create: (context) => ChartBloc()
+                                                                    ..add(FetchChartViewEvent(
+                                                                        page: 1,
+                                                                        pageSize:
+                                                                            10,
+                                                                        chatId:
+                                                                            filteredChatList[index].chatId!)),
+                                                                ),
+                                                                BlocProvider(
+                                                                    create: (context) =>
+                                                                        InitialRegisterBloc()),
+                                                                BlocProvider(
+                                                                    create: (context) =>
+                                                                        ShowInterestedBloc()),
+                                                              ],
+                                                              child:
+                                                                  ChatViewScreen(
+                                                                refreshPageCallback:
+                                                                    _refreshPageAfterEdit,
+                                                                chatId:
+                                                                    filteredChatList[
                                                                             index]
-                                                                        .chatId!)),
-                                                            ),
-                                                            BlocProvider(
-                                                                create: (context) =>
-                                                                    InitialRegisterBloc()),
-                                                            BlocProvider(
-                                                                create: (context) =>
-                                                                    ShowInterestedBloc()),
-                                                          ],
-                                                          child: ChatViewScreen(
-                                                            refreshPageCallback:
-                                                                _refreshPageAfterEdit,
-                                                            chatId:
-                                                                chatList[index]
-                                                                    .chatId!,
-                                                            isGroup:
-                                                                chatList[index]
-                                                                    .isGroup!,
-                                                          ),
-                                                        )));
+                                                                        .chatId!,
+                                                                isGroup:
+                                                                    filteredChatList[
+                                                                            index]
+                                                                        .isGroup!,
+                                                              ),
+                                                            )));
                                           },
-                                          message:
-                                              chatList[index].latestMessage !=
-                                                      null
-                                                  ? chatList[index]
-                                                      .latestMessage!
-                                                      .content!
-                                                  : "",
-                                          count: chatList[index].unreadCount!,
-                                          isGroup: chatList[index].isGroup!,
+                                          message: filteredChatList[index]
+                                                      .latestMessage !=
+                                                  null
+                                              ? filteredChatList[index]
+                                                  .latestMessage!
+                                                  .content!
+                                              : "",
+                                          count: filteredChatList[index]
+                                              .unreadCount!,
+                                          isGroup:
+                                              filteredChatList[index].isGroup!,
                                           date: formatChatDate(
-                                              chatList[index].updatedAt!));
+                                              filteredChatList[index]
+                                                  .updatedAt!));
                                     }),
                               )
                             ],
                             if (!isChatListLoading && chatList.isEmpty) ...[
                               Container(
-                                width: SizeConfig.blockWidth*100,
-                                height: SizeConfig.blockHeight*70,
+                                width: SizeConfig.blockWidth * 100,
+                                height: SizeConfig.blockHeight * 70,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -591,8 +626,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                               )
                             ] else if (isError && !isChatListLoading) ...[
                               Container(
-                                width: SizeConfig.blockWidth*100,
-                                height: SizeConfig.blockHeight*70,
+                                width: SizeConfig.blockWidth * 100,
+                                height: SizeConfig.blockHeight * 70,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -721,5 +756,69 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
               ),
             ),
           );
+  }
+
+  // Widget _buildTabButton(String label) {
+  //   final isSelected = selectedTab == label;
+  //   return ElevatedButton(
+  //     onPressed: () {
+  //       setState(() {
+  //         selectedTab = label;
+  //         if (selectedTab == 'Chart') {
+  //           filteredChatList = chatList
+  //               .where((item) => item.isGroup == false)
+  //               .toList();
+  //         } else if (selectedTab == 'Group') {
+  //           filteredChatList = chatList
+  //               .where((item) => item.isGroup == true)
+  //               .toList();
+  //         } else {
+  //           filteredChatList = chatList;
+  //         }
+  //       });
+  //     },
+  //     style: ElevatedButton.styleFrom(
+  //       backgroundColor: isSelected ? Colors.blue : Colors.grey[300],
+  //       foregroundColor: isSelected ? Colors.white : Colors.black,
+  //     ),
+  //     child: Text(label),
+  //   );
+  // }
+
+  Widget _buildTabButton(String label) {
+    final isSelected = selectedTab == label;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectedTab = label;
+          if (selectedTab == 'Chart') {
+            filteredChatList =
+                chatList.where((item) => item.isGroup == false).toList();
+          } else if (selectedTab == 'Group') {
+            filteredChatList =
+                chatList.where((item) => item.isGroup == true).toList();
+          } else {
+            filteredChatList = chatList;
+          }
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+            vertical: SizeConfig.blockHeight * 1,
+            horizontal: SizeConfig.blockWidth * 3),
+        decoration: BoxDecoration(
+            color: isSelected ? COLORS.primary : COLORS.neutralDarkTwo,
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.25)),
+        margin: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth),
+        child: Text(
+          label,
+          style: TextStyle(
+              color: isSelected ? COLORS.white : COLORS.neutralDark,
+              fontSize: SizeConfig.blockWidth * 3.2,
+              fontWeight: FontWeight.w500,
+              fontFamily: "Poppins",),
+        ),
+      ),
+    );
   }
 }

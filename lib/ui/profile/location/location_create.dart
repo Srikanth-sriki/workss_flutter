@@ -14,8 +14,11 @@ import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/profile/modal/address_success.dart';
 
+import '../../../bloc/register_account/initial_register_bloc.dart';
 import '../../../components/colors.dart';
 import '../../../dao/get_user_location.dart';
+import '../../../global_helper/dropdown.dart';
+import '../../../global_helper/loading_placeholder/home_layout.dart';
 import '../../../global_helper/reuse_widget.dart';
 import '../component.dart';
 
@@ -30,6 +33,7 @@ class AddressScreen extends StatefulWidget {
 }
 
 class _AddressScreenState extends State<AddressScreen> {
+  late InitialRegisterBloc initialRegisterBloc;
   GoogleMapController? _mapController;
   Location _location = Location();
   final TextEditingController houseNo = TextEditingController();
@@ -54,13 +58,43 @@ class _AddressScreenState extends State<AddressScreen> {
   bool locationAdded = false;
   bool instructionAdded = false;
   bool nameAddressAdded = false;
+  bool cityLoading = true;
+  bool localityLoading = true;
+  List<String> dropdownCityItem = [];
+  List<String> localityListItem = [];
+  Map<String, String> cityMap = {};
+  String? _selectedCity;
+  bool citySelected = false;
+  String? _selectedLocality;
+  bool localitySelected = false;
+  bool isSubmitButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
+    initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
     _getCurrentLocation();
   }
+
+
+  void _validateForm() {
+    bool isValid = false;
+
+    if (_currentAddress != 'Loading address...' &&
+        homeAddress.text.isNotEmpty &&
+        (_selectedCity?.isNotEmpty ?? false) &&
+        _selectedLocality?.isNotEmpty == true &&
+        (_selectedType != 'Other' || otherName.text.isNotEmpty)) {
+      isValid = true;
+    }
+
+    setState(() {
+      isSubmitButtonEnabled = isValid;
+    });
+  }
+
+
 
   Future<void> _getCurrentLocation() async {
     setState(() {
@@ -109,6 +143,10 @@ class _AddressScreenState extends State<AddressScreen> {
     setState(() {
       _currentAddress = addressData['address'] ?? '';
       homeAddress.text = addressData['address'] ?? '';
+      if(addressData['address']!.isNotEmpty){
+        locationAdded = true;
+      }
+      _validateForm();
     });
   }
 
@@ -146,40 +184,84 @@ class _AddressScreenState extends State<AddressScreen> {
           backgroundColor: COLORS.white,
           titleColors: COLORS.neutralDark,
         ),
-        body: BlocListener<ProfileBloc, ProfileState>(
-          listener: (context, state) {
-            if (state is AddressLocationLoading) {
-              setState(() {
-                loading = true;
-              });
-            } else if (state is AddressLocationCreateSuccess) {
-              setState(() {
-                loading = false;
-              });
-              showMaterialModalBottomSheet(
-                enableDrag: false,
-                expand: false,
-                isDismissible: false,
-                backgroundColor: COLORS.white,
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                builder: (context) => AddressSuccessBottomSheet(
-                  routePage: widget.routePage,
-                ),
-              );
-            } else if (state is AddressLocationCreateFailed) {
-              setState(() {
-                loading = false;
-              });
-              showCustomSnackBar(
-                context: context,
-                message: state.message,
-              );
-            }
-            setState(() {});
-          },
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<InitialRegisterBloc, InitialRegisterState>(
+              listener: (context, state) {
+               if (state is FetchCityLoading) {
+                  setState(() {
+                    cityLoading = true;
+                  });
+                }else if (state is FetchCitySuccess) {
+                  setState(() {
+                    cityMap = {
+                      for (var city in state.dropDownItems)
+                        city.city: city.id,
+                    };
+                    dropdownCityItem = cityMap.keys.toList();
+                    cityLoading = false;
+                  });
+                } else if (state is FetchCityFailed) {
+                  setState(() {
+                    cityLoading = false;
+                  });
+                } else if (state is FetchLocalitiesListLoading) {
+                  setState(() {
+                    localityLoading = true;
+                  });
+                } else if (state is FetchLocalitiesListSuccess) {
+                  setState(() {
+                    localityListItem = state.dropDownItems
+                        .map((item) => item.locality)
+                        .toList();
+                    localityLoading = false;
+                  });
+                } else if (state is FetchLocalitiesListFailed) {
+                  setState(() {
+                    localityLoading = false;
+                  });
+                }
+
+                setState(() {});
+              },
+            ),
+            BlocListener<ProfileBloc, ProfileState>(
+              listener: (context, state) {
+                if (state is AddressLocationLoading) {
+                  setState(() {
+                    loading = true;
+                  });
+                } else if (state is AddressLocationCreateSuccess) {
+                  setState(() {
+                    loading = false;
+                  });
+                  showMaterialModalBottomSheet(
+                    enableDrag: false,
+                    expand: false,
+                    isDismissible: false,
+                    backgroundColor: COLORS.white,
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => AddressSuccessBottomSheet(
+                      routePage: widget.routePage,
+                    ),
+                  );
+                } else if (state is AddressLocationCreateFailed) {
+                  setState(() {
+                    loading = false;
+                  });
+                  showCustomSnackBar(
+                    context: context,
+                    message: state.message,
+                  );
+                }
+                setState(() {});
+              },
+            )
+          ],
           child: SafeArea(
             child: CustomScrollView(
               slivers: [
@@ -227,8 +309,9 @@ class _AddressScreenState extends State<AddressScreen> {
                           left: 0,
                           right: 0,
                           child: InkWell(
-                            onTap: _getCurrentLocation, borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 3),
+                            onTap: _getCurrentLocation,
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3),
                             child: Container(
                               width: SizeConfig.blockWidth * 40,
                               margin: EdgeInsets.symmetric(
@@ -400,71 +483,147 @@ class _AddressScreenState extends State<AddressScreen> {
                                     },
                                     error: otherNameError,
                                     title: 'Name of Address'.tr(),
-                                    color: nameAddressAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
-                                    fontWeight: nameAddressAdded?FontWeight.w400:FontWeight.w500,
+                                    color: nameAddressAdded
+                                        ? COLORS.neutralDarkOne
+                                        : COLORS.neutralDark,
+                                    fontWeight: nameAddressAdded
+                                        ? FontWeight.w400
+                                        : FontWeight.w500,
                                     onChanged: (value) {
-                                      if(value!.isNotEmpty){
+                                      if (value!.isNotEmpty) {
                                         setState(() {
                                           nameAddressAdded = true;
+                                          _validateForm();
                                         });
-                                      }
-                                      else{
+                                      } else {
                                         setState(() {
                                           nameAddressAdded = false;
                                         });
                                       }
                                     })
                               ],
+                              // buildTextField(
+                              //     label: 'Address',
+                              //     controller: houseNo,
+                              //     hintText: "Enter house/flat/block no".tr(),
+                              //     validator: (value) {},
+                              //     error: false,
+                              //     title: 'Address'.tr(),
+                              //     color: addressAdded
+                              //         ? COLORS.neutralDarkOne
+                              //         : COLORS.neutralDark,
+                              //     fontWeight: addressAdded
+                              //         ? FontWeight.w400
+                              //         : FontWeight.w500,
+                              //     onChanged: (value) {
+                              //       if (value!.isNotEmpty) {
+                              //         setState(() {
+                              //           addressAdded = true;
+                              //         });
+                              //       } else {
+                              //         setState(() {
+                              //           addressAdded = false;
+                              //         });
+                              //       }
+                              //     }),
                               buildTextField(
-                                  label: 'Address',
-                                  controller: houseNo,
-                                  hintText: "Enter house/flat/block no".tr(),
-                                  validator: (value) {},
-                                  error: false,
-                                  title: 'Address'.tr(),
-                                  color: addressAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
-                                  fontWeight: addressAdded?FontWeight.w400:FontWeight.w500,
-                                  onChanged: (value) {
-                                    if(value!.isNotEmpty){
-                                      setState(() {
-                                        addressAdded = true;
-                                      });
+                                  label: 'Location',
+                                  controller: homeAddress,
+                                  hintText: "Enter apartment/road/area".tr(),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      setState(() => addressArea = true);
+                                      return 'Enter apartment/road/area'.tr();
                                     }
-                                    else{
-                                      setState(() {
-                                        addressAdded = false;
-                                      });
-                                    }
-                                  }),
-                              buildTextField(
-                                label: 'Location',
-                                controller: homeAddress,
-                                hintText: "Enter apartment/road/area".tr(),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    setState(() => addressArea = true);
-                                    return 'Enter apartment/road/area'.tr();
-                                  }
-                                  setState(() => addressArea = false);
-                                  return null;
-                                },
-                                error: addressArea,
-                                title: 'Location'.tr(),
-                                  color: locationAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
-                                  fontWeight: locationAdded?FontWeight.w400:FontWeight.w500,
+                                    setState(() => addressArea = false);
+                                    return null;
+                                  },
+                                  error: addressArea,
+                                  title: 'Location'.tr(),
+                                  color: locationAdded
+                                      ? COLORS.neutralDarkOne
+                                      : COLORS.neutralDark,
+                                  fontWeight: locationAdded
+                                      ? FontWeight.w400
+                                      : FontWeight.w500,
                                   onChanged: (value) {
-                                    if(value!.isNotEmpty){
+                                    if (value!.isNotEmpty) {
                                       setState(() {
                                         locationAdded = true;
+                                        _validateForm();
                                       });
-                                    }
-                                    else{
+                                    } else {
                                       setState(() {
                                         locationAdded = false;
                                       });
                                     }
-                                  }
-                              ),
+                                  }),
+                              buildDropdown(
+                                  label: 'city'.tr(),
+                                  hintText: 'Select your city'.tr(),
+                                  items: dropdownCityItem,
+                                  onChanged: (value) => setState(() {
+                                    _selectedCity = value;
+                                    citySelected = true;
+                                    print(cityMap[value]);
+
+                                    _selectedLocality = '';
+                                    localitySelected = false;
+                                    localityListItem = [];
+
+                                    localityLoading = true;
+
+                                    initialRegisterBloc.add(FetchLocalitiesListEvent(
+                                        cityId: cityMap[value]!));
+
+                                    _validateForm();
+                                  }),
+                                  itemLoading: cityLoading,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select your city'.tr();
+                                    }
+                                    return null;
+                                  },
+                                  color: citySelected
+                                      ? COLORS.neutralDarkOne
+                                      : COLORS.neutralDark,
+                                  fontWeight: citySelected
+                                      ? FontWeight.w400
+                                      : FontWeight.w500),
+                              if (localityLoading == true) ...[
+                                registerText(
+                                    text: 'Locality'.tr(), color: COLORS.neutralDark),
+                                dropDownLoader(hintText: 'Select Locality'),
+                                SizedBox(height: SizeConfig.blockHeight*2,)
+                              ],
+                              if (localityLoading == false) ...[
+                                buildDropdown(
+                                    label: 'Locality'.tr(),
+                                    hintText: 'Select Locality'.tr(),
+                                    items: localityListItem,
+                                    onChanged: (value) => setState(() {
+                                      _selectedLocality = value;
+                                      setState(() {
+                                        localitySelected = true;
+
+                                      });
+                                     _validateForm();
+                                    }),
+                                    itemLoading: localityLoading,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please select your city locality'.tr();
+                                      }
+                                      return null;
+                                    },
+                                    color: localitySelected
+                                        ? COLORS.neutralDarkOne
+                                        : COLORS.neutralDark,
+                                    fontWeight: localitySelected
+                                        ? FontWeight.w400
+                                        : FontWeight.w500)
+                              ],
                               buildBioTextField(
                                   label: 'Instructions'.tr(),
                                   controller: Instructions,
@@ -475,20 +634,23 @@ class _AddressScreenState extends State<AddressScreen> {
                                   maxLines: 4,
                                   error: false,
                                   title: 'Instructions (Optional)'.tr(),
-                                color: instructionAdded?COLORS.neutralDarkOne:COLORS.neutralDark,
-                                  fontWeight: instructionAdded?FontWeight.w400:FontWeight.w500,
-                                onChanged: (value) {
-                                  if(value!.isNotEmpty){
-                                    setState(() {
-                                      instructionAdded = true;
-                                    });
-                                  }
-                                  else{
-                                    setState(() {
-                                      instructionAdded = false;
-                                    });
-                                  }
-                                }),
+                                  color: instructionAdded
+                                      ? COLORS.neutralDarkOne
+                                      : COLORS.neutralDark,
+                                  fontWeight: instructionAdded
+                                      ? FontWeight.w400
+                                      : FontWeight.w500,
+                                  onChanged: (value) {
+                                    if (value!.isNotEmpty) {
+                                      setState(() {
+                                        instructionAdded = true;
+                                      });
+                                    } else {
+                                      setState(() {
+                                        instructionAdded = false;
+                                      });
+                                    }
+                                  }),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -521,25 +683,28 @@ class _AddressScreenState extends State<AddressScreen> {
                               customButton(
                                   text: 'SAVE'.tr(),
                                   onPressed: () {
-                                    if( _currentAddress != 'Loading address...' && homeAddress.text.isNotEmpty){
+                                    if (isSubmitButtonEnabled) {
                                       if (_formKey.currentState!.validate()) {
                                         profileBloc.add(AddressLocationCreate(
                                             addressType:
-                                            _selectedType.toLowerCase(),
+                                                _selectedType.toLowerCase(),
                                             addressTypeName: otherName.text,
                                             houseNo: houseNo.text,
                                             area: homeAddress.text,
                                             instructions: Instructions.text,
                                             isDefault: isChecked,
                                             latitude: latitude.toString(),
-                                            longitude: longitude.toString()));
+                                            longitude: longitude.toString(),
+                                            city: _selectedCity!,
+                                          locality: _selectedLocality!
+
+                                        ));
                                       }
                                     }
                                   },
-                                  backgroundColor:
-                                      (_currentAddress != 'Loading address...' && homeAddress.text.isNotEmpty)
-                                          ? COLORS.primary
-                                          : COLORS.primary.withOpacity(0.2),
+                                  backgroundColor: (isSubmitButtonEnabled)
+                                      ? COLORS.primary
+                                      : COLORS.primary.withOpacity(0.2),
                                   showIcon: false,
                                   width: SizeConfig.blockWidth * 100,
                                   height: SizeConfig.blockHeight * 8,

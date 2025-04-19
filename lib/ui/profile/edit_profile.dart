@@ -87,6 +87,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   String? longitude = "0.0";
   String? profilePicture = "";
   bool cityLoading = true;
+  bool pinCodeLoading = true;
   List<String> dropdownCityItem = [];
   bool feesChargesLoading = true;
   List<String> feesChargesItem = [];
@@ -94,6 +95,11 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
   List<String> professionalTypesItem = [];
+  String? _selectedPinCode;
+  Map<String, String> cityMap = {};
+  bool citySelected = false;
+  List<String> pinCodeListItem = [];
+  bool pincodeSelected = false;
 
   void _validateForm() {}
 
@@ -133,8 +139,9 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     profilePic = widget.profileFetch.profilePic!;
     _enterName.text = widget.profileFetch.name!;
     _emailController.text = widget.profileFetch.email!;
-    pinCodeController.text = widget.profileFetch.pincode.toString()!;
+    // pinCodeController.text = widget.profileFetch.pincode.toString()!;
     _selectedCity = widget.profileFetch.city!;
+    _selectedPinCode= widget.profileFetch.pincode.toString();
     profilePicture = widget.profileFetch.profilePic!;
     workImages = widget.profileFetch.workImages!;
     bioController.text =
@@ -221,7 +228,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         profession_type: widget.profileFetch.userType == 'professional'
             ? _selectedProfession
             : null,
-        pincode: pinCodeController.text,
+        pincode: _selectedPinCode,
         city: _selectedCity!,
         gender: widget.profileFetch.userType == 'professional'
             ? _selectedGender?.toLowerCase()
@@ -348,11 +355,26 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   });
                 } else if (state is FetchCitySuccess) {
                   setState(() {
-                    dropdownCityItem =
-                        state.dropDownItems.map((item) => item.city).toList();
+                    cityMap = {
+                      for (var city in state.dropDownItems)
+                        city.city: city.id,
+                    };
+                    dropdownCityItem = cityMap.keys.toList();
                     cityLoading = false;
+
+                    if (widget.profileFetch.city != null && widget.profileFetch.city!.isNotEmpty) {
+                      _selectedCity = widget.profileFetch.city!;
+                      final selectedCityId = cityMap[_selectedCity];
+
+                      if (selectedCityId != null) {
+                        initialRegisterBloc.add(FetchPinListEvent(cityId: selectedCityId));
+                      } else {
+                        print("City '${_selectedCity}' not found in cityMap.");
+                      }
+                    }
                   });
-                } else if (state is FetchCityFailed) {
+                }
+                else if (state is FetchCityFailed) {
                   setState(() {
                     cityLoading = false;
                   });
@@ -366,6 +388,22 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                 } else if (state is FetchChargeFeesFailed) {
                   setState(() {
                     feesChargesLoading = false;
+                  });
+                }
+                else if (state is FetchPinListLoading) {
+                  setState(() {
+                    pinCodeLoading = true;
+                  });
+                } else if (state is FetchPinListSuccess) {
+                  setState(() {
+                    pinCodeListItem = state.dropDownItems
+                        .map((item) => item.pincode)
+                        .toList();
+                    pinCodeLoading = false;
+                  });
+                } else if (state is FetchPinListFailed) {
+                  setState(() {
+                    pinCodeLoading = false;
                   });
                 }
                 if (state is FetchDropDownLoading) {
@@ -485,49 +523,49 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                               _validateForm();
                             },
                             title: 'email'.tr(),color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
-                        buildTextField(
-                          label: 'Pincode',
-                          inputNameType: TextInputType.phone,
-                          controller: pinCodeController,
-                          maxLength: 6,
-                          hintText: "Enter your pincode".tr(),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              setState(() => pinError = true);
-                              return 'Please enter a pincode'.tr();
-                            } else if (value!.length != 6) {
-                              setState(() => pinError = true);
-                              return 'Please enter valid pincode'.tr();
-                            }
-                            setState(() => pinError = false);
-                            return null;
-                          },
-                          prefix: true,
-                          prefixIcon: _isLoadingMap
-                              ? Container(
-                                  height: SizeConfig.blockHeight,
-                                  width: SizeConfig.blockHeight,
-                                  padding: EdgeInsets.all(
-                                      SizeConfig.blockWidth * 3.5),
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: SizeConfig.blockWidth * 0.5,
-                                      color: COLORS.accent))
-                              : null,
-                          onTap: () async {},
-                          error: pinError,
-                          onChanged: (value) {
-                            if (value!.length == 6) {
-                              setState(() {
-                                loading = true;
-                              });
-                            }
-
-                            _onPinCodeChanged(value);
-                            return null;
-                          },
-                          title: 'Pincode'.tr(),
-                            color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400
-                        ),
+                        // buildTextField(
+                        //   label: 'Pincode',
+                        //   inputNameType: TextInputType.phone,
+                        //   controller: pinCodeController,
+                        //   maxLength: 6,
+                        //   hintText: "Enter your pincode".tr(),
+                        //   validator: (value) {
+                        //     if (value == null || value.isEmpty) {
+                        //       setState(() => pinError = true);
+                        //       return 'Please enter a pincode'.tr();
+                        //     } else if (value!.length != 6) {
+                        //       setState(() => pinError = true);
+                        //       return 'Please enter valid pincode'.tr();
+                        //     }
+                        //     setState(() => pinError = false);
+                        //     return null;
+                        //   },
+                        //   prefix: true,
+                        //   prefixIcon: _isLoadingMap
+                        //       ? Container(
+                        //           height: SizeConfig.blockHeight,
+                        //           width: SizeConfig.blockHeight,
+                        //           padding: EdgeInsets.all(
+                        //               SizeConfig.blockWidth * 3.5),
+                        //           child: CircularProgressIndicator(
+                        //               strokeWidth: SizeConfig.blockWidth * 0.5,
+                        //               color: COLORS.accent))
+                        //       : null,
+                        //   onTap: () async {},
+                        //   error: pinError,
+                        //   onChanged: (value) {
+                        //     if (value!.length == 6) {
+                        //       setState(() {
+                        //         loading = true;
+                        //       });
+                        //     }
+                        //
+                        //     _onPinCodeChanged(value);
+                        //     return null;
+                        //   },
+                        //   title: 'Pincode'.tr(),
+                        //     color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400
+                        // ),
                         buildDropdown(
                           label: 'city'.tr(),
                           value: _selectedCity,
@@ -536,6 +574,15 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           itemLoading: cityLoading,color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400,
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
+                            citySelected = true;
+                            _selectedPinCode = null;
+                            pincodeSelected = false;
+                            pinCodeListItem = [];
+                            pinCodeLoading = true;
+
+                            initialRegisterBloc.add(FetchPinListEvent(
+                                cityId: cityMap[value]!));
+
                             _validateForm();
                           }),
                           validator: (value) {
@@ -546,6 +593,37 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           },
 
                         ),
+
+                        if (pinCodeLoading == true) ...[
+                          registerText(
+                              text: 'Pincode'.tr(), color: COLORS.neutralDark),
+                          dropDownLoader(hintText: 'Select your city pincode')
+                        ],
+                        if (pinCodeLoading == false) ...[
+                          buildDropdown(
+                              label: 'Pincode'.tr(),
+                              value: _selectedPinCode,
+                              hintText: 'Select your city pincode'.tr(),
+                              items: pinCodeListItem,
+                              onChanged: (value) => setState(() {
+                                _selectedPinCode = value;
+                                setState(() {
+                                  pincodeSelected = true;
+                                  if(value!.isNotEmpty) {
+                                    _onPinCodeChanged(value);
+                                  }
+                                });
+                                _validateForm();
+                              }),
+                              itemLoading: pinCodeLoading,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select your city pincode'.tr();
+                                }
+                                return null;
+                              },
+                              color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
+                        ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
                           buildDropdown(

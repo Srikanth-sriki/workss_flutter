@@ -109,3 +109,10 @@ class FetchPinListEvent extends InitialRegisterEvent {
   @override
   List<Object> get props => [cityId];
 }
+
+class FetchLocalitiesListEvent extends InitialRegisterEvent {
+  String cityId;
+  FetchLocalitiesListEvent({required this.cityId});
+  @override
+  List<Object> get props => [cityId];
+}

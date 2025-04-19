@@ -218,7 +218,9 @@ class ProfileDao {
     required bool isDefault,
     required String latitude,
     required String longitude,
-    required String addressTypeName
+    required String addressTypeName,
+    required String city,
+    required String locality
   }) async {
     var url = '${Config.url}/user/address/create';
 
@@ -231,6 +233,8 @@ class ProfileDao {
       "is_default": isDefault,
       "latitude": latitude,
       "longitude": longitude,
+      "city":city,
+      "locality":locality
     };
 
     final response = await http.post(
@@ -250,7 +254,9 @@ class ProfileDao {
     required bool isDefault,
     required String latitude,
     required String longitude,
-    required String addressTypeName
+    required String addressTypeName,
+    required String city,
+    required String locality
   }) async {
     var url = '${Config.url}/user/address/edit';
 
@@ -264,6 +270,8 @@ class ProfileDao {
       "is_default": isDefault,
       "latitude": latitude,
       "longitude": longitude,
+      "city":city,
+      "locality":locality
     };
 
     final response = await http.post(
@@ -324,5 +332,12 @@ class ProfileDao {
     return response;
   }
 
+  Future fetchLocalitieCodeList({required String cityID}) async {
+    var url = '${Config.url}/common/localities?city_id=$cityID';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+    return response;
+  }
 
 }

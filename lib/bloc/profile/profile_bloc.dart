@@ -481,7 +481,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           instructions: event.instructions,
           isDefault: event.isDefault,
           latitude: event.latitude,
-          longitude: event.longitude);
+          longitude: event.longitude,
+          city: event.city,
+          locality: event.locality
+      );
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
@@ -511,7 +514,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           instructions: event.instructions,
           isDefault: event.isDefault,
           latitude: event.latitude,
-          longitude: event.longitude);
+          longitude: event.longitude,
+          city: event.city,locality: event.locality
+      );
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {

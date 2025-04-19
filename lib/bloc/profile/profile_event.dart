@@ -181,6 +181,8 @@ class AddressLocationCreate extends ProfileEvent {
   bool isDefault;
   String latitude;
   String longitude;
+  String city;
+  String locality;
   AddressLocationCreate({
     required this.addressType,
     required this.addressTypeName,
@@ -190,6 +192,8 @@ class AddressLocationCreate extends ProfileEvent {
     required this.isDefault,
     required this.latitude,
     required this.longitude,
+    required this.locality,
+    required this.city
   });
   @override
   List<Object> get props => [
@@ -200,7 +204,7 @@ class AddressLocationCreate extends ProfileEvent {
         instructions,
         isDefault,
         latitude,
-        longitude
+        longitude,locality,city
       ];
 }
 
@@ -214,6 +218,8 @@ class AddressLocationEdit extends ProfileEvent {
   bool isDefault;
   String latitude;
   String longitude;
+  String city;
+  String locality;
   AddressLocationEdit({
     required this.addressId,
     required this.addressType,
@@ -224,6 +230,8 @@ class AddressLocationEdit extends ProfileEvent {
     required this.isDefault,
     required this.latitude,
     required this.longitude,
+    required this.locality,
+    required this.city
   });
   @override
   List<Object> get props => [
@@ -234,7 +242,7 @@ class AddressLocationEdit extends ProfileEvent {
         instructions,
         isDefault,
         latitude,
-        longitude
+        longitude,locality,city
       ];
 }
 
