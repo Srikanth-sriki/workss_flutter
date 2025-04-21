@@ -24,6 +24,7 @@ import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
+import '../../global_helper/popup.dart';
 import '../../helper/socket_service.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/friends/friends_search_list_modal.dart';
@@ -596,68 +597,84 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                     physics: NeverScrollableScrollPhysics(),
                                     scrollDirection: Axis.vertical,
                                     itemBuilder: (context, index) {
-                                      return chartSearchCards(
-                                          image:
-                                              filteredChatList[index].picture!,
-                                          name: filteredChatList[index].name!,
+                                      final chat = filteredChatList[index];
+
+                                      return GestureDetector(
+                                        onLongPress: () {
+                                          showCustomAlertDialog(
+                                            context: context,
+                                            title: 'Delete Chat',
+                                            message:
+                                            'Are you sure you want to delete this chat?',
+                                            positiveButtonText: 'Delete',
+                                            negativeButtonText: 'Cancel',
+                                            onPositivePressed: () {
+                                              chartBloc.add(DeleteGroupEvent(
+                                                  chatId: chat.chatId!,
+                                                  onSuccess: (message) {
+                                                    showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                        backgroundColor: COLORS.neutralDarkTwo);
+                                                    setState(() {
+                                                      screenReload = false;
+                                                    });
+                                                    _fetchData();
+                                                  },
+                                                  onError: (message) {
+                                                    showCustomSnackBar(
+                                                      context: context,
+                                                      message: message,
+                                                    );
+                                                  }));
+                                            },
+                                            onNegativePressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          );
+                                        },
+                                        child: chartSearchCards(
+                                          image: chat.picture!,
+                                          name: chat.name!,
                                           onTapCard: () {
                                             socket.emit("open_chat", {
                                               Config.id,
-                                              filteredChatList[index].chatId!
+                                              chat.chatId!
                                             });
                                             Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder:
-                                                        (context) =>
-                                                            MultiBlocProvider(
-                                                              providers: [
-                                                                BlocProvider(
-                                                                  create: (context) => ChartBloc()
-                                                                    ..add(FetchChartViewEvent(
-                                                                        page: 1,
-                                                                        pageSize:
-                                                                            10,
-                                                                        chatId:
-                                                                            filteredChatList[index].chatId!)),
-                                                                ),
-                                                                BlocProvider(
-                                                                    create: (context) =>
-                                                                        InitialRegisterBloc()),
-                                                                BlocProvider(
-                                                                    create: (context) =>
-                                                                        ShowInterestedBloc()),
-                                                              ],
-                                                              child:
-                                                                  ChatViewScreen(
-                                                                refreshPageCallback:
-                                                                    _refreshPageAfterEdit,
-                                                                chatId:
-                                                                    filteredChatList[
-                                                                            index]
-                                                                        .chatId!,
-                                                                isGroup:
-                                                                    filteredChatList[
-                                                                            index]
-                                                                        .isGroup!,
-                                                              ),
-                                                            )));
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => MultiBlocProvider(
+                                                  providers: [
+                                                    BlocProvider(
+                                                      create: (context) => ChartBloc()
+                                                        ..add(FetchChartViewEvent(
+                                                          page: 1,
+                                                          pageSize: 10,
+                                                          chatId: chat.chatId!,
+                                                        )),
+                                                    ),
+                                                    BlocProvider(create: (context) => InitialRegisterBloc()),
+                                                    BlocProvider(create: (context) => ShowInterestedBloc()),
+                                                  ],
+                                                  child: ChatViewScreen(
+                                                    refreshPageCallback: _refreshPageAfterEdit,
+                                                    chatId: chat.chatId!,
+                                                    isGroup: chat.isGroup!,
+                                                  ),
+                                                ),
+                                              ),
+                                            );
                                           },
-                                          message: filteredChatList[index]
-                                                      .latestMessage !=
-                                                  null
-                                              ? filteredChatList[index]
-                                                  .latestMessage!
-                                                  .content!
-                                              : "",
-                                          count: filteredChatList[index]
-                                              .unreadCount!,
-                                          isGroup:
-                                              filteredChatList[index].isGroup!,
-                                          date: formatChatDate(
-                                              filteredChatList[index]
-                                                  .updatedAt!));
-                                    }),
+                                          message: chat.latestMessage?.content ?? "",
+                                          count: chat.unreadCount!,
+                                          isGroup: chat.isGroup!,
+                                          date: formatChatDate(chat.updatedAt!),
+                                        ),
+                                      );
+                                    }
+
+                                ),
                               )
                             ],
                             if (!isChatListLoading && chatList.isEmpty) ...[

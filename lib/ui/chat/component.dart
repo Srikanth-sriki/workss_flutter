@@ -18,13 +18,13 @@ Widget chartSearchCards({
   required String count,
   required bool isGroup,
 }) {
-  return TouchRippleEffect(
+  return Material(
+    color: Colors.transparent,
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
-    rippleColor: Colors.white60,
     child: InkWell(
       onTap: onTapCard,
-      splashColor: Colors.white.withOpacity(0.1),
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+      splashColor: Colors.white.withOpacity(0.1), // Customize ripple color
       child: Container(
         margin: EdgeInsets.symmetric(
           vertical: SizeConfig.blockHeight * 1,
@@ -39,39 +39,39 @@ Widget chartSearchCards({
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if(image.isNotEmpty)...[
+                if (image.isNotEmpty)
                   Container(
                     width: SizeConfig.blockWidth * 14,
                     height: SizeConfig.blockWidth * 14,
                     decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(image),
-                          fit: BoxFit.fill,
-                        ),
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(SizeConfig.blockWidth * 2))),
-                  ),
-
-                ]
-                else...[
+                      image: DecorationImage(
+                        image: NetworkImage(image),
+                        fit: BoxFit.fill,
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(SizeConfig.blockWidth * 2),
+                      ),
+                    ),
+                  )
+                else
                   Container(
                     width: SizeConfig.blockWidth * 14,
                     height: SizeConfig.blockWidth * 14,
                     decoration: BoxDecoration(
                       color: COLORS.neutralDarkTwo,
-                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3)
+                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
                     ),
-                    child: Icon(isGroup?Icons.people:Icons.person,color: COLORS.neutralDark,size: SizeConfig.blockWidth*7,),
-                  )
-                ]
-               ,
+                    child: Icon(
+                      isGroup ? Icons.people : Icons.person,
+                      color: COLORS.neutralDark,
+                      size: SizeConfig.blockWidth * 7,
+                    ),
+                  ),
                 SizedBox(width: SizeConfig.blockWidth * 3),
                 Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
                       width: SizeConfig.blockWidth * 40,
@@ -85,10 +85,9 @@ Widget chartSearchCards({
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        // textAlign: TextAlign.end,
                       ),
                     ),
-                    if(message.isNotEmpty)...[
+                    if (message.isNotEmpty)
                       SizedBox(
                         width: SizeConfig.blockWidth * 40,
                         child: Text(
@@ -101,16 +100,13 @@ Widget chartSearchCards({
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          // textAlign: TextAlign.end,
                         ),
-                      )
-                    ],
+                      ),
                   ],
                 ),
               ],
             ),
             Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
@@ -123,19 +119,17 @@ Widget chartSearchCards({
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  // textAlign: TextAlign.end,
                 ),
                 SizedBox(height: SizeConfig.blockHeight),
-                if(count !='0' )...[
+                if (count != '0')
                   Container(
                     alignment: Alignment.center,
                     width: SizeConfig.blockWidth * 4,
                     height: SizeConfig.blockWidth * 4,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          SizeConfig.blockWidth * 4,
-                        ),
-                        color: COLORS.accent),
+                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 4),
+                      color: COLORS.accent,
+                    ),
                     child: Text(
                       count,
                       style: TextStyle(
@@ -144,11 +138,8 @@ Widget chartSearchCards({
                         fontWeight: FontWeight.w500,
                         fontFamily: "Poppins",
                       ),
-
-                      // textAlign: TextAlign.end,
                     ),
-                  )
-                ],
+                  ),
               ],
             ),
           ],
@@ -157,6 +148,7 @@ Widget chartSearchCards({
     ),
   );
 }
+
 
 class DynamicBottomSheet extends StatelessWidget {
   final String header;
