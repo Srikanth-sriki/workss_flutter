@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/ImagePickerComponent.dart';
@@ -18,6 +19,7 @@ import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../models/friends/global_search_list_modal.dart';
 import 'chat_view.dart';
+import 'modal/filter_search_modal.dart';
 
 class AddFriendsScreen extends StatefulWidget {
   final String header;
@@ -137,6 +139,7 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                 vertical: SizeConfig.blockHeight * 2,
               ),
               child: Row(
+
                 children: [
                   Expanded(
                     child: TextField(
@@ -159,10 +162,13 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                           fontWeight: FontWeight.w400,
                           fontFamily: "Poppins",
                         ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: COLORS.neutralDarkOne,
-                          size: SizeConfig.blockWidth * 5,
+                        prefixIcon:  Padding(padding: EdgeInsets.all(SizeConfig.blockWidth*4),
+                        child: Image.asset(
+                          'assets/images/home/search.png',
+                          width: SizeConfig.blockWidth * 3.5,
+                          height: SizeConfig.blockWidth * 3.5,
+                          fit: BoxFit.cover,
+                        ),
                         ),
                         border: OutlineInputBorder(
                           borderRadius:
@@ -187,6 +193,71 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                         ),
                       ),
                       onChanged: _onSearchChanged,
+                    ),
+                  ),
+                  SizedBox(width: SizeConfig.blockWidth*3),
+                  InkWell(
+                    onTap: () async {
+                      final result = await showMaterialModalBottomSheet(
+                          enableDrag: true,
+                          expand: false,
+                          isDismissible: true,
+                          backgroundColor: COLORS.white,
+                          closeProgressThreshold: 0,
+                          duration: const Duration(seconds: 0),
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(SizeConfig.blockWidth * 6)),
+                          ),
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) {
+                                  final bloc = InitialRegisterBloc();
+                                  bloc.add(const FetchCityEvent());
+                                  return bloc;
+                                },
+                              ),
+                            ],
+                            child: CustomFilterBottomSheet(
+                            title: 'City',
+                            showSearch: true,
+                            options: [
+                              'All', 'Bengaluru', 'Mysuru', 'Mangaluru', 'Hubballi', 'Belagavi',
+                              'Davanagere', 'Ballari', 'Tumakuru', 'Shivamogga', 'Kalaburagi',
+                              'Vijayapur', 'Raichur', 'Bidar', 'Hassan', 'Chitradurga', 'Mandya',
+                              'Karwar', 'Udupi',
+                            ],
+                            selectedOptions: ['Bengaluru'],
+                            onSubmit: (selectedList) {
+                              // Do something with selectedList
+                              print("Selected cities: $selectedList");
+                              Navigator.pop(context);
+                            },
+                          )
+                          ));
+
+                      if (result != null) {
+
+                      }
+                    },
+                    borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                    child: Container(
+                      padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                      height: SizeConfig.blockHeight * 8,
+                      width: SizeConfig.blockHeight * 8,
+                      decoration: BoxDecoration(
+                          borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                          color: COLORS.neutralDarkTwo.withOpacity(0.6)),
+                      child: Image.asset(
+                        'assets/images/home/filter.png',
+                        width: SizeConfig.blockWidth * 5.5,
+                        height: SizeConfig.blockWidth * 5.5,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ],

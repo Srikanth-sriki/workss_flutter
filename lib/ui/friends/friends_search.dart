@@ -155,11 +155,14 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                             fontWeight: FontWeight.w400,
                             fontFamily: "Poppins",
                           ),
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: COLORS.neutralDarkOne,
-                            size: SizeConfig.blockWidth * 5,
-                          ),
+                            prefixIcon:  Padding(padding: EdgeInsets.all(SizeConfig.blockWidth*4),
+                              child: Image.asset(
+                                'assets/images/home/search.png',
+                                width: SizeConfig.blockWidth * 3.5,
+                                height: SizeConfig.blockWidth * 3.5,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
                                 SizeConfig.blockWidth * 3.25),
