@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+
 class Config {
   static String url = "https://43.204.94.146/api";
   static String socketUrl = "https://43.204.94.146";
@@ -16,6 +18,8 @@ class Config {
   static String userType = "";
   static String fcmToken = "";
   static int notificationCount =0;
+  static bool chartCount = false ;
+  static ValueNotifier<bool> chatHasNewMessage = ValueNotifier<bool>(false);
 
   static Map<String, String> headers() {
     return {

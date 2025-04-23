@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:works_app/components/config.dart';
 
 import '../bloc/chart/chart_bloc.dart';
 import '../bloc/friends/friends_bloc.dart';
@@ -69,6 +70,11 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
     RemoteNotification? notification = message.notification;
     print('1111111111111111111111111111111111111111111111111');
     if (notification != null && !kIsWeb) {
+
+      final notificationBody = message.notification?.body ?? '';
+      if (notificationBody.contains('new message')) {
+        Config.chatHasNewMessage.value = true;
+      }
       _handleNotificationNavigation(navigatorKey,message);
     }
   });
@@ -79,6 +85,10 @@ void initializeNotifications(GlobalKey<NavigatorState> navigatorKey) async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && !kIsWeb) {
+        final notificationBody = message.notification?.body ?? '';
+        if (notificationBody.contains('new message')) {
+          Config.chatHasNewMessage.value = true;
+        }
         _handleNotificationNavigation(navigatorKey,message);
       }
       flutterLocalNotificationsPlugin.show(

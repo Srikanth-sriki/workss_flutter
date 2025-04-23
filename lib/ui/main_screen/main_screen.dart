@@ -259,6 +259,8 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -303,11 +305,52 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/chart.png'),
+              icon: ValueListenableBuilder<bool>(
+                valueListenable: Config.chatHasNewMessage,
+                builder: (context, hasNewMessage, _) => Stack(
+                  children: [
+                    bottomTabIcon(icon: 'assets/images/bottom_tab/chart.png'),
+                    if (hasNewMessage)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
               label: 'Chat'.tr(),
-              activeIcon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/chart_select.png'),
+              activeIcon: ValueListenableBuilder<bool>(
+                valueListenable: Config.chatHasNewMessage,
+                builder: (context, hasNewMessage, _) => Stack(
+                  children: [
+                    bottomTabIcon(icon: 'assets/images/bottom_tab/chart_select.png'),
+                    if (hasNewMessage)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
+
+
             BottomNavigationBarItem(
               icon: bottomTabIcon(
                   icon: 'assets/images/bottom_tab/profile_01.png'),

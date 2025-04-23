@@ -67,6 +67,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   void initState() {
     super.initState();
     _isMounted = true;
+    setState(() {
+      Config.chatHasNewMessage.value = false;
+    });
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
     socket = io.io(Config.socketUrl, <String, dynamic>{
@@ -581,7 +584,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     _buildTabButton('All'),
+                                    SizedBox(width: SizeConfig.blockWidth*2,),
                                     _buildTabButton('Chart'),
+                                    SizedBox(width: SizeConfig.blockWidth*2,),
                                     _buildTabButton('Groups')
                                   ],
                                 ),
@@ -853,6 +858,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   Widget _buildTabButton(String label) {
     final isSelected = selectedTab == label;
     return InkWell(
+      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.25),
+      splashColor: Colors.white.withOpacity(0.1),
       onTap: () {
         setState(() {
           selectedTab = label;
@@ -874,7 +881,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
         decoration: BoxDecoration(
             color: isSelected ? COLORS.primary : COLORS.neutralDarkTwo,
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.25)),
-        margin: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth),
+
         child: Text(
           label,
           style: TextStyle(
