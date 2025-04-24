@@ -66,6 +66,9 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
   List<String> professionalTypesItem = [];
+  String citySelected = '';
+  String pincodeSelected = '';
+  String localitySelected = '';
 
   // List<DropdownItem<Language>> items = [
   //   DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
@@ -145,6 +148,9 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
     longitude = widget.fetchPostedModel.longitude!;
     bioController.text = widget.fetchPostedModel.description!;
     addressSelected = widget.fetchPostedModel.location!;
+    citySelected = widget.fetchPostedModel.city!;
+    localitySelected = widget.fetchPostedModel.locality!;
+    pincodeSelected = widget.fetchPostedModel.pincode!;
   }
 
   void knownLanguageUpdate() {
@@ -189,7 +195,11 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
         isProfessionalCanCall: isChecked,
         latitude: latitude!,
         longitude: longitude!,
-        description: bioController.text));
+        description: bioController.text,
+        city: citySelected,
+      pincode: pincodeSelected,
+      locality:localitySelected
+    ));
   }
 
   Future<Position> _determinePosition() async {
@@ -519,13 +529,16 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                                   ..add(const AddressLocationListEvent()),
                                 child: AddressListModalBottomSheet(
                                   selectedAddressId: addressId,
-                                  onAddressSelected:
-                                      (id, address, latitudeAdd, longitudeAdd) {
+                                  onAddressSelected: (id, address, latitudeAdd,
+                                      longitudeAdd, cityAdd, localityAdd, pincodeAdd) {
                                     setState(() {
                                       addressId = id;
                                       addressSelected = address;
                                       latitude = latitudeAdd;
                                       longitude = longitudeAdd;
+                                      citySelected = cityAdd;
+                                      localitySelected = localityAdd;
+                                      pincodeSelected = pincodeAdd;
                                     });
                                   },
                                 ),

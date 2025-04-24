@@ -18,6 +18,10 @@ class HomeFetchModel {
   String? distance;
   User? user;
   IntrestShown? intrestShown;
+  String? city;
+  String? pincode;
+  String? locality;
+
 
   HomeFetchModel({
     this.id,
@@ -39,6 +43,9 @@ class HomeFetchModel {
     this.distance,
     this.user,
     this.intrestShown,
+    this.city,
+    this.pincode,
+    this.locality,
   });
 
   factory HomeFetchModel.fromJson(Map<String, dynamic> json) => HomeFetchModel(
@@ -71,6 +78,9 @@ class HomeFetchModel {
     intrestShown: json["intrestShown"] != null
         ? IntrestShown.fromJson(json["intrestShown"])
         : null,
+      locality: json["locality"] ??"",
+      pincode: json["pincode"] ??"",
+      city: json["city"] ??''
   );
 
   Map<String, dynamic> toJson() => {
@@ -97,6 +107,9 @@ class HomeFetchModel {
     "distance": distance,
     "user": user?.toJson(),
     "intrestShown": intrestShown?.toJson(),
+    "city":city,
+    "pincode": pincode,
+    "locality": locality,
   };
 }
 

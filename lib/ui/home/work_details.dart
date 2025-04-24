@@ -497,7 +497,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                             ),
                             child: WorkCard(
                               title: work.requiredProfession ?? '--',
-                              location: work.location ?? '--',
+                              location:'${work.locality} ${work.city}' ?? '--',
                               timeAgo: timeAgo(work.updatedAt!),
                               jobType: work.workPlace ?? '--',
                               experience: work.experienceLevel ?? '--',

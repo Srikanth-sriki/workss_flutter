@@ -133,8 +133,8 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
 
         emit(FriendsAddListSuccess(
           searchFriendLists: searchFriendLists,
-          maxPageNumber: 1,
-          maxPageSize: 1,
+          maxPageNumber: maxPageNumber,
+          maxPageSize: maxPageSize,
         ));
       } else {
         emit(FriendsAddListFailed(message: jsonDecoded["message"] ?? 'Error'));

@@ -19,7 +19,7 @@ import 'location_edit.dart';
 
 class AddressListModalBottomSheet extends StatefulWidget {
   final String? selectedAddressId; // Accept selected ID
-  final Function(String id, String address, String latitude,String longitude) onAddressSelected;
+  final Function(String id, String address, String latitude,String longitude,String city,String locality,String pincode) onAddressSelected;
 
   const AddressListModalBottomSheet({
     super.key,
@@ -194,16 +194,13 @@ class _AddressListModalBottomSheetState
                                 setState(() {
                                   selectedAddressId = addressItem.id;
                                 });
-                                // widget.onAddressSelected(
-                                //   addressItem.id!,
-                                //   '${addressItem.houseNo ?? ''} ${addressItem.area ?? ''} ${addressItem.instructions ?? ''}',
-                                //     addressItem.latitude!,addressItem.longitude!,
-                                // );
                                 widget.onAddressSelected(
                                   addressItem.id!,
-                                  '${addressItem.locality ?? ''} ${addressItem.city ?? ''} ',
-                                  addressItem.latitude!,addressItem.longitude!,
+                                  '${addressItem.houseNo ?? ''} ${addressItem.area ?? ''} ${addressItem.instructions ?? ''}',
+                                    addressItem.latitude!,addressItem.longitude!,
+                                  addressItem.city!,addressItem.locality!,addressItem.pincode!
                                 );
+
                                 Navigator.pop(context);
                               },
                               child: Padding(

@@ -219,9 +219,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                         bottom: SizeConfig.blockHeight,
                       ),
                       child: ListView.builder(
-                          itemCount: state.friendsSearchList.length,
+                          itemCount: state.friendsSearchList.length +(isFetchingMore ? 1 : 0),
                           shrinkWrap: true,
                           scrollDirection: Axis.vertical,
+                          controller: _scrollController,
                           itemBuilder: (context, index) {
                             return friendSearchCards(
                               image: state.friendsSearchList[index].friends.profilePic,

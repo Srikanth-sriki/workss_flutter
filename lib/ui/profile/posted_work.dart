@@ -114,7 +114,7 @@ class _PostedWorkListState extends State<PostedWorkList> {
                                 ),
                                 child: WorkCard(
                                   title: profile.requiredProfession!,
-                                  location: profile.location!,
+                                  location:'${profile.locality} ${profile.city}' ?? '--',
                                   timeAgo: timeAgo(profile.updatedAt!),
                                   jobType: profile.workPlace!,
                                   experience: profile.experienceLevel!,

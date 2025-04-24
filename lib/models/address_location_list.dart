@@ -15,6 +15,7 @@ class AddressListModal {
   String? longitude;
   String?city;
   String?locality;
+  String?pincode;
   bool? isDefault;
   String? addressTypeName;
 
@@ -31,7 +32,8 @@ class AddressListModal {
     this.isDefault,
     this.addressTypeName,
     this.city,
-    this.locality
+    this.locality,
+    this.pincode
 
   });
 
@@ -47,7 +49,8 @@ class AddressListModal {
     isDefault: json["is_default"]??"",
     addressTypeName: json["address_type_name"]??"",
       locality: json['locality']??null,
-    city: json['city']??null
+    city: json['city']??null,
+    pincode: json['pincode']??""
   );
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +65,7 @@ class AddressListModal {
     "is_default": isDefault,
     "address_type_name":addressTypeName,
     "locality":locality,
-    "city":city
+    "city":city,
+    "pincode":pincode
   };
 }

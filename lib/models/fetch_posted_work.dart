@@ -27,6 +27,9 @@ class FetchPostedModel {
   List<Work>? workIntrests;
   List<Work>? workViews;
   User? user;
+  String? city;
+  String? pincode;
+  String? locality;
 
   FetchPostedModel({
     this.id,
@@ -47,7 +50,10 @@ class FetchPostedModel {
     this.updatedAt,
     this.workIntrests,
     this.workViews,
-    this.user
+    this.user,
+     this. city,
+     this. pincode,
+     this. locality,
     // this.deletedAt,
   });
 
@@ -71,6 +77,9 @@ class FetchPostedModel {
     workIntrests:  json.containsKey("workIntrests") ? json["workIntrests"] == null ? null :  List<Work>.from(json["workIntrests"].map((x) => Work.fromJson(x))) : null,
     workViews: json.containsKey("workViews") ? json["workViews"] == null ? null :  List<Work>.from(json["workViews"].map((x) => Work.fromJson(x))) : null,
     user: json["user"] != null ? User.fromJson(json["user"]) : null,
+    locality: json["locality"] ??"",
+    pincode: json["pincode"] ??"",
+    city: json["city"] ??''
     // deletedAt: json["deletedAt"],
   );
 
@@ -94,6 +103,9 @@ class FetchPostedModel {
     "workIntrests": List<dynamic>.from(workIntrests!.map((x) => x.toJson())),
     "workViews": List<dynamic>.from(workViews!.map((x) => x.toJson())),
     "user": user?.toJson(),
+    "city":city,
+    "pincode": pincode,
+    "locality": locality,
     // "deletedAt": deletedAt,
   };
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,7 +27,7 @@ import '../../models/dropDown_modal.dart';
 
 class PostWorkScreen extends StatefulWidget {
   final bool arrowBack;
-  const PostWorkScreen({super.key,required this.arrowBack});
+  const PostWorkScreen({super.key, required this.arrowBack});
 
   @override
   State<PostWorkScreen> createState() => _PostWorkScreenState();
@@ -65,22 +66,23 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
   List<String> professionalTypesItem = [];
-  bool professionalSelected =false;
+  bool professionalSelected = false;
   bool experienceLevelSelected = true;
   bool genderSelected = true;
-  bool knownLangSelected =false;
-  bool workAddressSelected =false;
-  bool workPlaceSelected =false;
-  bool workDetailsSelected =false;
-
-
+  bool knownLangSelected = false;
+  bool workAddressSelected = false;
+  bool workPlaceSelected = false;
+  bool workDetailsSelected = false;
+  String citySelected = '';
+  String pincodeSelected = '';
+  String localitySelected = '';
 
   void _validateForm() {
     bool isValid = false;
     if ((_selectedProfession?.isNotEmpty ?? false) &&
         bioController.text.isNotEmpty &&
-        (_experienceLevel?.isNotEmpty ?? false)  &&
-        selectedLanguage.isNotEmpty ) {
+        (_experienceLevel?.isNotEmpty ?? false) &&
+        selectedLanguage.isNotEmpty) {
       isValid = true;
     }
     setState(() {
@@ -122,7 +124,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     _fetchData();
   }
 
-  void _fetchData(){
+  void _fetchData() {
     professionalBloc.add(const FetchCategoryListEvent());
     postWorkBloc.add(const FetchWorkKnownLanguageEvent());
     postWorkBloc.add(const FetchWorkPlaceEvent());
@@ -135,7 +137,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     //   });
     // } else
 
-      if (_experienceLevel == null) {
+    if (_experienceLevel == null) {
       showCustomSnackBar(
         context: context,
         message: "Please select experience level",
@@ -164,7 +166,10 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
           isProfessionalCanCall: isChecked,
           latitude: latitude!,
           longitude: longitude!,
-          description: bioController.text));
+          description: bioController.text,
+          pincode: pincodeSelected,
+          city: citySelected,
+          locality: localitySelected));
     }
   }
 
@@ -258,18 +263,25 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if(widget.arrowBack)...[
+                if (widget.arrowBack) ...[
                   InkWell(
-                    onTap: (){
+                    onTap: () {
                       Navigator.pop(context);
                     },
                     child: Padding(
-                      padding: EdgeInsets.only(top: SizeConfig.blockHeight*0.5),
-                      child: Icon(Icons.arrow_back_ios_new ,color: COLORS.white,size: SizeConfig.blockHeight*2.5,),
+                      padding:
+                          EdgeInsets.only(top: SizeConfig.blockHeight * 0.5),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: COLORS.white,
+                        size: SizeConfig.blockHeight * 2.5,
+                      ),
                     ),
                   ),
                 ],
-                SizedBox(width: SizeConfig.blockWidth*2,),
+                SizedBox(
+                  width: SizeConfig.blockWidth * 2,
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -409,59 +421,60 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         buildDropdown(
-                          label: 'Professional/Worker Required'.tr(),
-                          hintText: 'Select Profession'.tr(),
-                          items: professionalTypesItem,
-                          onChanged: (value) => setState(() {
-                            _selectedProfession = value;
-                            professionalSelected = true;
-                            _validateForm();
-                          }),
-                          itemLoading: professionalTypesLoading,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select your profession'.tr();
-                            }
-                            return null;
-                          },
-                          color: professionalSelected?COLORS.neutralDarkOne:COLORS.neutralDark
-                        ),
+                            label: 'Professional/Worker Required'.tr(),
+                            hintText: 'Select Profession'.tr(),
+                            items: professionalTypesItem,
+                            onChanged: (value) => setState(() {
+                                  _selectedProfession = value;
+                                  professionalSelected = true;
+                                  _validateForm();
+                                }),
+                            itemLoading: professionalTypesLoading,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your profession'.tr();
+                              }
+                              return null;
+                            },
+                            color: professionalSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark),
                         buildDynamicRadioSelection(
-                          title: 'Experience Level'.tr(),
-                          options: [
-                            {'label': 'Fresher', 'value': 'Fresher'},
-                            {'label': 'Experienced', 'value': 'Experienced'},
-                            {'label': 'Any', 'value': 'Any'},
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _experienceLevel = value;
-                              _validateForm();
-                            });
-                          },
-                          groupValue: _experienceLevel,
-                            color: COLORS.neutralDarkOne
-                        ),
+                            title: 'Experience Level'.tr(),
+                            options: [
+                              {'label': 'Fresher', 'value': 'Fresher'},
+                              {'label': 'Experienced', 'value': 'Experienced'},
+                              {'label': 'Any', 'value': 'Any'},
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _experienceLevel = value;
+                                _validateForm();
+                              });
+                            },
+                            groupValue: _experienceLevel,
+                            color: COLORS.neutralDarkOne),
                         SizedBox(height: SizeConfig.blockHeight * 1),
                         buildDynamicRadioSelection(
-                          title: 'Gender'.tr(),
-                          options: [
-                            {'label': 'Male', 'value': 'Male'},
-                            {'label': 'Female', 'value': 'Female'}
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedGender = value;
-                              _validateForm();
-                            });
-                          },
-                          groupValue: _selectedGender,
-                          color: COLORS.neutralDarkOne
-                        ),
+                            title: 'Gender'.tr(),
+                            options: [
+                              {'label': 'Male', 'value': 'Male'},
+                              {'label': 'Female', 'value': 'Female'}
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedGender = value;
+                                _validateForm();
+                              });
+                            },
+                            groupValue: _selectedGender,
+                            color: COLORS.neutralDarkOne),
                         SizedBox(height: SizeConfig.blockHeight * 1),
-                        registerText(text: 'known_language'.tr(),
-                            color: knownLangSelected?COLORS.neutralDarkOne:COLORS.neutralDark
-                        ),
+                        registerText(
+                            text: 'known_language'.tr(),
+                            color: knownLangSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark),
                         if (!knowLanguageLoading) ...[
                           MultiDropdown<Language>(
                             items: knownLanguageItems,
@@ -500,7 +513,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                               //   fontSize: SizeConfig.blockWidth * 3.2,
                               // ),
                               animateSuffixIcon: true,
-                              borderRadius: SizeConfig.blockWidth*4,
+                              borderRadius: SizeConfig.blockWidth * 4,
                               padding: EdgeInsets.only(
                                 top: SizeConfig.blockHeight * 2.7,
                                 bottom: SizeConfig.blockHeight * 2.7,
@@ -568,7 +581,11 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                           dropDownLoader(hintText: 'Select Languages')
                         ],
                         SizedBox(height: SizeConfig.blockHeight * 1.5),
-                        registerText(text: 'Work Address' ,color: workAddressSelected?COLORS.neutralDarkOne:COLORS.neutralDark),
+                        registerText(
+                            text: 'Work Address',
+                            color: workAddressSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark),
                         InkWell(
                           onTap: () {
                             showMaterialModalBottomSheet(
@@ -588,14 +605,17 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                   ..add(const AddressLocationListEvent()),
                                 child: AddressListModalBottomSheet(
                                   selectedAddressId: addressId,
-                                  onAddressSelected:
-                                      (id, address, latitudeAdd, longitudeAdd) {
+                                  onAddressSelected: (id, address, latitudeAdd,
+                                      longitudeAdd, cityAdd, localityAdd, pincodeAdd) {
                                     setState(() {
                                       addressId = id;
                                       addressSelected = address;
                                       latitude = latitudeAdd;
                                       longitude = longitudeAdd;
-                                      if(addressId.isNotEmpty){
+                                      citySelected = cityAdd;
+                                      localitySelected = localityAdd;
+                                      pincodeSelected = pincodeAdd;
+                                      if (addressId.isNotEmpty) {
                                         workAddressSelected = true;
                                       }
                                     });
@@ -603,8 +623,9 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                 ),
                               ),
                             );
-                          },  borderRadius: BorderRadius.circular(
-                            SizeConfig.blockWidth * 3.5),
+                          },
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 3.5),
                           child: Container(
                             width: SizeConfig.blockWidth * 100,
                             height: SizeConfig.blockHeight * 7.5,
@@ -659,26 +680,26 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                         //   title: 'Work Address'.tr(),
                         // ),
                         buildDropdown(
-                          label: 'Work Place'.tr(),
-                          hintText: 'Ex : Home, Bank, etc'.tr(),
-                          items: dropdownWorkPlaceItem,
-                          onChanged: (value) => setState(() {
-                            _selectedWorkPlace = value;
-                            setState(() {
-                              workPlaceSelected = true;
-                            });
-                            _validateForm();
-                          }),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select work place'.tr();
-                            }
-                            return null;
-                          },
-                          itemLoading: workPlaceLoading,
-                            color: workPlaceSelected?COLORS.neutralDarkOne:COLORS.neutralDark
-
-                        ),
+                            label: 'Work Place'.tr(),
+                            hintText: 'Ex : Home, Bank, etc'.tr(),
+                            items: dropdownWorkPlaceItem,
+                            onChanged: (value) => setState(() {
+                                  _selectedWorkPlace = value;
+                                  setState(() {
+                                    workPlaceSelected = true;
+                                  });
+                                  _validateForm();
+                                }),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select work place'.tr();
+                              }
+                              return null;
+                            },
+                            itemLoading: workPlaceLoading,
+                            color: workPlaceSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark),
                         SizedBox(height: SizeConfig.blockHeight * 0.5),
                         _buildBioTextField(
                             label: 'Work Details'.tr(),
@@ -695,18 +716,19 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                             error: bioError,
                             onChanged: (value) {
                               _validateForm();
-                              if(value!.isNotEmpty){
+                              if (value!.isNotEmpty) {
                                 setState(() {
                                   workDetailsSelected = true;
                                 });
-                              }
-                              else{
+                              } else {
                                 setState(() {
                                   workDetailsSelected = false;
                                 });
                               }
                             },
-                            color: workDetailsSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
+                            color: workDetailsSelected
+                                ? COLORS.neutralDarkOne
+                                : COLORS.neutralDark,
                             title: 'Work Details'.tr()),
                         MultipleImagePickerComponent(
                           onImagesSelected: _onImagesSelected,
@@ -769,12 +791,11 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                           text: 'POST WORK'.tr(),
                           loading: loading,
                           onPressed: () {
-                           if(buttonVisible){
-                             if (_formKey.currentState!.validate()) {
-                               _submitButton();
-                             }
-                           }
-
+                            if (buttonVisible) {
+                              if (_formKey.currentState!.validate()) {
+                                _submitButton();
+                              }
+                            }
                           },
                           backgroundColor: buttonVisible
                               ? COLORS.primary
@@ -803,13 +824,13 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
       required String? Function(String?) validator,
       required String? Function(String?) onChanged,
       required bool error,
-        Color? color = COLORS.neutralDark,
-        FontWeight? fontWeight = FontWeight. w500,
+      Color? color = COLORS.neutralDark,
+      FontWeight? fontWeight = FontWeight.w500,
       required String title}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        registerText(text: title,color: color,fontWeight: fontWeight),
+        registerText(text: title, color: color, fontWeight: fontWeight),
         normalTextField(
             hintText: hintText,
             controller: controller,

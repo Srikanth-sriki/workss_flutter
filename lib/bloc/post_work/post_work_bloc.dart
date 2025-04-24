@@ -41,7 +41,6 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
     on<FetchWorkKnownLanguageEvent>((event, emit) async {
       await mapFetchKnownLanguagePlace(event, emit);
     });
-
   }
 
   Future<void> mapPostWorkAccountEvent(
@@ -50,18 +49,20 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       emit(const PostWorkLoading());
 
       var response = await homeDao.postWork(
-        description: event.description,
-        experienceLevel: event.experienceLevel,
-        gender: event.gender,
-        isProfessionalCanCall: event.isProfessionalCanCall,
-        knowLanguage: event.knowLanguage,
-        latitude: event.latitude,
-        location: event.location,
-        longitude: event.longitude,
-        requiredProfession: event.requiredProfession,
-        workImages: event.workImages,
-        workPlace: event.workPlace,
-      );
+          description: event.description,
+          experienceLevel: event.experienceLevel,
+          gender: event.gender,
+          isProfessionalCanCall: event.isProfessionalCanCall,
+          knowLanguage: event.knowLanguage,
+          latitude: event.latitude,
+          location: event.location,
+          longitude: event.longitude,
+          requiredProfession: event.requiredProfession,
+          workImages: event.workImages,
+          workPlace: event.workPlace,
+          city: event.city,
+          pincode: event.pincode,
+          locality: event.locality);
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
@@ -106,19 +107,21 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       emit(const PostWorkLoading());
 
       var response = await homeDao.editPostWork(
-        workId: event.workId,
-        description: event.description,
-        experienceLevel: event.experienceLevel,
-        gender: event.gender,
-        isProfessionalCanCall: event.isProfessionalCanCall,
-        knowLanguage: event.knowLanguage,
-        latitude: event.latitude,
-        location: event.location,
-        longitude: event.longitude,
-        requiredProfession: event.requiredProfession,
-        workImages: event.workImages,
-        workPlace: event.workPlace,
-      );
+          workId: event.workId,
+          description: event.description,
+          experienceLevel: event.experienceLevel,
+          gender: event.gender,
+          isProfessionalCanCall: event.isProfessionalCanCall,
+          knowLanguage: event.knowLanguage,
+          latitude: event.latitude,
+          location: event.location,
+          longitude: event.longitude,
+          requiredProfession: event.requiredProfession,
+          workImages: event.workImages,
+          workPlace: event.workPlace,
+          city: event.city,
+          pincode: event.pincode,
+          locality: event.locality);
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
@@ -195,7 +198,8 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
         if (jsonDecoded['status'] == true) {
-          FetchKnownLanguageDropDown fetchKnownLanguageDropDown = FetchKnownLanguageDropDown.fromJson(jsonDecoded);
+          FetchKnownLanguageDropDown fetchKnownLanguageDropDown =
+              FetchKnownLanguageDropDown.fromJson(jsonDecoded);
           emit(FetchKnownLanguageSuccess(
             dropDownItems: fetchKnownLanguageDropDown.data,
             message: fetchKnownLanguageDropDown.message,

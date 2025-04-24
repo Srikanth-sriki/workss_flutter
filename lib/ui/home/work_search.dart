@@ -337,7 +337,7 @@ class _WorkSearchListState extends State<WorkSearchList> {
                 vertical: SizeConfig.blockHeight * 0.5),
             child: WorkCard(
               title: work.requiredProfession ?? '--',
-              location: work.location ?? '--',
+              location:'${work.locality} ${work.city}' ?? '--',
               timeAgo: timeAgo(work.updatedAt!),
               jobType: work.workPlace ?? '--',
               experience: work.experienceLevel ?? '--',

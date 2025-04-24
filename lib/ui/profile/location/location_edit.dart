@@ -70,6 +70,10 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   String? _selectedLocality;
   bool localitySelected = true;
   bool isSubmitButtonEnabled = false;
+  List<String> pinCodeListItem = [];
+  bool pincodeSelected = true;
+  bool pinCodeLoading = true;
+  String? _selectedPinCode;
 
   @override
   void initState() {
@@ -100,6 +104,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     longitude = double.tryParse(widget.addressItem.longitude ?? '0.0')!;
     _selectedCity = widget.addressItem.city!;
     _selectedLocality = widget.addressItem.locality!;
+    _selectedPinCode = widget.addressItem.pincode!;
 
     bool newNameAddressAdded = widget.addressItem.addressTypeName!.isNotEmpty;
     bool newAddressAdded = widget.addressItem.area!.isNotEmpty;
@@ -187,7 +192,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     if (
         homeAddress.text.isNotEmpty &&
         (_selectedCity?.isNotEmpty ?? false) &&
-        _selectedLocality?.isNotEmpty == true &&
+        _selectedLocality?.isNotEmpty == true && (_selectedPinCode?.isNotEmpty?? false) &&
         (_selectedType != 'Other' || otherName.text.isNotEmpty)) {
       isValid = true;
     }
@@ -246,10 +251,12 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
 
                       if (selectedCityId != null) {
                         initialRegisterBloc.add(FetchLocalitiesListEvent(cityId: selectedCityId));
+                        initialRegisterBloc.add(FetchPinListEvent(cityId: selectedCityId));
                       } else {
                         print("City '${_selectedCity}' not found in cityMap.");
                       }
                     }
+
                   });
                 } else if (state is FetchCityFailed) {
                   setState(() {
@@ -612,6 +619,14 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                   localityListItem = [];
 
                                   localityLoading = true;
+                                  _selectedPinCode = null;
+                                  pincodeSelected = false;
+                                  pinCodeListItem = [];
+                                  pinCodeLoading = true;
+
+                                  initialRegisterBloc.add(FetchPinListEvent(
+                                      cityId: cityMap[value]!));
+
 
                                   initialRegisterBloc.add(FetchLocalitiesListEvent(
                                       cityId: cityMap[value]!));
@@ -648,6 +663,33 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Please Select Locality'.tr();
+                                      }
+                                      return null;
+                                    },
+                                    color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
+                              ],
+                              if (pinCodeLoading == true) ...[
+                                registerText(
+                                    text: 'Pincode'.tr(), color: COLORS.neutralDark),
+                                dropDownLoader(hintText: 'Select your city pincode'),
+                                SizedBox(height: SizeConfig.blockHeight*2,)
+                              ],
+                              if (pinCodeLoading == false) ...[
+                                buildDropdown(
+                                    label: 'Pincode'.tr(),
+                                    value: _selectedPinCode,
+                                    hintText: 'Select your city pincode'.tr(),
+                                    items: pinCodeListItem,
+                                    onChanged: (value) => setState(() {
+                                      _selectedPinCode = value;
+                                      setState(() {
+                                        pincodeSelected = true;
+                                      });
+                                    }),
+                                    itemLoading: pinCodeLoading,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Please select your city pincode'.tr();
                                       }
                                       return null;
                                     },

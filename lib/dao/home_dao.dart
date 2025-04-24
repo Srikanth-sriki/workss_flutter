@@ -62,6 +62,9 @@ class HomeDao {
     required String latitude,
     required String longitude,
     required String description,
+    required String city,
+    required String pincode,
+    required String locality,
   }) async {
     var url = '${Config.url}/user/work/post';
 
@@ -77,6 +80,9 @@ class HomeDao {
       "latitude": latitude,
       "longitude": longitude,
       "description": description,
+      "city":city,
+      "pincode":pincode,
+      "locality":locality
     };
     final response = await http.post(
       Uri.parse(url),
@@ -170,6 +176,9 @@ class HomeDao {
     required String latitude,
     required String longitude,
     required String description,
+    required String city,
+    required String pincode,
+    required String locality,
   }) async {
     var url = '${Config.url}/user/work/update-post';
 
@@ -186,6 +195,9 @@ class HomeDao {
       "latitude": latitude,
       "longitude": longitude,
       "description": description,
+      "city":city,
+      "pincode":pincode,
+      "locality":locality
     };
     final response = await http.post(
       Uri.parse(url),
