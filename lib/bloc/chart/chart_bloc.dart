@@ -850,7 +850,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         print('object1233333333333333333333322222222222222222222111');
         List<ChartSearchList> chartSearchList = [];
         for (var i in jsonDecoded["data"]["groups"]) {
-          chartSearchList.add(ChartSearchList().fromJson(i));
+          chartSearchList.add(ChartSearchList.fromJson(i));
         }
         print('object1222222222222222222222111');
         if (event.page > 1) {
