@@ -479,3 +479,31 @@ class GroupUnBlocChatLoading extends ChartState {
   @override
   List<Object> get props => [];
 }
+
+class chartListSearchLoading extends ChartState {
+  const chartListSearchLoading();
+  @override
+  List<Object> get props => [];
+}
+
+
+class chartListSearchFailed extends ChartState {
+  String message;
+
+  chartListSearchFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class chartListSearchSuccess extends ChartState {
+  List<ChartSearchList> chartSearchList = [];
+  int maxPageNumber;
+  int maxPageSize;
+
+  chartListSearchSuccess(
+      {required this.chartSearchList,
+        required this.maxPageNumber,
+        required this.maxPageSize});
+  @override
+  List<Object> get props => [ChartSearchList,maxPageSize,maxPageNumber];
+}

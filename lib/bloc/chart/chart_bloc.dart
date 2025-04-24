@@ -12,6 +12,7 @@ import 'package:works_app/models/chat/chat_view_modal.dart';
 import '../../components/global_handle.dart';
 import '../../helper/custom_log.dart';
 import '../../models/chat/blocked_chat_list.dart';
+import '../../models/chat/chart_search_list.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
 import '../../models/chat/invite_friend_modal.dart';
 
@@ -828,5 +829,52 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     }
   }
 
+
+  Future<void> mapChartSearchListEvent(
+      FetchChartSearchListEvent event, Emitter<ChartState> emit) async {
+    try {
+      if (event.page == 1) {
+        emit(const chartListSearchLoading());
+      }
+
+      var response = await friendsDao.fetchChatSearchList(
+          page: event.page, pageSize: event.pageSize, keyWord: event.keyWord);
+
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      print('object');
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        print('object1111111111111');
+        int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
+        int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"];
+        print('object1233333333333333333333322222222222222222222111');
+        List<ChartSearchList> chartSearchList = [];
+        for (var i in jsonDecoded["data"]["groups"]) {
+          chartSearchList.add(ChartSearchList().fromJson(i));
+        }
+        print('object1222222222222222222222111');
+        if (event.page > 1) {
+          final currentState = state;
+          if (currentState is chartListSearchSuccess) {
+            chartSearchList = List.from(currentState.chartSearchList)
+              ..addAll(chartSearchList);
+          }
+        }
+
+        emit(chartListSearchSuccess(
+        chartSearchList: chartSearchList,
+          maxPageNumber: maxPageNumber,
+          maxPageSize: maxPageSize,
+        ));
+      } else {
+        emit(chartListSearchFailed(
+            message: jsonDecoded["message"] ?? 'Error'));
+        customLog(jsonDecoded["message"]);
+      }
+    } catch (error) {
+      emit(chartListSearchFailed(message: "Something went wrong"));
+      customLog('jsonDecoded["message"]');
+    }
+  }
 
 }

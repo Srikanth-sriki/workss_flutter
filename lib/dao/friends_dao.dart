@@ -575,6 +575,20 @@ class FriendsDao {
     return response;
   }
 
+  Future fetchChatSearchList({
+    required int page,
+    required int pageSize,
+    required String keyWord,
+  }) async {
+    var url = '${Config.url}/user/chat/search-groups?search=$keyWord&page=$page&page_size=$pageSize';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
 
 
 }

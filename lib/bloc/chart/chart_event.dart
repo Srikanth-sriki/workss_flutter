@@ -330,3 +330,16 @@ class BlockedChatList extends ChartEvent {
   @override
   List<Object> get props => [];
 }
+
+class FetchChartSearchListEvent extends ChartEvent {
+  int page;
+  int pageSize;
+  String keyWord;
+  FetchChartSearchListEvent({
+    required this.page,
+    required this.pageSize,
+    required this.keyWord,
+  });
+  @override
+  List<Object> get props => [page, pageSize, keyWord];
+}
