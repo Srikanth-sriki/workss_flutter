@@ -103,6 +103,7 @@ Widget friendSearchDetailsCards({
   bool sendMessageButtonRequired = false,
   Widget? widgetButton,
   bool widgetButtonRequired = false,
+  bool isGroup = false
 }) {
   return InkWell(
     onTap: onTapCard,
@@ -122,17 +123,34 @@ Widget friendSearchDetailsCards({
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: SizeConfig.blockWidth * 12,
-                height: SizeConfig.blockWidth * 12,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(image),
-                      fit: BoxFit.fill,
-                    ),
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(SizeConfig.blockWidth * 2.5))),
-              ),
+              if(image.isNotEmpty)...[
+                Container(
+                  width: SizeConfig.blockWidth * 12,
+                  height: SizeConfig.blockWidth * 12,
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(image),
+                        fit: BoxFit.fill,
+                      ),
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(SizeConfig.blockWidth * 2.5))),
+                )
+              ]
+              else...[
+                Container(
+                  width: SizeConfig.blockWidth * 14,
+                  height: SizeConfig.blockWidth * 14,
+                  decoration: BoxDecoration(
+                    color: COLORS.neutralDarkTwo,
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                  ),
+                  child: Icon(
+                    isGroup ? Icons.people : Icons.person,
+                    color: COLORS.neutralDark,
+                    size: SizeConfig.blockWidth * 7,
+                  ),
+                ),
+              ],
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
                 width: SizeConfig.blockWidth * width,

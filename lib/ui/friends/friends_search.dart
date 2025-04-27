@@ -475,7 +475,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                       ShowInterestedBloc()),
                               BlocProvider(
                                   create: (context) =>
-                                      ChartBloc())
+                                      ChartBloc() ..add(FetchChartSearchListEvent(page: 1, pageSize: 10, keyWord: '')))
                             ],
                             child:  AddFriendsScreen(header: 'Add Friend',refreshPageCallback: _refreshPageAfterEdit),
                           )));

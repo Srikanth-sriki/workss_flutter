@@ -394,7 +394,7 @@ Widget _buildButtonContent({
                         text.tr(),
                         style: TextStyle(
                           color: textColor ?? COLORS.white,
-                          fontSize: SizeConfig.blockWidth * 3.8,
+                          fontSize: SizeConfig.blockWidth * 3.6,
                           fontWeight: FontWeight.w500,
                           fontFamily: "Poppins",
                         ),

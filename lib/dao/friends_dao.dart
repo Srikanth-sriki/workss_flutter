@@ -27,8 +27,10 @@ class FriendsDao {
     required int page,
     required int pageSize,
     required String keyWord,
+    required String gender,
+    required String city
   }) async {
-    var url = '${Config.url}/user/friend/search?search=$keyWord&page=$page&page_size=$pageSize';
+    var url = '${Config.url}/user/friend/search?search=$keyWord&page=$page&page_size=$pageSize&gender=$gender&city=$city';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -585,10 +587,57 @@ class FriendsDao {
       Uri.parse(url),
       headers: Config.authHeaders(),
     );
+    customLog("Response Status Code  chart: ${response.statusCode}");
+    return response;
+  }
+
+  Future sendJoinChartGroup({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId
+    };
+    var url = '${Config.url}/user/chat/send-join-request';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future cancelJoinRequestGroup({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId
+    };
+    var url = '${Config.url}/user/chat/cancel-join-request';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
     customLog("Response Status Code : ${response.statusCode}");
     return response;
   }
 
 
+  Future deleteChart({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chatId": chatId
+    };
+    var url = '${Config.url}/user/chat/delete';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
 
 }

@@ -112,6 +112,14 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<ReportChartGroupEvent>((event, emit) async {
       await mapChatReportGroupEvent(event, emit);
     });
+
+    on<FetchChartSearchListEvent>((event, emit) async {
+      await mapChartSearchListEvent(event, emit);
+    });
+
+    on<DeleteChartEvent>((event, emit) async {
+      await mapDeleteChatEvent(event, emit);
+    });
   }
 
   Future<void> mapCharListEvent(
@@ -844,15 +852,12 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       print('object');
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
-        print('object1111111111111');
         int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
         int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"];
-        print('object1233333333333333333333322222222222222222222111');
         List<ChartSearchList> chartSearchList = [];
         for (var i in jsonDecoded["data"]["groups"]) {
           chartSearchList.add(ChartSearchList.fromJson(i));
         }
-        print('object1222222222222222222222111');
         if (event.page > 1) {
           final currentState = state;
           if (currentState is chartListSearchSuccess) {
@@ -860,6 +865,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
               ..addAll(chartSearchList);
           }
         }
+        customLog(chartSearchList.length);
 
         emit(chartListSearchSuccess(
         chartSearchList: chartSearchList,
@@ -876,5 +882,32 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       customLog('jsonDecoded["message"]');
     }
   }
+
+
+  Future<void> mapDeleteChatEvent(
+      DeleteChartEvent event, Emitter<ChartState> emit) async {
+    try {
+      //emit(const RejectInviteChatLoading());
+      var response = await friendsDao.deleteChart(
+        chatId: event.chatId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(DeleteChatSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(DeleteChatFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(DeleteChatFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
 
 }

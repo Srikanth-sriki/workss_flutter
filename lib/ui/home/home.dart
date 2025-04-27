@@ -377,7 +377,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             create: (context) =>
                                                 ShowInterestedBloc()),
                                         BlocProvider(
-                                            create: (context) => ChartBloc())
+                                            create: (context) => ChartBloc()
+                                        ..add(FetchChartSearchListEvent(page: 1, pageSize: 10, keyWord: ''))
+                                        )
                                       ],
                                       child: AddFriendsScreen(
                                         header: 'Friend Suggestion',

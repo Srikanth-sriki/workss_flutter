@@ -343,3 +343,15 @@ class FetchChartSearchListEvent extends ChartEvent {
   @override
   List<Object> get props => [page, pageSize, keyWord];
 }
+
+class DeleteChartEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  DeleteChartEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}

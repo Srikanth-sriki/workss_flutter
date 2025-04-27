@@ -82,6 +82,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     }
     connectToSocket();
   }
+
   void connectToSocket() {
     socket.on('new_message', (data) {
       if (_isMounted) {
@@ -102,7 +103,6 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
       screenReload = true;
     });
     _fetchData();
-
   }
 
   void _fetchData() {
@@ -269,8 +269,12 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                 create: (context) =>
                                                     ShowInterestedBloc()),
                                             BlocProvider(
-                                                create: (context) =>
-                                                    ChartBloc())
+                                                create: (context) => ChartBloc()
+                                                  ..add(
+                                                      FetchChartSearchListEvent(
+                                                          page: 1,
+                                                          pageSize: 10,
+                                                          keyWord: '')))
                                           ],
                                           child: AddFriendsScreen(
                                             header: 'Add Friend',
@@ -332,7 +336,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                   listener: (context, state) {
                     if (state is ChartListLoading) {
                       setState(() {
-                        if(screenReload){
+                        if (screenReload) {
                           isChatListLoading = true;
                         }
                       });
@@ -361,13 +365,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: COLORS.neutralDarkTwo,
-                              width: SizeConfig.blockWidth*0.15
-                            )
-                          )
-                        ),
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: COLORS.neutralDarkTwo,
+                                    width: SizeConfig.blockWidth * 0.15))),
                         child: Padding(
                           padding: EdgeInsets.only(
                               left: SizeConfig.blockWidth * 4.5,
@@ -433,7 +434,6 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
                             if (isChatListLoading && isFriendsListLoad) ...[
                               SizedBox(
                                 height: SizeConfig.blockHeight * 60,
@@ -584,9 +584,13 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     _buildTabButton('All'),
-                                    SizedBox(width: SizeConfig.blockWidth*2,),
+                                    SizedBox(
+                                      width: SizeConfig.blockWidth * 2,
+                                    ),
                                     _buildTabButton('Chart'),
-                                    SizedBox(width: SizeConfig.blockWidth*2,),
+                                    SizedBox(
+                                      width: SizeConfig.blockWidth * 2,
+                                    ),
                                     _buildTabButton('Groups')
                                   ],
                                 ),
@@ -610,17 +614,19 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                             context: context,
                                             title: 'Delete Chat',
                                             message:
-                                            'Are you sure you want to delete this chat?',
+                                                'Are you sure you want to delete this chat?',
                                             positiveButtonText: 'Delete',
                                             negativeButtonText: 'Cancel',
                                             onPositivePressed: () {
-                                              chartBloc.add(DeleteGroupEvent(
+                                              chartBloc.add(DeleteChartEvent(
                                                   chatId: chat.chatId!,
                                                   onSuccess: (message) {
+                                                    Navigator.of(context).pop();
                                                     showCustomSnackBar(
                                                         context: context,
                                                         message: message,
-                                                        backgroundColor: COLORS.neutralDarkTwo);
+                                                        backgroundColor: COLORS
+                                                            .neutralDarkTwo);
                                                     setState(() {
                                                       screenReload = false;
                                                     });
@@ -642,28 +648,35 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                           image: chat.picture!,
                                           name: chat.name!,
                                           onTapCard: () {
-                                            socket.emit("open_chat", {
-                                              Config.id,
-                                              chat.chatId!
-                                            });
+                                            socket.emit("open_chat",
+                                                {Config.id, chat.chatId!});
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => MultiBlocProvider(
+                                                builder: (context) =>
+                                                    MultiBlocProvider(
                                                   providers: [
                                                     BlocProvider(
-                                                      create: (context) => ChartBloc()
-                                                        ..add(FetchChartViewEvent(
-                                                          page: 1,
-                                                          pageSize: 10,
-                                                          chatId: chat.chatId!,
-                                                        )),
+                                                      create: (context) =>
+                                                          ChartBloc()
+                                                            ..add(
+                                                                FetchChartViewEvent(
+                                                              page: 1,
+                                                              pageSize: 10,
+                                                              chatId:
+                                                                  chat.chatId!,
+                                                            )),
                                                     ),
-                                                    BlocProvider(create: (context) => InitialRegisterBloc()),
-                                                    BlocProvider(create: (context) => ShowInterestedBloc()),
+                                                    BlocProvider(
+                                                        create: (context) =>
+                                                            InitialRegisterBloc()),
+                                                    BlocProvider(
+                                                        create: (context) =>
+                                                            ShowInterestedBloc()),
                                                   ],
                                                   child: ChatViewScreen(
-                                                    refreshPageCallback: _refreshPageAfterEdit,
+                                                    refreshPageCallback:
+                                                        _refreshPageAfterEdit,
                                                     chatId: chat.chatId!,
                                                     isGroup: chat.isGroup!,
                                                   ),
@@ -671,15 +684,14 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                               ),
                                             );
                                           },
-                                          message: chat.latestMessage?.content ?? "",
+                                          message:
+                                              chat.latestMessage?.content ?? "",
                                           count: chat.unreadCount!,
                                           isGroup: chat.isGroup!,
                                           date: formatChatDate(chat.updatedAt!),
                                         ),
                                       );
-                                    }
-
-                                ),
+                                    }),
                               )
                             ],
                             if (!isChatListLoading && chatList.isEmpty) ...[
@@ -735,7 +747,11 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                               create: (context) =>
                                                   ShowInterestedBloc()),
                                           BlocProvider(
-                                              create: (context) => ChartBloc())
+                                              create: (context) => ChartBloc()
+                                                ..add(FetchChartSearchListEvent(
+                                                    page: 1,
+                                                    pageSize: 10,
+                                                    keyWord: '')))
                                         ],
                                         child: AddFriendsScreen(
                                             header: 'Add Friend',
@@ -881,14 +897,14 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
         decoration: BoxDecoration(
             color: isSelected ? COLORS.primary : COLORS.neutralDarkTwo,
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.25)),
-
         child: Text(
           label,
           style: TextStyle(
-              color: isSelected ? COLORS.white : COLORS.neutralDark,
-              fontSize: SizeConfig.blockWidth * 3.2,
-              fontWeight: FontWeight.w500,
-              fontFamily: "Poppins",),
+            color: isSelected ? COLORS.white : COLORS.neutralDark,
+            fontSize: SizeConfig.blockWidth * 3.2,
+            fontWeight: FontWeight.w500,
+            fontFamily: "Poppins",
+          ),
         ),
       ),
     );

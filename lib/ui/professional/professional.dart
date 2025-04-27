@@ -710,7 +710,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                                           ShowInterestedBloc()),
                                                                   BlocProvider(
                                                                       create: (context) =>
-                                                                          ChartBloc())
+                                                                          ChartBloc() ..add(FetchChartSearchListEvent(page: 1, pageSize: 10, keyWord: '')))
                                                                 ],
                                                                 child:
                                                                     AddFriendsScreen(

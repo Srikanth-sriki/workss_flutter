@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 
 import '../../dao/friends_dao.dart';
 import '../../dao/home_dao.dart';
+import '../../helper/custom_log.dart';
 
 part 'show_interested_event.dart';
 part 'show_interested_state.dart';
@@ -49,6 +50,19 @@ class ShowInterestedBloc
     on<UnSendFriendEvent>((event, emit) async {
       await mapUnSendFriendEvent(event, emit);
     });
+
+    on<SendJoinGroupChatEvent>((event, emit) async {
+      await mapSendJoinGroupChatEvent(event, emit);
+    });
+
+    on<CancelJoinRequestChatEvent>((event, emit) async {
+      await mapCancelJoinRequestChatEvent(event, emit);
+    });
+
+    on<AcceptSendChatEvent>((event, emit) async {
+      await mapAcceptInviteSendChatEvent(event, emit);
+    });
+
   }
 
   Future<void> mapInterestedPropertyEvent(
@@ -261,5 +275,84 @@ class ShowInterestedBloc
       emit(UnSendFriendFriendsFailed(message: "Something went wrong"));
     }
   }
+
+  Future<void> mapSendJoinGroupChatEvent(
+      SendJoinGroupChatEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const SendJoinGroupChatLoading());
+      var response = await friendsDao.sendJoinChartGroup(
+        chatId: event.chatId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(SendJoinGroupChatSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(SendJoinGroupChatFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(SendJoinGroupChatFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+
+  Future<void> mapCancelJoinRequestChatEvent(
+      CancelJoinRequestChatEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const CancelJoinRequestChatLoading());
+      var response = await friendsDao.cancelJoinRequestGroup(
+        chatId: event.chatId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(CancelJoinRequestChatSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(CancelJoinRequestChatFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(CancelJoinRequestChatFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+
+  Future<void> mapAcceptInviteSendChatEvent(
+      AcceptSendChatEvent event, Emitter<ShowInterestedState> emit) async {
+    try {
+      emit(const AcceptSendInviteChatLoading());
+      var response = await friendsDao.acceptInviteGroup(
+        chatId: event.chatId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(AcceptSendInviteChatSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(AcceptSendInviteChatFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(AcceptSendInviteChatFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+
 
 }

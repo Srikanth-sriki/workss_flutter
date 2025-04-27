@@ -27,9 +27,14 @@ import 'package:buttons_tabbar/buttons_tabbar.dart';
 class ChartFriendsScreen extends StatefulWidget {
   final String searchText;
   final VoidCallback refreshPageCallback;
+  final String city;
+  final String gender;
+
 
   const ChartFriendsScreen(
-      {super.key, required this.refreshPageCallback,required this.searchText});
+      {super.key, required this.refreshPageCallback,required this.searchText,
+      required this.city,required this.gender
+      });
 
   @override
   State<ChartFriendsScreen> createState() => _ChartFriendsScreenState();
@@ -90,6 +95,8 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
       page: currentPage,
       pageSize: pageSize,
       keyWord: searchKeyword,
+      city: widget.city,
+      gender: widget.gender
     ));
   }
 
@@ -115,20 +122,28 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FriendsBloc, FriendsState>(
+    return BlocConsumer<FriendsBloc, FriendsState>(
+      listener: (context, state) {
+        if (state is FriendsAddListSuccess) {
+          setState(() {
+            if (currentPage == 1) {
+              searchFriendLists = state.searchFriendLists;
+            } else {
+              searchFriendLists.addAll(state.searchFriendLists);
+            }
+            isFetchingMore = false;
+            maxPageNumber = state.maxPageNumber;
+          });
+        } else if (state is FriendsAddListFailed) {
+          setState(() {
+            isFetchingMore = false;
+          });
+        }
+      },
       builder: (context, state) {
         if (state is FriendsListLoading && currentPage == 1) {
           return friendsListLoading();
         } else if (state is FriendsAddListSuccess) {
-          // update the list based on success
-          if (currentPage == 1) {
-            searchFriendLists = state.searchFriendLists;
-          } else {
-            searchFriendLists.addAll(state.searchFriendLists);
-          }
-          isFetchingMore = false;
-          maxPageNumber = state.maxPageNumber;
-
           return ListView.builder(
             padding: EdgeInsets.symmetric(
               horizontal: SizeConfig.blockWidth * 4.5,
@@ -160,15 +175,15 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                           MaterialPageRoute(
                             builder: (context) => MultiBlocProvider(
                               providers: [
-                                BlocProvider(create: (_) {
+                                BlocProvider(create: (context) {
                                   final bloc = FriendsBloc();
                                   bloc.add(FetchFriendsSingleView(friendId: friend.id));
                                   return bloc;
                                 }),
-                                BlocProvider(create: (_) => ShowInterestedBloc()),
-                                BlocProvider(create: (_) => ReportPostBloc()),
-                                BlocProvider(create: (_) => ShowInterestedBloc()),
-                                BlocProvider(create: (_) => ChartBloc()),
+                                BlocProvider(create: (context) => ShowInterestedBloc()),
+                                BlocProvider(create: (context) => ReportPostBloc()),
+                                BlocProvider(create: (context) => ShowInterestedBloc()),
+                                BlocProvider(create: (context) => ChartBloc()),
                               ],
                               child: FriendsDetailsScreen(
                                 refreshPageCallback: _refreshPageAfterEdit,
@@ -187,16 +202,14 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                             StartMessageEvent(
                               chatId: friend.isFriend!.friendId!,
                               onSuccess: (chatId) {
-                                if (!mounted) return;
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => MultiBlocProvider(
                                       providers: [
-                                        BlocProvider(create: (_) => ChartBloc()
-                                          ..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
-                                        BlocProvider(create: (_) => InitialRegisterBloc()),
-                                        BlocProvider(create: (_) => ShowInterestedBloc()),
+                                        BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
+                                        BlocProvider(create: (context) => InitialRegisterBloc()),
+                                        BlocProvider(create: (context) => ShowInterestedBloc()),
                                       ],
                                       child: ChatViewScreen(
                                         refreshPageCallback: _refreshPageAfterEdit,
@@ -208,7 +221,6 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                                 );
                               },
                               onError: (message) {
-                                if (!mounted) return;
                                 showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
                               },
                             ),
@@ -217,13 +229,11 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                           showInterestedBloc.add(UnSendFriendEvent(
                             userId: friend.id,
                             onSuccess: (message) {
-                              if (!mounted) return;
                               setState(() {
                                 searchFriendLists[index].friendRequestSent = null;
                               });
                             },
                             onError: (message) {
-                              if (!mounted) return;
                               showCustomSnackBar(context: context, message: message);
                             },
                           ));
@@ -231,13 +241,11 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                           showInterestedBloc.add(AddFriendEvent(
                             userId: friend.id,
                             onSuccess: (message) {
-                              if (!mounted) return;
                               setState(() {
                                 searchFriendLists[index].friendRequestSent = FriendRequestSent(userId: friend.id);
                               });
                             },
                             onError: (message) {
-                              if (!mounted) return;
                               showCustomSnackBar(context: context, message: message);
                             },
                           ));
@@ -264,18 +272,15 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                 return const SizedBox.shrink();
               }
             },
+
           );
         } else if (state is FriendsAddListFailed) {
-          isFetchingMore = false;
-          return ErrorScreen(
-            onRetry: () {
-              _fetchData();
-            },
-          );
+          return ErrorScreen(onRetry: () {
+            _fetchData();
+          });
         }
-        return friendsListLoading(); // fallback to loader instead of blank Container
+        return Container();
       },
     );
-
   }
 }

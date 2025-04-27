@@ -128,3 +128,60 @@ class UnSendFriendFriendsFailed extends ShowInterestedState {
   List<Object> get props => [message];
 }
 
+
+
+class SendJoinGroupChatLoading extends ShowInterestedState {
+  const SendJoinGroupChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class SendJoinGroupChatSuccess extends ShowInterestedState {
+  String message;
+  SendJoinGroupChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class SendJoinGroupChatFailed extends ShowInterestedState {
+  String message;
+  SendJoinGroupChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class CancelJoinRequestChatLoading extends ShowInterestedState {
+  const CancelJoinRequestChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class CancelJoinRequestChatSuccess extends ShowInterestedState {
+  String message;
+  CancelJoinRequestChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class CancelJoinRequestChatFailed extends ShowInterestedState {
+  String message;
+  CancelJoinRequestChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class AcceptSendInviteChatLoading extends ShowInterestedState {
+  const AcceptSendInviteChatLoading();
+  @override
+  List<Object> get props => [];
+}
+class AcceptSendInviteChatSuccess extends ShowInterestedState {
+  String message;
+  AcceptSendInviteChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class AcceptSendInviteChatFailed extends ShowInterestedState {
+  String message;
+  AcceptSendInviteChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

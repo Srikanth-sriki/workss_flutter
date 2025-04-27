@@ -379,7 +379,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                                                               context: context,
                                                               message: message,
                                                               backgroundColor: COLORS.neutralDarkTwo);
-                                                          notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                          notificationBloc.add(FetchNotificationViewEvent(id: notification.id!));
                                                         },
                                                         onError: (message) {
                                                           showCustomSnackBar(
@@ -397,7 +397,7 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
                                                               context: context,
                                                               message: message,
                                                               backgroundColor: COLORS.neutralDarkTwo);
-                                                          notificationBloc..add(FetchNotificationViewEvent(id: notification.id!));
+                                                          notificationBloc.add(FetchNotificationViewEvent(id: notification.id!));
                                                         },
                                                         onError: (message) {
                                                           showCustomSnackBar(

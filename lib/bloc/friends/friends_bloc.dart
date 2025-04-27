@@ -110,7 +110,9 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
         emit(const FriendsListLoading());
       }
       var response = await friendsDao.fetchAddFriendsChatSearchList(
-          page: event.page, pageSize: event.pageSize, keyWord: event.keyWord);
+          page: event.page, pageSize: event.pageSize, keyWord: event.keyWord,
+        city: event.city ?? "",gender: event.gender??""
+      );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 

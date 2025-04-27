@@ -100,3 +100,41 @@ UnSendFriendEvent({
 @override
 List<Object> get props => [userId,onSuccess,onError];
 }
+
+
+class SendJoinGroupChatEvent extends ShowInterestedEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  SendJoinGroupChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class CancelJoinRequestChatEvent extends ShowInterestedEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  CancelJoinRequestChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+
+class AcceptSendChatEvent extends ShowInterestedEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  AcceptSendChatEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}

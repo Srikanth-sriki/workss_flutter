@@ -507,3 +507,17 @@ class chartListSearchSuccess extends ChartState {
   @override
   List<Object> get props => [ChartSearchList,maxPageSize,maxPageNumber];
 }
+
+
+class DeleteChatSuccess extends ChartState {
+  String message;
+  DeleteChatSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class DeleteChatFailed extends ChartState {
+  String message;
+  DeleteChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
