@@ -55,6 +55,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController pinCodeController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final controller = MultiSelectController<Language>();
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
   List<File> _selectedImages = [];
   late InitialRegisterBloc initialRegisterBloc;
   late ProfessionalBloc professionalBloc;
@@ -388,8 +389,12 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   } else if (state is FetchCategoryListSuccess) {
                     setState(() {
-                      professionalTypesItem =
-                          state.categories.map((item) => item.name).toList();
+                      // professionalTypesItem =
+                      //     state.categories.map((item) => item.name).toList();
+                      professionalTypesItem = state.categories.map((item) {
+                        final translated = item.translation?.getTranslation(langKey);
+                        return translated?.isNotEmpty == true ? translated! : item.name;
+                      }).toList();
 
                       professionalTypesLoading = false;
                     });

@@ -18,6 +18,7 @@ import 'package:works_app/ui/chat/remove_friends.dart';
 import '../../../bloc/chart/chart_bloc.dart';
 import '../../../bloc/show_interested/show_interested_bloc.dart';
 import '../../../components/colors.dart';
+import '../../../global_helper/helper_function.dart';
 import '../../../models/chat/chart_search_list.dart';
 import '../../../models/chat/chat_view_pro_modal.dart';
 
@@ -100,6 +101,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
           borderColor: true,
           actions: [
             InkWell(
+              onTap: (){
+                shareChatGroupInvite(groupName: chatViewGroupInfo.name);
+              },
               child: Image.asset(
                 'assets/images/home/share.png',
                 height: SizeConfig.blockWidth * 5,

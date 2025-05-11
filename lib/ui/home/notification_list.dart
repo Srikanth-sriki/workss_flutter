@@ -7,6 +7,7 @@ import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
+import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
@@ -54,6 +55,9 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
+    setState(() {
+      Config.notificationReceiveMessage.value = false;
+    });
   }
 
   @override

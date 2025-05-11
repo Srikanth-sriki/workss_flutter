@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
@@ -8,6 +11,7 @@ import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 import 'dart:math' as math;
 import '../../global_helper/reuse_widget.dart';
+// import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';dart
 
 Widget chartSearchCards({
   required String image,
@@ -1324,3 +1328,22 @@ Widget BlockedChartCards({
     ),
   );
 }
+
+
+
+// Future<File?> compressAudio(File inputFile) async {
+//   final dir = await getTemporaryDirectory();
+//   final outputPath = '${dir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.aac';
+//
+//   final session = await FFmpegKit.execute(
+//       '-i ${inputFile.path} -acodec aac -b:a 96k $outputPath');
+//
+//   final outputFile = File(outputPath);
+//
+//   if (await outputFile.exists()) {
+//     debugPrint("Compressed size: ${outputFile.lengthSync()}");
+//     return outputFile;
+//   }
+//
+//   return null;
+// }

@@ -13,6 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
+import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../dao/get_user_location.dart';
 import '../../global_helper/ImagePickerComponent.dart';
@@ -42,6 +43,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   final TextEditingController bioController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
   late MultiSelectController<Language> controller;
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
   String? _selectedWorkPlace;
   String? _selectedProfession;
   String? _selectedGender;
@@ -316,9 +318,13 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                     } else if (state is FetchDropDownSuccess) {
                       setState(() {
                         workPlaceLoading = false;
-                        dropdownWorkPlaceItem = state.dropDownItems
-                            .map((item) => item.place)
-                            .toList();
+                        // dropdownWorkPlaceItem = state.dropDownItems
+                        //     .map((item) => item.place)
+                        //     .toList();
+                        dropdownWorkPlaceItem = state.dropDownItems.map((item) {
+                          final translated = item.translation?.getTranslation(langKey);
+                          return translated?.isNotEmpty == true ? translated! : item.place;
+                        }).toList();
                       });
                     } else if (state is FetchKnownLanguageSuccess) {
                       setState(() {
@@ -345,9 +351,12 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                       });
                     } else if (state is FetchCategoryListSuccess) {
                       setState(() {
-                        professionalTypesItem =
-                            state.categories.map((item) => item.name).toList();
-
+                        // professionalTypesItem =
+                        //     state.categories.map((item) => item.name).toList();
+                        professionalTypesItem = state.categories.map((item) {
+                          final translated = item.translation?.getTranslation(langKey);
+                          return translated?.isNotEmpty == true ? translated! : item.name;
+                        }).toList();
                         professionalTypesLoading = false;
                       });
                     } else if (state is FetchCategoryListFailed) {

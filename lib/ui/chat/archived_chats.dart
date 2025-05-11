@@ -116,6 +116,7 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
                                                     _refreshPageAfterEdit,
                                                 chatId: chatList[index].chatId!,
                                                 isGroup: chatList[index].isGroup!,
+                                                isRequest: false,
                                               ),
                                             )));
                               },

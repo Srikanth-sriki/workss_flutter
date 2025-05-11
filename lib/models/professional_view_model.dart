@@ -53,6 +53,7 @@ class Professional {
   IsContacted? isContacted;
   IsFriend? isFriend;
   FriendRequestSent? friendRequestSent;
+  bool? smartCallControl;
 
 
   Professional({
@@ -82,6 +83,7 @@ class Professional {
     this.isContacted,
     this.isFriend,
     this.friendRequestSent,
+    this.smartCallControl
   });
 
   factory Professional.fromJson(Map<String, dynamic> json) => Professional(
@@ -122,6 +124,7 @@ class Professional {
     friendRequestSent: json.containsKey('friendRequestSent') && json['friendRequestSent'] != null
         ?FriendRequestSent.fromJson(json["friendRequestSent"])
         : null,
+    smartCallControl: json.containsKey('smart_call_control')?json["smart_call_control"]:false,
 
   );
 
@@ -152,6 +155,7 @@ class Professional {
     "isContacted": isContacted?.toJson(),
     "isFriend": isFriend?.toJson(),
     "friendRequestSent": friendRequestSent?.toJson(),
+    "smart_call_control":smartCallControl
   };
 
 }

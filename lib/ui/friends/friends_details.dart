@@ -621,6 +621,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                                                       (){},
                                                                   chatId: chatId,
                                                                   isGroup: false,
+                                                                  isRequest: false,
                                                                 ),
                                                               )));
 

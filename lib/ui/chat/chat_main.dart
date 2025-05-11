@@ -49,6 +49,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   late ChartBloc chartBloc;
   List<Friend> friends = [];
   List<ChatList> chatList = [];
+  List<ChatList> requestChatList = [];
   List<ChatList> filteredChatList = [];
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -101,8 +102,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   void _refreshPageAfterEdit() {
     setState(() {
       screenReload = true;
+      selectedTab = 'All';
     });
     _fetchData();
+
   }
 
   void _fetchData() {
@@ -112,6 +115,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
       keyWord: '',
     ));
     chartBloc.add(const ChartListEvent());
+    chartBloc.add(const RequestedChartListEvent());
   }
 
   @override
@@ -153,8 +157,9 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                       [
                         if (friendListCount != 0) ...[
                           BottomSheetItem(
-                            title: 'Friends(${friendListCount})',
+                            title: '${'Friends'.tr()}($friendListCount)',
                             onTap: () => {
+                              Navigator.pop(context),
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -190,6 +195,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         BottomSheetItem(
                           title: 'Create new group',
                           onTap: () => {
+                            Navigator.pop(context),
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -217,6 +223,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         BottomSheetItem(
                           title: 'Archived Chats',
                           onTap: () => {
+                            Navigator.pop(context),
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -235,6 +242,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         BottomSheetItem(
                           title: 'Turn-Off Notification',
                           onTap: () => {
+                            Navigator.pop(context),
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -253,6 +261,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         BottomSheetItem(
                           title: 'Add Friends',
                           onTap: () => {
+                            Navigator.pop(context),
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -287,6 +296,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         BottomSheetItem(
                           title: 'Blocked Chats/Friends',
                           onTap: () => {
+                            Navigator.pop(context),
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -348,6 +358,23 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                         isError = false;
                       });
                     } else if (state is ChartListFailed) {
+                      setState(() {
+                        isChatListLoading = false;
+                        isError = true;
+                      });
+                    } else if (state is RequestedChartListLoading) {
+                      setState(() {
+                        if (screenReload) {
+                          isChatListLoading = true;
+                        }
+                      });
+                    } else if (state is RequestedChartListSuccess) {
+                      setState(() {
+                        requestChatList = state.chatList;
+                        isChatListLoading = false;
+                        isError = false;
+                      });
+                    } else if (state is RequestedChartListFailed) {
                       setState(() {
                         isChatListLoading = false;
                         isError = true;
@@ -461,7 +488,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                 ),
                                 child: addFriendText(
                                     textOne: 'Friends',
-                                    textTwo: 'View All(${friends.length})',
+                                    textTwo: '${'View All'.tr()}(${friends.length})',
                                     onTap: () {
                                       Navigator.push(
                                           context,
@@ -545,10 +572,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                                     ChatViewScreen(
                                                                   refreshPageCallback:
                                                                       _refreshPageAfterEdit,
-                                                                  chatId:
-                                                                      chatId,
-                                                                  isGroup:
-                                                                      false,
+                                                                  chatId: chatId,
+                                                                  isGroup: false, isRequest: false,
                                                                 ),
                                                               )));
                                                 },
@@ -591,7 +616,11 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                     SizedBox(
                                       width: SizeConfig.blockWidth * 2,
                                     ),
-                                    _buildTabButton('Groups')
+                                    _buildTabButton('Groups'),
+                                    SizedBox(
+                                      width: SizeConfig.blockWidth * 2,
+                                    ),
+                                    _buildTabButton('Requests')
                                   ],
                                 ),
                               ),
@@ -679,6 +708,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                                         _refreshPageAfterEdit,
                                                     chatId: chat.chatId!,
                                                     isGroup: chat.isGroup!,
+                                                    isRequest: chat.isRequest! && (Config.id != chat.requestedBy),
                                                   ),
                                                 ),
                                               ),
@@ -885,6 +915,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
           } else if (selectedTab == 'Group') {
             filteredChatList =
                 chatList.where((item) => item.isGroup == true).toList();
+          } else if(selectedTab == 'Requests'){
+              filteredChatList = requestChatList;
           } else {
             filteredChatList = chatList;
           }
@@ -898,7 +930,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
             color: isSelected ? COLORS.primary : COLORS.neutralDarkTwo,
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.25)),
         child: Text(
-          label,
+          label.tr(),
           style: TextStyle(
             color: isSelected ? COLORS.white : COLORS.neutralDark,
             fontSize: SizeConfig.blockWidth * 3.2,

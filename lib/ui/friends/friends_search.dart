@@ -303,6 +303,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                                           _refreshPageAfterEdit,
                                                           chatId: chatId,
                                                           isGroup: false,
+                                                          isRequest: false,
                                                         ),
                                                       )));
 
@@ -427,6 +428,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                                       _refreshPageAfterEdit,
                                                       chatId: chatId,
                                                       isGroup: false,
+                                                      isRequest: false,
                                                     ),
                                                   )));
 

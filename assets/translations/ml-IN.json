@@ -334,7 +334,25 @@
   "Instructions (Optional)": "നിർദ്ദേശങ്ങൾ (ഐച്ഛികം)",
   "REPORT": "റിപ്പോർട്ട്",
   "Upload your work images (Optional) \n(max 2 pictures)": "നിങ്ങളുടെ ജോലിയുടെ ചിത്രങ്ങൾ അപ്‌ലോഡ് ചെയ്യുക (ഐച്ഛികം) \n(ഏറ്റവും അധികം 2 ചിത്രങ്ങൾ)",
-  "No Chats Found": "ചാറ്റുകൾ കണ്ടെത്താനായില്ല"
+  "No Chats Found": "ചാറ്റുകൾ കണ്ടെത്താനായില്ല",
+  "Clear": "വൃത്തിയാക്കുക",
+  "Select profession type": "തൊഴിലിനിയം തിരഞ്ഞെടുക്കുക",
+  "Select city": "നഗരം തിരഞ്ഞെടുക്കുക",
+  "Search for an profession": "ഒരു തൊഴിൽ തിരയുക",
+  "Select your known languages": "നിങ്ങളറിയുന്ന ഭാഷകൾ തിരഞ്ഞെടുക്കുക",
+  "Delete Chat": "ചാറ്റ് ഇല്ലാതാക്കുക",
+  "Write a reason for report": "റിപ്പോർട്ടിന് കാരണം എഴുതുക",
+  "Are you sure you want to delete this chat?": "ഈ ചാറ്റ് ഇല്ലാതാക്കണമെന്ന് തീർച്ചയാണോ?",
+  "Delete": "ഇല്ലാതാക്കുക",
+  "All": "എല്ലാം",
+  "Chart": "ചാർട്ട്",
+  "Groups": "ഗ്രൂപ്പുകൾ",
+  "People": "മനുഷ്യർ",
+  "Join Group": "ഗ്രൂപ്പിൽ ചേരുക",
+  "Invited": "ആഹ്വാനം ചെയ്തവർ",
+  "Friends": "സുഹൃത്തുകൾ",
+  "Blocked Chats/Friends": "തടഞ്ഞ ചാറ്റുകൾ/സുഹൃത്തുകൾ",
+  "Select your city pincode": "നിങ്ങളുടെ നഗരം പിന്‍കോഡ് തിരഞ്ഞെടുക്കുക"
 }
 
 

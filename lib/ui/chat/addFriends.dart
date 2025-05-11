@@ -357,11 +357,11 @@ class _AddFriendsScreenState extends State<AddFriendsScreen> {
                       });
                     },
 
-                    tabs: const [
+                    tabs:  [
                       Tab(
-                        text: 'People',
+                        text: 'People'.tr(),
                       ),
-                      Tab(text: 'Groups'),
+                      Tab(text: 'Groups'.tr()),
                     ],
                   ),
                 ),

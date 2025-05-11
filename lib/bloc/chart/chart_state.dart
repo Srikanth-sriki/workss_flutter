@@ -28,7 +28,25 @@ class ChartListSuccess extends ChartState {
   @override
   List<Object> get props => [chatList];
 }
+class RequestedChartListLoading extends ChartState {
+  const RequestedChartListLoading();
+  @override
+  List<Object> get props => [];
+}
 
+class RequestedChartListFailed extends ChartState {
+  String message;
+  RequestedChartListFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class RequestedChartListSuccess extends ChartState {
+  List<ChatList> chatList = [];
+  RequestedChartListSuccess({required this.chatList});
+  @override
+  List<Object> get props => [chatList];
+}
 class ChartGroupCreateFailed extends ChartState {
   String message;
   ChartGroupCreateFailed({required this.message});
@@ -518,6 +536,32 @@ class DeleteChatSuccess extends ChartState {
 class DeleteChatFailed extends ChartState {
   String message;
   DeleteChatFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class ApproveChartRequestSuccess extends ChartState {
+  String message;
+  ApproveChartRequestSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class ApproveChartRequestFailed extends ChartState {
+  String message;
+  ApproveChartRequestFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class RejectChartRequestSuccess extends ChartState {
+  String message;
+  RejectChartRequestSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class RejectChartRequestFailed extends ChartState {
+  String message;
+  RejectChartRequestFailed({required this.message});
   @override
   List<Object> get props => [message];
 }

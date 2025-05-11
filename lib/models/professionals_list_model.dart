@@ -24,6 +24,7 @@ class ProfessionalsPostedWork {
   bool? isVerified;
   IsContacted?isSaved;
   IsContacted? isContacted;
+  bool? smartCallControl;
 
   ProfessionalsPostedWork({
     this.id,
@@ -43,6 +44,7 @@ class ProfessionalsPostedWork {
     this.isVerified,
     this.isSaved,
     this.isContacted,
+    this.smartCallControl
   });
 
   factory ProfessionalsPostedWork.fromJson(Map<String, dynamic> json) => ProfessionalsPostedWork(
@@ -71,6 +73,7 @@ class ProfessionalsPostedWork {
     isContacted: json["isContacted"] != null
         ? IsContacted.fromJson(json["isContacted"])
         : null,
+    smartCallControl: json.containsKey('smart_call_control')?json["smart_call_control"]:false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -95,6 +98,7 @@ class ProfessionalsPostedWork {
     "is_verified": isVerified,
     "isSaved":isSaved,
     "isContacted": isContacted?.toJson(),
+    "smart_call_control":smartCallControl
   };
 }
 

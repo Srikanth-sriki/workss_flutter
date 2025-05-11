@@ -334,7 +334,25 @@
   "Instructions (Optional)": "సూచనలు (ఐచ్ఛికం)",
   "REPORT": "రిపోర్ట్",
   "Upload your work images (Optional) \n(max 2 pictures)": "మీ పని చిత్రాలను అప్లోడ్ చేయండి (ఐచ్ఛికం) \n(గరిష్టంగా 2 చిత్రాలు)",
-  "No Chats Found": "చాట్‌లు కనబడలేదు"
+  "No Chats Found": "చాట్‌లు కనబడలేదు",
+  "Clear": "తెప్పించు",
+  "Select profession type": "వృత్తి రకాన్ని ఎంచుకోండి",
+  "Select city": "నగరాన్ని ఎంచుకోండి",
+  "Search for an profession": "వృత్తిని శోధించండి",
+  "Select your known languages": "మీకు తెలిసిన భాషలను ఎంచుకోండి",
+  "Delete Chat": "చాట్ తొలగించు",
+  "Write a reason for report": "నివేదికకు కారణాన్ని రాయండి",
+  "Are you sure you want to delete this chat?": "ఈ చాట్‌ను తొలగించాలనుకుంటున్నారా?",
+  "Delete": "తొలగించు",
+  "All": "అన్నీ",
+  "Chart": "చార్ట్",
+  "Groups": "గుంపులు",
+  "People": "ప్రజలు",
+  "Join Group": "గుంపులో చేరండి",
+  "Invited": "ఆహ్వానించబడిన",
+  "Friends": "మిత్రులు",
+  "Blocked Chats/Friends": "ఆపిన చాట్స్/స్నేహితులు",
+  "Select your city pincode": "మీ నగర పిన్‌కోడ్‌ను ఎంచుకోండి"
 }
 
 

@@ -341,5 +341,30 @@
   "Instructions (Optional)": "Instructions (Optional)",
   "REPORT": "REPORT",
   "Upload your work images (Optional) \n(max 2 pictures)": "Upload your work images (Optional) \n(max 2 pictures),",
-  "No Chats Found": "No Chats Found"
+  "No Chats Found": "No Chats Found",
+
+  "Clear": "Clear",
+  "Select profession type": "Select profession type",
+  "Select city": "Select city",
+  "Search for an profession": "Search for an profession",
+  "Select your known languages": "Select your known languages",
+  "Delete Chat": "Delete Chat",
+  "Write a reason for report": "Write a reason for report",
+  "Are you sure you want to delete this chat?": "Are you sure you want to delete this chat?",
+  "Delete": "Delete",
+  "All": "All",
+  "Chart": "Chart",
+  "Groups": "Groups",
+  "People": "People",
+  "Join Group": "Join Group",
+  "Invited": "Invited",
+  "Friends": "Friends",
+  "Blocked Chats/Friends": "Blocked Chats/Friends",
+  "Select your city pincode": "Select your city pincode",
+
+
+
+  "Search for an": "Search for an"
+
+
 }

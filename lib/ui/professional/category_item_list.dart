@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/ui/professional/professional_view.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
@@ -12,6 +14,7 @@ import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/professionals_list_model.dart';
+import '../chat/chat_view.dart';
 
 class CategoryItemList extends StatefulWidget {
   final String subCategory;
@@ -24,6 +27,7 @@ class CategoryItemList extends StatefulWidget {
 class _CategoryItemListState extends State<CategoryItemList> {
   late ProfessionalBloc professionalBloc;
   late ShowInterestedBloc showInterestedBloc;
+  late ChartBloc chartBloc;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   late List<ProfessionalsPostedWork> professionalsPostedWork;
@@ -38,6 +42,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
     super.initState();
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent &&
@@ -150,6 +155,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
                 jobTypeImage: 'assets/images/profile/prof.png',
                 language: professionalData.knownLanguages!.join(", "),
                 languageImage: 'assets/images/home/speak.png',
+                smartControlEnable: professionalData.smartCallControl!,
                 onShowInterest: () {
                   if (professionalData.isContacted == null) {
                     showInterestedBloc.add(ProfessionalContactUs(
@@ -188,7 +194,8 @@ class _CategoryItemListState extends State<CategoryItemList> {
                               BlocProvider(
                                 create: (context) => ShowInterestedBloc(),
                               ),
-                              BlocProvider(create:(context)=>ReportPostBloc() )
+                              BlocProvider(create:(context)=>ReportPostBloc() ),
+                              BlocProvider(create: (context) => ChartBloc())
                             ],
                             child: ProfessionalViewScreen(
                               id: professionalData.id!,
@@ -230,7 +237,39 @@ class _CategoryItemListState extends State<CategoryItemList> {
                       },
                     ));
                   }
-                }),
+                },
+                messageOnTap: (){
+                  chartBloc.add(
+                    StartMessageEvent(
+                      chatId: professionalData.id!,
+                      onSuccess: (chatId) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
+                                BlocProvider(create: (context) => InitialRegisterBloc()),
+                                BlocProvider(create: (context) => ShowInterestedBloc()),
+                              ],
+                              child: ChatViewScreen(
+                                refreshPageCallback: (){
+                                  _fetchData(isNewFetch: true);
+                                },
+                                chatId: chatId,
+                                isGroup: false,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      onError: (message) {
+                        showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
+                      },
+                    ),
+                  );
+                }
+            ),
           );
         } else if (isFetchingMore) {
           return Center(

@@ -13,6 +13,8 @@ class ChatList {
   LatestMessage? latestMessage;
   String? unreadCount;
   DateTime? updatedAt;
+  bool?isRequest;
+  String?requestedBy;
 
   ChatList({
      this.name,
@@ -22,6 +24,8 @@ class ChatList {
      this.latestMessage,
      this.unreadCount,
      this.updatedAt,
+    this.isRequest,
+    this.requestedBy
   });
 
   factory ChatList.fromJson(Map<String, dynamic> json) => ChatList(
@@ -32,6 +36,8 @@ class ChatList {
     latestMessage: json["latest_message"] == null ? null : LatestMessage.fromJson(json["latest_message"]),
     unreadCount: json["unread_count"].toString()??"",
     updatedAt: json["updatedAt"] != null ? DateTime.tryParse(json["updatedAt"]) : null,
+    isRequest: json.containsKey("isRequest")?json["isRequest"]??false:false,
+      requestedBy:json.containsKey("requestedBy")?json["requestedBy"]:""
   );
 
   Map<String, dynamic> toJson() => {
@@ -42,6 +48,8 @@ class ChatList {
     "latest_message": latestMessage?.toJson(),
     "unread_count": unreadCount,
     "updatedAt": updatedAt?.toIso8601String(),
+    "isRequest":isRequest,
+    "requestedBy":requestedBy
   };
 }
 

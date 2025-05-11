@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:works_app/bloc/chart/chart_bloc.dart';
 
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
@@ -136,7 +137,8 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                                         BlocProvider(
                                           create: (context) =>
                                               ShowInterestedBloc(),
-                                        )
+                                        ),
+                                        BlocProvider(create: (context) => ChartBloc())
                                       ],
                                       child: CategoryItemList(
                                         subCategory: item.name,

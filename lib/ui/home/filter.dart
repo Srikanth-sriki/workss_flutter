@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/register_account/initial_register_bloc.dart';
+import '../../components/config.dart';
 import '../../global_helper/dropdown.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
@@ -54,6 +55,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool knowLanguageLoading = true;
   List<Language> selectedLanguage = [];
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
 
 
   @override
@@ -161,9 +163,12 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                 });
               } else if (state is FetchCategoryListSuccess) {
                 setState(() {
-                  professionalTypesItem =
-                      state.categories.map((item) => item.name).toList();
-
+                  // professionalTypesItem =
+                  //     state.categories.map((item) => item.name).toList();
+                  professionalTypesItem = state.categories.map((item) {
+                    final translated = item.translation?.getTranslation(langKey);
+                    return translated?.isNotEmpty == true ? translated! : item.name;
+                  }).toList();
                   professionalTypesLoading = false;
                 });
               } else if (state is FetchCategoryListFailed) {

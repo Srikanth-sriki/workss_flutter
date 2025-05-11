@@ -161,6 +161,41 @@ Don’t miss out on your dream job. Download Works now and take control of your 
 
 
 
+Future<void> shareChatGroupInvite({
+  required String groupName,
+}) async {
+  final String inviteMessage = '''
+📢 *Join the official Works Community Group!*
+
+👥 *Group:* $groupName  
+
+Stay updated on the latest jobs, career tips, and exclusive updates from *Works*.  
+Connect, grow, and succeed together with professionals like you!
+
+🔗 *Join Now:* https://play.google.com/store/apps/details?id=com.workss.works_app
+
+Brought to you by *Works* — your partner in career growth.
+''';
+
+  // Load banner image
+  final ByteData bytes = await rootBundle.load('assets/images/home/share-banner.png');
+  final Uint8List list = bytes.buffer.asUint8List();
+
+  // Save the image to temp directory
+  final tempDir = await getTemporaryDirectory();
+  final file = await File('${tempDir.path}/works-group-banner.png').create();
+  await file.writeAsBytes(list);
+
+  // Share with image and message
+  await Share.shareXFiles(
+    [XFile(file.path)],
+    text: inviteMessage,
+  );
+}
+
+
+
+
 
 // Future<File?> compressImage(File file) async {
 //   final compressedImage = await FlutterImageCompress.compressWithFile(

@@ -793,7 +793,9 @@ Widget buildProfessionalCard(
     required bool accountVerified,
     required bool saved,
     required VoidCallback onTap,
-    required String image}) {
+    required String image,
+      required bool smartControlEnable,
+    required VoidCallback messageOnTap}) {
   return TouchRippleEffect(
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
     rippleColor: Colors.white60,
@@ -945,17 +947,32 @@ Widget buildProfessionalCard(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: customButton(
-                        text: contacted ? 'CONTACTED' : "CONTACT",
-                        onPressed: onShowInterest,
-                        backgroundColor:
+                    if(!smartControlEnable)...[
+                      Expanded(
+                        child: customButton(
+                            text: "Message",
+                            onPressed: messageOnTap,
+                            backgroundColor:
                             contacted ? COLORS.semanticTwo : COLORS.primary,
-                        showIcon: false,
-                        textColor: COLORS.white,
-                        height: SizeConfig.blockHeight*7
-                      ),
-                    ),
+                            showIcon: false,
+                            textColor: COLORS.white,
+                            height: SizeConfig.blockHeight*7
+                        ),
+                      )
+                    ]
+                    else...[
+                      Expanded(
+                        child: customButton(
+                            text: contacted ? 'CONTACTED' : "CONTACT",
+                            onPressed: onShowInterest,
+                            backgroundColor:
+                            contacted ? COLORS.semanticTwo : COLORS.primary,
+                            showIcon: false,
+                            textColor: COLORS.white,
+                            height: SizeConfig.blockHeight*7
+                        ),
+                      )
+                    ],
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1277,6 +1294,7 @@ Widget showContactUsButton({
   required final void Function()? onShare,
   required bool saved,
   required bool contacted,
+  required String buttonText
 }) {
   return   Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1284,7 +1302,7 @@ Widget showContactUsButton({
     children: [
       Expanded(
         child: customButton(
-          text: contacted ? 'CONTACTED' : "CONTACT",
+          text: buttonText,
           onPressed: onShowInterest,
           backgroundColor:
           contacted ? COLORS.semanticTwo : COLORS.primary,
@@ -1540,5 +1558,16 @@ class LiveLocationCard extends StatelessWidget {
     );
   }
 }
+
+
+Map<String, String> languageCodeToTranslationKey = {
+  'hn': 'hindi',
+  'kn': 'kannada',
+  'ml': 'malayalam',
+  'tl': 'telugu',
+  'tm': 'tamil',
+  'mr': 'marathi',
+  'gj': 'gujarati',
+};
 
 

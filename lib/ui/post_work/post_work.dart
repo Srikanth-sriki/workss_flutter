@@ -17,6 +17,7 @@ import 'package:works_app/ui/profile/location/location_list_modal.dart';
 import '../../bloc/post_work/post_work_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
+import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../dao/get_user_location.dart';
 import '../../global_helper/ImagePickerComponent.dart';
@@ -76,6 +77,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   String citySelected = '';
   String pincodeSelected = '';
   String localitySelected = '';
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
 
   void _validateForm() {
     bool isValid = false;
@@ -369,9 +371,10 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                     } else if (state is FetchDropDownSuccess) {
                       setState(() {
                         workPlaceLoading = false;
-                        dropdownWorkPlaceItem = state.dropDownItems
-                            .map((item) => item.place)
-                            .toList();
+                        dropdownWorkPlaceItem = state.dropDownItems.map((item) {
+                          final translated = item.translation?.getTranslation(langKey);
+                          return translated?.isNotEmpty == true ? translated! : item.place;
+                        }).toList();
                       });
                     } else if (state is FetchKnownLanguageSuccess) {
                       setState(() {
@@ -397,9 +400,10 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                       });
                     } else if (state is FetchCategoryListSuccess) {
                       setState(() {
-                        professionalTypesItem =
-                            state.categories.map((item) => item.name).toList();
-
+                        professionalTypesItem = state.categories.map((item) {
+                          final translated = item.translation?.getTranslation(langKey);
+                          return translated?.isNotEmpty == true ? translated! : item.name;
+                        }).toList();
                         professionalTypesLoading = false;
                       });
                     } else if (state is FetchCategoryListFailed) {

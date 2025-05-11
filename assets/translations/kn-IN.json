@@ -374,7 +374,26 @@
   "Instructions (Optional)": "ಸೂಚನೆಗಳು (ಐಚ್ಛಿಕ)",
   "REPORT": "ವರದಿ",
   "Upload your work images (Optional) \n(max 2 pictures)": "ನಿಮ್ಮ ಕೆಲಸದ ಚಿತ್ರಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ (ಐಚ್ಛಿಕ) \n(ಗರಿಷ್ಠ 2 ಚಿತ್ರಗಳು)",
-  "No Chats Found": "ಚಾಟ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
+  "No Chats Found": "ಚಾಟ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+  "Clear": "ಸ್ಪಷ್ಟಗೊಳಿಸಿ",
+  "Select profession type": "ವೃತ್ತಿಯ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "Select city": "ನಗರವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "Search for an profession": "ವೃತ್ತಿಗಾಗಿ ಹುಡುಕಿ",
+  "Select your known languages": "ನೀವು ತಿಳಿದಿರುವ ಭಾಷೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "Delete Chat": "ಚಾಟ್ ಅಳಿಸಿ",
+  "Write a reason for report": "ವರದಿಗಾಗಿ ಕಾರಣವನ್ನು ಬರೆಯಿರಿ",
+  "Are you sure you want to delete this chat?": "ಈ ಚಾಟ್ ಅಳಿಸಲು ನೀವು ಖಚಿತವಾಗಿದ್ದೀರಾ?",
+  "Delete": "ಅಳಿಸಿ",
+  "All": "ಎಲ್ಲಾ",
+  "Chart": "ಚಿತ್ರದಾಖಲೆ",
+  "Groups": "ಗುಂಪುಗಳು",
+  "People": "ಜನರು",
+  "Join Group": "ಗುಂಪಿಗೆ ಸೇರಿರಿ",
+  "Invited": "ಆಮಂತ್ರಣಿತ",
+  "Friends": "ಸ್ನೇಹಿತರು",
+  "Blocked Chats/Friends": "ತಡೆಯಲಾದ ಚಾಟ್‌ಗಳು/ಸ್ನೇಹಿತರು",
+  "Select your city pincode": "ನಿಮ್ಮ ನಗರದ ಪಿನ್‌ಕೋಡ್ ಆಯ್ಕೆಮಾಡಿ"
+
 }
 
 

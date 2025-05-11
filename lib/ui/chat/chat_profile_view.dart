@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/helper_function.dart';
 import 'package:works_app/ui/chat/addFriends.dart';
 import 'package:works_app/ui/chat/component.dart';
 import 'package:works_app/ui/chat/groupmemeber_list.dart';
@@ -139,6 +140,9 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
           actions: [
             if (chatViewGroupInfo.isGroup!) ...[
               InkWell(
+                onTap: (){
+                  shareChatGroupInvite(groupName: chatViewGroupInfo.name);
+                },
                 child: Image.asset(
                   'assets/images/home/share.png',
                   height: SizeConfig.blockWidth * 5,
@@ -791,7 +795,8 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                     ),
                                                     BlocProvider(
                                                         create: (context) =>
-                                                            ReportPostBloc())
+                                                            ReportPostBloc()),
+                                                    BlocProvider(create: (context) => ChartBloc())
                                                   ],
                                                   child: ProfessionalViewScreen(
                                                     id: participants.userId!,
@@ -893,6 +898,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                                                                 _refreshPageAfterEdit,
                                                             chatId: chatId,
                                                             isGroup: false,
+                                                            isRequest: false,
                                                           ),
                                                         )));
                                           },

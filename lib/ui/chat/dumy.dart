@@ -202,6 +202,7 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                                         refreshPageCallback: _refreshPageAfterEdit,
                                         chatId: chatId,
                                         isGroup: false,
+                                        isRequest: false,
                                       ),
                                     ),
                                   ),

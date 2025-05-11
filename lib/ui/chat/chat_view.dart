@@ -2,12 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:chat_bubbles/bubbles/bubble_normal.dart';
-import 'package:chat_bubbles/bubbles/bubble_normal_audio.dart';
-import 'package:chat_bubbles/bubbles/bubble_special_one.dart';
-import 'package:chat_bubbles/bubbles/bubble_special_three.dart';
-import 'package:chat_bubbles/bubbles/bubble_special_two.dart';
-import 'package:chat_bubbles/date_chips/date_chip.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,11 +46,12 @@ class ChatViewScreen extends StatefulWidget {
   final VoidCallback refreshPageCallback;
   final String chatId;
   final bool isGroup;
+  final bool isRequest;
   const ChatViewScreen(
       {super.key,
       required this.refreshPageCallback,
       required this.chatId,
-      required this.isGroup});
+      required this.isGroup,  this.isRequest = false});
 
   @override
   State<ChatViewScreen> createState() => _ChatViewScreenState();
@@ -93,6 +88,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   bool _isMounted = false;
   bool sentAudio = false;
   bool sentAudioSent = false;
+  late bool isRequestLocal;
 
   @override
   void initState() {
@@ -102,6 +98,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     chartBloc = BlocProvider.of<ChartBloc>(context);
     initialRegisterBloc = BlocProvider.of<InitialRegisterBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    setState(() {
+      isRequestLocal = widget.isRequest;
+    });
 
     _getDir();
     _initialiseControllers();
@@ -214,6 +213,53 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       });
     }
   }
+
+  // void _startOrStopRecording() async {
+  //   setState(() {
+  //     sentAudio = false;
+  //     sentAudioSent = false;
+  //   });
+  //
+  //   try {
+  //     if (isRecording) {
+  //       recorderController.reset();
+  //
+  //       path = await recorderController.stop(false);
+  //
+  //       if (path != null) {
+  //         isRecordingCompleted = true;
+  //         final recordedFile = File(path!);
+  //         int size = recordedFile.lengthSync();
+  //         debugPrint("Original size: $size bytes");
+  //
+  //         File fileToUpload = recordedFile;
+  //         if (size > 1 * 1024 * 1024) {
+  //           final compressed = await compressAudio(recordedFile);
+  //           if (compressed != null) {
+  //             fileToUpload = compressed;
+  //           }
+  //         }
+  //
+  //         chartBloc.add(UploadFileEvent(filePath: fileToUpload));
+  //
+  //         setState(() {
+  //           sentAudioSent = true;
+  //         });
+  //       }
+  //     } else {
+  //       final dir = await getTemporaryDirectory();
+  //       path = '${dir.path}/recorded_${DateTime.now().millisecondsSinceEpoch}.aac';
+  //       await recorderController.record(path: path);
+  //     }
+  //   } catch (e) {
+  //     debugPrint(e.toString());
+  //   } finally {
+  //     setState(() {
+  //       isRecording = !isRecording;
+  //     });
+  //   }
+  // }
+
 
   void _refreshWave() {
     if (isRecording) recorderController.refresh();
@@ -1300,7 +1346,97 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
               ),
               color: COLORS.white,
             ),
-            child: Row(
+            child: !isRequestLocal ?Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'New Chat? You Decide!',
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 3.6,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+                SizedBox(height: SizeConfig.blockHeight,),
+                Text(
+                  'Review and respond to chat requests securely.',
+                  style: TextStyle(
+                    color: COLORS.neutralDarkOne,
+                    fontSize: SizeConfig.blockWidth * 3.3,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                  softWrap: true,
+                ),
+                SizedBox(height: SizeConfig.blockHeight,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    customButton(
+                      text: 'Reject'.tr(),
+                      onPressed: () {
+                        chartBloc.add(RejectChartRequestEvent(
+                            chatId: chatViewGroupInfo.id,
+                            onSuccess: (message) {
+                              setState(() {
+                                isRequestLocal = false;
+                              });
+                              showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                  backgroundColor:
+                                  COLORS.neutralDarkOne);
+                              Navigator.pushNamed(
+                                context,
+                                '/main_screen',
+                                arguments: {
+                                  'selectedIndex': 3
+                                },
+                              );
+                            },
+                            onError: (message) {
+                              showCustomSnackBar(
+                                context: context,
+                                message: message,
+                              );
+                            }));
+                      },
+                      backgroundColor: COLORS.neutralDarkTwo,
+                      showIcon: false,
+                      width: SizeConfig.blockWidth * 44,
+                      height: SizeConfig.blockHeight * 8,
+                      textColor: COLORS.neutralDark,
+                    ),
+                    customButton(
+                      text: 'Accept'.tr(),
+                      onPressed: () {
+                        chartBloc.add(ApproveChartRequestEvent(
+                            chatId: chatViewGroupInfo.id,
+                            onSuccess: (message) {
+                              setState(() {
+                                isRequestLocal = false;
+                              });
+                            },
+                            onError: (message) {
+                              showCustomSnackBar(
+                                context: context,
+                                message: message,
+                              );
+                            }));
+                      },
+                      backgroundColor: COLORS.primary,
+                      showIcon: false,
+                      width: SizeConfig.blockWidth * 44,
+                      height: SizeConfig.blockHeight * 8,
+                      textColor: COLORS.white,
+                    ),
+                  ],
+                ),
+              ],
+            ): Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

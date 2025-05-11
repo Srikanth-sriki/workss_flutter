@@ -107,7 +107,8 @@ class _MainScreenState extends State<MainScreen> {
                       gender: "",
                       currentLongitude: '',knownLanguages: [],
                       currentLatitude: '')),
-              )
+              ),
+              BlocProvider(create: (context) => ChartBloc())
             ],
             child: const ProfessionalsScreen(),
           );
@@ -122,7 +123,7 @@ class _MainScreenState extends State<MainScreen> {
                   ..add(FetchFriendsListEvent(
                       page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(
-                create: (context) => ChartBloc()..add(const ChartListEvent()))
+                create: (context) => ChartBloc()..add(const ChartListEvent())..add(const RequestedChartListEvent()))
           ], child: const ChatMainScreen());
         case 4:
           return _cachedProfileScreen;
@@ -189,7 +190,8 @@ class _MainScreenState extends State<MainScreen> {
                       gender: "",
                       currentLongitude: '',
                       currentLatitude: '',knownLanguages: [],)),
-              )
+              ),
+              BlocProvider(create: (context) => ChartBloc())
             ],
             child: const ProfessionalsScreen(),
           );
@@ -200,7 +202,7 @@ class _MainScreenState extends State<MainScreen> {
                   ..add(FetchFriendsListEvent(
                       page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(
-                create: (context) => ChartBloc()..add(const ChartListEvent()))
+                create: (context) => ChartBloc()..add(const ChartListEvent())..add(const RequestedChartListEvent()))
           ], child: const ChatMainScreen());
         case 3:
           return _cachedProfileScreen;
@@ -315,9 +317,9 @@ class _MainScreenState extends State<MainScreen> {
                         top: 0,
                         right: 0,
                         child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
+                          width: SizeConfig.blockWidth*3,
+                          height: SizeConfig.blockWidth*3,
+                          decoration: const BoxDecoration(
                             color: Colors.red,
                             shape: BoxShape.circle,
                           ),

@@ -142,7 +142,10 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
       },
       builder: (context, state) {
         if (state is FriendsListLoading && currentPage == 1) {
-          return friendsListLoading();
+          return SizedBox(
+              width: SizeConfig.screenWidth,
+              height: SizeConfig.blockHeight*90,
+              child: globalLoadingWidget());
         } else if (state is FriendsAddListSuccess) {
           return ListView.builder(
             padding: EdgeInsets.symmetric(
@@ -215,6 +218,7 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                                         refreshPageCallback: _refreshPageAfterEdit,
                                         chatId: chatId,
                                         isGroup: false,
+                                        isRequest: false,
                                       ),
                                     ),
                                   ),

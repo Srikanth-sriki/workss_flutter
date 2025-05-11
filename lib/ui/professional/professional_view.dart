@@ -6,7 +6,9 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
@@ -15,6 +17,7 @@ import '../../global_helper/readmore_text.dart';
 import '../../global_helper/report_post.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/professional_view_model.dart';
+import '../chat/chat_view.dart';
 import '../chat/component.dart';
 import '../profile/component.dart';
 import 'component/grid_image_card.dart';
@@ -33,6 +36,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
   late ProfessionalBloc professionalBloc;
   late ShowInterestedBloc showInterestedBloc;
   late ReportPostBloc reportPostBloc;
+  late ChartBloc chartBloc;
   final bool saved = false;
 
   @override
@@ -41,6 +45,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     reportPostBloc = BlocProvider.of<ReportPostBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
   }
 
   void _refreshPageAfterEdit() {
@@ -589,6 +594,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                               professionalData!.isVerified!,
                                           image: professionalData!.profilePic!,
                                           name: professionalData!.name!,
+                                          smartControlEnable: professionalData.smartCallControl!,
                                           profession:
                                               professionalData.professionType!,
                                           location: professionalData.city!,
@@ -640,6 +646,37 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                               makePhoneCall(
                                                   professionalData.mobile!);
                                             }
+                                          },
+                                          messageOnTap: (){
+                                            chartBloc.add(
+                                              StartMessageEvent(
+                                                chatId: professionalData.id!,
+                                                onSuccess: (chatId) {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => MultiBlocProvider(
+                                                        providers: [
+                                                          BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
+                                                          BlocProvider(create: (context) => InitialRegisterBloc()),
+                                                          BlocProvider(create: (context) => ShowInterestedBloc()),
+                                                        ],
+                                                        child: ChatViewScreen(
+                                                          refreshPageCallback: (){
+                                                           _refreshPageAfterEdit();
+                                                          },
+                                                          chatId: chatId,
+                                                          isGroup: false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                                onError: (message) {
+                                                  showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
+                                                },
+                                              ),
+                                            );
                                           },
                                           jobType:
                                               professionalData.professionType!,
@@ -748,6 +785,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
               child: showContactUsButton(
                   contacted: professional.isContacted != null,
                   saved: professional.isSaved != null,
+                  buttonText: professional.smartCallControl == true?professional.isContacted != null ? 'CONTACTED' : "CONTACT":"Message",
                   onShare: () {
                     shareJobDetails(
                       experience: professional.experiencedYears!,

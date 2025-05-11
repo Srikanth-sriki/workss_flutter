@@ -120,6 +120,16 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<DeleteChartEvent>((event, emit) async {
       await mapDeleteChatEvent(event, emit);
     });
+
+    on<RequestedChartListEvent>((event, emit) async {
+      await mapRequestedCharListEvent(event, emit);
+    });
+    on<ApproveChartRequestEvent>((event, emit) async {
+      await mapApproveChatRequestEvent(event, emit);
+    });
+    on<RejectChartRequestEvent>((event, emit) async {
+      await mapRejectChatRequestEvent(event, emit);
+    });
   }
 
   Future<void> mapCharListEvent(
@@ -162,6 +172,50 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     } catch (error) {
       customLog("Error: $error");
       emit(ChartListFailed(message: "Something went wrong"));
+    }
+  }
+
+
+  Future<void> mapRequestedCharListEvent(
+      RequestedChartListEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const RequestedChartListLoading());
+      var response = await friendsDao.fetchRequestChartList();
+
+      customLog("Response Body: ${response.body}");
+
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        List<ChatList> chatList = [];
+        customLog("Processing Data...");
+
+        if (jsonDecoded["data"] is List) {
+          for (var i in jsonDecoded["data"]) {
+            try {
+              chatList.add(ChatList.fromJson(i));
+            } catch (e) {
+              customLog("Error parsing chatList item: $e");
+            }
+          }
+        } else {
+          customLog("Data is not a list: ${jsonDecoded["data"]}");
+          emit(RequestedChartListFailed(message: "Invalid data format"));
+          return;
+        }
+
+        customLog("Chat List Length: ${chatList.length}");
+        if (chatList.isNotEmpty) {
+          emit(RequestedChartListSuccess(chatList: chatList));
+        } else {
+          emit(RequestedChartListFailed(message: "No chats found"));
+        }
+      } else {
+        emit(RequestedChartListFailed(message: jsonDecoded["message"] ?? 'Error'));
+      }
+    } catch (error) {
+      customLog("Error: $error");
+      emit(RequestedChartListFailed(message: "Something went wrong"));
     }
   }
 
@@ -905,6 +959,57 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     } catch (error) {
       customLog("The error is : $error");
       emit(DeleteChatFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+
+  Future<void> mapApproveChatRequestEvent(
+      ApproveChartRequestEvent event, Emitter<ChartState> emit) async {
+    try {
+      var response = await friendsDao.approveChartRequest(
+        chatId: event.chatId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(ApproveChartRequestSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(ApproveChartRequestFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(ApproveChartRequestFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+
+  Future<void> mapRejectChatRequestEvent(
+      RejectChartRequestEvent event, Emitter<ChartState> emit) async {
+    try {
+      //emit(const RejectInviteChatLoading());
+      var response = await friendsDao.rejectChartRequest(
+        chatId: event.chatId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(RejectChartRequestSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(RejectChartRequestFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(RejectChartRequestFailed(message: "Something Went wrong"));
       event.onError('Something Went wrong"');
     }
   }

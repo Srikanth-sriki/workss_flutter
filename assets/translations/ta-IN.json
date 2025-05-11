@@ -373,7 +373,26 @@
   "Instructions (Optional)": "வழிமுறைகள் (விரும்பினால்)",
   "REPORT": "புகார்",
   "Upload your work images (Optional) \n(max 2 pictures)": "உங்கள் வேலை படங்களை பதிவேற்றவும் (விரும்பினால்) \n(அதிகபட்சம் 2 படங்கள்)",
-  "No Chats Found": "சாட் இல்லை"
+  "No Chats Found": "சாட் இல்லை",
+  "Clear": "தெளிவாக்கு",
+  "Select profession type": "தொழில் வகையைத் தேர்ந்தெடுக்கவும்",
+  "Select city": "நகரத்தைத் தேர்ந்தெடுக்கவும்",
+  "Search for an profession": "ஒரு தொழிலைத் தேடுங்கள்",
+  "Select your known languages": "உங்கள் தெரிந்த மொழிகளைத் தேர்ந்தெடுக்கவும்",
+  "Delete Chat": "அரட்டையை அழிக்கவும்",
+  "Write a reason for report": "அறிக்கைக்கு காரணத்தை எழுதவும்",
+  "Are you sure you want to delete this chat?": "இந்த அரட்டையை அழிக்க விரும்புகிறீர்களா?",
+  "Delete": "அழிக்கவும்",
+  "All": "அனைத்தும்",
+  "Chart": "வரைப்படம்",
+  "Groups": "குழுக்கள்",
+  "People": "மக்கள்",
+  "Join Group": "குழுவில் சேரவும்",
+  "Invited": "அழைக்கப்பட்டது",
+  "Friends": "நண்பர்கள்",
+  "Blocked Chats/Friends": "தடைசெய்யப்பட்ட அரட்டைகள்/நண்பர்கள்",
+  "Select your city pincode": "உங்கள் நகர பின்கோடைக் தேர்ந்தெடுக்கவும்"
 }
+
 
 

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -240,7 +241,7 @@ Widget buildDropdown(
                   horizontal: SizeConfig.blockWidth * 3,
                   vertical: SizeConfig.blockHeight,
                 ),
-                hintText: 'Search for an $label...',
+                hintText: '${'Search for an'.tr()} $label...',
                 hintStyle: TextStyle(
                   fontWeight: FontWeight.w400,
                   fontFamily: "Poppins",

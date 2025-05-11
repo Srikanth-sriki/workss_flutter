@@ -11,6 +11,7 @@ import 'package:works_app/bloc/report_post_bloc.dart';
 import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/global_helper/popup.dart';
+import 'package:works_app/helper/socket_service.dart';
 import 'package:works_app/ui/home/component.dart';
 import 'package:works_app/ui/home/notification_list.dart';
 import 'package:works_app/ui/home/work_details.dart';
@@ -35,6 +36,7 @@ import '../friends/friends_search.dart';
 import '../onboarding/register_form.dart';
 import '../post_work/post_work.dart';
 import 'filter.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -57,12 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
   String? selectedProfession = '';
   String? selectedCity = '';
   String selectedGender = '';
-  String experienceLevel ='';
+  String experienceLevel = '';
   List<String> selectedLanguage = [];
+  late io.Socket socket;
+  bool _isMounted = false;
 
   @override
   void initState() {
     super.initState();
+    _isMounted = true;
     homeBloc = BlocProvider.of<HomeBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
@@ -74,6 +79,27 @@ class _HomeScreenState extends State<HomeScreen> {
           !isFetchingMore &&
           currentPage < maxPageNumber) {
         _loadMoreData();
+      }
+    });
+    socket = io.io(Config.socketUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true,
+    });
+
+    if (!socket.connected) {
+      SocketService().reconnect();
+    }
+    connectToSocket();
+  }
+
+  void connectToSocket() {
+    socket.on('new_notification', (data) {
+      if (_isMounted) {
+        setState(() {
+          Config.notificationReceiveMessage.value = true;
+
+          print(data);
+        });
       }
     });
   }
@@ -109,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
         city: selectedCity ?? "",
         gender: selectedGender ?? "",
         knownLanguages: [],
-        experienceLevel: experienceLevel??'',
+        experienceLevel: experienceLevel ?? '',
         currentLongitude: '',
         currentLatitude: ''));
   }
@@ -137,7 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void filterHomeScreenData(String? profession, String? city, String gender,String experienceLevel, List<String>selectedLanguages) {
+  void filterHomeScreenData(String? profession, String? city, String gender,
+      String experienceLevel, List<String> selectedLanguages) {
     setState(() {
       currentPage = 1;
       isFetchingMore = false;
@@ -150,14 +177,16 @@ class _HomeScreenState extends State<HomeScreen> {
           gender: gender ?? "",
           currentLongitude: '',
           currentLatitude: '',
-        knownLanguages: selectedLanguages,
-        experienceLevel: experienceLevel??""
-      ));
+          knownLanguages: selectedLanguages,
+          experienceLevel: experienceLevel ?? ""));
     });
   }
 
   @override
   void dispose() {
+    _isMounted = false;
+    // socket.off('new_notification');
+    // socket.disconnect();
     _scrollController.dispose();
     super.dispose();
   }
@@ -259,8 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   currentLongitude: '',
                                   currentLatitude: '',
                                   knownLanguages: [],
-                                  experienceLevel: ''
-                              ));
+                                  experienceLevel: ''));
                             });
                           }
                           return Container();
@@ -338,7 +366,6 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (index == 0) ...[
-
                   Padding(
                     padding:
                         EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
@@ -355,7 +382,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
                 if ((index == 3 || index == 15 || index == 30 || index == 50) &&
-                    searchFriendLists.isNotEmpty && Config.profileCompleted) ...[
+                    searchFriendLists.isNotEmpty &&
+                    Config.profileCompleted) ...[
                   SizedBox(height: SizeConfig.blockHeight),
                   addFriendText(
                       textOne: 'Add Friends',
@@ -378,8 +406,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ShowInterestedBloc()),
                                         BlocProvider(
                                             create: (context) => ChartBloc()
-                                        ..add(FetchChartSearchListEvent(page: 1, pageSize: 10, keyWord: ''))
-                                        )
+                                              ..add(FetchChartSearchListEvent(
+                                                  page: 1,
+                                                  pageSize: 10,
+                                                  keyWord: '')))
                                       ],
                                       child: AddFriendsScreen(
                                         header: 'Friend Suggestion',
@@ -487,7 +517,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
                 WorkCard(
                   title: work.requiredProfession ?? '--',
-                  location:'${work.locality} ${work.city}' ?? '--',
+                  location: '${work.locality} ${work.city}' ?? '--',
                   timeAgo: timeAgo(work.updatedAt!),
                   jobType: work.workPlace ?? '--',
                   experience: work.experienceLevel ?? '--',
@@ -752,45 +782,77 @@ class _HomeScreenState extends State<HomeScreen> {
                   InkWell(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (context) => NotificationBloc()
-                                          ..add(const FetchNotificationList()),
-                                      ),
-                                      BlocProvider(
-                                          create: (context) =>
-                                              ShowInterestedBloc()),
-                                      BlocProvider(
-                                          create: (context) => ChartBloc()),
-                                      BlocProvider(
-                                          create: (context) => FriendsBloc()
-                                            ..add(FetchFriendsRequestListEvent(
-                                                page: 1,
-                                                pageSize: 10,
-                                                keyWord: '')))
-                                    ],
-                                    child: const NotificationListScreen(),
-                                  )));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => NotificationBloc()
+                                  ..add(const FetchNotificationList()),
+                              ),
+                              BlocProvider(
+                                create: (context) => ShowInterestedBloc(),
+                              ),
+                              BlocProvider(
+                                create: (context) => ChartBloc(),
+                              ),
+                              BlocProvider(
+                                create: (context) => FriendsBloc()
+                                  ..add(
+                                    FetchFriendsRequestListEvent(
+                                      page: 1,
+                                      pageSize: 10,
+                                      keyWord: '',
+                                    ),
+                                  ),
+                              ),
+                            ],
+                            child: const NotificationListScreen(),
+                          ),
+                        ),
+                      );
                     },
                     borderRadius:
                         BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                              SizeConfig.blockWidth * 2.5),
-                          color: COLORS.primaryOne.withOpacity(0.3)),
-                      child: Image.asset(
-                        'assets/images/home/notification.png',
-                        width: SizeConfig.blockWidth * 5.5,
-                        height: SizeConfig.blockWidth * 5.5,
-                        fit: BoxFit.contain,
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                        color: COLORS.primaryOne.withOpacity(0.3),
+                      ),
+                      child: Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/home/notification.png',
+                            width: SizeConfig.blockWidth * 5.5,
+                            height: SizeConfig.blockWidth * 5.5,
+                            fit: BoxFit.contain,
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: Config.notificationReceiveMessage,
+                            builder: (context, hasNewMessage, _) {
+                              return hasNewMessage
+                                  ? Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: Container(
+                                        width: SizeConfig.blockWidth * 3,
+                                        height: SizeConfig.blockWidth * 3,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox
+                                      .shrink(); // Return empty widget if false
+                            },
+                          ),
+                        ],
                       ),
                     ),
-                  ),
+                  )
                 ],
               )
             ],
@@ -824,8 +886,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             currentLatitude: '',
                                             gender: '',
                                             knownLanguages: [],
-                                            experienceLevel: ''
-                                        ))),
+                                            experienceLevel: ''))),
                                   BlocProvider(
                                     create: (context) => ShowInterestedBloc(),
                                   )
@@ -920,13 +981,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     selectedGender = result['selectedGender'];
                     experienceLevel = result['_experienceLevel'];
                     selectedLanguage = result['selectedLanguage'];
-                    filterHomeScreenData(
-                      selectedProfession,
-                      selectedCity,
-                      selectedGender,
-                        experienceLevel,
-                        selectedLanguage
-                    );
+                    filterHomeScreenData(selectedProfession, selectedCity,
+                        selectedGender, experienceLevel, selectedLanguage);
                   }
                 },
                 borderRadius:

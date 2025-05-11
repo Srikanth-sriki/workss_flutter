@@ -13,6 +13,12 @@ class ChartListEvent extends ChartEvent {
   List<Object> get props => [];
 }
 
+class RequestedChartListEvent extends ChartEvent {
+  const RequestedChartListEvent();
+  @override
+  List<Object> get props => [];
+}
+
 class ChartGroupCreateEvent extends ChartEvent {
   String picture;
   String name;
@@ -349,6 +355,30 @@ class DeleteChartEvent extends ChartEvent {
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
   DeleteChartEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class ApproveChartRequestEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  ApproveChartRequestEvent({
+    required this.chatId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [chatId,onError,onSuccess];
+}
+
+class RejectChartRequestEvent extends ChartEvent {
+  String chatId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  RejectChartRequestEvent({
     required this.chatId,
     required this.onSuccess,required this.onError
   });

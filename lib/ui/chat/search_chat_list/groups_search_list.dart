@@ -129,7 +129,10 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
       },
       builder: (context, state) {
         if (state is chartListSearchLoading && currentChartPage == 1 && pageLoaded) {
-          return friendsListLoading();
+          return SizedBox(
+              width: SizeConfig.screenWidth,
+              height: SizeConfig.blockHeight*90,
+              child: globalLoadingWidget());
         } else if (state is chartListSearchSuccess) {
           return ListView.builder(
             controller: _scrollController,
@@ -182,6 +185,7 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                                   refreshPageCallback: _refreshPageAfterEdit,
                                   chatId: chart.participantsDetails!.chatId!,
                                   isGroup: true,
+                                  isRequest: false,
                                 ),
                               ),
                             ),
@@ -232,6 +236,7 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                                   refreshPageCallback: _refreshPageAfterEdit,
                                   chatId: chart.participantsDetails!.chatId!,
                                   isGroup: true,
+                                  isRequest: false,
                                 ),
                               ),
                             ),

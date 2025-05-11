@@ -198,6 +198,7 @@ class _MemberListWidgetState extends State<MemberListWidget> {
                         ),
                         BlocProvider(create: (_) => ShowInterestedBloc()),
                         BlocProvider(create: (_) => ReportPostBloc()),
+                        BlocProvider(create: (context) => ChartBloc())
                       ],
                       child: ProfessionalViewScreen(
                         id: participant.userId,
@@ -243,6 +244,7 @@ class _MemberListWidgetState extends State<MemberListWidget> {
                               refreshPageCallback: widget.refreshPageCallback,
                               chatId: chatId,
                               isGroup: false,
+                              isRequest: false,
                             ),
                           ),
                         ),

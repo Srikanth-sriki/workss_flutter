@@ -154,6 +154,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/components/local_constant.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/home/home.dart';
@@ -177,6 +178,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   void initState() {
     super.initState();
     _loadSavedLocale();
+    print(Config.languageSelected);
   }
 
   Future<void> _loadSavedLocale() async {
@@ -187,6 +189,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       if (localeParts.length == 2) {
         setState(() {
           selectedLocale = Locale(localeParts[0], localeParts[1]);
+          Config.languageSelected = Locale(localeParts[0]).toString();
         });
       }
     }
@@ -209,6 +212,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           '${selectedLocale!.languageCode}_${selectedLocale!.countryCode}');
 
       context.setLocale(selectedLocale!);
+      setState(() {
+        Config.languageSelected = selectedLocale!.languageCode;
+      });
 
       if(widget.routeType == 'intro'){
         SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -25,6 +25,7 @@ import '../../global_helper/reuse_widget.dart';
 import '../../models/category_list_modal.dart';
 import '../../models/friends/global_search_list_modal.dart';
 import '../chat/addFriends.dart';
+import '../chat/chat_view.dart';
 import '../friends/friends_details.dart';
 import '../home/filter.dart';
 import '../home/notification_list.dart';
@@ -42,6 +43,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   late ProfessionalBloc professionalBloc;
   late ShowInterestedBloc showInterestedBloc;
   late FriendsBloc friendsBloc;
+  late ChartBloc chartBloc;
   List<ProfessionalsPostedWork> professionalsPostedWork = [];
   late List<SearchFriendLists> searchFriendLists = [];
   final ScrollController _scrollController = ScrollController();
@@ -63,6 +65,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
     _fetchData();
     _fetchFriendList();
     _scrollController.addListener(() {
@@ -351,7 +354,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                           BlocProvider(
                                             create: (context) =>
                                                 ShowInterestedBloc(),
-                                          )
+                                          ),
+                                          BlocProvider(create: (context) => ChartBloc())
                                         ],
                                         child: const ProfessionalSearchList(),
                                       )));
@@ -867,6 +871,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               price: professionalData.charges!,
                                               paymentType:
                                                   professionalData.chargeType!,
+                                              smartControlEnable: professionalData.smartCallControl!,
                                               contacted: professionalData
                                                       .isContacted !=
                                                   null,
@@ -915,6 +920,37 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 }
                                                 else {loginUserBottomSheet(context);}
                                               },
+                                              messageOnTap: (){
+                                                chartBloc.add(
+                                                  StartMessageEvent(
+                                                    chatId: professionalData.id!,
+                                                    onSuccess: (chatId) {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) => MultiBlocProvider(
+                                                            providers: [
+                                                              BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
+                                                              BlocProvider(create: (context) => InitialRegisterBloc()),
+                                                              BlocProvider(create: (context) => ShowInterestedBloc()),
+                                                            ],
+                                                            child: ChatViewScreen(
+                                                              refreshPageCallback: (){
+                                                                _fetchData(isNewFetch: true);
+                                                              },
+                                                              chatId: chatId,
+                                                              isGroup: false,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
+                                                    },
+                                                  ),
+                                                );
+                                              },
                                               jobType: professionalData
                                                   .professionType!,
                                               onShare: () {
@@ -951,7 +987,8 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                                   ),
                                                                   BlocProvider(
                                                                       create: (context) =>
-                                                                          ReportPostBloc())
+                                                                          ReportPostBloc()),
+                                                                  BlocProvider(create: (context) => ChartBloc())
                                                                 ],
                                                                 child:
                                                                 ProfessionalViewScreen(

@@ -159,6 +159,7 @@ class _ChatListSearchState extends State<ChatListSearch> {
                                           refreshPageCallback: _refreshPageAfterEdit,
                                           chatId: chatList[index].chatId!,
                                           isGroup: chatList[index].isGroup!,
+                                          isRequest: false,
                                         ),
                                       ),
                                     ),

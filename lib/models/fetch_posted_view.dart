@@ -164,6 +164,7 @@ class User {
   // dynamic deletedAt;
   IsContacted?isSaved;
   IsContacted? isContacted;
+  bool? smartCallControl;
 
   User({
     this.id,
@@ -195,6 +196,7 @@ class User {
     // this.deletedAt,
     this.isSaved,
     this.isContacted,
+    this.smartCallControl
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -220,6 +222,7 @@ class User {
     isContacted: json["isContacted"] != null
         ? IsContacted.fromJson(json["isContacted"])
         : null,
+    smartCallControl: json.containsKey('smart_call_control')?json["smart_call_control"]:false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -239,6 +242,7 @@ class User {
     "mobile":mobile,
     "isSaved":isSaved,
     "isContacted": isContacted?.toJson(),
+    "smart_call_control":smartCallControl
   };
 }
 

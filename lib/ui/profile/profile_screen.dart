@@ -18,6 +18,7 @@ import 'package:works_app/ui/profile/faq.dart';
 import 'package:works_app/ui/profile/location/location_create.dart';
 import 'package:works_app/ui/profile/posted_work.dart';
 import 'package:works_app/ui/profile/setting.dart';
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
@@ -415,6 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           create: (context) =>
                                               ShowInterestedBloc(),
                                         ),
+                                        BlocProvider(create: (context) => ChartBloc())
                                       ],
                                       child: const BookMarkListScreen(),
                                     )));

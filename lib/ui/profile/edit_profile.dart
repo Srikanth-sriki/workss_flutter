@@ -11,6 +11,7 @@ import 'package:works_app/models/fetch_profile_model.dart';
 import 'package:works_app/ui/profile/component.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../components/colors.dart';
+import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/dropdown.dart';
@@ -56,6 +57,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   final TextEditingController pinCodeController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   late MultiSelectController<Language> controller;
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
 
   String? selectedYears;
   String? selectedCharges;
@@ -460,8 +462,12 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   });
                 } else if (state is FetchCategoryListSuccess) {
                   setState(() {
-                    professionalTypesItem =
-                        state.categories.map((item) => item.name).toList();
+                    // professionalTypesItem =
+                    //     state.categories.map((item) => item.name).toList();
+                    professionalTypesItem = state.categories.map((item) {
+                      final translated = item.translation?.getTranslation(langKey);
+                      return translated?.isNotEmpty == true ? translated! : item.name;
+                    }).toList();
 
                     professionalTypesLoading = false;
                   });
@@ -627,7 +633,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
                           buildDropdown(
-                            value: _selectedProfession,
+                            value: _selectedProfession??null,
                             label: 'profession_type'.tr(),
                             hintText: 'Select your Profession'.tr(),
                             items: professionalTypesItem,itemLoading: professionalTypesLoading,

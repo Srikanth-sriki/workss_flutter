@@ -136,6 +136,16 @@ class FriendsDao {
     return response;
   }
 
+  Future fetchRequestChartList() async {
+    var url = '${Config.url}/user/chat/request-list';
+    final response = await http.get(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+    );
+    customLog("Response Status Code : ${response.body}");
+    return response;
+  }
+
   Future fetchArchivedChartList() async {
     var url = '${Config.url}/user/chat/archive-list';
     final response = await http.get(
@@ -631,6 +641,38 @@ class FriendsDao {
       "chatId": chatId
     };
     var url = '${Config.url}/user/chat/delete';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future approveChartRequest({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chat_id": chatId
+    };
+    var url = '${Config.url}/user/chat/approve-request';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future rejectChartRequest({
+    required String chatId,
+  }) async {
+    Map<String, dynamic> body = {
+      "chat_id": chatId
+    };
+    var url = '${Config.url}/user/chat/reject-request';
     final response = await http.post(
       Uri.parse(url),
       headers: Config.authHeaders(),

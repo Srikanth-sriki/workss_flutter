@@ -4,14 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 
+import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
+import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/professionals_list_model.dart';
+import '../chat/chat_view.dart';
 import '../professional/professional_view.dart';
 
 class BookMarkListScreen extends StatefulWidget {
@@ -25,6 +28,7 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
   late ProfileBloc profileBloc;
   late ShowInterestedBloc showInterestedBloc;
   late List<ProfessionalsPostedWork> professionalsPostedWork;
+  late ChartBloc chartBloc;
   bool loading = true;
   bool error = false;
 
@@ -33,6 +37,7 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
   }
   void _refreshPageAfterEdit() {
     profileBloc.add(const FetchSavedProfessionalEvent());
@@ -115,7 +120,8 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                                           create: (context) =>
                                                               ShowInterestedBloc(),
                                                         ),
-                                                        BlocProvider(create:(context)=>ReportPostBloc() )
+                                                        BlocProvider(create:(context)=>ReportPostBloc() ),
+                                                        BlocProvider(create: (context) => ChartBloc())
                                                       ],
                                                       child:
                                                           ProfessionalViewScreen(
@@ -125,6 +131,38 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                                       ),
                                                     )));
                                       },
+                                      messageOnTap: (){
+                                        chartBloc.add(
+                                          StartMessageEvent(
+                                            chatId: professionalData.id!,
+                                            onSuccess: (chatId) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => MultiBlocProvider(
+                                                    providers: [
+                                                      BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
+                                                      BlocProvider(create: (context) => InitialRegisterBloc()),
+                                                      BlocProvider(create: (context) => ShowInterestedBloc()),
+                                                    ],
+                                                    child: ChatViewScreen(
+                                                      refreshPageCallback: (){
+                                                        _refreshPageAfterEdit();
+                                                      },
+                                                      chatId: chatId,
+                                                      isGroup: false,
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            onError: (message) {
+                                              showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      smartControlEnable: professionalData.smartCallControl!,
                                       accountVerified:
                                           professionalData!.isVerified!,
                                       image: professionalData!.profilePic!,

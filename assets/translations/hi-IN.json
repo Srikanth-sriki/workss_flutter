@@ -372,9 +372,25 @@
   "Instructions (Optional)": "निर्देश (वैकल्पिक)",
   "REPORT": "रिपोर्ट करें",
   "Upload your work images (Optional) \n(max 2 pictures)": "अपने कार्य की छवियां अपलोड करें (वैकल्पिक) \n(अधिकतम 2 चित्र)",
-  "No Chats Found": "कोई चैट नहीं मिली"
+  "No Chats Found": "कोई चैट नहीं मिली",
+  "Clear": "साफ़ करें",
+  "Select profession type": "पेशे का प्रकार चुनें",
+  "Select city": "शहर चुनें",
+  "Search for an profession": "एक पेशे की खोज करें",
+  "Select your known languages": "अपनी ज्ञात भाषाएं चुनें",
+  "Delete Chat": "चैट हटाएं",
+  "Write a reason for report": "रिपोर्ट के लिए कारण लिखें",
+  "Are you sure you want to delete this chat?": "क्या आप वाकई इस चैट को हटाना चाहते हैं?",
+  "Delete": "हटाएं",
+  "All": "सभी",
+  "Chart": "चार्ट",
+  "Groups": "समूह",
+  "People": "लोग",
+  "Join Group": "समूह में शामिल हों",
+  "Invited": "आमंत्रित",
+  "Friends": "मित्र",
+  "Blocked Chats/Friends": "अवरोधित चैट/मित्र",
+  "Select your city pincode": "अपने शहर का पिनकोड चुनें"
 }
-
-
 
 

@@ -20,6 +20,7 @@ class Config {
   static int notificationCount =0;
   static bool chartCount = false ;
   static ValueNotifier<bool> chatHasNewMessage = ValueNotifier<bool>(false);
+  static ValueNotifier<bool> notificationReceiveMessage = ValueNotifier<bool>(false);
 
   static Map<String, String> headers() {
     return {
