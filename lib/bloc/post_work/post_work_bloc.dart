@@ -62,7 +62,12 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
           workPlace: event.workPlace,
           city: event.city,
           pincode: event.pincode,
-          locality: event.locality);
+          locality: event.locality,
+          profCategoryId: event.profCategoryId,
+          workPlaceId: event.workPlaceId,
+          localityId: event.localityId,
+         cityId: event.cityId
+      );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 

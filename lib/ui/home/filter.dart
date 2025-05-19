@@ -55,6 +55,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool knowLanguageLoading = true;
   List<Language> selectedLanguage = [];
+  late Map<String, String> translatedToProfessionalTypes;
   final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
 
 
@@ -171,6 +172,20 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                   }).toList();
                   professionalTypesLoading = false;
                 });
+                setState(() {
+                  translatedToProfessionalTypes = {};
+                  professionalTypesItem = [];
+
+                  for (final category in state.categories) {
+                    for (final subCategory in category.professionalSubCategories) {
+                      final translated = subCategory.translation?.getTranslation(langKey) ?? subCategory.name;
+                      translatedToProfessionalTypes[translated] = subCategory.name;
+                      professionalTypesItem.add(translated);
+                    }
+                  }
+                  professionalTypesItem.sort((a, b) => a.compareTo(b));
+                  professionalTypesLoading = false;
+                });
               } else if (state is FetchCategoryListFailed) {
                 setState(() {
                   professionalTypesLoading = false;
@@ -214,7 +229,9 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
               hintText: 'Select profession type.'.tr(),
               items: professionalTypesItem,
               onChanged: (value) => setState(() {
-                selectedProfession = value;
+                selectedProfession =
+                    translatedToProfessionalTypes[value] ??
+                        value;
               }),
               itemLoading: professionalTypesLoading,
               validator: (value) {
@@ -407,7 +424,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                         'selectedCity': "",
                         'selectedGender': "",
                         "_experienceLevel":"",
-                        'selectedLanguage':[]
+                        'selectedLanguage':[""]
                       });
                     },
                     backgroundColor: COLORS.neutralDarkTwo,

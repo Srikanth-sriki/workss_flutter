@@ -799,6 +799,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                                 isDefault: isChecked,
                                                 city: _selectedCity!,
                                                 locality: _selectedLocality!,
+                                                pincode: _selectedPinCode!,
                                                 latitude: latitude.toString(),
                                                 longitude:
                                                 longitude.toString()));

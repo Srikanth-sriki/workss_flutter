@@ -1346,7 +1346,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
               ),
               color: COLORS.white,
             ),
-            child: !isRequestLocal ?Column(
+            child: isRequestLocal ?Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

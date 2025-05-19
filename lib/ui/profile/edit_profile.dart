@@ -464,11 +464,21 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   setState(() {
                     // professionalTypesItem =
                     //     state.categories.map((item) => item.name).toList();
+
                     professionalTypesItem = state.categories.map((item) {
                       final translated = item.translation?.getTranslation(langKey);
                       return translated?.isNotEmpty == true ? translated! : item.name;
                     }).toList();
-
+                    if (widget.profileFetch.userType == 'professional') {
+                      final matchedCategory = state.categories.firstWhere(
+                            (item) => item.name == widget.profileFetch.professionType,
+                      );
+                      final translated = matchedCategory.translation?.getTranslation(langKey);
+                      _selectedProfession = translated?.isNotEmpty == true ? translated! : matchedCategory.name;
+                    }
+                    else {
+                      _selectedProfession = '';
+                    }
                     professionalTypesLoading = false;
                   });
                 } else if (state is FetchCategoryListFailed) {
@@ -633,22 +643,24 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
                           buildDropdown(
-                            value: _selectedProfession??null,
-                            label: 'profession_type'.tr(),
-                            hintText: 'Select your Profession'.tr(),
-                            items: professionalTypesItem,itemLoading: professionalTypesLoading,
-                            onChanged: (value) => setState(() {
-                              _selectedProfession = value;
-                              _validateForm();
-                            }),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please select your profession'.tr();
-                              }
-                              return null;
-                            },
+                              value: _selectedProfession??null,
+                              label: 'profession_type'.tr(),
+                              hintText: 'Select your Profession'.tr(),
+                              items: professionalTypesItem,
+                              itemLoading: professionalTypesLoading,
+                              onChanged: (value) => setState(() {
+                                _selectedProfession = value;
+                                _validateForm();
+                              }),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please select your profession'.tr();
+                                }
+                                return null;
+                              },
                               color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400
                           )
+
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),

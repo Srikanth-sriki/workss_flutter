@@ -36,3 +36,21 @@ class LoginSuccess extends LoginState{
   @override
   List<Object> get props => [phoneNumber,countryCode,otpToken];
 }
+
+class AppVersionFailed extends LoginState{
+  String message;
+
+  AppVersionFailed({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}
+
+class AppVersionSuccess extends LoginState{
+  List<AppVersion> appVersion = [];
+  AppVersionSuccess({required this.appVersion});
+
+  @override
+  List<Object> get props => [appVersion];
+}
+

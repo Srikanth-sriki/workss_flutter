@@ -114,6 +114,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
      - assets/images/login/hiring.png
+     - assets/images/login/force_update.png
+     - assets/images/login/maintenace.png
      - assets/images/login/hiring_select.png
      - assets/images/login/intro1.png
      - assets/images/login/intro2.png
@@ -192,6 +194,10 @@ flutter:
      - assets/images/profile/clip_bord.png
      - assets/images/profile/logout_outline.png
      - assets/images/chat/user_register.png
+     - assets/images/profile/controle.png
+     - assets/images/profile/kyc_pending.png
+     - assets/images/profile/kyc_verifying.png
+     - assets/images/profile/kyc_success.png
 
 
   #   - images/a_dot_ham.jpeg

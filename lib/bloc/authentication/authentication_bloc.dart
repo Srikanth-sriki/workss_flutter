@@ -99,35 +99,8 @@ class AuthenticationBloc
 
   Future<void> mapAuthenticationLogin(
       AuthenticationLogin event, Emitter<AuthenticationState> emit) async {
-    ///Get values from local storage and remove them
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // prefs.remove(LocalConstant.accessToken);
-    // prefs.remove(LocalConstant.userId);
-    // prefs.remove(LocalConstant.profileCompleted);
-    // prefs.remove(LocalConstant.phoneNumber);
-    // prefs.remove(LocalConstant.name);
-    // prefs.remove(LocalConstant.email);
-    // prefs.remove(LocalConstant.countryCode);
-    // prefs.remove(LocalConstant.currency);
-    // prefs.remove(LocalConstant.appLogo);
-    // prefs.remove(LocalConstant.sessionId);
-
-    // final authContext = GlobalBlocClass.authenticationContext;
-    // if (authContext == null) {
-    //   print("Authentication context is null.");
-    //   return; // Return early to avoid using null context
-    // }
     emit(const AuthenticationLoginRequired());
-    // Navigator.pushAndRemoveUntil(
-    //   GlobalBlocClass.authenticationContext!,
-    //   MaterialPageRoute(
-    //     builder: (context) => BlocProvider(create: (context) => AuthenticationBloc()..add(const InitializeApp()),
-    //         child: const Authentication()),
-    //   ),
-    //       (Route<dynamic> route) => false,
-    // );
-    // const snackBar =  SnackBar(content: Text("Please Register"));
-    // ScaffoldMessenger.of(GlobalBlocClass.authenticationContext!).showSnackBar(snackBar);
+
   }
 
   Future<void> mapAuthenticationRegisterAccountEvent(

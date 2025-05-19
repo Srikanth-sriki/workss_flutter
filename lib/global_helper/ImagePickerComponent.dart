@@ -712,6 +712,8 @@ class MultipleImagePickerComponent extends StatefulWidget {
   final List<String> defaultImages;
   Color? color = COLORS.neutralDark;
   FontWeight? fontWeight = FontWeight.w500;
+  String? filedConatinerText ='Upload your work images (Optional) \n(max 2 pictures)';
+  bool?headerNeed = true;
 
   MultipleImagePickerComponent(
       {super.key,
@@ -719,7 +721,7 @@ class MultipleImagePickerComponent extends StatefulWidget {
       required this.error,
       required this.removeImage,
       this.defaultImages = const [],
-      this.fontWeight,
+      this.fontWeight, this.headerNeed,this.filedConatinerText,
       this.color});
 
   @override
@@ -941,10 +943,12 @@ class _MultipleImagePickerComponentState
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          registerText(
-              text: 'Photos',
-              color: widget.color,
-              fontWeight: widget.fontWeight),
+          if(widget.headerNeed!)...[
+            registerText(
+                text: 'Photos',
+                color: widget.color,
+                fontWeight: widget.fontWeight)
+          ],
           SizedBox(
             height: SizeConfig.blockHeight * 0.5,
           ),
@@ -1007,7 +1011,7 @@ class _MultipleImagePickerComponentState
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Upload your work images (Optional) \n(max 2 pictures)'.tr(),
+              widget.filedConatinerText!.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: COLORS.neutralDark,

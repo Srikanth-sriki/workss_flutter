@@ -8,6 +8,7 @@ import 'package:works_app/ui/profile/modal/account_delete.dart';
 import 'package:works_app/ui/profile/modal/logout.dart';
 import 'package:works_app/ui/profile/notification.dart';
 import 'package:works_app/ui/profile/privacy_policy.dart';
+import 'package:works_app/ui/profile/smart_call_control.dart';
 import 'package:works_app/ui/profile/terms_and_con.dart';
 
 import '../../bloc/profile/profile_bloc.dart';
@@ -144,6 +145,18 @@ class _SettingAppState extends State<SettingApp> {
                               const LanguageSelectionScreen(
                                 routeType: 'homo',
                               )),
+                    );
+                  },
+                ),
+                SettingsTile(
+                  icon: 'assets/images/profile/controle.png',
+                  title: 'Smart Call Control',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                          const SmartCallControl()),
                     );
                   },
                 ),

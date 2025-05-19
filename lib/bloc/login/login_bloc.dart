@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:works_app/models/app_version_modal.dart';
 
 import '../../components/config.dart';
 import '../../components/local_constant.dart';
@@ -20,6 +21,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     loginDao = LoginDao();
     on<LoginWithPhoneNumber>((event, emit) async {
       await mapLoginWithPhoneNumber(event, emit);
+    });
+    on<AppVersionCheck>((event, emit) async {
+      await mapAppVersioncheck(event, emit);
     });
   }
   Future<void> mapLoginWithPhoneNumber(
@@ -54,6 +58,31 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } catch (error) {
       customLog("The error of login : $error");
       emit(LoginFailed(message: "Something went wrong"));
+    }
+  }
+
+  Future<void> mapAppVersioncheck(
+      AppVersionCheck event, Emitter<LoginState> emit) async {
+    try {
+      var response = await loginDao.fetchAppVersions();
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        List<AppVersion> appVersion = [];
+        for (var i in jsonDecoded["data"]) {
+          appVersion.add(AppVersion.fromJson(i));
+        }
+        emit(AppVersionSuccess(appVersion: appVersion));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(AppVersionFailed(message: message));
+      } else {
+        emit(AppVersionFailed(message: '"Something Went wrong"'));
+      }
+    } catch (error) {
+      customLog("The error of resend otp is : $error");
+      emit(AppVersionFailed(message: "Something Went wrong"));
     }
   }
 }

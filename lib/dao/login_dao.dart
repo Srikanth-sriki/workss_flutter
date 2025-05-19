@@ -192,5 +192,15 @@ class LoginDao {
     return response;
   }
 
+  Future fetchAppVersions() async {
+    var url = '${Config.url}/common/app-versions';
+    final response = await http.get(
+      Uri.parse(url),
+    );
+    customLog('response');
+    customLog(response);
+    return response;
+  }
+
 
 }

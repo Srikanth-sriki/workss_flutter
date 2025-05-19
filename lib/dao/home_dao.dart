@@ -65,6 +65,10 @@ class HomeDao {
     required String city,
     required String pincode,
     required String locality,
+    required String workPlaceId,
+    required String profCategoryId,
+    required String localityId,
+    required String cityId,
   }) async {
     var url = '${Config.url}/user/work/post';
 
@@ -82,7 +86,14 @@ class HomeDao {
       "description": description,
       "city":city,
       "pincode":pincode,
-      "locality":locality
+      "locality":locality,
+      "prof_category_id": profCategoryId,
+      "work_place_id": workPlaceId,
+      "locality_id":localityId,
+      "city_id":cityId,
+      "cityDetail": null,
+      "localityDetail": null,
+      "professionalSubCategory": null,
     };
     final response = await http.post(
       Uri.parse(url),

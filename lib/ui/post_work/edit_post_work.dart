@@ -21,6 +21,8 @@ import '../../global_helper/dropdown.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/loading_placeholder/home_layout.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/category_list_modal.dart';
+import '../../models/dropDown_modal.dart';
 import '../../models/fetch_posted_work.dart';
 import '../profile/location/location_list_modal.dart';
 
@@ -45,7 +47,9 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   late MultiSelectController<Language> controller;
   final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
   String? _selectedWorkPlace;
-  String? _selectedProfession;
+  DropdownItemValue? _selectedProfession;
+  String? _selectedWorkPlaceId;
+  String? _selectedProfessionId;
   String? _selectedGender;
   String? _experienceLevel;
   List<Language> selectedLanguage = [];
@@ -67,7 +71,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   List<String> dropdownWorkPlaceItem = [];
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
-  List<String> professionalTypesItem = [];
+  List<DropdownItemValue> professionalTypesItem = [];
   String citySelected = '';
   String pincodeSelected = '';
   String localitySelected = '';
@@ -131,19 +135,21 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   }
 
   void initialData() {
-    _selectedProfession = widget.fetchPostedModel.requiredProfession!;
+    _selectedProfession = DropdownItemValue(
+        id: widget.fetchPostedModel.profCategoryId!,
+        label: widget.fetchPostedModel.requiredProfession!);
+    _selectedProfessionId = widget.fetchPostedModel.profCategoryId!;
+    _selectedWorkPlaceId = widget.fetchPostedModel.workPlaceId!;
     _experienceLevel = widget.fetchPostedModel.experienceLevel!;
     _selectedGender = widget.fetchPostedModel.gender!;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       List<DropdownItem<Language>> item = knownLanguageItems;
       controller.setItems(item);
-      controller.selectWhere((item) =>
-          widget.fetchPostedModel.knowLanguage!.contains(item.value.name));
+      controller.selectWhere((item) => widget.fetchPostedModel.knowLanguage!.contains(item.value.name));
     });
     selectedLanguage = convertLanguages(widget.fetchPostedModel.knowLanguage!);
     print(selectedLanguage);
-    _selectedWorkPlace =
-        capitalizeFirstLetter(widget.fetchPostedModel.workPlace!);
+    _selectedWorkPlace = capitalizeFirstLetter(widget.fetchPostedModel.workPlace!);
     workImages = widget.fetchPostedModel.workImages!;
     isChecked = widget.fetchPostedModel.isProfessionalCanCall!;
     latitude = widget.fetchPostedModel.latitude!;
@@ -187,7 +193,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
     selectedLanguage.map((lang) => lang.name).toList();
     postWorkBloc.add(EditPostWorkEvent(
         workId: widget.fetchPostedModel.id!,
-        requiredProfession: _selectedProfession!,
+        requiredProfession: _selectedProfession!.label!,
         experienceLevel: _experienceLevel!.toLowerCase(),
         gender: _selectedGender!.toLowerCase(),
         knowLanguage: languageSelect,
@@ -317,15 +323,44 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                       });
                     } else if (state is FetchDropDownSuccess) {
                       setState(() {
-                        workPlaceLoading = false;
-                        // dropdownWorkPlaceItem = state.dropDownItems
-                        //     .map((item) => item.place)
-                        //     .toList();
+                        print('222222');
+                        print(widget.fetchPostedModel.workPlace);
+
+                        // Map dropdown items with translation or fallback to 'place'
                         dropdownWorkPlaceItem = state.dropDownItems.map((item) {
                           final translated = item.translation?.getTranslation(langKey);
                           return translated?.isNotEmpty == true ? translated! : item.place;
                         }).toList();
+
+                        DropDownData? matchedCategory;
+
+                        for (final item in state.dropDownItems) {
+                          final translated = item.translation?.getTranslation(langKey)?.trim();
+                          final rawPlace = item.place.trim();
+                          final input = widget.fetchPostedModel.workPlace?.trim() ?? "";
+
+                          if (translated == input || rawPlace == input) {
+                            matchedCategory = item;
+                            break;
+                          }
+                        }
+
+                        print(matchedCategory);
+
+                        if (matchedCategory != null) {
+                          final translated = matchedCategory.translation?.getTranslation(langKey);
+                          _selectedWorkPlace = translated?.isNotEmpty == true ? translated! : matchedCategory.place;
+                        } else {
+                          // Fallback if no match found
+                          _selectedWorkPlace = widget.fetchPostedModel.workPlace ?? "";
+                        }
+
+                        workPlaceLoading = false;
+
+                        print('_selectedWorkPlace: $_selectedWorkPlace');
+                        print('dropdownWorkPlaceItem: $dropdownWorkPlaceItem');
                       });
+
                     } else if (state is FetchKnownLanguageSuccess) {
                       setState(() {
                         knownLanguageItems =
@@ -350,15 +385,97 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                         professionalTypesLoading = true;
                       });
                     } else if (state is FetchCategoryListSuccess) {
+                      // setState(() {
+                      //   // professionalTypesItem =
+                      //   //     state.categories.map((item) => item.name).toList();
+                      //   professionalTypesItem = state.categories.map((item) {
+                      //     final translated = item.translation?.getTranslation(langKey);
+                      //     return translated?.isNotEmpty == true ? translated! : item.name;
+                      //   }).toList();
+                      //   final matchedCategory = state.categories.firstWhere(
+                      //         (item) => item.name == widget.fetchPostedModel.requiredProfession!,
+                      //   );
+                      //   final translated = matchedCategory.translation?.getTranslation(langKey);
+                      //   _selectedProfession = translated?.isNotEmpty == true ? translated! : matchedCategory.name;
+                      //
+                      //   professionalTypesLoading = false;
+                      // });
+                      // setState(() {
+                      //
+                      //
+                      //   // Build the translated list of all subcategory names
+                      //   for (final category in state.categories) {
+                      //     for (final subCategory in category.professionalSubCategories) {
+                      //       final translated = subCategory.translation?.getTranslation(langKey);
+                      //       final displayName = translated?.isNotEmpty == true ? translated! : subCategory.name;
+                      //       professionalTypesItem.add(DropdownItemValue(id: subCategory.id, label: displayName));
+                      //     }
+                      //   }
+                      //   print(widget.fetchPostedModel.requiredProfession!);
+                      //   print(professionalTypesItem);
+                      //
+                      //   // Find the matched subcategory based on requiredProfession
+                      //   ProfessionalSubCategory? matchedSubCategory;
+                      //
+                      //   for (final category in state.categories) {
+                      //     try {
+                      //       matchedSubCategory = category.professionalSubCategories.firstWhere(
+                      //             (sub) {
+                      //           final translated = sub.translation?.getTranslation(langKey)?.trim() ?? '';
+                      //           final name = sub.name.trim();
+                      //           final required = widget.fetchPostedModel.requiredProfession!.trim();
+                      //           return translated == required || name == required;
+                      //         },
+                      //       );
+                      //       break;
+                      //     } catch (_) {}
+                      //   }
+                      //
+                      //   print("Matched: ${matchedSubCategory?.toJson()}");
+                      //
+                      //   print(_selectedProfession);
+                      //   if (matchedSubCategory != null) {
+                      //     final translated = matchedSubCategory.translation?.getTranslation(langKey);
+                      //     print(translated);
+                      //     _selectedProfession = translated?.isNotEmpty == true
+                      //         ? translated!
+                      //         : matchedSubCategory.name;
+                      //   } else {
+                      //     _selectedProfession = '';
+                      //   }
+                      //
+                      //   professionalTypesLoading = false;
+                      // });
+
                       setState(() {
-                        // professionalTypesItem =
-                        //     state.categories.map((item) => item.name).toList();
-                        professionalTypesItem = state.categories.map((item) {
-                          final translated = item.translation?.getTranslation(langKey);
-                          return translated?.isNotEmpty == true ? translated! : item.name;
-                        }).toList();
+                        professionalTypesItem.clear();
+
+                        for (final category in state.categories) {
+                          for (final subCategory in category.professionalSubCategories) {
+                            final translated = subCategory.translation?.getTranslation(langKey);
+                            final displayName = (translated?.isNotEmpty == true) ? translated! : subCategory.name;
+
+                            professionalTypesItem.add(DropdownItemValue(id: subCategory.id, label: displayName));
+                          }
+                        }
+
+                        professionalTypesItem.sort((a, b) => a.label.compareTo(b.label)); // Optional if needed
+
+                        // Set selected value based on ID (more reliable than name)
+                        final matchedProfession = professionalTypesItem.firstWhere(
+                              (item) => item.id == widget.fetchPostedModel.profCategoryId,
+                          orElse: () => DropdownItemValue(id: '', label: ''),
+                        );
+
+                        print(matchedProfession);
+
+                        _selectedProfession = matchedProfession.id.isNotEmpty ? matchedProfession : null;
+
                         professionalTypesLoading = false;
                       });
+
+
+
                     } else if (state is FetchCategoryListFailed) {
                       setState(() {
                         professionalTypesLoading = false;
@@ -377,8 +494,10 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildDropdown(
-                          value: _selectedProfession,
+                        buildDropdownTwo(
+                          value:  professionalTypesItem.contains(_selectedProfession)
+                        ? _selectedProfession
+                        : null,
                           label: 'Professional/Worker Required'.tr(),
                           hintText: 'Select Profession'.tr(),
                           items: professionalTypesItem,
@@ -607,8 +726,12 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                         //     },
                         //     onTap: _fetchCurrentLocation,
                         //     title: 'Work Address'.tr()),
+
+
                         buildDropdown(
-                          value: _selectedWorkPlace,
+                          value: dropdownWorkPlaceItem.contains(_selectedWorkPlace)
+                              ? _selectedWorkPlace
+                              : null,
                           label: 'Work Place'.tr(),
                           hintText: 'Ex : Home, Bank, etc'.tr(),
                           items: dropdownWorkPlaceItem,

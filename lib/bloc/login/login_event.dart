@@ -16,3 +16,9 @@ class LoginWithPhoneNumber extends LoginEvent{
   @override
   List<Object> get props => [countryCode,phoneNumber];
 }
+
+class AppVersionCheck extends LoginEvent{
+  const AppVersionCheck();
+  @override
+  List<Object> get props => [];
+}

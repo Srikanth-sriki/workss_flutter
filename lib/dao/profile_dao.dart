@@ -220,7 +220,8 @@ class ProfileDao {
     required String longitude,
     required String addressTypeName,
     required String city,
-    required String locality
+    required String locality,
+    required String pincode,
   }) async {
     var url = '${Config.url}/user/address/create';
 
@@ -234,7 +235,8 @@ class ProfileDao {
       "latitude": latitude,
       "longitude": longitude,
       "city":city,
-      "locality":locality
+      "locality":locality,
+      "pincode":pincode
     };
 
     final response = await http.post(
@@ -256,7 +258,8 @@ class ProfileDao {
     required String longitude,
     required String addressTypeName,
     required String city,
-    required String locality
+    required String locality,
+    required String pincode,
   }) async {
     var url = '${Config.url}/user/address/edit';
 
@@ -271,7 +274,8 @@ class ProfileDao {
       "latitude": latitude,
       "longitude": longitude,
       "city":city,
-      "locality":locality
+      "locality":locality,
+      "pincode":pincode
     };
 
     final response = await http.post(

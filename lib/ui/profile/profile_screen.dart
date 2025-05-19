@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:works_app/bloc/post_work/post_work_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/components/colors.dart';
@@ -25,6 +26,7 @@ import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../models/fetch_profile_model.dart';
 import '../onboarding/select_user_type.dart';
+import 'kyc_verify.dart';
 import 'location/location_list.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -175,9 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 ),
                                                 BlocProvider(
                                                     create: (context) =>
-                                                        ProfessionalBloc()
-                                                          ..add(
-                                                              const FetchCategoryListEvent())),
+                                                        ProfessionalBloc()..add(const FetchCategoryListEvent())),
                                               ],
                                               child: EditProfileRegisterForm(
                                                 refreshPageCallback:
@@ -185,9 +185,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 profileFetch: profileFetch,
                                               ),
                                             )));
-                              },  borderRadius: BorderRadius.all(
-        Radius.circular(
-            SizeConfig.blockWidth * 2)),
+                              },
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(SizeConfig.blockWidth * 2)),
                               child: Container(
                                 width: SizeConfig.blockWidth * 8,
                                 height: SizeConfig.blockWidth * 8,
@@ -206,13 +206,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             )
-                          ]
-                          else...[
+                          ] else ...[
                             Padding(
                               padding: EdgeInsets.symmetric(
                                   horizontal: SizeConfig.blockWidth),
-                              child:
-                              LoadingAnimationWidget.hexagonDots(
+                              child: LoadingAnimationWidget.hexagonDots(
                                 color: COLORS.accent,
                                 size: SizeConfig.blockWidth * 5,
                               ),
@@ -368,13 +366,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Expanded(
                 child: ListView(
                   children: [
-                    if(Config.profileCompleted)...[
+                    if (Config.profileCompleted) ...[
                       _buildListItem('assets/images/profile/other_location.png',
                           'My Addresses', () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
                                       providers: [
                                         BlocProvider(
                                             create: (context) => ProfileBloc()
@@ -383,14 +381,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ],
                                       child: LocationListScreen(),
                                     )));
-                          }),
+                      }),
                       _buildListItem(
-                          'assets/images/profile/posted_work.png', 'Posted Works',
-                              () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
+                          'assets/images/profile/settings.png', 'KYC Verification', () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) => PostWorkBloc(),
+                                    ),
+                                  ],
+                                  child: KYCVerificationScreen(isVerified: false),
+                                )));
+
+                      }),
+                      _buildListItem('assets/images/profile/posted_work.png',
+                          'Posted Works', () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
                                       providers: [
                                         BlocProvider(
                                           create: (context) => ProfileBloc()
@@ -399,13 +411,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ],
                                       child: PostedWorkList(),
                                     )));
-                          }),
+                      }),
                       _buildListItem('assets/images/profile/bookmark.png',
                           'Saved Professionals', () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
                                       providers: [
                                         BlocProvider(
                                           create: (context) => ProfileBloc()
@@ -416,19 +428,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           create: (context) =>
                                               ShowInterestedBloc(),
                                         ),
-                                        BlocProvider(create: (context) => ChartBloc())
+                                        BlocProvider(
+                                            create: (context) => ChartBloc())
                                       ],
                                       child: const BookMarkListScreen(),
                                     )));
-                          }),
+                      }),
                       if (Config.userType == 'professional') ...[
-                        _buildListItem(
-                            'assets/images/profile/like.png', 'Interested Works',
-                                () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MultiBlocProvider(
+                        _buildListItem('assets/images/profile/like.png',
+                            'Interested Works', () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MultiBlocProvider(
                                         providers: [
                                           BlocProvider(
                                             create: (context) => ProfileBloc()
@@ -442,12 +454,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ],
                                         child: InterestedWorkList(),
                                       )));
-                            }),
+                        }),
                       ]
                     ],
-              if(Config.profileCompleted == false)...[
-                SizedBox(height: SizeConfig.blockHeight*2,),
-              ],
+                    if (Config.profileCompleted == false) ...[
+                      SizedBox(
+                        height: SizeConfig.blockHeight * 2,
+                      ),
+                    ],
                     _buildListItem(
                         'assets/images/profile/share.png', 'Share with Friends',
                         () {

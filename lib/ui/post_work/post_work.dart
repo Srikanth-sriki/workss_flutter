@@ -44,7 +44,9 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   final TextEditingController addressController = TextEditingController();
 
   String? _selectedWorkPlace;
+  String? _selectedWorkPlaceId;
   String? _selectedProfession;
+  String? _selectedProfessionId;
   String? _selectedGender = 'Male';
   String? _experienceLevel = 'Any';
   List<Language> selectedLanguage = [];
@@ -63,10 +65,12 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   String addressSelected = 'Select work location';
   bool workPlaceLoading = false;
   bool knowLanguageLoading = true;
-  List<String> dropdownWorkPlaceItem = [];
+  List<DropdownItemValue> dropdownWorkPlaceItem = [];
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
-  List<String> professionalTypesItem = [];
+  List<DropdownItemValue> professionalTypesItem = [];
+  late Map<String, String> translatedToProfessionalTypes;
+  late Map<String, String> translatedToWorkPlaceItemTypes;
   bool professionalSelected = false;
   bool experienceLevelSelected = true;
   bool genderSelected = true;
@@ -77,7 +81,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   String citySelected = '';
   String pincodeSelected = '';
   String localitySelected = '';
-  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
+  final langKey =
+      languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
 
   void _validateForm() {
     bool isValid = false;
@@ -171,7 +176,12 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
           description: bioController.text,
           pincode: pincodeSelected,
           city: citySelected,
-          locality: localitySelected));
+          locality: localitySelected,
+          workPlaceId: _selectedWorkPlaceId!,
+          profCategoryId: _selectedProfessionId!,
+          localityId: '150630d5-694e-442d-8f9f-c0b7e8bd3672',
+          cityId: '150630d5-694e-442d-8f9f-c0b7e8bd3672'
+      ));
     }
   }
 
@@ -202,6 +212,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     addressController.dispose();
     _selectedWorkPlace = '';
     _selectedProfession = '';
+    _selectedProfessionId='';
+    _selectedWorkPlaceId = '';
     _selectedGender = null;
     _experienceLevel = null;
     selectedLanguage = [];
@@ -219,6 +231,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
       _selectedProfession = null;
       _selectedGender = null;
       _experienceLevel = null;
+      _selectedProfessionId=null;
+      _selectedWorkPlaceId = null;
       selectedLanguage = [];
       _selectedImages = [];
       workImages = [];
@@ -371,11 +385,16 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                     } else if (state is FetchDropDownSuccess) {
                       setState(() {
                         workPlaceLoading = false;
+                        translatedToWorkPlaceItemTypes = {};
                         dropdownWorkPlaceItem = state.dropDownItems.map((item) {
-                          final translated = item.translation?.getTranslation(langKey);
-                          return translated?.isNotEmpty == true ? translated! : item.place;
+                          final translated = item.translation?.getTranslation(langKey) ?? item.place;
+
+                          translatedToWorkPlaceItemTypes[translated] = item.place;
+
+                          return DropdownItemValue(id: item.place, label: translated);
                         }).toList();
                       });
+
                     } else if (state is FetchKnownLanguageSuccess) {
                       setState(() {
                         knownLanguageItems =
@@ -400,10 +419,17 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                       });
                     } else if (state is FetchCategoryListSuccess) {
                       setState(() {
-                        professionalTypesItem = state.categories.map((item) {
-                          final translated = item.translation?.getTranslation(langKey);
-                          return translated?.isNotEmpty == true ? translated! : item.name;
-                        }).toList();
+                        translatedToProfessionalTypes = {};
+                        professionalTypesItem.clear();
+
+                        for (final category in state.categories) {
+                          for (final subCategory in category.professionalSubCategories) {
+                            final translated = subCategory.translation?.getTranslation(langKey) ?? subCategory.name;
+                            translatedToProfessionalTypes[translated] = subCategory.name;
+                            professionalTypesItem.add(DropdownItemValue(id: subCategory.id, label: translated));
+                          }
+                        }
+                        professionalTypesItem.sort((a, b) => a.label.compareTo(b.label));
                         professionalTypesLoading = false;
                       });
                     } else if (state is FetchCategoryListFailed) {
@@ -424,13 +450,15 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        buildDropdown(
+                        buildDropdownTwo(
                             label: 'Professional/Worker Required'.tr(),
                             hintText: 'Select Profession'.tr(),
                             items: professionalTypesItem,
                             onChanged: (value) => setState(() {
-                                  _selectedProfession = value;
+                              _selectedProfession = translatedToProfessionalTypes[value.label] ?? value.label;
+                              _selectedProfessionId =  value.id;
                                   professionalSelected = true;
+                                  print(_selectedProfession);
                                   _validateForm();
                                 }),
                             itemLoading: professionalTypesLoading,
@@ -609,8 +637,13 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                   ..add(const AddressLocationListEvent()),
                                 child: AddressListModalBottomSheet(
                                   selectedAddressId: addressId,
-                                  onAddressSelected: (id, address, latitudeAdd,
-                                      longitudeAdd, cityAdd, localityAdd, pincodeAdd) {
+                                  onAddressSelected: (id,
+                                      address,
+                                      latitudeAdd,
+                                      longitudeAdd,
+                                      cityAdd,
+                                      localityAdd,
+                                      pincodeAdd) {
                                     setState(() {
                                       addressId = id;
                                       addressSelected = address;
@@ -683,12 +716,13 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                         //
                         //   title: 'Work Address'.tr(),
                         // ),
-                        buildDropdown(
+                        buildDropdownTwo(
                             label: 'Work Place'.tr(),
                             hintText: 'Ex : Home, Bank, etc'.tr(),
                             items: dropdownWorkPlaceItem,
                             onChanged: (value) => setState(() {
-                                  _selectedWorkPlace = value;
+                                  _selectedWorkPlace = translatedToWorkPlaceItemTypes[value.label] ?? value.label;
+                                  _selectedWorkPlaceId = value.id;
                                   setState(() {
                                     workPlaceSelected = true;
                                   });

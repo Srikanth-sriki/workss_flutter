@@ -30,6 +30,8 @@ class FetchPostedModel {
   String? city;
   String? pincode;
   String? locality;
+  String? profCategoryId;
+  String? workPlaceId;
 
   FetchPostedModel({
     this.id,
@@ -54,6 +56,8 @@ class FetchPostedModel {
      this. city,
      this. pincode,
      this. locality,
+    this.workPlaceId,
+    this.profCategoryId,
     // this.deletedAt,
   });
 
@@ -79,7 +83,9 @@ class FetchPostedModel {
     user: json["user"] != null ? User.fromJson(json["user"]) : null,
     locality: json["locality"] ??"",
     pincode: json["pincode"] ??"",
-    city: json["city"] ??''
+    city: json["city"] ??'',
+    profCategoryId: json["prof_category_id"]??'',
+    workPlaceId: json["work_place_id"]??""
     // deletedAt: json["deletedAt"],
   );
 

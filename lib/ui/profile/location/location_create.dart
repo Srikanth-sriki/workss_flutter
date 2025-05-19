@@ -748,8 +748,7 @@ class _AddressScreenState extends State<AddressScreen> {
                                     if (isSubmitButtonEnabled) {
                                       if (_formKey.currentState!.validate()) {
                                         profileBloc.add(AddressLocationCreate(
-                                            addressType:
-                                                _selectedType.toLowerCase(),
+                                            addressType: _selectedType.toLowerCase(),
                                             addressTypeName: otherName.text,
                                             houseNo: houseNo.text,
                                             area: homeAddress.text,
@@ -758,7 +757,8 @@ class _AddressScreenState extends State<AddressScreen> {
                                             latitude: latitude.toString(),
                                             longitude: longitude.toString(),
                                             city: _selectedCity!,
-                                          locality: _selectedLocality!
+                                            locality: _selectedLocality!,
+                                            pincode: _selectedPinCode!
 
                                         ));
                                       }

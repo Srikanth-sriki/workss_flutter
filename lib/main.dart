@@ -20,8 +20,10 @@ import 'package:works_app/bloc/professional/professional_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/main_screen/main_screen.dart';
+import 'package:works_app/ui/onboarding/app_update.dart';
 import 'package:works_app/ui/onboarding/intro_slider.dart';
 import 'package:works_app/ui/onboarding/language_selection.dart';
+import 'package:works_app/ui/onboarding/maintenace.dart';
 import 'package:works_app/ui/onboarding/phone_number.dart';
 import 'package:works_app/ui/onboarding/register_form.dart';
 import 'package:works_app/ui/onboarding/select_user_type.dart';
@@ -245,7 +247,10 @@ class _MyAppState extends State<MyApp> {
             child: child!,
           );
         },
-        home: SplashScreen(),
+          home: BlocProvider(
+          create: (context) => LoginBloc()..add(AppVersionCheck()),
+    child: const SplashScreen(),
+    ),
         theme: ThemeData(
           textTheme: Theme.of(context).textTheme.apply(fontSizeFactor: 1.0),
         ),
@@ -314,6 +319,8 @@ class _MyAppState extends State<MyApp> {
             ),
             BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
               ], child: const MainScreen()),
+          '/force-update': (_) => const ForceUpdateScreen(),
+          '/maintenance': (_) => const MaintenanceScreen(),
         },
       ),
     );
@@ -348,7 +355,11 @@ class _AuthenticationState extends State<Authentication> {
         builder: (context, state) {
           if (state is AuthenticationLoading) {
             print("auth loading ------------");
-            return const SplashScreen();
+            return MultiBlocProvider(providers: [
+              BlocProvider(
+                create: (context) => LoginBloc()..add(AppVersionCheck()),
+              ),
+            ], child: const SplashScreen());
           }
           if (state is AuthenticationLoginRequired) {
             print("auth phone ------------");

@@ -1561,13 +1561,13 @@ class LiveLocationCard extends StatelessWidget {
 
 
 Map<String, String> languageCodeToTranslationKey = {
-  'hn': 'hindi',
+  'hi': 'hindi',
   'kn': 'kannada',
   'ml': 'malayalam',
-  'tl': 'telugu',
-  'tm': 'tamil',
+  'te': 'telugu',
+  'ta': 'tamil',
   'mr': 'marathi',
-  'gj': 'gujarati',
+  'gu': 'gujarati',
 };
 
 
