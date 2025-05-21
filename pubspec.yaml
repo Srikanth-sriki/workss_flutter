@@ -198,6 +198,7 @@ flutter:
      - assets/images/profile/kyc_pending.png
      - assets/images/profile/kyc_verifying.png
      - assets/images/profile/kyc_success.png
+     - assets/images/profile/verify.png
 
 
   #   - images/a_dot_ham.jpeg

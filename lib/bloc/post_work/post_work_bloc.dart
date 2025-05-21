@@ -41,6 +41,10 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
     on<FetchWorkKnownLanguageEvent>((event, emit) async {
       await mapFetchKnownLanguagePlace(event, emit);
     });
+
+    on<PostVerifyKycImages>((event, emit) async {
+      await mapKycVerifyPostEvent(event, emit);
+    });
   }
 
   Future<void> mapPostWorkAccountEvent(
@@ -220,4 +224,26 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       emit(FetchDropDownFailed(message: "Something went wrong: $error"));
     }
   }
+
+  Future<void> mapKycVerifyPostEvent(
+      PostVerifyKycImages event, Emitter<PostWorkState> emit) async {
+    try {
+      // emit(const WorkInterestedLoading());
+      var response = await homeDao.verifyKYCPost(firstImg: event.firstImg, backImg: event.backImg);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(KycImageAddedSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        emit(KycImageAddedFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        emit(KycImageAddedFailed(message: message));
+      }
+    } catch (error) {
+      emit(KycImageAddedFailed(message: "Something went wrong"));
+    }
+  }
+
 }

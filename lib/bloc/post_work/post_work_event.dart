@@ -151,3 +151,13 @@ class FetchWorkKnownLanguageEvent extends PostWorkEvent {
   @override
   List<Object> get props => [];
 }
+
+
+class PostVerifyKycImages extends PostWorkEvent {
+  String firstImg;
+  String backImg;
+  PostVerifyKycImages(
+      {required this.backImg, required this.firstImg,});
+  @override
+  List<Object> get props => [firstImg,backImg];
+}

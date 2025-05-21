@@ -394,4 +394,18 @@ class HomeDao {
     customLog('Response body:${response.body.toString()}');
     return response;
   }
+
+
+  Future verifyKYCPost({required String firstImg, required String backImg}) async {
+    var url = '${Config.url}/user/profile/update-adhar-kyc';
+    Map<String, dynamic> body = {"adhar_front": firstImg, "adhar_back": backImg};
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog('Response body:${response.body.toString()}');
+    return response;
+  }
 }

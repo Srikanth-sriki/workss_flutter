@@ -383,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     )));
                       }),
                       _buildListItem(
-                          'assets/images/profile/settings.png', 'KYC Verification', () {
+                          'assets/images/profile/verify.png', 'KYC Verification', () {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -393,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       create: (context) => PostWorkBloc(),
                                     ),
                                   ],
-                                  child: KYCVerificationScreen(isVerified: false),
+                                  child:  KYCVerificationScreen(isVerified: profileFetch!.kycStatus!),
                                 )));
 
                       }),
@@ -506,7 +506,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (BuildContext context) => SettingApp()),
+                            builder: (BuildContext context) => SettingApp(
+                              smartCallControl: profileFetch.smartCallControl!,
+                              smartCallSchedule: profileFetch.smartCallSchedule!,
+                            )),
                       );
                     }),
                   ],

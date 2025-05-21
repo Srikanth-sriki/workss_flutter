@@ -30,6 +30,9 @@ class ProfileFetch {
   String ?chargeType;
   DateTime ?createdAt;
   DateTime ?updatedAt;
+  String?kycStatus;
+  List<SmartCallSchedule>? smartCallSchedule;
+  String? smartCallControl;
   // dynamic deletedAt;
 
   ProfileFetch({
@@ -56,6 +59,9 @@ class ProfileFetch {
      this.createdAt,
      this.updatedAt,
     this.isVerified,
+    this.kycStatus,
+    this.smartCallSchedule,
+    this.smartCallControl
     // required this.deletedAt,
   });
 
@@ -83,6 +89,9 @@ class ProfileFetch {
     chargeType: json.containsKey("charge_type")?json["charge_type"]??null:null,
     createdAt: json.containsKey("createdAt")?DateTime.parse(json["createdAt"])??null:null,
     updatedAt: json.containsKey("updatedAt")?DateTime.parse(json["updatedAt"])??null:null,
+    kycStatus: json.containsKey("kyc_status")?json["kyc_status"]??null:null,
+    smartCallControl: json.containsKey("smart_call_control")?json["smart_call_control"]??null:null,
+    smartCallSchedule: json.containsKey("smart_call_schedule")?List<SmartCallSchedule>.from(json["smart_call_schedule"].map((x) => SmartCallSchedule.fromJson(x)))??null:null,
     // deletedAt: json["deletedAt"],
   );
 
@@ -109,7 +118,40 @@ class ProfileFetch {
     "charge_type": chargeType,
     "createdAt": createdAt?.toIso8601String(),
     "updatedAt": updatedAt?.toIso8601String(),
-    "is_verified":isVerified
+    "is_verified":isVerified,
+    "kyc_status":kycStatus,
+    "smart_call_control": smartCallControl,
+    "smart_call_schedule": List<dynamic>.from(smartCallSchedule!.map((x) => x.toJson())),
     // "deletedAt": deletedAt,
   };
 }
+
+class SmartCallSchedule {
+  String? day;
+  bool? status;
+  String? toTime;
+  String? fromTime;
+
+  SmartCallSchedule({
+    this.day,
+    this.status,
+    this.toTime,
+    this.fromTime,
+  });
+
+  factory SmartCallSchedule.fromJson(Map<String, dynamic> json) =>
+      SmartCallSchedule(
+        day: json["day"],
+        status: json["status"],
+        toTime: json["to_time"],
+        fromTime: json["from_time"],
+      );
+
+  Map<String, dynamic> toJson() => {
+    "day": day,
+    "status": status,
+    "to_time": toTime,
+    "from_time": fromTime,
+  };
+}
+

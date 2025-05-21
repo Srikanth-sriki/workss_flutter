@@ -112,3 +112,18 @@ class FetchDropDownLoading extends PostWorkState {
   List<Object> get props => [];
 }
 
+
+class KycImageAddedSuccess extends PostWorkState {
+  String message;
+  KycImageAddedSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class KycImageAddedFailed extends PostWorkState {
+  String message;
+  KycImageAddedFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+

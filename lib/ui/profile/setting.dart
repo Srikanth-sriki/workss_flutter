@@ -14,6 +14,7 @@ import 'package:works_app/ui/profile/terms_and_con.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../components/colors.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/fetch_profile_model.dart';
 import '../onboarding/language_selection.dart';
 
 class SettingsTile extends StatelessWidget {
@@ -65,7 +66,9 @@ class SettingsTile extends StatelessWidget {
 }
 
 class SettingApp extends StatefulWidget {
-  const SettingApp({super.key});
+  final List<SmartCallSchedule> smartCallSchedule;
+  final String smartCallControl;
+  const SettingApp({super.key,required this.smartCallControl,required this.smartCallSchedule});
 
   @override
   State<SettingApp> createState() => _SettingAppState();
@@ -156,7 +159,10 @@ class _SettingAppState extends State<SettingApp> {
                       context,
                       MaterialPageRoute(
                           builder: (BuildContext context) =>
-                          const SmartCallControl()),
+                           SmartCallControlScreen(
+                             smartCallControl: widget.smartCallControl,
+                             smartCallSchedule: widget.smartCallSchedule!,
+                           )),
                     );
                   },
                 ),
