@@ -352,7 +352,28 @@
   "Invited": "ആഹ്വാനം ചെയ്തവർ",
   "Friends": "സുഹൃത്തുകൾ",
   "Blocked Chats/Friends": "തടഞ്ഞ ചാറ്റുകൾ/സുഹൃത്തുകൾ",
-  "Select your city pincode": "നിങ്ങളുടെ നഗരം പിന്‍കോഡ് തിരഞ്ഞെടുക്കുക"
-}
+  "Select your city pincode": "നിങ്ങളുടെ നഗരം പിന്‍കോഡ് തിരഞ്ഞെടുക്കുക",
 
+
+  "Search for an": "തിരയുക",
+  "KYC Verification": "കെവൈസി സ്ഥിരീകരണം",
+  "Aadhaar verification is pending!": "ആധാർ സ്ഥിരീകരണം കാത്തിരിക്കുകയാണ്!",
+  "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.": "നിങ്ങളുടെ തിരിച്ചറിയൽ ഉറപ്പാക്കാൻ\nആധാർ കാർഡിന്റെ രണ്ട് വശങ്ങളും ഫോട്ടോ എടുക്കണം.",
+  "Verifying Your Identity": "നിങ്ങളുടെ തിരിച്ചറിയൽ പരിശോധനയിൽ ആണ്",
+  "We’re currently reviewing your Aadhaar card for secure verification.": "നമ്മൾ ആധാർ കാർഡ് സുരക്ഷിതമായ സ്ഥിരീകരണത്തിനായി പരിശോധിക്കുന്നു.",
+  "OKAY": "ശരി",
+  "Verification Successful": "സ്ഥിരീകരണം വിജയകരമായി പൂർത്തിയായി",
+  "Your Aadhaar card has been successfully verified.\nYou're all set!": "നിങ്ങളുടെ ആധാർ കാർഡ് വിജയകരമായി സ്ഥിരീകരിച്ചു.\nനിങ്ങൾ എല്ലാവിധത്തിലും തയ്യാറാണ്!",
+  "Smart Call Control": "സ്മാർട്ട് കോളിന്റെ നിയന്ത്രണം",
+  "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.": "കോളിന്റെ അനുമതികൾ എളുപ്പത്തിൽ ഓണോ ഓഫോ ചെയ്യാം, കോളുകൾ സ്വീകരിക്കേണ്ട സമയങ്ങൾ നിശ്ചയിക്കാം. നിങ്ങളുടെ ലഭ്യത അനുസരിച്ച് അതിനെ ക്രമീകരിക്കുക.",
+  "Available Anytime": "എപ്പോഴും ലഭ്യമാണ്",
+  "Set Your Schedule": "നിങ്ങളുടെ ഷെഡ്യൂൾ സജ്ജമാക്കുക",
+  "Do Not Disturb": "ശല്യപ്പെടുത്തരുത്",
+  "Receive calls 24/7 without any restrictions — you’re always reachable": "24/7 കോളുകൾക്ക് തടസ്സമില്ലാതെ സ്വീകരിക്കുക — നിങ്ങൾ എപ്പോഴും ലഭ്യനാണ്",
+  "Choose specific days and time slots to receive calls that suit your routine.": "നിങ്ങളുടെ ദിവസചിട്ട അനുസരിച്ച് കോളുകൾ സ്വീകരിക്കാനുള്ള ദിവസങ്ങളും സമയവും തിരഞ്ഞെടുക്കുക.",
+  "Block all incoming calls to focus on your work or personal time.": "നിങ്ങളുടെ ജോലി അല്ലെങ്കിൽ സ്വകാര്യ സമയത്ത് ശ്രദ്ധ കേന്ദ്രീകരിക്കാൻ എല്ലാ ഇൻകമിംഗ് കോളുകളും തടയുക.",
+  "You have unsaved changes. Are you sure you want to discard them?": "നിങ്ങൾ സംരക്ഷിക്കാത്ത മാറ്റങ്ങളുണ്ട്. നിങ്ങൾ അവ തള്ളിക്കളയാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?",
+  "UPDATE": "അപ്ഡേറ്റ് ചെയ്യുക",
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "നിങ്ങളുടെ സ്മാർട്ട് കോളിന്റെ ക്രമീകരണം മാറ്റിയിട്ടുണ്ട്. ഈ മാറ്റങ്ങൾ സംരക്ഷിക്കണോ?"
+}
 

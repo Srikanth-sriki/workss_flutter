@@ -123,7 +123,12 @@ class InitialRegisterBloc
           user_type: event.user_type,
           userLatitude: event.userLatitude,
           userLongitude: event.userLongitude,
-          workImages: event.workImages);
+          workImages: event.workImages,
+          cityId: event.cityId,
+        localityId: event.localityId,
+        profCategoryId: event.profCategoryId,
+        chargeTypeId: event.chargeTypeId
+      );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 

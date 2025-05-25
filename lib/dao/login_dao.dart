@@ -140,7 +140,13 @@ class LoginDao {
       required dynamic charges,
       required dynamic charge_type,
       required String userLatitude,
-      required String userLongitude}) async {
+      required String userLongitude,
+      required String cityId,
+        required String chargeTypeId,
+        required String profCategoryId,
+        required String localityId,
+
+      }) async {
     var url = '${Config.url}/user/profile/register';
 
     Map<String, dynamic> body = {
@@ -160,7 +166,11 @@ class LoginDao {
       "charges": charges,
       "charge_type": charge_type,
       "userLatitude": userLatitude,
-      "userLongitude": userLongitude
+      "userLongitude": userLongitude,
+      "city_id":cityId,
+      "prof_category_id":profCategoryId,
+      "charge_type_id":chargeTypeId,
+      // "locality_id":localityId
     };
     final response = await http.post(
       Uri.parse(url),

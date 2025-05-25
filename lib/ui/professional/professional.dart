@@ -871,7 +871,10 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               price: professionalData.charges!,
                                               paymentType:
                                                   professionalData.chargeType!,
-                                              smartControlEnable: professionalData.smartCallControl!,
+                                              smartControlEnable: isSmartControlEnabled(
+                                                professionalData.smartCallControl,
+                                                professionalData.smartCallSchedule,
+                                              ),
                                               contacted: professionalData
                                                       .isContacted !=
                                                   null,

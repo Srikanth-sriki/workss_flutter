@@ -156,14 +156,20 @@ class _SettingAppState extends State<SettingApp> {
                   title: 'Smart Call Control',
                   onTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                           SmartCallControlScreen(
-                             smartCallControl: widget.smartCallControl,
-                             smartCallSchedule: widget.smartCallSchedule!,
-                           )),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                  create: (context) => ProfileBloc()),
+
+                              ],
+                              child: SmartCallControlScreen(
+                                smartCallControl: widget.smartCallControl,
+                                smartCallSchedule: widget.smartCallSchedule!,
+                              ),
+                            )));
+
                   },
                 ),
                 Padding(

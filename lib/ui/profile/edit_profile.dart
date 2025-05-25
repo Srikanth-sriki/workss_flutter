@@ -61,8 +61,8 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
 
   String? selectedYears;
   String? selectedCharges;
-  String? _selectedCity;
-  String? _selectedProfession;
+  DropdownItemValue? _selectedCity;
+  DropdownItemValue? _selectedProfession;
   bool buttonVisible = true;
   bool nameError = false;
   bool emailError = false;
@@ -75,7 +75,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   String? selectedValue;
   String? _selectedGender;
   String? selectedExperence = 'Year';
-  String? selectedCharge;
+  DropdownItemValue? selectedCharge;
   List<Language> selectedLanguage = [];
   bool isSubmitButtonEnabled = false;
   String userType = '';
@@ -90,18 +90,25 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
   String? profilePicture = "";
   bool cityLoading = true;
   bool pinCodeLoading = true;
-  List<String> dropdownCityItem = [];
+  List<DropdownItemValue> dropdownCityItem = [];
   bool feesChargesLoading = true;
-  List<String> feesChargesItem = [];
+  List<DropdownItemValue> feesChargesItem = [];
   bool knowLanguageLoading = true;
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
-  List<String> professionalTypesItem = [];
+  List<DropdownItemValue> professionalTypesItem = [];
   String? _selectedPinCode;
   Map<String, String> cityMap = {};
   bool citySelected = false;
   List<String> pinCodeListItem = [];
   bool pincodeSelected = false;
+  String? _selectedWorkCityId;
+  String? _selectedProfessionId;
+  String? _selectedChargeId;
+
+
+
+
 
   void _validateForm() {}
 
@@ -142,7 +149,8 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
     _enterName.text = widget.profileFetch.name!;
     _emailController.text = widget.profileFetch.email!;
     // pinCodeController.text = widget.profileFetch.pincode.toString()!;
-    _selectedCity = widget.profileFetch.city!;
+    _selectedCity = DropdownItemValue(id: widget.profileFetch.cityId!, label: widget.profileFetch.city!);
+    _selectedWorkCityId = widget.profileFetch.cityId!;
     _selectedPinCode= widget.profileFetch.pincode.toString();
     profilePicture = widget.profileFetch.profilePic!;
     workImages = widget.profileFetch.workImages!;
@@ -160,8 +168,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
           ? widget.profileFetch.age.toString()!
           : '';
       _selectedProfession = widget.profileFetch.userType == 'professional'
-          ? widget.profileFetch.professionType!
-          : '';
+          ? DropdownItemValue(id: widget.profileFetch.professionId!, label: widget.profileFetch.professionType!)
+          : null;
+      _selectedProfessionId= widget.profileFetch.userType == 'professional'
+          ?widget.profileFetch.professionId:'';
       _selectedGender = widget.profileFetch.userType == 'professional'
           ? widget.profileFetch.gender!
           : '';
@@ -169,8 +179,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
           ? convertLanguages(widget.profileFetch.knownLanguages!)
           : [];
       selectedCharge = widget.profileFetch.userType == 'professional'
-          ? capitalizeWords(widget.profileFetch.chargeType!)
+          ? DropdownItemValue(id: widget.profileFetch.chargeId!, label: capitalizeWords(widget.profileFetch.chargeType!))
           : null;
+      _selectedChargeId= widget.profileFetch.userType == 'professional'
+          ?widget.profileFetch.chargeId:'';
 
       print(selectedCharge);
       print(widget.profileFetch.chargeType!);
@@ -228,10 +240,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
         email: _emailController.text,
         user_type: widget.profileFetch.userType!,
         profession_type: widget.profileFetch.userType == 'professional'
-            ? _selectedProfession
+            ? _selectedProfession!.label
             : null,
         pincode: _selectedPinCode,
-        city: _selectedCity!,
+        city: _selectedCity!.label,
         gender: widget.profileFetch.userType == 'professional'
             ? _selectedGender?.toLowerCase()
             : null,
@@ -247,10 +259,14 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
             ? chargesController.text
             : null,
         charge_type: widget.profileFetch.userType == 'professional'
-            ? selectedCharge?.toLowerCase()
+            ? selectedCharge!.label.toLowerCase()
             : null,
         userLongitude: longitude ?? '0.0',
         userLatitude: longitude ?? '0.0',
+          chargeTypeId: _selectedChargeId!,
+          profCategoryId:_selectedProfessionId! ,
+          localityId: '',
+          cityId: _selectedWorkCityId!
       ));
     }
   }
@@ -357,23 +373,36 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   });
                 } else if (state is FetchCitySuccess) {
                   setState(() {
-                    cityMap = {
-                      for (var city in state.dropDownItems)
-                        city.city: city.id,
-                    };
-                    dropdownCityItem = cityMap.keys.toList();
+                    dropdownCityItem.clear();
+                    for (final category in state.dropDownItems) {
+                      dropdownCityItem.add(DropdownItemValue(
+                          id: category.id, label: category.city));
+                    }
+
+                    dropdownCityItem.sort((a, b) =>
+                        a.label.compareTo(b.label)); // Optional if needed
+
+                    final matchedProfession = dropdownCityItem.firstWhere(
+                          (item) => item.id == widget.profileFetch.cityId,
+                      orElse: () => DropdownItemValue(id: '', label: ''),
+                    );
+
+                    print(matchedProfession);
+
+                    _selectedCity = matchedProfession.id.isNotEmpty
+                        ? matchedProfession
+                        : null;
+
+                    if (_selectedCity != null) {
+                      initialRegisterBloc
+                          .add(FetchPinListEvent(cityId: _selectedCity!.id));
+                    } else {
+                      print(
+                          "City '${_selectedCity}' not found in cityMap.");
+                    }
+
                     cityLoading = false;
 
-                    if (widget.profileFetch.city != null && widget.profileFetch.city!.isNotEmpty) {
-                      _selectedCity = widget.profileFetch.city!;
-                      final selectedCityId = cityMap[_selectedCity];
-
-                      if (selectedCityId != null) {
-                        initialRegisterBloc.add(FetchPinListEvent(cityId: selectedCityId));
-                      } else {
-                        print("City '${_selectedCity}' not found in cityMap.");
-                      }
-                    }
                   });
                 }
                 else if (state is FetchCityFailed) {
@@ -382,9 +411,26 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   });
                 } else if (state is FetchChargeFeesSuccess) {
                   setState(() {
-                    feesChargesItem = state.fetchChargeFeesItems
-                        .map((item) => item.type)
-                        .toList();
+                    feesChargesItem.clear();
+                    for (final category in state.fetchChargeFeesItems) {
+                      feesChargesItem.add(DropdownItemValue(
+                          id: category.id, label: category.type));
+                    }
+
+                    feesChargesItem.sort((a, b) =>
+                        a.label.compareTo(b.label)); // Optional if needed
+
+                    final matchedProfession = feesChargesItem.firstWhere(
+                          (item) => item.id == widget.profileFetch.chargeId,
+                      orElse: () => DropdownItemValue(id: '', label: ''),
+                    );
+
+                    print(matchedProfession);
+
+                    selectedCharge = matchedProfession.id.isNotEmpty
+                        ? matchedProfession
+                        : null;
+
                     feesChargesLoading = false;
                   });
                 } else if (state is FetchChargeFeesFailed) {
@@ -464,21 +510,29 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                   setState(() {
                     // professionalTypesItem =
                     //     state.categories.map((item) => item.name).toList();
+                    professionalTypesItem.clear();
 
-                    professionalTypesItem = state.categories.map((item) {
-                      final translated = item.translation?.getTranslation(langKey);
-                      return translated?.isNotEmpty == true ? translated! : item.name;
-                    }).toList();
-                    if (widget.profileFetch.userType == 'professional') {
-                      final matchedCategory = state.categories.firstWhere(
-                            (item) => item.name == widget.profileFetch.professionType,
-                      );
-                      final translated = matchedCategory.translation?.getTranslation(langKey);
-                      _selectedProfession = translated?.isNotEmpty == true ? translated! : matchedCategory.name;
+                    for (final category in state.categories) {
+                      for (final subCategory in category.professionalSubCategories) {
+                        final translated = subCategory.translation?.getTranslation(langKey);
+                        final displayName = (translated?.isNotEmpty == true) ? translated! : subCategory.name;
+
+                        professionalTypesItem.add(DropdownItemValue(id: subCategory.id, label: displayName));
+                      }
                     }
-                    else {
-                      _selectedProfession = '';
-                    }
+
+                    professionalTypesItem.sort((a, b) => a.label.compareTo(b.label)); // Optional if needed
+
+                    // Set selected value based on ID (more reliable than name)
+                    final matchedProfession = professionalTypesItem.firstWhere(
+                          (item) => item.id == widget.profileFetch.professionId,
+                      orElse: () => DropdownItemValue(id: '', label: ''),
+                    );
+
+                    print(matchedProfession);
+
+                    _selectedProfession = matchedProfession.id.isNotEmpty ? matchedProfession : null;
+
                     professionalTypesLoading = false;
                   });
                 } else if (state is FetchCategoryListFailed) {
@@ -582,7 +636,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         //   title: 'Pincode'.tr(),
                         //     color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400
                         // ),
-                        buildDropdown(
+                        buildDropdownTwo(
                           label: 'city'.tr(),
                           value: _selectedCity,
                           hintText: 'Select your city'.tr(),
@@ -590,6 +644,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           itemLoading: cityLoading,color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400,
                           onChanged: (value) => setState(() {
                             _selectedCity = value;
+                            _selectedWorkCityId =value.id;
                             citySelected = true;
                             _selectedPinCode = null;
                             pincodeSelected = false;
@@ -597,7 +652,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                             pinCodeLoading = true;
 
                             initialRegisterBloc.add(FetchPinListEvent(
-                                cityId: cityMap[value]!));
+                                cityId: _selectedWorkCityId!));
 
                             _validateForm();
                           }),
@@ -642,14 +697,17 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                         ],
                         if (widget.profileFetch.userType == 'professional') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          buildDropdown(
-                              value: _selectedProfession??null,
+                          buildDropdownTwo(
+                              value:  professionalTypesItem.contains(_selectedProfession)
+                                  ? _selectedProfession
+                                  : null,
                               label: 'profession_type'.tr(),
                               hintText: 'Select your Profession'.tr(),
                               items: professionalTypesItem,
                               itemLoading: professionalTypesLoading,
                               onChanged: (value) => setState(() {
                                 _selectedProfession = value;
+                                _selectedProfessionId = value.id;
                                 _validateForm();
                               }),
                               validator: (value) {
@@ -750,11 +808,14 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                       maxWidth: SizeConfig.blockWidth * 35, // Add constraints
                                     ),
                                     child: CustomDropdownButtonFormField(
-                                      selectedValue: selectedCharge,
+                                      selectedValue:  feesChargesItem.contains(selectedCharge)
+                                          ? selectedCharge
+                                          : null,
                                       items: feesChargesItem,
-                                      onChanged: (String? newValue) {
+                                      onChanged: (newValue) {
                                         setState(() {
                                           selectedCharge = newValue;
+                                          _selectedChargeId = newValue.id;
                                         });
                                       },
                                       hintText: 'Select Duration',
@@ -1006,7 +1067,9 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           error: imagesList,
                           removeImage: _removeImage,
                           defaultImages: workImages,
-                            color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400
+                            color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400,
+                            headerNeed: true,
+                            filedConatinerText :'Upload your work images (Optional) \n(max 2 pictures)'
                         ),
                       ],
                     ),

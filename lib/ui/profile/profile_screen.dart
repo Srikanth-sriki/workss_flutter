@@ -39,6 +39,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late ProfileBloc profileBloc;
   bool loading = true;
+  bool error = false;
   String profileImage = "";
   String userName = "";
   String phoneNumber = "";
@@ -79,8 +80,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Config.phoneNumber = state.profileFetch.mobile!;
               Config.name = state.profileFetch.name ?? "";
             });
+            error = false;
           } else if (state is FetchProfileFailed) {
-            loading = false;
+           setState(() {
+             loading = false;
+             error = true;
+           });
+
           }
           setState(() {});
         },
@@ -262,7 +268,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 )
               ] else ...[
-                if (loading == true && Config.profileCompleted == false) ...[
+                if (loading == true && Config.profileCompleted == false && error == false) ...[
                   Shimmer.fromColors(
                     baseColor: COLORS.primary.withOpacity(0.8),
                     highlightColor: COLORS.primary.withOpacity(0.5),
@@ -508,7 +514,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         MaterialPageRoute(
                             builder: (BuildContext context) => SettingApp(
                               smartCallControl: profileFetch.smartCallControl!,
-                              smartCallSchedule: profileFetch.smartCallSchedule!,
+                              smartCallSchedule: profileFetch.smartCallSchedule ?? [],
                             )),
                       );
                     }),

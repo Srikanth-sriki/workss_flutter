@@ -155,7 +155,10 @@ class _CategoryItemListState extends State<CategoryItemList> {
                 jobTypeImage: 'assets/images/profile/prof.png',
                 language: professionalData.knownLanguages!.join(", "),
                 languageImage: 'assets/images/home/speak.png',
-                smartControlEnable: professionalData.smartCallControl!,
+                smartControlEnable: isSmartControlEnabled(
+                  professionalData.smartCallControl,
+                  professionalData.smartCallSchedule,
+                ),
                 onShowInterest: () {
                   if (professionalData.isContacted == null) {
                     showInterestedBloc.add(ProfessionalContactUs(

@@ -391,8 +391,26 @@
   "Invited": "அழைக்கப்பட்டது",
   "Friends": "நண்பர்கள்",
   "Blocked Chats/Friends": "தடைசெய்யப்பட்ட அரட்டைகள்/நண்பர்கள்",
-  "Select your city pincode": "உங்கள் நகர பின்கோடைக் தேர்ந்தெடுக்கவும்"
+  "Select your city pincode": "உங்கள் நகர பின்கோடைக் தேர்ந்தெடுக்கவும்",
+
+  "Search for an": "தேடு",
+  "KYC Verification": "KYC சரிபார்ப்பு",
+  "Aadhaar verification is pending!": "ஆதார் சரிபார்ப்பு நிலுவையில் உள்ளது!",
+  "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.": "உங்கள் அடையாளத்தை சரிபார்க்க,\nஉங்கள் ஆதார் அட்டையின் இரு பக்கங்களையும் படம் எடுக்க வேண்டும்.",
+  "Verifying Your Identity": "உங்கள் அடையாளம் சரிபார்க்கப்படுகிறது",
+  "We’re currently reviewing your Aadhaar card for secure verification.": "உங்கள் ஆதார் அட்டையை பாதுகாப்பான சரிபார்ப்பிற்காக பார்வையிடுகிறோம்.",
+  "OKAY": "சரி",
+  "Verification Successful": "சரிபார்ப்பு வெற்றிகரமாக முடிந்தது",
+  "Your Aadhaar card has been successfully verified.\nYou're all set!": "உங்கள் ஆதார் அட்டை வெற்றிகரமாக சரிபார்க்கப்பட்டது.\nநீங்கள் தயாராக இருக்கிறீர்கள்!",
+  "Smart Call Control": "ஸ்மார்ட் அழைப்பு கட்டுப்பாடு",
+  "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.": "அழைப்பு அனுமதிகளை எளிதாக இயக்கவும் அல்லது முடக்கவும், மற்றும் அழைப்புகளைப் பெற வேண்டிய நேரங்களை அமைக்கவும். உங்களுக்கேற்ற வகையில் கிடைக்கக்கூடிய நேரத்தை அமைக்கவும்.",
+  "Available Anytime": "எப்போது வேண்டுமானாலும் கிடைக்கும்",
+  "Set Your Schedule": "உங்கள் அட்டவணையை அமைக்கவும்",
+  "Do Not Disturb": "தடையாதீர்கள்",
+  "Receive calls 24/7 without any restrictions — you’re always reachable": "24/7 அழைப்புகளை எந்த தடையும் இல்லாமல் பெறுங்கள் — நீங்கள் எப்போதும் கிடைக்கக்கூடியவர்",
+  "Choose specific days and time slots to receive calls that suit your routine.": "உங்கள் அன்றாட வாழ்க்கைக்கு ஏற்ப, அழைப்புகள் வர அனுமதிக்கப்படும் நாட்களையும் நேரங்களையும் தேர்ந்தெடுக்கவும்.",
+  "Block all incoming calls to focus on your work or personal time.": "உங்கள் வேலை அல்லது தனிப்பட்ட நேரத்தில் கவனம் செலுத்த அனைத்து அழைப்புகளையும் தடுக்கவும்.",
+  "You have unsaved changes. Are you sure you want to discard them?": "நீங்கள் சேமிக்காத மாற்றங்கள் உள்ளன. அவற்றை கண்டிப்பாக நிாாக வேண்டுமா?",
+  "UPDATE": "புதுப்பிக்கவும்",
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "உங்கள் ஸ்மார்ட் அழைப்பு அமைப்புகள் மாற்றப்பட்டுள்ளன. இந்த மாற்றங்களைச் சேமிக்க விரும்புகிறீர்களா?"
 }
-
-
-

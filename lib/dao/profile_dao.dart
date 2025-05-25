@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:works_app/models/fetch_profile_model.dart';
 
 import '../components/config.dart';
 import '../helper/custom_log.dart';
@@ -65,7 +66,12 @@ class ProfileDao {
       required dynamic charges,
       required dynamic charge_type,
       required String userLatitude,
-      required String userLongitude}) async {
+      required String userLongitude,
+        required String cityId,
+        required String chargeTypeId,
+        required String profCategoryId,
+        required String localityId,
+      }) async {
     var url = '${Config.url}/user/profile/update';
 
     Map<String, dynamic> body = {
@@ -85,7 +91,11 @@ class ProfileDao {
       "charges": charges,
       "charge_type": charge_type,
       "userLatitude": userLatitude,
-      "userLongitude": userLongitude
+      "userLongitude": userLongitude,
+      "city_id":cityId,
+      "prof_category_id":profCategoryId,
+      "charge_type_id":chargeTypeId,
+      // "locality_id":localityId
     };
     final response = await http.post(
       Uri.parse(url),
@@ -222,21 +232,25 @@ class ProfileDao {
     required String city,
     required String locality,
     required String pincode,
+    required String cityId,
+    required String localityId
   }) async {
     var url = '${Config.url}/user/address/create';
 
     Map<String, dynamic> body = {
       "address_type": addressType,
-      "address_type_name":addressTypeName,
+      "address_type_name": addressTypeName,
       "house_no": houseNo,
       "area": area,
       "instructions": instructions,
       "is_default": isDefault,
       "latitude": latitude,
       "longitude": longitude,
-      "city":city,
-      "locality":locality,
-      "pincode":pincode
+      "city": city,
+      "locality": locality,
+      "pincode": pincode,
+      "locality_id":localityId,
+      "city_id":cityId,
     };
 
     final response = await http.post(
@@ -260,22 +274,26 @@ class ProfileDao {
     required String city,
     required String locality,
     required String pincode,
+    required String cityId,
+    required String localityId
   }) async {
     var url = '${Config.url}/user/address/edit';
 
     Map<String, dynamic> body = {
-      "id":addressId,
+      "id": addressId,
       "address_type": addressType,
-      "address_type_name":addressTypeName,
+      "address_type_name": addressTypeName,
       "house_no": houseNo,
       "area": area,
       "instructions": instructions,
       "is_default": isDefault,
       "latitude": latitude,
       "longitude": longitude,
-      "city":city,
-      "locality":locality,
-      "pincode":pincode
+      "city": city,
+      "locality": locality,
+      "pincode": pincode,
+      "locality_id":localityId,
+      "city_id":cityId,
     };
 
     final response = await http.post(
@@ -316,7 +334,7 @@ class ProfileDao {
     final response = await http.get(
       Uri.parse(url),
     );
-   // customLog("Response Status Code : ${response.body.toString()}");
+    // customLog("Response Status Code : ${response.body.toString()}");
     return response;
   }
 
@@ -344,4 +362,21 @@ class ProfileDao {
     return response;
   }
 
+  Future smartCallControl(
+      {required  List<SmartCallSchedule>  smartCallSchedule,
+      required String smartCallControl}) async {
+    var url = '${Config.url}/user/profile/smart-call-settings';
+
+    Map<String, dynamic> body = {
+      "smart_call_control": smartCallControl,
+      "smart_call_schedule": smartCallSchedule,
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    return response;
+  }
 }

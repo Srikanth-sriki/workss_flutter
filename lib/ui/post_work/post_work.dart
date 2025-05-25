@@ -81,8 +81,9 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
   String citySelected = '';
   String pincodeSelected = '';
   String localitySelected = '';
-  final langKey =
-      languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
+  String? _selectedWorkCityId;
+  String? _selectedWorkLocalityId;
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
 
   void _validateForm() {
     bool isValid = false;
@@ -162,6 +163,10 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     } else {
       List<String> languageSelect =
           selectedLanguage.map((lang) => lang.name).toList();
+      print(_selectedWorkPlaceId);
+      print(_selectedProfessionId);
+      print(_selectedWorkLocalityId);
+      print(_selectedWorkCityId);
       postWorkBloc.add(CreatePostWorkEvent(
           requiredProfession: _selectedProfession!,
           experienceLevel: _experienceLevel!.toLowerCase(),
@@ -179,8 +184,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
           locality: localitySelected,
           workPlaceId: _selectedWorkPlaceId!,
           profCategoryId: _selectedProfessionId!,
-          localityId: '150630d5-694e-442d-8f9f-c0b7e8bd3672',
-          cityId: '150630d5-694e-442d-8f9f-c0b7e8bd3672'
+          localityId: _selectedWorkLocalityId!,
+          cityId: _selectedWorkCityId!
       ));
     }
   }
@@ -222,6 +227,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
     isChecked = false;
     buttonVisible = false;
     addressSelected = 'Select work location';
+    _selectedWorkLocalityId = '';
+    _selectedWorkCityId ="";
     super.dispose();
   }
 
@@ -233,6 +240,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
       _experienceLevel = null;
       _selectedProfessionId=null;
       _selectedWorkPlaceId = null;
+      _selectedWorkLocalityId = null;
+      _selectedWorkCityId =null;
       selectedLanguage = [];
       _selectedImages = [];
       workImages = [];
@@ -391,7 +400,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
 
                           translatedToWorkPlaceItemTypes[translated] = item.place;
 
-                          return DropdownItemValue(id: item.place, label: translated);
+                          return DropdownItemValue(id: item.id, label: translated);
                         }).toList();
                       });
 
@@ -643,7 +652,7 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                       longitudeAdd,
                                       cityAdd,
                                       localityAdd,
-                                      pincodeAdd) {
+                                      pincodeAdd,cityId,localityId) {
                                     setState(() {
                                       addressId = id;
                                       addressSelected = address;
@@ -652,6 +661,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                                       citySelected = cityAdd;
                                       localitySelected = localityAdd;
                                       pincodeSelected = pincodeAdd;
+                                      _selectedWorkCityId=cityId;
+                                      _selectedWorkLocalityId=localityId;
                                       if (addressId.isNotEmpty) {
                                         workAddressSelected = true;
                                       }
@@ -721,9 +732,9 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                             hintText: 'Ex : Home, Bank, etc'.tr(),
                             items: dropdownWorkPlaceItem,
                             onChanged: (value) => setState(() {
-                                  _selectedWorkPlace = translatedToWorkPlaceItemTypes[value.label] ?? value.label;
-                                  _selectedWorkPlaceId = value.id;
                                   setState(() {
+                                    _selectedWorkPlace = translatedToWorkPlaceItemTypes[value.label] ?? value.label;
+                                    _selectedWorkPlaceId = value.id;
                                     workPlaceSelected = true;
                                   });
                                   _validateForm();
@@ -772,7 +783,8 @@ class _PostWorkScreenState extends State<PostWorkScreen> {
                           onImagesSelected: _onImagesSelected,
                           error: imagesList,
                           removeImage: _removeImage,
-                          defaultImages: [],
+                          defaultImages: [], headerNeed: true,
+                            filedConatinerText :'Upload your work images (Optional) \n(max 2 pictures)'
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 4),
                         Row(

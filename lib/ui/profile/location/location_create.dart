@@ -60,8 +60,8 @@ class _AddressScreenState extends State<AddressScreen> {
   bool nameAddressAdded = false;
   bool cityLoading = true;
   bool localityLoading = true;
-  List<String> dropdownCityItem = [];
-  List<String> localityListItem = [];
+  List<DropdownItemValue> dropdownCityItem = [];
+  List<DropdownItemValue> localityListItem = [];
   Map<String, String> cityMap = {};
   String? _selectedCity;
   bool citySelected = false;
@@ -70,7 +70,9 @@ class _AddressScreenState extends State<AddressScreen> {
   bool isSubmitButtonEnabled = false;
   bool pinCodeLoading = true;
   String? _selectedPinCode;
-  List<String> pinCodeListItem = [];
+  String? _selectedWorkCityId;
+  String? _selectedWorkLocalityId;
+  List<DropdownItemValue> pinCodeListItem = [];
   bool pincodeSelected = false;
 
   @override
@@ -198,11 +200,10 @@ class _AddressScreenState extends State<AddressScreen> {
                   });
                 }else if (state is FetchCitySuccess) {
                   setState(() {
-                    cityMap = {
+                    dropdownCityItem.addAll([
                       for (var city in state.dropDownItems)
-                        city.city: city.id,
-                    };
-                    dropdownCityItem = cityMap.keys.toList();
+                        DropdownItemValue(id: city.id, label: city.city),
+                    ]);
                     cityLoading = false;
                   });
                 } else if (state is FetchCityFailed) {
@@ -215,9 +216,10 @@ class _AddressScreenState extends State<AddressScreen> {
                   });
                 } else if (state is FetchLocalitiesListSuccess) {
                   setState(() {
-                    localityListItem = state.dropDownItems
-                        .map((item) => item.locality)
-                        .toList();
+                    localityListItem.addAll([
+                      for (var city in state.dropDownItems)
+                        DropdownItemValue(id: city.id, label: city.locality),
+                    ]);
                     localityLoading = false;
                   });
                 } else if (state is FetchLocalitiesListFailed) {
@@ -231,9 +233,10 @@ class _AddressScreenState extends State<AddressScreen> {
                  });
                } else if (state is FetchPinListSuccess) {
                  setState(() {
-                   pinCodeListItem = state.dropDownItems
-                       .map((item) => item.pincode)
-                       .toList();
+                   pinCodeListItem.addAll([
+                     for (var city in state.dropDownItems)
+                       DropdownItemValue(id: city.id, label: city.pincode),
+                   ]);
                    pinCodeLoading = false;
                  });
                } else if (state is FetchPinListFailed) {
@@ -578,14 +581,15 @@ class _AddressScreenState extends State<AddressScreen> {
                                       });
                                     }
                                   }),
-                              buildDropdown(
+                              buildDropdownTwo(
                                   label: 'city'.tr(),
                                   hintText: 'Select your city'.tr(),
                                   items: dropdownCityItem,
                                   onChanged: (value) => setState(() {
-                                    _selectedCity = value;
+                                    _selectedCity = value.label;
+                                    _selectedWorkCityId =value.id;
                                     citySelected = true;
-                                    print(cityMap[value]);
+
 
                                     _selectedLocality = '';
                                     localitySelected = false;
@@ -593,17 +597,18 @@ class _AddressScreenState extends State<AddressScreen> {
                                     _selectedPinCode = '';
                                     pincodeSelected = false;
                                     pinCodeListItem = [];
+                                    _selectedWorkLocalityId = null;
 
                                     pinCodeLoading = true;
                                     localityLoading = true;
 
                                     initialRegisterBloc.add(FetchLocalitiesListEvent(
-                                        cityId: cityMap[value]!));
+                                        cityId: value.id));
 
 
 
                                     initialRegisterBloc.add(FetchPinListEvent(
-                                        cityId: cityMap[value]!));
+                                        cityId: value.id));
 
 
                                     _validateForm();
@@ -628,15 +633,16 @@ class _AddressScreenState extends State<AddressScreen> {
                                 SizedBox(height: SizeConfig.blockHeight*2,)
                               ],
                               if (localityLoading == false) ...[
-                                buildDropdown(
+                                buildDropdownTwo(
                                     label: 'Locality'.tr(),
                                     hintText: 'Select Locality'.tr(),
                                     items: localityListItem,
                                     onChanged: (value) => setState(() {
-                                      _selectedLocality = value;
-                                      setState(() {
-                                        localitySelected = true;
 
+                                      setState(() {
+                                        _selectedLocality = value.label;
+                                        _selectedWorkLocalityId = value.id;
+                                        localitySelected = true;
                                       });
                                      _validateForm();
                                     }),
@@ -661,13 +667,13 @@ class _AddressScreenState extends State<AddressScreen> {
                                 SizedBox(height: SizeConfig.blockHeight*2,)
                               ],
                               if (pinCodeLoading == false) ...[
-                                buildDropdown(
+                                buildDropdownTwo(
                                     label: 'Pincode'.tr(),
                                     hintText: 'Select your city pincode'.tr(),
                                     items: pinCodeListItem,
                                     onChanged: (value) => setState(() {
-                                      _selectedPinCode = value;
                                       setState(() {
+                                        _selectedPinCode = value.label;
                                         pincodeSelected = true;
                                       });
                                       _validateForm();
@@ -758,7 +764,9 @@ class _AddressScreenState extends State<AddressScreen> {
                                             longitude: longitude.toString(),
                                             city: _selectedCity!,
                                             locality: _selectedLocality!,
-                                            pincode: _selectedPinCode!
+                                            pincode: _selectedPinCode!,
+                                            localityId: _selectedWorkLocalityId!,
+                                            cityId: _selectedWorkCityId!
 
                                         ));
                                       }

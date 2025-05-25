@@ -77,7 +77,7 @@ class _RegisterFormState extends State<RegisterForm> {
   String? selectedValue;
   String? _selectedGender = 'male';
   String? selectedExperence = 'Year';
-  String? selectedCharge = 'Per Day';
+  DropdownItemValue? selectedCharge;
   List<Language> selectedLanguage = [];
   bool isSubmitButtonEnabled = false;
   bool imagesList = false;
@@ -88,15 +88,16 @@ class _RegisterFormState extends State<RegisterForm> {
   String? longitude = "0.0";
   bool cityLoading = true;
   bool pinCodeLoading = true;
-  List<String> dropdownCityItem = [];
+  List<DropdownItemValue> dropdownCityItem = [];
   Map<String, String> cityMap = {};
   bool feesChargesLoading = true;
-  List<String> feesChargesItem = [];
+  List<DropdownItemValue> feesChargesItem = [];
   List<String> pinCodeListItem = [];
   bool knowLanguageLoading = true;
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
-  List<String> professionalTypesItem = [];
+  List<DropdownItemValue> professionalTypesItem = [];
+  late Map<String, String> translatedToProfessionalTypes;
   bool profileSelected = false;
   bool nameSelected = false;
   bool emailSelected = false;
@@ -109,6 +110,9 @@ class _RegisterFormState extends State<RegisterForm> {
   bool bioSelected = false;
   bool imagesSelected = false;
   bool citySelected = false;
+  String? _selectedWorkCityId;
+  String? _selectedProfessionId;
+  String? _selectedChargeId;
 
 
   void _validateForm() {
@@ -178,9 +182,13 @@ class _RegisterFormState extends State<RegisterForm> {
               widget.userType == 'jobs' ? experienceController.text : null,
           charges: widget.userType == 'jobs' ? chargesController.text : null,
           charge_type:
-              widget.userType == 'jobs' ? selectedCharge?.toLowerCase() : null,
+              widget.userType == 'jobs' ? selectedCharge!.label.toLowerCase() : null,
           userLongitude: longitude ?? '0.0',
           userLatitude: longitude ?? '0.0',
+          chargeTypeId: _selectedChargeId!,
+          profCategoryId:_selectedProfessionId! ,
+          localityId: '',
+          cityId: _selectedWorkCityId!
         ));
         // Navigator.push(
         //   context,
@@ -323,11 +331,10 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   } else if (state is FetchCitySuccess) {
                     setState(() {
-                      cityMap = {
+                      dropdownCityItem.addAll([
                         for (var city in state.dropDownItems)
-                          city.city: city.id,
-                      };
-                      dropdownCityItem = cityMap.keys.toList();
+                          DropdownItemValue(id: city.id, label: city.city),
+                      ]);
                       cityLoading = false;
                     });
                   } else if (state is FetchCityFailed) {
@@ -336,9 +343,11 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   } else if (state is FetchChargeFeesSuccess) {
                     setState(() {
-                      feesChargesItem = state.fetchChargeFeesItems
-                          .map((item) => item.type)
-                          .toList();
+                      feesChargesItem.clear();
+                      feesChargesItem.addAll([
+                        for (var  charge in state.fetchChargeFeesItems)
+                          DropdownItemValue(id: charge.id, label: charge.type),
+                      ]);
                       feesChargesLoading = false;
                     });
                   } else if (state is FetchChargeFeesFailed) {
@@ -391,11 +400,17 @@ class _RegisterFormState extends State<RegisterForm> {
                     setState(() {
                       // professionalTypesItem =
                       //     state.categories.map((item) => item.name).toList();
-                      professionalTypesItem = state.categories.map((item) {
-                        final translated = item.translation?.getTranslation(langKey);
-                        return translated?.isNotEmpty == true ? translated! : item.name;
-                      }).toList();
+                      translatedToProfessionalTypes = {};
+                      professionalTypesItem.clear();
 
+                      for (final category in state.categories) {
+                        for (final subCategory in category.professionalSubCategories) {
+                          final translated = subCategory.translation?.getTranslation(langKey) ?? subCategory.name;
+                          translatedToProfessionalTypes[translated] = subCategory.name;
+                          professionalTypesItem.add(DropdownItemValue(id: subCategory.id, label: translated));
+                        }
+                      }
+                      professionalTypesItem.sort((a, b) => a.label.compareTo(b.label));
                       professionalTypesLoading = false;
                     });
                   } else if (state is FetchCategoryListFailed) {
@@ -536,12 +551,13 @@ class _RegisterFormState extends State<RegisterForm> {
                         //     color: pincodeSelected?COLORS.neutralDarkOne:COLORS.neutralDark,
                         //     fontWeight: pincodeSelected?FontWeight.w400:FontWeight.w500
                         // ),
-                        buildDropdown(
+                        buildDropdownTwo(
                             label: 'city'.tr(),
                             hintText: 'Select your city'.tr(),
                             items: dropdownCityItem,
                             onChanged: (value) => setState(() {
-                                  _selectedCity = value;
+                              _selectedCity = value.label;
+                              _selectedWorkCityId =value.id;
                                   citySelected = true;
                                   print(cityMap[value]);
 
@@ -552,7 +568,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                   pinCodeLoading = true;
 
                                   initialRegisterBloc.add(FetchPinListEvent(
-                                      cityId: cityMap[value]!));
+                                      cityId: _selectedWorkCityId!));
 
                                   _validateForm();
                                 }),
@@ -605,12 +621,13 @@ class _RegisterFormState extends State<RegisterForm> {
                         ],
                         if (widget.userType == 'jobs') ...[
                           SizedBox(height: SizeConfig.blockHeight),
-                          buildDropdown(
+                          buildDropdownTwo(
                               label: 'profession_type'.tr(),
                               hintText: 'Select your Profession'.tr(),
                               items: professionalTypesItem,
                               onChanged: (value) => setState(() {
-                                    _selectedProfession = value;
+                                _selectedProfession = translatedToProfessionalTypes[value.label] ?? value.label;
+                                _selectedProfessionId =  value.id;
                                     professionalSelected = true;
                                     _validateForm();
                                   }),
@@ -785,9 +802,12 @@ class _RegisterFormState extends State<RegisterForm> {
                                     child: CustomDropdownButtonFormField(
                                       selectedValue: selectedCharge,
                                       items: feesChargesItem,
-                                      onChanged: (String? newValue) {
+                                      onChanged: (newValue) {
                                         setState(() {
+                                          print(newValue);
+                                          print(newValue.label);
                                           selectedCharge = newValue;
+                                          _selectedChargeId = newValue.id;
                                           _validateForm();
                                         });
                                       },
@@ -1085,6 +1105,8 @@ class _RegisterFormState extends State<RegisterForm> {
                             onImagesSelected: _onImagesSelected,
                             error: imagesList,
                             removeImage: _removeImage,
+                              headerNeed: true,
+                              filedConatinerText :'Upload your work images (Optional) \n(max 2 pictures)'
                           ),
                         ],
                       ],

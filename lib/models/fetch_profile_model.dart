@@ -33,6 +33,9 @@ class ProfileFetch {
   String?kycStatus;
   List<SmartCallSchedule>? smartCallSchedule;
   String? smartCallControl;
+  String?cityId;
+  String?professionId;
+  String?chargeId;
   // dynamic deletedAt;
 
   ProfileFetch({
@@ -61,7 +64,10 @@ class ProfileFetch {
     this.isVerified,
     this.kycStatus,
     this.smartCallSchedule,
-    this.smartCallControl
+    this.smartCallControl,
+    this.chargeId,
+    this.cityId,
+    this.professionId
     // required this.deletedAt,
   });
 
@@ -91,7 +97,13 @@ class ProfileFetch {
     updatedAt: json.containsKey("updatedAt")?DateTime.parse(json["updatedAt"])??null:null,
     kycStatus: json.containsKey("kyc_status")?json["kyc_status"]??null:null,
     smartCallControl: json.containsKey("smart_call_control")?json["smart_call_control"]??null:null,
-    smartCallSchedule: json.containsKey("smart_call_schedule")?List<SmartCallSchedule>.from(json["smart_call_schedule"].map((x) => SmartCallSchedule.fromJson(x)))??null:null,
+    smartCallSchedule: json["smart_call_schedule"] != null
+        ? List<SmartCallSchedule>.from(
+        (json["smart_call_schedule"] as List).map((x) => SmartCallSchedule.fromJson(x)))
+        : null,
+    professionId: json.containsKey("prof_category_id")?json["prof_category_id"]??null:null,
+    cityId: json.containsKey("city_id")?json["city_id"]??null:null,
+    chargeId: json.containsKey("charge_type_id")?json["charge_type_id"]??null:null,
     // deletedAt: json["deletedAt"],
   );
 
@@ -121,7 +133,10 @@ class ProfileFetch {
     "is_verified":isVerified,
     "kyc_status":kycStatus,
     "smart_call_control": smartCallControl,
-    "smart_call_schedule": List<dynamic>.from(smartCallSchedule!.map((x) => x.toJson())),
+    "smart_call_schedule": smartCallSchedule?.map((x) => x.toJson()).toList(),
+    "charge_type_id":chargeId,
+    "city_id":cityId,
+    "prof_category_id":professionId
     // "deletedAt": deletedAt,
   };
 }

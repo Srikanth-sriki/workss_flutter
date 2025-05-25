@@ -303,7 +303,10 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 price: professionalData.charges!,
                 paymentType: professionalData.chargeType!,
                 contacted: professionalData.isContacted != null,
-                smartControlEnable: professionalData.smartCallControl!,
+                smartControlEnable: isSmartControlEnabled(
+                  professionalData.smartCallControl,
+                  professionalData.smartCallSchedule,
+                ),
                 saved: professionalData.isSaved != null,
                 experience: professionalData.experiencedYears!,
                 experienceImage: 'assets/images/home/work_select.png',
@@ -393,7 +396,8 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                                 BlocProvider(
                                   create: (context) => ShowInterestedBloc(),
                                 ),
-                                BlocProvider(create:(context)=>ReportPostBloc() )
+                                BlocProvider(create:(context)=>ReportPostBloc() ),
+                                BlocProvider(create: (context) => ChartBloc())
                               ],
                               child: ProfessionalViewScreen(
                                 id: professionalData.id!,

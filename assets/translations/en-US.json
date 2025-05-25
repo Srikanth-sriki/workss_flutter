@@ -364,7 +364,28 @@
 
 
 
-  "Search for an": "Search for an"
+  "Search for an": "Search for an",
+  "KYC Verification": "KYC Verification",
+  "Aadhaar verification is pending!": "Aadhaar verification is pending!",
+  "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.": "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.",
+  "Verifying Your Identity": "Verifying Your Identity",
+  "We’re currently reviewing your Aadhaar card for secure verification.": "We’re currently reviewing your Aadhaar card for secure verification.",
+  "OKAY": "OKAY",
+  "Verification Successful": "Verification Successful",
+  "Your Aadhaar card has been successfully verified.\nYou're all set!": "Your Aadhaar card has been successfully verified.\nYou're all set!",
+  "Smart Call Control": "Smart Call Control",
+  "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.": "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.",
+  "Available Anytime": "Available Anytime",
+  "Set Your Schedule": "Set Your Schedule",
+  "Do Not Disturb": "Do Not Disturb",
+  "Receive calls 24/7 without any restrictions — you’re always reachable": "Receive calls 24/7 without any restrictions — you’re always reachable",
+  "Choose specific days and time slots to receive calls that suit your routine.": "Choose specific days and time slots to receive calls that suit your routine.",
+  "Block all incoming calls to focus on your work or personal time.": "Block all incoming calls to focus on your work or personal time.",
+  "You have unsaved changes. Are you sure you want to discard them?": "You have unsaved changes. Are you sure you want to discard them?",
+  "UPDATE": "UPDATE",
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "Your Smart Call settings have been modified. Do you want to save these changes?"
+
+
 
 
 }

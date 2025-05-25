@@ -2,6 +2,8 @@
 
 import 'dart:convert';
 
+import 'fetch_profile_model.dart';
+
 ProfessionalViewModel professionalViewModelFromJson(String str) => ProfessionalViewModel.fromJson(json.decode(str));
 
 String professionalViewModelToJson(ProfessionalViewModel data) => json.encode(data.toJson());
@@ -53,7 +55,8 @@ class Professional {
   IsContacted? isContacted;
   IsFriend? isFriend;
   FriendRequestSent? friendRequestSent;
-  bool? smartCallControl;
+  List<SmartCallSchedule>? smartCallSchedule;
+  String? smartCallControl;
 
 
   Professional({
@@ -83,7 +86,8 @@ class Professional {
     this.isContacted,
     this.isFriend,
     this.friendRequestSent,
-    this.smartCallControl
+    this.smartCallSchedule,
+    this.smartCallControl,
   });
 
   factory Professional.fromJson(Map<String, dynamic> json) => Professional(
@@ -124,7 +128,11 @@ class Professional {
     friendRequestSent: json.containsKey('friendRequestSent') && json['friendRequestSent'] != null
         ?FriendRequestSent.fromJson(json["friendRequestSent"])
         : null,
-    smartCallControl: json.containsKey('smart_call_control')?json["smart_call_control"]:false,
+    smartCallControl: json.containsKey("smart_call_control")?json["smart_call_control"]??null:null,
+    smartCallSchedule: json["smart_call_schedule"] != null
+        ? List<SmartCallSchedule>.from(
+        (json["smart_call_schedule"] as List).map((x) => SmartCallSchedule.fromJson(x)))
+        : null,
 
   );
 
@@ -155,7 +163,9 @@ class Professional {
     "isContacted": isContacted?.toJson(),
     "isFriend": isFriend?.toJson(),
     "friendRequestSent": friendRequestSent?.toJson(),
-    "smart_call_control":smartCallControl
+    "smart_call_control":smartCallControl,
+    "smart_call_control": smartCallControl,
+    "smart_call_schedule": smartCallSchedule?.map((x) => x.toJson()).toList(),
   };
 
 }

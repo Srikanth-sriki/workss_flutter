@@ -17,9 +17,9 @@ class DropdownItemValue {
 
 
 class CustomDropdownButtonFormField extends StatelessWidget {
-  final String? selectedValue;
-  final List<String> items;
-  final ValueChanged<String?> onChanged;
+  final DropdownItemValue? selectedValue;
+  final List<DropdownItemValue> items;
+  final ValueChanged<DropdownItemValue> onChanged;
   final String hintText;
   final double iconSize;
   final Color iconColor;
@@ -40,7 +40,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField2(
-      dropdownSearchData: dropdownSearchData,
+      // dropdownSearchData: dropdownSearchData,
       value: selectedValue,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.fromLTRB(
@@ -69,30 +69,36 @@ class CustomDropdownButtonFormField extends StatelessWidget {
         ),
       ),
       items: items
-          .map((item) => DropdownMenuItem<String>(
-                value: item,
-                child: Text(
-                  item,
-                  style: TextStyle(
-                    color: COLORS.accent,
-                    fontSize: SizeConfig.blockWidth * 3.5,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                  ),
-                ),
-              ))
+          .map((item) => DropdownMenuItem<DropdownItemValue>(
+        value: item,
+        child: Text(
+          item.label,
+          style: TextStyle(
+            color: COLORS.accent,
+            fontSize: SizeConfig.blockWidth * 3.5,
+            fontWeight: FontWeight.w400,
+            fontFamily: "Poppins",
+          ),
+        ),
+      ))
           .toList(),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          // return 'Please select an option';
-          showCustomSnackBar(
-            context: context,
-            message: 'Please ${hintText}',
-          );
+      // onChanged: (DropdownItemValue? newValue) {
+      //   setState(() {
+      //     selectedItem = newValue;
+      //   });
+      // },
+      validator: (val) {
+        if (val == null) {
+          return 'Please select an option';
         }
         return null;
       },
-      onChanged: onChanged,
+      onChanged: (DropdownItemValue? newValue) {
+        if(newValue != null){
+          onChanged(newValue) ;
+        }
+      },
+
       dropdownStyleData: DropdownStyleData(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),

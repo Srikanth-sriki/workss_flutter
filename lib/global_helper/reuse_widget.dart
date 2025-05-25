@@ -947,13 +947,12 @@ Widget buildProfessionalCard(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if(!smartControlEnable)...[
+                    if(smartControlEnable == false)...[
                       Expanded(
                         child: customButton(
                             text: "Message",
                             onPressed: messageOnTap,
-                            backgroundColor:
-                            contacted ? COLORS.semanticTwo : COLORS.primary,
+                            backgroundColor: COLORS.primary,
                             showIcon: false,
                             textColor: COLORS.white,
                             height: SizeConfig.blockHeight*7
@@ -1294,7 +1293,8 @@ Widget showContactUsButton({
   required final void Function()? onShare,
   required bool saved,
   required bool contacted,
-  required String buttonText
+  required String buttonText,
+  required bool message,
 }) {
   return   Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1304,8 +1304,7 @@ Widget showContactUsButton({
         child: customButton(
           text: buttonText,
           onPressed: onShowInterest,
-          backgroundColor:
-          contacted ? COLORS.semanticTwo : COLORS.primary,
+          backgroundColor: message?contacted ? COLORS.semanticTwo : COLORS.primary:COLORS.primary,
           showIcon: false,
           textColor: COLORS.white,
         ),

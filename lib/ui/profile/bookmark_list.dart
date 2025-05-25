@@ -162,7 +162,10 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                           ),
                                         );
                                       },
-                                      smartControlEnable: professionalData.smartCallControl!,
+                                      smartControlEnable: isSmartControlEnabled(
+                                        professionalData.smartCallControl,
+                                        professionalData.smartCallSchedule,
+                                      ),
                                       accountVerified:
                                           professionalData!.isVerified!,
                                       image: professionalData!.profilePic!,

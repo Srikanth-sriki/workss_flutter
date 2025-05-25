@@ -49,6 +49,10 @@ class EditProfileAccount extends ProfileEvent {
   String userLatitude;
   String userLongitude;
   dynamic age;
+  String cityId;
+  String chargeTypeId;
+  String profCategoryId;
+  String localityId;
 
   EditProfileAccount(
       {required this.name,
@@ -67,7 +71,12 @@ class EditProfileAccount extends ProfileEvent {
       required this.userLatitude,
       required this.userLongitude,
       required this.age,
-      required this.workImages});
+      required this.workImages,
+        required this.localityId,
+        required this.cityId,
+        required this.profCategoryId,
+        required this.chargeTypeId
+      });
 
   @override
   List<Object> get props => [
@@ -87,7 +96,7 @@ class EditProfileAccount extends ProfileEvent {
         userLongitude,
         userLongitude,
         workImages,
-        age
+        age,cityId,localityId,profCategoryId,chargeTypeId
       ];
 }
 
@@ -184,6 +193,8 @@ class AddressLocationCreate extends ProfileEvent {
   String city;
   String locality;
   String pincode;
+  String localityId;
+  String cityId;
   AddressLocationCreate({
     required this.addressType,
     required this.addressTypeName,
@@ -195,7 +206,9 @@ class AddressLocationCreate extends ProfileEvent {
     required this.longitude,
     required this.locality,
     required this.city,
-    required this.pincode
+    required this.pincode,
+    required this.cityId,
+    required this.localityId
   });
   @override
   List<Object> get props => [
@@ -206,7 +219,7 @@ class AddressLocationCreate extends ProfileEvent {
         instructions,
         isDefault,
         latitude,
-        longitude,locality,city,pincode
+        longitude,locality,city,pincode,cityId,localityId
       ];
 }
 
@@ -221,7 +234,8 @@ class AddressLocationEdit extends ProfileEvent {
   String latitude;
   String longitude;
   String city;
-  String locality; String pincode;
+  String locality; String pincode; String localityId;
+  String cityId;
   AddressLocationEdit({
     required this.addressId,
     required this.addressType,
@@ -234,7 +248,9 @@ class AddressLocationEdit extends ProfileEvent {
     required this.longitude,
     required this.locality,
     required this.city,
-    required this.pincode
+    required this.pincode,
+    required this.cityId,
+    required this.localityId
   });
   @override
   List<Object> get props => [
@@ -245,7 +261,7 @@ class AddressLocationEdit extends ProfileEvent {
         instructions,
         isDefault,
         latitude,
-        longitude,locality,city,pincode
+        longitude,locality,city,pincode,cityId,localityId
       ];
 }
 
@@ -263,4 +279,19 @@ class AddressLocationIdDelete extends ProfileEvent {
       {required this.onSuccess, required this.onError, required this.id});
   @override
   List<Object> get props => [onSuccess, onError, id];
+}
+
+
+class SmartCallControlEvent extends ProfileEvent {
+  String smartCallControl;
+  List<SmartCallSchedule> smartCallSchedule;
+  VoidCallback onSuccess;
+  VoidCallback onError;
+  SmartCallControlEvent(
+      {required this.smartCallSchedule,
+        required this.smartCallControl,
+        required this.onSuccess, required this.onError
+      });
+  @override
+  List<Object> get props => [smartCallControl,smartCallSchedule,onSuccess, onError];
 }

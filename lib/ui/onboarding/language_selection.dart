@@ -208,6 +208,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   Future<void> updateLanguage() async {
     if (selectedLocale != null) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      await prefs.setString(LocalConstant.localLanguageSelected, selectedLocale!.languageCode);
       await prefs.setString('selected_locale',
           '${selectedLocale!.languageCode}_${selectedLocale!.countryCode}');
 

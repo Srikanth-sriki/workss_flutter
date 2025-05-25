@@ -43,6 +43,10 @@ class RegisterAccountEvent extends InitialRegisterEvent {
   String userLatitude;
   String userLongitude;
   dynamic age;
+   String cityId;
+   String chargeTypeId;
+   String profCategoryId;
+   String localityId;
 
   RegisterAccountEvent(
       {required this.name,
@@ -61,7 +65,12 @@ class RegisterAccountEvent extends InitialRegisterEvent {
       required this.userLatitude,
       required this.userLongitude,
       required this.age,
-      required this.workImages});
+      required this.workImages,
+      required this.localityId,
+        required this.cityId,
+        required this.profCategoryId,
+        required this.chargeTypeId
+      });
 
   @override
   List<Object> get props => [
@@ -81,7 +90,7 @@ class RegisterAccountEvent extends InitialRegisterEvent {
         userLongitude,
         userLongitude,
         workImages,
-        age
+        age,cityId,localityId,profCategoryId,chargeTypeId
       ];
 }
 

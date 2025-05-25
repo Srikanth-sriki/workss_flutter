@@ -46,7 +46,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   final TextEditingController addressController = TextEditingController();
   late MultiSelectController<Language> controller;
   final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
-  String? _selectedWorkPlace;
+  DropdownItemValue? _selectedWorkPlace;
   DropdownItemValue? _selectedProfession;
   String? _selectedWorkPlaceId;
   String? _selectedProfessionId;
@@ -68,13 +68,15 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
   String addressSelected = 'Select work location';
   bool workPlaceLoading = false;
   bool knowLanguageLoading = true;
-  List<String> dropdownWorkPlaceItem = [];
+  List<DropdownItemValue> dropdownWorkPlaceItem = [];
   List<DropdownItem<Language>> knownLanguageItems = [];
   bool professionalTypesLoading = true;
   List<DropdownItemValue> professionalTypesItem = [];
   String citySelected = '';
   String pincodeSelected = '';
   String localitySelected = '';
+  String? _selectedWorkCityId;
+  String? _selectedWorkLocalityId;
 
   // List<DropdownItem<Language>> items = [
   //   DropdownItem(label: 'English', value: Language(name: 'English', id: 1)),
@@ -149,7 +151,8 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
     });
     selectedLanguage = convertLanguages(widget.fetchPostedModel.knowLanguage!);
     print(selectedLanguage);
-    _selectedWorkPlace = capitalizeFirstLetter(widget.fetchPostedModel.workPlace!);
+    _selectedWorkPlace = DropdownItemValue(id: capitalizeFirstLetter(widget.fetchPostedModel.workPlace!),
+        label: widget.fetchPostedModel.workPlaceId!);
     workImages = widget.fetchPostedModel.workImages!;
     isChecked = widget.fetchPostedModel.isProfessionalCanCall!;
     latitude = widget.fetchPostedModel.latitude!;
@@ -170,8 +173,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
     });
     selectedLanguage = convertLanguages(widget.fetchPostedModel.knowLanguage!);
     print(selectedLanguage);
-    _selectedWorkPlace =
-        capitalizeFirstLetter(widget.fetchPostedModel.workPlace!);
+
   }
 
   List<Language> convertLanguages(List<String> knownLanguages) {
@@ -198,7 +200,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
         gender: _selectedGender!.toLowerCase(),
         knowLanguage: languageSelect,
         location: addressSelected,
-        workPlace: _selectedWorkPlace!.toLowerCase(),
+        workPlace: _selectedWorkPlace!.label.toLowerCase(),
         workImages: workImages,
         isProfessionalCanCall: isChecked,
         latitude: latitude!,
@@ -323,42 +325,29 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                       });
                     } else if (state is FetchDropDownSuccess) {
                       setState(() {
-                        print('222222');
-                        print(widget.fetchPostedModel.workPlace);
+                        dropdownWorkPlaceItem.clear();
 
-                        // Map dropdown items with translation or fallback to 'place'
-                        dropdownWorkPlaceItem = state.dropDownItems.map((item) {
-                          final translated = item.translation?.getTranslation(langKey);
-                          return translated?.isNotEmpty == true ? translated! : item.place;
-                        }).toList();
+                        for (final category in state.dropDownItems) {
+                          final translated = category.translation?.getTranslation(langKey);
+                          final displayName = (translated?.isNotEmpty == true) ? translated! : category.place;
 
-                        DropDownData? matchedCategory;
+                          dropdownWorkPlaceItem.add(DropdownItemValue(id: category.id, label: displayName));
 
-                        for (final item in state.dropDownItems) {
-                          final translated = item.translation?.getTranslation(langKey)?.trim();
-                          final rawPlace = item.place.trim();
-                          final input = widget.fetchPostedModel.workPlace?.trim() ?? "";
-
-                          if (translated == input || rawPlace == input) {
-                            matchedCategory = item;
-                            break;
-                          }
                         }
 
-                        print(matchedCategory);
+                        dropdownWorkPlaceItem.sort((a, b) => a.label.compareTo(b.label)); // Optional if needed
 
-                        if (matchedCategory != null) {
-                          final translated = matchedCategory.translation?.getTranslation(langKey);
-                          _selectedWorkPlace = translated?.isNotEmpty == true ? translated! : matchedCategory.place;
-                        } else {
-                          // Fallback if no match found
-                          _selectedWorkPlace = widget.fetchPostedModel.workPlace ?? "";
-                        }
+                        // Set selected value based on ID (more reliable than name)
+                        final matchedProfession = dropdownWorkPlaceItem.firstWhere(
+                              (item) => item.id == widget.fetchPostedModel.workPlaceId,
+                          orElse: () => DropdownItemValue(id: '', label: ''),
+                        );
+
+                        print(matchedProfession);
+
+                        _selectedWorkPlace = matchedProfession.id.isNotEmpty ? matchedProfession : null;
 
                         workPlaceLoading = false;
-
-                        print('_selectedWorkPlace: $_selectedWorkPlace');
-                        print('dropdownWorkPlaceItem: $dropdownWorkPlaceItem');
                       });
 
                     } else if (state is FetchKnownLanguageSuccess) {
@@ -658,7 +647,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                                 child: AddressListModalBottomSheet(
                                   selectedAddressId: addressId,
                                   onAddressSelected: (id, address, latitudeAdd,
-                                      longitudeAdd, cityAdd, localityAdd, pincodeAdd) {
+                                      longitudeAdd, cityAdd, localityAdd, pincodeAdd,cityId,localityId) {
                                     setState(() {
                                       addressId = id;
                                       addressSelected = address;
@@ -667,6 +656,8 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                                       citySelected = cityAdd;
                                       localitySelected = localityAdd;
                                       pincodeSelected = pincodeAdd;
+                                      _selectedWorkCityId=cityId;
+                                      _selectedWorkLocalityId=localityId;
                                     });
                                   },
                                 ),
@@ -728,7 +719,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                         //     title: 'Work Address'.tr()),
 
 
-                        buildDropdown(
+                        buildDropdownTwo(
                           value: dropdownWorkPlaceItem.contains(_selectedWorkPlace)
                               ? _selectedWorkPlace
                               : null,
@@ -770,6 +761,8 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                           error: imagesList,
                           removeImage: _removeImage,
                           defaultImages: workImages,
+                            headerNeed: true,
+                            filedConatinerText :'Upload your work images (Optional) \n(max 2 pictures)'
                         ),
                         SizedBox(height: SizeConfig.blockHeight * 4),
                         Row(

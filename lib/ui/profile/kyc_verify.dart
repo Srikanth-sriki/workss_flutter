@@ -90,7 +90,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
             if (mounted) {
               showCustomSnackBar(context: context, message: state.message);
               setState(() => loading = false);
-              Navigator.pushNamed(context, '/main_screen', arguments: {'selectedIndex': 1});
+              Navigator.pushNamed(context, '/main_screen', arguments: {'selectedIndex': 0});
             }
           } else if (state is KycImageAddedFailed) {
             setState(() => loading = false);
@@ -111,7 +111,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
               ),
               SizedBox(height: SizeConfig.blockHeight * 3),
               Text(
-                "Aadhaar verification is pending!",
+                "Aadhaar verification is pending!".tr(),
                 style: TextStyle(
                   color: COLORS.neutralDark,
                   fontSize: SizeConfig.blockWidth * 4.25,
@@ -185,7 +185,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
             ),
             SizedBox(height: SizeConfig.blockHeight * 3),
             Text(
-              "Verifying Your Identity",
+              "Verifying Your Identity".tr(),
               style: TextStyle(
                 color: COLORS.neutralDark,
                 fontSize: SizeConfig.blockWidth * 4.25,
@@ -196,7 +196,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
             ),
             SizedBox(height: SizeConfig.blockHeight * 2),
             Text(
-              "We’re currently reviewing your Aadhaar card for secure verification.",
+              "We’re currently reviewing your Aadhaar card for secure verification.".tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: COLORS.neutralDarkOne,
@@ -246,7 +246,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
             ),
             SizedBox(height: SizeConfig.blockHeight * 3),
             Text(
-              "Verification Successful",
+              "Verification Successful".tr(),
               style: TextStyle(
                 color: COLORS.neutralDark,
                 fontSize: SizeConfig.blockWidth * 4.25,
@@ -257,7 +257,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
             ),
             SizedBox(height: SizeConfig.blockHeight * 2),
             Text(
-              "Your Aadhaar card has been successfully verified.\nYou're all set!",
+              "Your Aadhaar card has been successfully verified.\nYou're all set!".tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: COLORS.neutralDarkOne,
@@ -273,7 +273,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
                 Navigator.pushNamed(
                   context,
                   '/main_screen',
-                  arguments: {'selectedIndex': 1},
+                  arguments: {'selectedIndex': 0},
                 );
               },
               backgroundColor: COLORS.primary,

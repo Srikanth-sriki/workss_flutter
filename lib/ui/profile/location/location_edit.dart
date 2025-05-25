@@ -62,18 +62,20 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   bool nameAddressAdded = true;
   bool cityLoading = true;
   bool localityLoading = true;
-  List<String> dropdownCityItem = [];
-  List<String> localityListItem = [];
+  List<DropdownItemValue> dropdownCityItem = [];
+  List<DropdownItemValue> localityListItem = [];
   Map<String, String> cityMap = {};
-  String? _selectedCity;
+  DropdownItemValue? _selectedCity;
   bool citySelected = true;
-  String? _selectedLocality;
+  DropdownItemValue? _selectedLocality;
   bool localitySelected = true;
   bool isSubmitButtonEnabled = false;
   List<String> pinCodeListItem = [];
   bool pincodeSelected = true;
   bool pinCodeLoading = true;
   String? _selectedPinCode;
+  String? _selectedWorkCityId;
+  String? _selectedWorkLocalityId;
 
   @override
   void initState() {
@@ -102,8 +104,13 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     isChecked = widget.addressItem.isDefault!;
     latitude = double.tryParse(widget.addressItem.latitude ?? '0.0')!;
     longitude = double.tryParse(widget.addressItem.longitude ?? '0.0')!;
-    _selectedCity = widget.addressItem.city!;
-    _selectedLocality = widget.addressItem.locality!;
+    _selectedCity = DropdownItemValue(
+        id: widget.addressItem.cityId!, label: widget.addressItem.city!);
+    _selectedLocality = DropdownItemValue(
+        id: widget.addressItem.localityId!,
+        label: widget.addressItem.locality!);
+    _selectedWorkCityId=widget.addressItem.cityId!;
+    _selectedWorkLocalityId =widget.addressItem.localityId!;
     _selectedPinCode = widget.addressItem.pincode!;
 
     bool newNameAddressAdded = widget.addressItem.addressTypeName!.isNotEmpty;
@@ -165,7 +172,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
     setState(() {
       _currentAddress = addressData['address'] ?? '';
       homeAddress.text = addressData['address'] ?? '';
-      if(addressData['address']!.isNotEmpty){
+      if (addressData['address']!.isNotEmpty) {
         locationAdded = true;
       }
       _validateForm();
@@ -189,10 +196,10 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   void _validateForm() {
     bool isValid = false;
 
-    if (
-        homeAddress.text.isNotEmpty &&
-        (_selectedCity?.isNotEmpty ?? false) &&
-        _selectedLocality?.isNotEmpty == true && (_selectedPinCode?.isNotEmpty?? false) &&
+    if (homeAddress.text.isNotEmpty &&
+        (_selectedCity?.label.isNotEmpty ?? false) &&
+        _selectedLocality?.label.isNotEmpty == true &&
+        (_selectedPinCode?.isNotEmpty ?? false) &&
         (_selectedType != 'Other' || otherName.text.isNotEmpty)) {
       isValid = true;
     }
@@ -201,7 +208,6 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
       isSubmitButtonEnabled = isValid;
     });
   }
-
 
   @override
   void dispose() {
@@ -229,94 +235,141 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
           titleColors: COLORS.neutralDark,
         ),
         body: MultiBlocListener(
-          listeners: [
-            BlocListener<InitialRegisterBloc, InitialRegisterState>(
-              listener: (context, state) {
-                if (state is FetchCityLoading) {
-                  setState(() {
-                    cityLoading = true;
-                  });
-                }else if (state is FetchCitySuccess) {
-                  setState(() {
-                    cityMap = {
-                      for (var city in state.dropDownItems)
-                        city.city: city.id,
-                    };
-                    dropdownCityItem = cityMap.keys.toList();
-                    cityLoading = false;
+            listeners: [
+              BlocListener<InitialRegisterBloc, InitialRegisterState>(
+                listener: (context, state) {
+                  if (state is FetchCityLoading) {
+                    setState(() {
+                      cityLoading = true;
+                    });
+                  } else if (state is FetchCitySuccess) {
+                    setState(() {
+                      dropdownCityItem.clear();
 
-                    if (widget.addressItem.city != null && widget.addressItem.city!.isNotEmpty) {
-                      _selectedCity = widget.addressItem.city!;
-                      final selectedCityId = cityMap[_selectedCity];
-
-                      if (selectedCityId != null) {
-                        initialRegisterBloc.add(FetchLocalitiesListEvent(cityId: selectedCityId));
-                        initialRegisterBloc.add(FetchPinListEvent(cityId: selectedCityId));
-                      } else {
-                        print("City '${_selectedCity}' not found in cityMap.");
+                      for (final category in state.dropDownItems) {
+                        dropdownCityItem.add(DropdownItemValue(
+                            id: category.id, label: category.city));
                       }
-                    }
 
-                  });
-                } else if (state is FetchCityFailed) {
+                      dropdownCityItem.sort((a, b) =>
+                          a.label.compareTo(b.label)); // Optional if needed
+
+                      final matchedProfession = dropdownCityItem.firstWhere(
+                            (item) => item.id == widget.addressItem.cityId,
+                        orElse: () => DropdownItemValue(id: '', label: ''),
+                      );
+
+                      print(matchedProfession);
+
+                      _selectedCity = matchedProfession.id.isNotEmpty
+                          ? matchedProfession
+                          : null;
+
+                      if (_selectedCity != null) {
+                        initialRegisterBloc.add(
+                            FetchLocalitiesListEvent(cityId: _selectedCity!.id));
+                        initialRegisterBloc
+                            .add(FetchPinListEvent(cityId: _selectedCity!.id));
+                      } else {
+                        print(
+                            "City '${_selectedCity}' not found in cityMap.");
+                      }
+
+                      cityLoading = false;
+                    });
+                  } else if (state is FetchCityFailed) {
+                    setState(() {
+                      cityLoading = false;
+                    });
+                  } else if (state is FetchLocalitiesListLoading) {
+                    setState(() {
+                      localityLoading = true;
+                    });
+                  } else if (state is FetchLocalitiesListSuccess) {
+                    setState(() {
+                      localityListItem.clear();
+
+                      for (final category in state.dropDownItems) {
+                        localityListItem.add(DropdownItemValue(
+                            id: category.id, label: category.locality));
+                      }
+
+                      localityListItem.sort((a, b) =>
+                          a.label.compareTo(b.label)); // Optional if needed
+
+                      final matchedProfession = localityListItem.firstWhere(
+                        (item) => item.id == widget.addressItem.localityId,
+                        orElse: () => DropdownItemValue(id: '', label: ''),
+                      );
+
+                      print(matchedProfession);
+
+                      _selectedLocality = matchedProfession.id.isNotEmpty
+                          ? matchedProfession
+                          : null;
+
+                      localityLoading = false;
+                    });
+                  } else if (state is FetchLocalitiesListFailed) {
+                    setState(() {
+                      localityLoading = false;
+                    });
+                  } else if (state is FetchPinListLoading) {
+                    setState(() {
+                      pinCodeLoading = true;
+                    });
+                  } else if (state is FetchPinListSuccess) {
+                    setState(() {
+                      pinCodeListItem.addAll([
+                        for (var city in state.dropDownItems) city.pincode,
+                      ]);
+                      pinCodeLoading = false;
+                    });
+                  } else if (state is FetchPinListFailed) {
+                    setState(() {
+                      pinCodeLoading = false;
+                    });
+                  }
+
+                  setState(() {});
+                },
+              ),
+              BlocListener<ProfileBloc, ProfileState>(
+                  listener: (context, state) {
+                if (state is AddressLocationLoading) {
                   setState(() {
-                    cityLoading = false;
+                    loading = true;
                   });
-                } else if (state is FetchLocalitiesListLoading) {
+                } else if (state is AddressLocationEditSuccess) {
                   setState(() {
-                    localityLoading = true;
+                    loading = false;
                   });
-                } else if (state is FetchLocalitiesListSuccess) {
+                  showMaterialModalBottomSheet(
+                    enableDrag: false,
+                    expand: false,
+                    isDismissible: false,
+                    backgroundColor: COLORS.white,
+                    context: context,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    builder: (context) => EditAddressSuccessBottomSheet(
+                      routeType: widget.routeType,
+                    ),
+                  );
+                } else if (state is AddressLocationEditFailed) {
                   setState(() {
-                    localityListItem = state.dropDownItems
-                        .map((item) => item.locality)
-                        .toList();
-                    localityLoading = false;
+                    loading = false;
                   });
-                } else if (state is FetchLocalitiesListFailed) {
-                  setState(() {
-                    localityLoading = false;
-                  });
+                  showCustomSnackBar(
+                    context: context,
+                    message: state.message,
+                  );
                 }
-
                 setState(() {});
-              },
-            ),
-            BlocListener<ProfileBloc, ProfileState>(listener: (context, state) {
-              if (state is AddressLocationLoading) {
-                setState(() {
-                  loading = true;
-                });
-              } else if (state is AddressLocationEditSuccess) {
-                setState(() {
-                  loading = false;
-                });
-                showMaterialModalBottomSheet(
-                  enableDrag: false,
-                  expand: false,
-                  isDismissible: false,
-                  backgroundColor: COLORS.white,
-                  context: context,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  builder: (context) => EditAddressSuccessBottomSheet(
-                    routeType: widget.routeType,
-                  ),
-                );
-              } else if (state is AddressLocationEditFailed) {
-                setState(() {
-                  loading = false;
-                });
-                showCustomSnackBar(
-                  context: context,
-                  message: state.message,
-                );
-              }
-              setState(() {});
-            })
-          ],
+              })
+            ],
             child: CustomScrollView(
               slivers: [
                 SliverAppBar(
@@ -333,7 +386,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                           gestureRecognizers: <Factory<
                               OneSequenceGestureRecognizer>>{
                             Factory<OneSequenceGestureRecognizer>(
-                                    () => EagerGestureRecognizer()),
+                                () => EagerGestureRecognizer()),
                           },
                           mapType: MapType.normal,
                           zoomControlsEnabled: true,
@@ -345,7 +398,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                           initialCameraPosition: CameraPosition(
                               target: _initialPosition, zoom: 18),
                           onMapCreated: (controller) =>
-                          _mapController = controller,
+                              _mapController = controller,
                           onCameraMove: (position) => _onCameraMove(position),
                           onCameraIdle: () =>
                               _getAddressFromCoordinates(_currentPosition),
@@ -605,12 +658,14 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                     }
                                     _validateForm();
                                   }),
-                              buildDropdown(
+                              buildDropdownTwo(
                                 label: 'city'.tr(),
                                 value: _selectedCity,
                                 hintText: 'Select your city'.tr(),
                                 items: dropdownCityItem,
-                                itemLoading: cityLoading,color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400,
+                                itemLoading: cityLoading,
+                                color: COLORS.neutralDarkOne,
+                                fontWeight: FontWeight.w400,
                                 onChanged: (value) => setState(() {
                                   _selectedCity = value;
                                   citySelected = true;
@@ -623,13 +678,15 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                   pincodeSelected = false;
                                   pinCodeListItem = [];
                                   pinCodeLoading = true;
+                                  _selectedWorkLocalityId = null;
+                                  _selectedWorkCityId =value.id;
 
                                   initialRegisterBloc.add(FetchPinListEvent(
-                                      cityId: cityMap[value]!));
+                                      cityId: _selectedWorkCityId!));
 
-
-                                  initialRegisterBloc.add(FetchLocalitiesListEvent(
-                                      cityId: cityMap[value]!));
+                                  initialRegisterBloc.add(
+                                      FetchLocalitiesListEvent(
+                                          cityId: _selectedWorkCityId!));
 
                                   _validateForm();
                                 }),
@@ -639,26 +696,30 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                   }
                                   return null;
                                 },
-
                               ),
 
                               if (localityLoading == true) ...[
                                 registerText(
-                                    text: 'Locality'.tr(), color: COLORS.neutralDark),
+                                    text: 'Locality'.tr(),
+                                    color: COLORS.neutralDark),
                                 dropDownLoader(hintText: 'Select Locality'),
-                                SizedBox(height: SizeConfig.blockHeight*2,)
+                                SizedBox(
+                                  height: SizeConfig.blockHeight * 2,
+                                )
                               ],
                               if (localityLoading == false) ...[
-                                buildDropdown(
+                                buildDropdownTwo(
                                     label: 'Locality'.tr(),
                                     value: _selectedLocality,
                                     hintText: 'Select Locality'.tr(),
                                     items: localityListItem,
                                     onChanged: (value) => setState(() {
-                                      _selectedLocality = value;
-                                      setState(() {});
-                                      _validateForm();
-                                    }),
+                                          setState(() {
+                                            _selectedLocality = value;
+                                            _selectedWorkLocalityId =value.id!;
+                                          });
+                                          _validateForm();
+                                        }),
                                     itemLoading: localityLoading,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
@@ -666,41 +727,51 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                       }
                                       return null;
                                     },
-                                    color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
+                                    color: COLORS.neutralDarkOne,
+                                    fontWeight: FontWeight.w400),
                               ],
                               if (pinCodeLoading == true) ...[
                                 registerText(
-                                    text: 'Pincode'.tr(), color: COLORS.neutralDark),
-                                dropDownLoader(hintText: 'Select your city pincode'),
-                                SizedBox(height: SizeConfig.blockHeight*2,)
+                                    text: 'Pincode'.tr(),
+                                    color: COLORS.neutralDark),
+                                dropDownLoader(
+                                    hintText: 'Select your city pincode'),
+                                SizedBox(
+                                  height: SizeConfig.blockHeight * 2,
+                                )
                               ],
                               if (pinCodeLoading == false) ...[
                                 buildDropdown(
                                     label: 'Pincode'.tr(),
-                                    value: _selectedPinCode,
+                                    value: pinCodeListItem
+                                            .contains(_selectedPinCode)
+                                        ? _selectedPinCode
+                                        : null,
                                     hintText: 'Select your city pincode'.tr(),
                                     items: pinCodeListItem,
                                     onChanged: (value) => setState(() {
-                                      _selectedPinCode = value;
-                                      setState(() {
-                                        pincodeSelected = true;
-                                      });
-                                    }),
+                                          _selectedPinCode = value;
+                                          setState(() {
+                                            pincodeSelected = true;
+                                          });
+                                        }),
                                     itemLoading: pinCodeLoading,
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
-                                        return 'Please select your city pincode'.tr();
+                                        return 'Please select your city pincode'
+                                            .tr();
                                       }
                                       return null;
                                     },
-                                    color: COLORS.neutralDarkOne,fontWeight: FontWeight.w400),
+                                    color: COLORS.neutralDarkOne,
+                                    fontWeight: FontWeight.w400),
                               ],
                               buildBioTextField(
                                   label: 'Instructions (Optional)'.tr(),
                                   controller: Instructions,
                                   hintText:
-                                  "Write instructions to reach out you"
-                                      .tr(),
+                                      "Write instructions to reach out you"
+                                          .tr(),
                                   validator: (value) {},
                                   error: false,
                                   title: 'Instructions'.tr(),
@@ -753,7 +824,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                               SizedBox(height: SizeConfig.blockHeight * 2),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   customButton(
@@ -771,8 +842,8 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                           ),
                                           builder: (context) =>
                                               EditAddressCancelBottomSheet(
-                                                reset: initialData,
-                                              ),
+                                            reset: initialData,
+                                          ),
                                         );
                                       },
                                       backgroundColor: COLORS.neutralDarkTwo,
@@ -789,25 +860,27 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                                               .validate()) {
                                             profileBloc.add(AddressLocationEdit(
                                                 addressId:
-                                                widget.addressItem.id!,
+                                                    widget.addressItem.id!,
                                                 addressType:
-                                                _selectedType.toLowerCase(),
+                                                    _selectedType.toLowerCase(),
                                                 addressTypeName: otherName.text,
                                                 houseNo: houseNo.text,
                                                 area: homeAddress.text,
                                                 instructions: Instructions.text,
                                                 isDefault: isChecked,
-                                                city: _selectedCity!,
-                                                locality: _selectedLocality!,
+                                                city: _selectedCity!.label!,
+                                                locality: _selectedLocality!.label,
                                                 pincode: _selectedPinCode!,
                                                 latitude: latitude.toString(),
-                                                longitude:
-                                                longitude.toString()));
+                                                longitude: longitude.toString(),
+                                              localityId: _selectedWorkLocalityId!,
+                                              cityId: _selectedWorkCityId!
+
+                                            ));
                                           }
                                         }
                                       },
-                                      backgroundColor:
-                                      isSubmitButtonEnabled
+                                      backgroundColor: isSubmitButtonEnabled
                                           ? COLORS.primary
                                           : COLORS.primary.withOpacity(0.4),
                                       showIcon: false,
@@ -826,8 +899,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                   ),
                 ),
               ],
-            )
-        ),
+            )),
       ),
     );
   }

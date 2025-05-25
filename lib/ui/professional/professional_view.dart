@@ -38,6 +38,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
   late ReportPostBloc reportPostBloc;
   late ChartBloc chartBloc;
   final bool saved = false;
+  late final bool smartControlEnabled;
 
   @override
   void initState() {
@@ -55,7 +56,17 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfessionalBloc, ProfessionalState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if(state is ProfessionalViewSuccess){
+          final professional = state.professionalViewModel.professional!;
+          setState(() {
+            smartControlEnabled = isSmartControlEnabled(
+              professional.smartCallControl,
+              professional.smartCallSchedule,
+            );
+          });
+        }
+      },
       builder: (context, state) {
         if (state is ProfessionalViewLoading || state is ProfessionalInitial) {
           return globalLoadingWidget();
@@ -594,7 +605,10 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                               professionalData!.isVerified!,
                                           image: professionalData!.profilePic!,
                                           name: professionalData!.name!,
-                                          smartControlEnable: professionalData.smartCallControl!,
+                                          smartControlEnable: isSmartControlEnabled(
+                                            professionalData.smartCallControl,
+                                            professionalData.smartCallSchedule,
+                                          ),
                                           profession:
                                               professionalData.professionType!,
                                           location: professionalData.city!,
@@ -783,9 +797,12 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                           color: COLORS.neutralDarkTwo,
                           width: SizeConfig.blockWidth * 0.15))),
               child: showContactUsButton(
+                message: smartControlEnabled,
                   contacted: professional.isContacted != null,
                   saved: professional.isSaved != null,
-                  buttonText: professional.smartCallControl == true?professional.isContacted != null ? 'CONTACTED' : "CONTACT":"Message",
+                  buttonText: smartControlEnabled
+                      ? (professional.isContacted != null ? 'CONTACTED' : 'CONTACT')
+                      : 'Message',
                   onShare: () {
                     shareJobDetails(
                       experience: professional.experiencedYears!,
@@ -827,22 +844,77 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                     }
                   },
                   onShowInterest: () {
-                    if (professional.isContacted == null) {
-                      showInterestedBloc.add(ProfessionalContactUs(
-                        PropId: professional.id!,
-                        onSuccess: () {
-                          setState(() {
-                            professional.isContacted = IsContacted(id: '');
-                            makePhoneCall(professional.mobile!);
-                          });
-                          widget.refreshPageCallback();
-                        },
-                        onError: () {},
-                      ));
+                    final smartEnabled = isSmartControlEnabled(
+                      professional.smartCallControl,
+                      professional.smartCallSchedule,
+                    );
+
+                    if (!smartEnabled) {
+                      chartBloc.add(
+                        StartMessageEvent(
+                          chatId: professional.id!,
+                          onSuccess: (chatId) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (_) => ChartBloc()
+                                        ..add(FetchChartViewEvent(
+                                          page: 1,
+                                          pageSize: 10,
+                                          chatId: chatId,
+                                        )),
+                                    ),
+                                    BlocProvider(create: (_) => InitialRegisterBloc()),
+                                    BlocProvider(create: (_) => ShowInterestedBloc()),
+                                  ],
+                                  child: ChatViewScreen(
+                                    refreshPageCallback: _refreshPageAfterEdit,
+                                    chatId: chatId,
+                                    isGroup: false,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          onError: (message) {
+                            showCustomSnackBar(
+                              context: context,
+                              message: message,
+                              backgroundColor: COLORS.neutralDarkTwo,
+                            );
+                          },
+                        ),
+                      );
                     } else {
-                      makePhoneCall(professional.mobile!);
+                      if (professional.isContacted == null) {
+                        showInterestedBloc.add(
+                          ProfessionalContactUs(
+                            PropId: professional.id!,
+                            onSuccess: () {
+                              setState(() {
+                                professional.isContacted = IsContacted(id: '');
+                                makePhoneCall(professional.mobile!);
+                              });
+                              widget.refreshPageCallback();
+                            },
+                            onError: () {
+                              showCustomSnackBar(
+                                context: context,
+                                message: "Failed to contact. Please try again.",
+                              );
+                            },
+                          ),
+                        );
+                      } else {
+                        makePhoneCall(professional.mobile!);
+                      }
                     }
-                  }),
+                  }
+
+              ),
             ),
           );
         } else if (state is ProfessionalViewError) {

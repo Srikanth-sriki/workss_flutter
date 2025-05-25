@@ -91,9 +91,9 @@ class HomeDao {
       "work_place_id": workPlaceId,
       "locality_id":localityId,
       "city_id":cityId,
-      "cityDetail": null,
-      "localityDetail": null,
-      "professionalSubCategory": null,
+      // "cityDetail": null,
+      // "localityDetail": null,
+      // "professionalSubCategory": null,
     };
     final response = await http.post(
       Uri.parse(url),

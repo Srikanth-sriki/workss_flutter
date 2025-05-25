@@ -52,6 +52,7 @@ class AuthenticationBloc
       String userType = prefs.getString(LocalConstant.userType) ?? "";
       String name = prefs.getString(LocalConstant.name) ?? "";
       bool profileCompleted = prefs.getBool(LocalConstant.profileCompleted) ?? false;
+      String localLang = prefs.getString(LocalConstant.localLanguageSelected) ?? "en";
 
       Config.accessToken = token;
       Config.id = userId;
@@ -60,6 +61,7 @@ class AuthenticationBloc
       Config.profileCompleted = profileCompleted;
       Config.isRegistered = profileCompleted;
       Config.userType =userType;
+      Config.languageSelected = localLang;
       print(token);
       print(profileCompleted);
 

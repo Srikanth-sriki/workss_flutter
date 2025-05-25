@@ -390,7 +390,29 @@
   "Invited": "आमंत्रित",
   "Friends": "मित्र",
   "Blocked Chats/Friends": "अवरोधित चैट/मित्र",
-  "Select your city pincode": "अपने शहर का पिनकोड चुनें"
+  "Select your city pincode": "अपने शहर का पिनकोड चुनें",
+
+  "Search for an": "खोजें",
+  "KYC Verification": "केवाईसी सत्यापन",
+  "Aadhaar verification is pending!": "आधार सत्यापन लंबित है!",
+  "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.": "आपकी पहचान सत्यापित करने के लिए\nहमें आपके आधार कार्ड के दोनों ओर की तस्वीर लेनी होगी।",
+  "Verifying Your Identity": "आपकी पहचान सत्यापित की जा रही है",
+  "We’re currently reviewing your Aadhaar card for secure verification.": "हम आपके आधार कार्ड की सुरक्षा सत्यापन के लिए समीक्षा कर रहे हैं।",
+  "OKAY": "ठीक है",
+  "Verification Successful": "सत्यापन सफल हुआ",
+  "Your Aadhaar card has been successfully verified.\nYou're all set!": "आपका आधार कार्ड सफलतापूर्वक सत्यापित हो गया है।\nआप तैयार हैं!",
+  "Smart Call Control": "स्मार्ट कॉल नियंत्रण",
+  "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.": "कॉल अनुमतियों को आसानी से सक्षम या अक्षम करें और कॉल प्राप्त करने के लिए विशिष्ट समय निर्धारित करें। अपनी उपलब्धता को अनुकूलित करें ताकि आप नियंत्रण में रहें।",
+  "Available Anytime": "कभी भी उपलब्ध",
+  "Set Your Schedule": "अपना शेड्यूल सेट करें",
+  "Do Not Disturb": "परेशान न करें",
+  "Receive calls 24/7 without any restrictions — you’re always reachable": "24/7 कॉल प्राप्त करें बिना किसी प्रतिबंध के — आप हमेशा उपलब्ध हैं",
+  "Choose specific days and time slots to receive calls that suit your routine.": "अपने रूटीन के अनुसार कॉल प्राप्त करने के लिए विशिष्ट दिन और समय चुनें।",
+  "Block all incoming calls to focus on your work or personal time.": "अपने कार्य या व्यक्तिगत समय पर ध्यान केंद्रित करने के लिए सभी कॉल्स ब्लॉक करें।",
+  "You have unsaved changes. Are you sure you want to discard them?": "आपके पास बिना सहेजे गए परिवर्तन हैं। क्या आप वाकई उन्हें छोड़ना चाहते हैं?",
+  "UPDATE": "अपडेट करें",
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "आपकी स्मार्ट कॉल सेटिंग्स बदल दी गई हैं। क्या आप इन परिवर्तनों को सहेजना चाहते हैं?"
 }
+
 
 

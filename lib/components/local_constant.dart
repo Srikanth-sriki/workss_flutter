@@ -11,6 +11,7 @@ class LocalConstant {
   static String intoChecked = "intoChecked";
   static String initialLanguage = "initialLanguage";
   static String userType = "userType";
+  static String localLanguageSelected = "localLanguageSelected";
 }
 
 storeToLocalStorage(dynamic key, dynamic value) async {

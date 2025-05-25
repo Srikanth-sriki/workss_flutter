@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'dart:io';
 import 'package:intl/intl.dart';
+
+import '../models/fetch_profile_model.dart';
 
 // String timeAgo(DateTime updatedAt) {
 //   DateTime now = DateTime.now();
@@ -296,4 +299,73 @@ Click below to join now:
     [XFile(file.path)],
     text: inviteMessage,
   );
+}
+
+
+bool isSmartControlEnabled(
+    String? smartCallControl,
+    List<SmartCallSchedule>? scheduleList,
+    ) {
+  if (smartCallControl == null) return false;
+
+  switch (smartCallControl) {
+    case 'available_anytime':
+      return true;
+
+    case 'dnd':
+      return false;
+
+    case 'scheduled':
+      if (scheduleList == null || scheduleList.isEmpty) return false;
+
+      final now = DateTime.now();
+      final today = _weekdayToDayName(now.weekday);
+
+      final todaySchedule = scheduleList.firstWhere(
+            (item) => item.day?.toLowerCase() == today,
+        orElse: () => SmartCallSchedule(status: false),
+      );
+
+      if (todaySchedule.status != true ||
+          todaySchedule.fromTime == null ||
+          todaySchedule.toTime == null) return false;
+
+      try {
+        final fromTime = _parseTime(todaySchedule.fromTime!);
+        final toTime = _parseTime(todaySchedule.toTime!);
+        final currentTime = TimeOfDay.fromDateTime(now);
+
+        return _isTimeInRange(currentTime, fromTime, toTime);
+      } catch (e) {
+        return false;
+      }
+
+    default:
+      return false;
+  }
+}
+
+/// Converts 1–7 to day names
+String _weekdayToDayName(int weekday) {
+  const days = [
+    'monday', 'tuesday', 'wednesday', 'thursday',
+    'friday', 'saturday', 'sunday'
+  ];
+  return days[(weekday - 1) % 7];
+}
+
+/// Parses "5:00 PM" to TimeOfDay
+TimeOfDay _parseTime(String timeStr) {
+  final format = DateFormat.jm(); // e.g., 5:00 PM
+  final dateTime = format.parse(timeStr);
+  return TimeOfDay.fromDateTime(dateTime);
+}
+
+/// Checks if current time is within [fromTime, toTime]
+bool _isTimeInRange(TimeOfDay current, TimeOfDay from, TimeOfDay to) {
+  final currentMinutes = current.hour * 60 + current.minute;
+  final fromMinutes = from.hour * 60 + from.minute;
+  final toMinutes = to.hour * 60 + to.minute;
+
+  return currentMinutes >= fromMinutes && currentMinutes <= toMinutes;
 }

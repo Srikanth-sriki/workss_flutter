@@ -1,11 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 import 'package:works_app/global_helper/reuse_widget.dart';
 import 'package:works_app/models/smartCallModal.dart';
+import '../../bloc/profile/profile_bloc.dart';
 import '../../components/colors.dart';
 import '../../models/fetch_profile_model.dart';
 import 'modal/smart_call_modal.dart';
@@ -25,6 +27,7 @@ class SmartCallControlScreen extends StatefulWidget {
 }
 
 class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
+  late ProfileBloc profileBloc;
   String selectedMode = "Available Anytime";
   bool hasChanges = false;
 
@@ -48,20 +51,51 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
   }
 
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   profileBloc = BlocProvider.of<ProfileBloc>(context);
+  //   selectedMode = _mapControlValue(widget.smartCallControl);
+  //   schedule = widget.smartCallSchedule.map((item) {
+  //     return SmartCallSchedule(
+  //       day: item.day,
+  //       fromTime: _formatIfNeeded(item.fromTime ?? "12:00"),
+  //       toTime: _formatIfNeeded(item.toTime ?? "19:00"),
+  //       status: item.status ?? false,
+  //     );
+  //
+  //   }).toList();
+  // }
+
   @override
   void initState() {
     super.initState();
+    profileBloc = BlocProvider.of<ProfileBloc>(context);
     selectedMode = _mapControlValue(widget.smartCallControl);
-    schedule = widget.smartCallSchedule.map((item) {
-      return SmartCallSchedule(
-        day: item.day,
-        fromTime: _formatIfNeeded(item.fromTime ?? "12:00"),
-        toTime: _formatIfNeeded(item.toTime ?? "19:00"),
-        status: item.status ?? false,
-      );
 
-    }).toList();
+    if (widget.smartCallSchedule.isEmpty) {
+      schedule = [
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+      ].map((day) {
+        return SmartCallSchedule(
+          day: day,
+          fromTime: _formatIfNeeded("09:00"),
+          toTime: _formatIfNeeded("19:00"),
+          status: false,
+        );
+      }).toList();
+    } else {
+      schedule = widget.smartCallSchedule.map((item) {
+        return SmartCallSchedule(
+          day: item.day,
+          fromTime: _formatIfNeeded(item.fromTime ?? "12:00"),
+          toTime: _formatIfNeeded(item.toTime ?? "19:00"),
+          status: item.status ?? false,
+        );
+      }).toList();
+    }
   }
+
 
   String _mapControlValue(String value) {
     switch (value) {
@@ -183,7 +217,30 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
       header:
       'Your Smart Call settings have been modified. Do you want to save these changes?',
       backgroundColor: COLORS.primary,
-        onPress: (){},
+        onPress: (){
+             profileBloc.add(SmartCallControlEvent(
+                 smartCallSchedule: schedule,
+                 smartCallControl: _mapControlLabel(selectedMode),
+                 onSuccess: (){
+                   showCustomSnackBar(
+                     context: context,
+                     message: 'Schedule Updated ',
+                     backgroundColor: COLORS.semanticTwo
+                   );
+                   Navigator.pushNamed(
+                     context,
+                     '/main_screen',
+                     arguments: {'selectedIndex': 0},
+                   );
+                 },
+                 onError: (){
+               Navigator.pop(context);
+               showCustomSnackBar(
+                 context: context,
+                 message: 'Something Went wrong',
+               );
+             }));
+        },
 
     ),
     );
@@ -209,10 +266,16 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.arrow_back_ios_outlined,
-                    color: COLORS.neutralDark,
-                    size: SizeConfig.blockWidth * 4,
+                  InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                    splashColor: COLORS.white,
+                    child: Icon(
+                      Icons.arrow_back_ios_outlined,
+                      color: COLORS.neutralDark,
+                      size: SizeConfig.blockWidth * 4,
+                    ),
                   ),
                   SizedBox(width: SizeConfig.blockWidth*4,),
                   Text(
@@ -226,11 +289,11 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
                   ),
                 ],
               ),
-              SizedBox(width: SizeConfig.blockHeight),
+              SizedBox(height: SizeConfig.blockHeight*1.5),
               Padding(
                 padding: EdgeInsets.only(left: SizeConfig.blockWidth*8),
                 child: Text(
-                  'Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.',
+                  'Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.'.tr(),
                   style: TextStyle(
                     color: COLORS.neutralDarkOne,
                     fontSize: SizeConfig.blockWidth * 3.25,
@@ -317,7 +380,7 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
     );
   }
 
-  Widget _buildModeTile(String mode,bool visibleList,String subText) {
+  Widget _buildModeTile(String mode, bool visibleList, String subText) {
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: SizeConfig.blockHeight,
@@ -334,78 +397,90 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          RadioListTile<String>(
-            title: Text(
-              mode,
-              style: TextStyle(
-                color: COLORS.neutralDark,
-                fontSize: SizeConfig.blockWidth * 3.5,
-                fontWeight: FontWeight.w400,
-                fontFamily: "Poppins",
-              ),
+          Theme(
+            data: Theme.of(context).copyWith(
+              visualDensity: VisualDensity.compact,
             ),
-            value: mode,
-            groupValue: selectedMode,
-            contentPadding: EdgeInsets.zero,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            fillColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.selected)) {
-                return COLORS.primary;
-              }
-              return COLORS.neutralDarkOne;
-            }),
-            dense: true,
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  selectedMode = value;
-                  hasChanges = true;
-                });
-              }
-            }, toggleable: true,
+            child: RadioListTile<String>(
+              title: Text(
+                mode.tr(),
+                style: TextStyle(
+                  color: COLORS.neutralDark,
+                  fontSize: SizeConfig.blockWidth * 3.5,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Poppins",
+                ),
+              ),
+              value: mode,
+              groupValue: selectedMode,
+              contentPadding: EdgeInsets.zero,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              fillColor: MaterialStateProperty.resolveWith<Color>((states) {
+                return states.contains(MaterialState.selected)
+                    ? COLORS.primary
+                    : COLORS.neutralDarkOne;
+              }),
+              dense: true,
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    selectedMode = value;
+                    hasChanges = true;
+                  });
+                }
+              },
+              toggleable: true,
+
+            ),
           ),
           Padding(
-            padding: EdgeInsets.only(left: SizeConfig.blockWidth*16),
+            padding: EdgeInsets.only(left: SizeConfig.blockWidth * 12),
             child: Text(
-              subText,
+              subText.tr(),
               style: TextStyle(
                 color: COLORS.neutralDarkOne,
                 fontSize: SizeConfig.blockWidth * 3,
                 fontWeight: FontWeight.w400,
                 fontFamily: "Poppins",
               ),
-              softWrap: true,
             ),
           ),
 
           if (selectedMode == "Set Your Schedule" && visibleList)
             ListView.builder(
               shrinkWrap: true,
+              padding: EdgeInsets.only(top: SizeConfig.blockHeight), // optional spacing
               physics: NeverScrollableScrollPhysics(),
               itemCount: schedule.length,
               itemBuilder: (_, index) => _buildDayRow(index),
             ),
+
+          SizedBox(height: SizeConfig.blockHeight*2,),
         ],
       ),
     );
   }
 
 
+
   Widget _buildDayRow(int index) {
     final item = schedule[index];
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding:  EdgeInsets.symmetric(vertical: SizeConfig.blockHeight *0.5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            capitalizeFirstLetter(item.day!).substring(0, 3),
-            style: TextStyle(
-              color: COLORS.neutralDark,
-              fontSize: SizeConfig.blockWidth * 3.5,
-              fontWeight: FontWeight.w500,
-              fontFamily: "Poppins",
+          Padding(
+            padding:  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth),
+            child: Text(
+              capitalizeFirstLetter(item.day!).substring(0, 3),
+              style: TextStyle(
+                color: COLORS.neutralDark,
+                fontSize: SizeConfig.blockWidth * 3.5,
+                fontWeight: FontWeight.w500,
+                fontFamily: "Poppins",
+              ),
             ),
           ),
 

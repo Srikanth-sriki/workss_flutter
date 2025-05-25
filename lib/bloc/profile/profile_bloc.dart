@@ -80,6 +80,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<AddressLocationIdDelete>((event, emit) async {
       await mapDeleteAddressEvent(event, emit);
     });
+    on<SmartCallControlEvent>((event, emit) async {
+      await mapSmartCallControlEvent(event, emit);
+    });
   }
 
   Future<void> mapFetchProfileEvent(
@@ -250,7 +253,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           user_type: event.user_type,
           userLatitude: event.userLatitude,
           userLongitude: event.userLongitude,
-          workImages: event.workImages);
+          workImages: event.workImages,
+          cityId: event.cityId,
+          localityId: event.localityId,
+          profCategoryId: event.profCategoryId,
+          chargeTypeId: event.chargeTypeId
+      );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
@@ -483,7 +491,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           latitude: event.latitude,
           longitude: event.longitude,
           city: event.city,
-          locality: event.locality,pincode: event.pincode
+          locality: event.locality,pincode: event.pincode,
+        cityId: event.cityId,localityId: event.localityId
       );
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
@@ -516,7 +525,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           latitude: event.latitude,
           longitude: event.longitude,
           city: event.city,locality: event.locality,
-        pincode: event.pincode
+          pincode: event.pincode,
+          cityId: event.cityId,
+          localityId: event.localityId
       );
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
@@ -583,4 +594,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(DeleteAddressLocationFailed(message: "Something went wrong"));
     }
   }
+
+  Future<void> mapSmartCallControlEvent(
+      SmartCallControlEvent event, Emitter<ProfileState> emit) async {
+    try {
+      // emit(const WorkInterestedLoading());
+      var response = await profileDao.smartCallControl(smartCallSchedule: event.smartCallSchedule, smartCallControl: event.smartCallControl);
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        event.onSuccess();
+        emit(SmartCallControlSuccess(message: message));
+      } else if (response.statusCode == 200 && jsonDecoded['status'] == false) {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(SmartCallControlFailed(message: message));
+      } else {
+        String message = jsonDecoded["message"];
+        event.onError();
+        emit(SmartCallControlFailed(message: message));
+      }
+    } catch (error) {
+      emit(SmartCallControlFailed(message: "Something went wrong"));
+      event.onError();
+    }
+  }
+
 }

@@ -278,3 +278,17 @@ class DeleteAddressLocationSuccess extends ProfileState {
   @override
   List<Object> get props => [];
 }
+
+class SmartCallControlFailed extends ProfileState {
+  String message;
+  SmartCallControlFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class SmartCallControlSuccess extends ProfileState {
+  String message;
+  SmartCallControlSuccess({required this.message});
+  @override
+  List<Object> get props => [];
+}

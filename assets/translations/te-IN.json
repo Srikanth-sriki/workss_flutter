@@ -352,9 +352,27 @@
   "Invited": "ఆహ్వానించబడిన",
   "Friends": "మిత్రులు",
   "Blocked Chats/Friends": "ఆపిన చాట్స్/స్నేహితులు",
-  "Select your city pincode": "మీ నగర పిన్‌కోడ్‌ను ఎంచుకోండి"
+  "Select your city pincode": "మీ నగర పిన్‌కోడ్‌ను ఎంచుకోండి",
+
+  "Search for an": "శోధించు",
+  "KYC Verification": "KYC ధృవీకరణ",
+  "Aadhaar verification is pending!": "ఆధార్ ధృవీకరణ పెండింగ్‌లో ఉంది!",
+  "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.": "మీ గుర్తింపును ధృవీకరించడానికి\nమీ ఆధార్ కార్డ్ రెండు వైపులా ఫోటో తీసుకోవాలి.",
+  "Verifying Your Identity": "మీ గుర్తింపు ధృవీకరించబడుతోంది",
+  "We’re currently reviewing your Aadhaar card for secure verification.": "మేము మీ ఆధార్ కార్డును సురక్షిత ధృవీకరణ కోసం సమీక్షిస్తున్నాము.",
+  "OKAY": "సరే",
+  "Verification Successful": "ధృవీకరణ విజయవంతమైంది",
+  "Your Aadhaar card has been successfully verified.\nYou're all set!": "మీ ఆధార్ కార్డ్ విజయవంతంగా ధృవీకరించబడింది.\nమీరు సిద్ధంగా ఉన్నారు!",
+  "Smart Call Control": "స్మార్ట్ కాల్ నియంత్రణ",
+  "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.": "కాల్ అనుమతులను సులభంగా ఆన్ లేదా ఆఫ్ చేయండి మరియు కాల్స్ అందుబాటులో ఉండే సమయాన్ని సెట్ చేయండి. మీ అవసరాలకు అనుగుణంగా లభ్యతను కస్టమైజ్ చేయండి.",
+  "Available Anytime": "ఎప్పుడైనా అందుబాటులో ఉంటుంది",
+  "Set Your Schedule": "మీ షెడ్యూల్ సెట్ చేయండి",
+  "Do Not Disturb": "డిస్ట్రబ్ చేయవద్దు",
+  "Receive calls 24/7 without any restrictions — you’re always reachable": "ఏ పరిమితులు లేకుండా 24/7 కాల్స్ స్వీకరించండి — మీరు ఎల్లప్పుడూ అందుబాటులో ఉంటారు",
+  "Choose specific days and time slots to receive calls that suit your routine.": "మీ రొటీన్‌కు సరిపోయే కాల్స్‌కి నిర్దిష్ట రోజులు మరియు సమయాలను ఎంచుకోండి.",
+  "Block all incoming calls to focus on your work or personal time.": "మీ పని లేదా వ్యక్తిగత సమయంలో ఫోకస్ చేయడానికి అన్ని ఇన్‌కమింగ్ కాల్స్‌ను బ్లాక్ చేయండి.",
+  "You have unsaved changes. Are you sure you want to discard them?": "మీరు సేవ్ చేయని మార్పులు ఉన్నాయి. వాటిని విస్మరించాలనుకుంటున్నారా?",
+  "UPDATE": "అప్‌డేట్ చేయండి",
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "మీ స్మార్ట్ కాల్ సెట్టింగ్‌లు మార్చబడ్డాయి. మీరు ఈ మార్పులను సేవ్ చేయాలనుకుంటున్నారా?"
 }
-
-
-
 

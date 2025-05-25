@@ -392,8 +392,28 @@
   "Invited": "ಆಮಂತ್ರಣಿತ",
   "Friends": "ಸ್ನೇಹಿತರು",
   "Blocked Chats/Friends": "ತಡೆಯಲಾದ ಚಾಟ್‌ಗಳು/ಸ್ನೇಹಿತರು",
-  "Select your city pincode": "ನಿಮ್ಮ ನಗರದ ಪಿನ್‌ಕೋಡ್ ಆಯ್ಕೆಮಾಡಿ"
+  "Select your city pincode": "ನಿಮ್ಮ ನಗರದ ಪಿನ್‌ಕೋಡ್ ಆಯ್ಕೆಮಾಡಿ",
 
+  "Search for an": "ಅನ್ವೇಷಿಸಿ",
+  "KYC Verification": "ಕೆವೈಸಿ ದೃಢೀಕರಣ",
+  "Aadhaar verification is pending!": "ಆಧಾರ್ ದೃಢೀಕರಣ ಬಾಕಿಯಿದೆ!",
+  "We need to take a picture of both sides of \nyour Aadhaar card to verify \nyour identity.": "ನಿಮ್ಮ ಗುರುತನ್ನು ದೃಢೀಕರಿಸಲು\nನಾವು ನಿಮ್ಮ ಆಧಾರ್ ಕಾರ್ಡ್‌ನ ಇಡೀ ಎರಡು ಬದಿಗಳ ಫೋಟೋ ತೆಗೆದುಕೊಳ್ಳಬೇಕು.",
+  "Verifying Your Identity": "ನಿಮ್ಮ ಗುರುತನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ",
+  "We’re currently reviewing your Aadhaar card for secure verification.": "ನಾವು ನಿಮ್ಮ ಆಧಾರ್ ಕಾರ್ಡ್‌ನನ್ನು ಸುರಕ್ಷಿತ ದೃಢೀಕರಣಕ್ಕಾಗಿ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದೇವೆ.",
+  "OKAY": "ಸರಿ",
+  "Verification Successful": "ದೃಢೀಕರಣ ಯಶಸ್ವಿಯಾಗಿದೆ",
+  "Your Aadhaar card has been successfully verified.\nYou're all set!": "ನಿಮ್ಮ ಆಧಾರ್ ಕಾರ್ಡ್ ಯಶಸ್ವಿಯಾಗಿ ದೃಢೀಕರಿಸಲಾಗಿದೆ.\nನೀವು ಸಿದ್ಧರಾಗಿದ್ದೀರಿ!",
+  "Smart Call Control": "ಸ್ಮಾರ್ಟ್ ಕರೆ ನಿಯಂತ್ರಣ",
+  "Easily enable or disable call permissions and set specific time windows to prioritize when calls can be received. Customize your availability to stay in control without missing what matters.": "ಕರೆ ಅನುಮತಿಗಳನ್ನು ಸುಲಭವಾಗಿ ಸಕ್ರಿಯ ಅಥವಾ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಮತ್ತು ಕರೆಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ನಿರ್ದಿಷ್ಟ ಸಮಯವನ್ನು ಹೊಂದಿಸಿ. ನಿಮಗೆ ಮುಖ್ಯವಾದದ್ದನ್ನು ತಪ್ಪಿಸದೇ ನಿಯಂತ್ರಣದಲ್ಲಿ ಇರುವುದು ಸುಲಭವಾಗುತ್ತದೆ.",
+  "Available Anytime": "ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ಲಭ್ಯವಿರುತ್ತದೆ",
+  "Set Your Schedule": "ನಿಮ್ಮ ವೇಳಾಪಟ್ಟಿಯನ್ನು ಹೊಂದಿಸಿ",
+  "Do Not Disturb": "ತೊಂದರೆ ಮಾಡಬೇಡಿ",
+  "Receive calls 24/7 without any restrictions — you’re always reachable": "ಯಾವುದೇ ನಿರ್ಬಂಧವಿಲ್ಲದೆ 24/7 ಕರೆಗಳನ್ನು ಸ್ವೀಕರಿಸಿ — ನೀವು ಯಾವಾಗಲೂ ಲಭ್ಯವಿರುತ್ತೀರಿ",
+  "Choose specific days and time slots to receive calls that suit your routine.": "ನಿಮ್ಮ ದಿನಚರೆಗೆ ಅನುಗುಣವಾಗಿ ಕರೆಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ನಿರ್ದಿಷ್ಟ ದಿನಗಳು ಮತ್ತು ಸಮಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+  "Block all incoming calls to focus on your work or personal time.": "ನಿಮ್ಮ ಕೆಲಸ ಅಥವಾ ವೈಯಕ್ತಿಕ ಸಮಯದಲ್ಲಿ ಗಮನ ಹರಿಸಲು ಎಲ್ಲ ಇನ್‌ಕಮಿಂಗ್ ಕರೆಗಳನ್ನು ತಡೆಹಿಡಿಯಿರಿ.",
+  "You have unsaved changes. Are you sure you want to discard them?": "ನೀವು ಉಳಿಸದ ಬದಲಾವಣೆಗಳಿವೆ. ಅವುಗಳನ್ನು ಕೈಬಿಡಲು ನಿಮಗೆ ಖಚಿತವಿದೆಯೇ?",
+  "UPDATE": "ನವೀಕರಿಸಿ",
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್ ಕರೆ ಸೆಟ್ಟಿಂಗ್ಗಳು ಬದಲಾಗಿದೆ. ಈ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಲು ಬಯಸುತ್ತೀರಾ?"
 }
 
 

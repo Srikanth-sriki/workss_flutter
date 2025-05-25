@@ -2,6 +2,8 @@
 
 import 'dart:convert';
 
+import 'fetch_profile_model.dart';
+
 List<ProfessionalsPostedWork> professionalsPostedWorkFromJson(String str) => List<ProfessionalsPostedWork>.from(json.decode(str).map((x) => ProfessionalsPostedWork.fromJson(x)));
 
 String professionalsPostedWorkToJson(List<ProfessionalsPostedWork> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
@@ -24,7 +26,8 @@ class ProfessionalsPostedWork {
   bool? isVerified;
   IsContacted?isSaved;
   IsContacted? isContacted;
-  bool? smartCallControl;
+  List<SmartCallSchedule>? smartCallSchedule;
+  String? smartCallControl;
 
   ProfessionalsPostedWork({
     this.id,
@@ -44,7 +47,8 @@ class ProfessionalsPostedWork {
     this.isVerified,
     this.isSaved,
     this.isContacted,
-    this.smartCallControl
+    this.smartCallSchedule,
+    this.smartCallControl,
   });
 
   factory ProfessionalsPostedWork.fromJson(Map<String, dynamic> json) => ProfessionalsPostedWork(
@@ -73,7 +77,11 @@ class ProfessionalsPostedWork {
     isContacted: json["isContacted"] != null
         ? IsContacted.fromJson(json["isContacted"])
         : null,
-    smartCallControl: json.containsKey('smart_call_control')?json["smart_call_control"]:false,
+    smartCallControl: json.containsKey("smart_call_control")?json["smart_call_control"]??null:null,
+    smartCallSchedule: json["smart_call_schedule"] != null
+        ? List<SmartCallSchedule>.from(
+        (json["smart_call_schedule"] as List).map((x) => SmartCallSchedule.fromJson(x)))
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -98,7 +106,9 @@ class ProfessionalsPostedWork {
     "is_verified": isVerified,
     "isSaved":isSaved,
     "isContacted": isContacted?.toJson(),
-    "smart_call_control":smartCallControl
+    "smart_call_control":smartCallControl,
+    "smart_call_control": smartCallControl,
+    "smart_call_schedule": smartCallSchedule?.map((x) => x.toJson()).toList(),
   };
 }
 
