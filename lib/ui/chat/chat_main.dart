@@ -612,7 +612,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                                     SizedBox(
                                       width: SizeConfig.blockWidth * 2,
                                     ),
-                                    _buildTabButton('Chart'),
+                                    _buildTabButton('Chat'),
                                     SizedBox(
                                       width: SizeConfig.blockWidth * 2,
                                     ),
@@ -909,12 +909,11 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
       onTap: () {
         setState(() {
           selectedTab = label;
-          if (selectedTab == 'Chart') {
+          if (selectedTab == 'Chat') {
             filteredChatList =
                 chatList.where((item) => item.isGroup == false).toList();
-          } else if (selectedTab == 'Group') {
-            filteredChatList =
-                chatList.where((item) => item.isGroup == true).toList();
+          } else if (selectedTab == 'Groups') {
+            filteredChatList = chatList.where((item) => item.isGroup == true).toList();
           } else if(selectedTab == 'Requests'){
               filteredChatList = requestChatList;
           } else {
