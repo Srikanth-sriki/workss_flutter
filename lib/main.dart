@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:http/io_client.dart';
 
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -16,8 +15,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/bloc/professional/professional_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
+import 'package:works_app/components/local_constant.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/ui/main_screen/main_screen.dart';
 import 'package:works_app/ui/onboarding/app_update.dart';
@@ -66,11 +67,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
 }
 
-class MyHttpOverrides extends HttpOverrides{
+class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext? context){
+  HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
 
@@ -119,7 +121,6 @@ Future<void> main() async {
         playSound: true);
   }
 
-
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   // Ensure localization is initialized
@@ -127,6 +128,9 @@ Future<void> main() async {
   // LatLng initialLocation = await fetchInitialLocation();
 
   HttpOverrides.global = MyHttpOverrides();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString(LocalConstant.accessToken) ?? "";
+  Config.accessToken = token;
   runApp(
     EasyLocalization(
       supportedLocales: const [
@@ -177,7 +181,6 @@ class _MyAppState extends State<MyApp> {
     print('-----------------------------check notification');
     getMessage(context);
     analyticsService.logScreenEvent('main_screen');
-    initializeNotifications(navigatorKey);
   }
 
   ///permission for notifications
@@ -223,7 +226,9 @@ class _MyAppState extends State<MyApp> {
       Config.fcmToken = apnId;
     });
   }
+
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -232,6 +237,8 @@ class _MyAppState extends State<MyApp> {
     ));
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+    final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
     return OverlaySupport.global(
       child: MaterialApp(
@@ -247,10 +254,10 @@ class _MyAppState extends State<MyApp> {
             child: child!,
           );
         },
-          home: BlocProvider(
+        home: BlocProvider(
           create: (context) => LoginBloc()..add(AppVersionCheck()),
-    child: const SplashScreen(),
-    ),
+          child: const SplashScreen(),
+        ),
         theme: ThemeData(
           textTheme: Theme.of(context).textTheme.apply(fontSizeFactor: 1.0),
         ),
@@ -271,7 +278,8 @@ class _MyAppState extends State<MyApp> {
                           city: '',
                           currentLongitude: '',
                           currentLatitude: '',
-                          gender: '', knownLanguages: [],
+                          gender: '',
+                          knownLanguages: [],
                           experienceLevel: ''))),
                 BlocProvider(
                   create: (context) {
@@ -303,25 +311,24 @@ class _MyAppState extends State<MyApp> {
                 BlocProvider(
                   create: (context) => ShowInterestedBloc(),
                 ),
-            BlocProvider(
-              create: (context) => FriendsBloc()
-                ..add(FetchFriendsAddListEvent(
-                    page: 1,
-                    pageSize: 10,
-                    keyWord: '')),
-            ),
-            BlocProvider(
-              create: (context) => FriendsBloc()
-                ..add(FetchFriendsListEvent(
-                    page: 1,
-                    pageSize: 10,
-                    keyWord: '')),
-            ),
-            BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
+                BlocProvider(
+                  create: (context) => FriendsBloc()
+                    ..add(FetchFriendsAddListEvent(
+                        page: 1, pageSize: 10, keyWord: '')),
+                ),
+                BlocProvider(
+                  create: (context) => FriendsBloc()
+                    ..add(FetchFriendsListEvent(
+                        page: 1, pageSize: 10, keyWord: '')),
+                ),
+                BlocProvider(
+                    create: (context) =>
+                        ChartBloc()..add(const ChartListEvent()))
               ], child: const MainScreen()),
           '/force-update': (_) => const ForceUpdateScreen(),
           '/maintenance': (_) => const MaintenanceScreen(),
         },
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
       ),
     );
   }
@@ -384,15 +391,14 @@ class _AuthenticationState extends State<Authentication> {
                         city: '',
                         currentLongitude: '',
                         currentLatitude: '',
-                        gender: '', knownLanguages: [],
+                        gender: '',
+                        knownLanguages: [],
                         experienceLevel: ''))),
 
               BlocProvider(
                 create: (context) => FriendsBloc()
                   ..add(FetchFriendsAddListEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: '')),
+                      page: 1, pageSize: 10, keyWord: '')),
               ),
               BlocProvider(
                 create: (context) {
@@ -420,11 +426,10 @@ class _AuthenticationState extends State<Authentication> {
               BlocProvider(
                 create: (context) => FriendsBloc()
                   ..add(FetchFriendsListEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: '')),
+                      page: 1, pageSize: 10, keyWord: '')),
               ),
-              BlocProvider(create: (context) => ChartBloc()..add(const ChartListEvent()) )
+              BlocProvider(
+                  create: (context) => ChartBloc()..add(const ChartListEvent()))
             ], child: const MainScreen());
           }
           return MultiBlocProvider(providers: [

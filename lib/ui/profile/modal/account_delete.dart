@@ -8,8 +8,6 @@ import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:works_app/ui/profile/account_delete_success.dart';
 
-import '../../../bloc/authentication/authentication_bloc.dart';
-import '../../../components/global_handle.dart';
 import '../../../components/local_constant.dart';
 import '../../../global_helper/reuse_widget.dart';
 
@@ -17,16 +15,14 @@ class AccountDeleteBottomSheet extends StatefulWidget {
   const AccountDeleteBottomSheet({super.key});
 
   @override
-  _AccountDeleteBottomSheetState createState() =>
-      _AccountDeleteBottomSheetState();
+  State<AccountDeleteBottomSheet> createState() => _AccountDeleteBottomSheetState();
 }
 
 class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController messageController = TextEditingController();
-  late ProfileBloc profileBloc;
+  late final ProfileBloc profileBloc;
 
-  bool messageError = false;
   @override
   void initState() {
     super.initState();
@@ -34,162 +30,182 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
   }
 
   @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
+
+  void _dismissKeyboard() {
+    FocusScope.of(context).unfocus();
+  }
+
+  Future<void> _handleDelete() async {
+    _dismissKeyboard();
+
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    FocusScope.of(context).unfocus();
+
+    profileBloc.add(DeleteAccount(
+      reason: messageController.text.trim(),
+      onSuccess: (message) async {
+
+        // if (mounted && Navigator.of(context).canPop()) {
+        //   Navigator.of(context).pop();
+        // }
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(LocalConstant.accessToken);
+        await prefs.remove(LocalConstant.userId);
+        await prefs.remove(LocalConstant.profileCompleted);
+        await prefs.remove(LocalConstant.phoneNumber);
+        await prefs.remove(LocalConstant.name);
+        await prefs.setBool(LocalConstant.initialLanguage, false);
+        if (!mounted) return;
+        Navigator.of(context, rootNavigator: true).pushReplacement(
+          MaterialPageRoute(builder: (_) => const AccountDeleteSuccess()),
+        );
+      },
+      onError: (message) {
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+        if (!mounted) return;
+        showCustomSnackBar(
+          context: context,
+          message: 'Something Went wrong',
+        );
+      },
+    ));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context)
-              .viewInsets
-              .bottom, // Ensure padding for keyboard
-        ),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.blockWidth * 5,
-              vertical: SizeConfig.blockHeight * 2.5),
-          decoration: BoxDecoration(
-              color: COLORS.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(SizeConfig.blockWidth * 5),
-                  topRight: Radius.circular(SizeConfig.blockWidth * 5))),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final scrollController = ModalScrollController.of(context);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _dismissKeyboard,
+      child: AnimatedPadding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        child: SafeArea(
+          top: false,
+          child: Material(
+            color: COLORS.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+              topRight: Radius.circular(SizeConfig.blockWidth * 5),
+            ),
+            child: SingleChildScrollView(
+              controller: scrollController,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.blockWidth * 5,
+                vertical: SizeConfig.blockHeight * 2.5,
+              ),
+              child: Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Are you sure?'.tr(),
-                          style: TextStyle(
-                            color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 4,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Poppins",
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Are you sure?'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 4,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                            Text(
+                              'Do you want to delete your account'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 3.4,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          'Do you want to delete your account'.tr(),
-                          style: TextStyle(
-                            color: COLORS.neutralDarkOne,
-                            fontSize: SizeConfig.blockWidth * 3.4,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
+                        IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            color: COLORS.black,
+                            size: SizeConfig.blockWidth * 5,
                           ),
+                          onPressed: () {
+                            _dismissKeyboard();
+                            Navigator.of(context).pop();
+                          },
                         ),
                       ],
                     ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        color: COLORS.black,
-                        size: SizeConfig.blockWidth * 5,
+                    Divider(
+                      color: COLORS.neutralDarkTwo,
+                      thickness: SizeConfig.blockHeight * 0.15,
+                    ),
+                    SizedBox(height: SizeConfig.blockHeight * 2),
+                  buildBioTextField(
+                    label: 'Can you please share the reason with us'.tr(),
+                    title: 'Can you please share the reason with us'.tr(),
+                    controller: messageController,
+                    hintText: "Write the reason".tr(),
+                    maxLines: 6,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter reason'.tr() : null,
+                    onChanged: (_) {},
+                    error: false,
+                  ),
+
+                  Container(
+                      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
+                      padding: EdgeInsets.only(
+                        top: SizeConfig.blockHeight * 2.5,
+                        bottom: SizeConfig.blockHeight * 1,
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: COLORS.neutralDarkOne, width: 0.1),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          customButton(
+                            text: 'CANCEL'.tr(),
+                            onPressed: () {
+                              _dismissKeyboard();
+                              Navigator.of(context).pop();
+                            },
+                            backgroundColor: COLORS.primary,
+                            showIcon: false,
+                            width: SizeConfig.blockWidth * 42,
+                            height: SizeConfig.blockHeight * 8,
+                            textColor: COLORS.white,
+                          ),
+                          customButton(
+                            text: 'DELETE'.tr(),
+                            onPressed: _handleDelete,
+                            backgroundColor: COLORS.semantic,
+                            showIcon: false,
+                            width: SizeConfig.blockWidth * 42,
+                            height: SizeConfig.blockHeight * 8,
+                            textColor: COLORS.white,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                Divider(
-                  color: COLORS.neutralDarkTwo,
-                  thickness: SizeConfig.blockHeight * 0.15,
-                ),
-                SizedBox(
-                  height: SizeConfig.blockHeight * 2,
-                ),
-                buildBioTextField(
-                  label: 'Can you please share the reason with us'.tr(),
-                  controller: messageController,
-                  hintText: "Write the reason".tr(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      setState(() => messageError = true);
-                      return 'Please enter reason'.tr();
-                    }
-                    setState(() => messageError = false);
-                    return null;
-                  },
-                  error: messageError,
-                  title: 'Can you please share the reason with us'.tr(),
-                  onChanged: (value) {},maxLines: 6
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1.5),
-                  padding: EdgeInsets.only(
-                      top: SizeConfig.blockHeight * 2.5,
-                      bottom: SizeConfig.blockHeight * 1),
-                  decoration: const BoxDecoration(
-                      border: Border(
-                          top: BorderSide(
-                              color: COLORS.neutralDarkOne, width: 0.1))),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      customButton(
-                        text: 'CANCEL'.tr(),
-                        onPressed: () {
-                          setState(() {});
-                          Navigator.pop(context);
-                        },
-                        backgroundColor: COLORS.primary,
-                        showIcon: false,
-                        width: SizeConfig.blockWidth * 42,
-                        height: SizeConfig.blockHeight * 8,
-                        textColor: COLORS.white,
-                      ),
-                      customButton(
-                        text: 'DELETE'.tr(),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            profileBloc.add(DeleteAccount(
-                                onSuccess: (message) async{
-                                  // GlobalBlocClass.authenticationBloc
-                                  //     ?.add(const AuthenticationLogoutEvent());
-                                  // Navigator.pushAndRemoveUntil(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) =>
-                                  //     const AccountDeleteSuccess(),
-                                  //   ),
-                                  //       (Route<dynamic> route) => false,
-                                  // );
-                                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                                  await prefs.remove(LocalConstant.accessToken);
-                                  await prefs.remove(LocalConstant.userId);
-                                  await prefs.remove(LocalConstant.profileCompleted);
-                                  await prefs.remove(LocalConstant.phoneNumber);
-                                  await prefs.remove(LocalConstant.name);
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const AccountDeleteSuccess()),
-                                  );
-                                },
-                                onError: (message) {
-                                  Navigator.pop(context);
-                                  showCustomSnackBar(
-                                    context: context,
-                                    message: 'Something Went wrong',
-                                  );
-                                },
-                                reason: messageController.text));
-                          }
-
-                        },
-                        backgroundColor: COLORS.semantic,
-                        showIcon: false,
-                        width: SizeConfig.blockWidth * 42,
-                        height: SizeConfig.blockHeight * 8,
-                        textColor: COLORS.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

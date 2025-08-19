@@ -780,7 +780,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             child: DeleteGroupModal(
                                               buttonText: 'DELETE',
                                               header:
-                                                  'Are you sure you want to \n delete the group?',
+                                                  'Are you sure you want to \n delete the chat?',
                                               chatId: chatViewGroupInfo!.id!,
                                             ),
                                           ),

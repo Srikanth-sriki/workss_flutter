@@ -136,42 +136,38 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       ChartListEvent event, Emitter<ChartState> emit) async {
     try {
       emit(const ChartListLoading());
-      var response = await friendsDao.fetchChartList();
 
+      final response = await friendsDao.fetchChartList();
       customLog("Response Body: ${response.body}");
-
-      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      final jsonDecoded = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
-        List<ChatList> chatList = [];
-        customLog("Processing Data...");
+        final data = jsonDecoded['data'];
 
-        if (jsonDecoded["data"] is List) {
-          for (var i in jsonDecoded["data"]) {
-            try {
-              chatList.add(ChatList.fromJson(i));
-            } catch (e) {
-              customLog("Error parsing chatList item: $e");
-            }
-          }
-        } else {
-          customLog("Data is not a list: ${jsonDecoded["data"]}");
+        if (data is! List) {
+          customLog("Data is not a list: $data");
           emit(ChartListFailed(message: "Invalid data format"));
           return;
         }
 
-        customLog("Chat List Length: ${chatList.length}");
-        if (chatList.isNotEmpty) {
-          emit(ChartListSuccess(chatList: chatList));
-        } else {
-          emit(ChartListFailed(message: "No chats found"));
+        final chatList = <ChatList>[];
+        for (final item in data) {
+          try {
+            chatList.add(ChatList.fromJson(item as Map<String, dynamic>));
+          } catch (e) {
+            customLog("Error parsing chatList item: $e");
+          }
         }
+
+        customLog("Chat List Length: ${chatList.length}");
+        // ✅ treat empty as success with []
+        emit(ChartListSuccess(chatList: chatList));
       } else {
         emit(ChartListFailed(message: jsonDecoded["message"] ?? 'Error'));
       }
-    } catch (error) {
-      customLog("Error: $error");
-      emit(ChartListFailed(message: "Something went wrong"));
+    } catch (e) {
+      customLog("Error: $e");
+      emit( ChartListFailed(message: "Something went wrong"));
     }
   }
 

@@ -263,10 +263,10 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
             : null,
         userLongitude: longitude ?? '0.0',
         userLatitude: longitude ?? '0.0',
-          chargeTypeId: _selectedChargeId!,
-          profCategoryId:_selectedProfessionId! ,
-          localityId: '',
-          cityId: _selectedWorkCityId!
+          chargeTypeId: _selectedChargeId,
+          profCategoryId:_selectedProfessionId ,
+          localityId: null,
+          cityId: _selectedWorkCityId
       ));
     }
   }
@@ -1040,37 +1040,38 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                           ],
                           if (knowLanguageLoading) ...[
                             dropDownLoader(hintText: 'Select Languages',)
-                          ]
+                          ],
+                          SizedBox(
+                            height: SizeConfig.blockHeight * 2.5,
+                          ),
+                          buildBioTextField(
+                              label: 'Bio'.tr(),
+                              controller: bioController,
+                              hintText: "Write about you and your work".tr(),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  setState(() => bioError = true);
+                                  return 'Please enter Bio'.tr();
+                                }
+                                setState(() => bioError = false);
+                                return null;
+                              },
+                              error: bioError,
+                              onChanged: (value) {
+                                _validateForm();
+                              },
+                              title: 'Bio'.tr(),maxLines: 6,color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400),
+                          MultipleImagePickerComponent(
+                              onImagesSelected: _onImagesSelected,
+                              error: imagesList,
+                              removeImage: _removeImage,
+                              defaultImages: workImages,
+                              color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400,
+                              headerNeed: true,
+                              filedConatinerText :'Upload your work images (Optional) \n(max 2 pictures)'
+                          ),
                         ],
-                        SizedBox(
-                          height: SizeConfig.blockHeight * 2.5,
-                        ),
-                        buildBioTextField(
-                            label: 'Bio'.tr(),
-                            controller: bioController,
-                            hintText: "Write about you and your work".tr(),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                setState(() => bioError = true);
-                                return 'Please enter Bio'.tr();
-                              }
-                              setState(() => bioError = false);
-                              return null;
-                            },
-                            error: bioError,
-                            onChanged: (value) {
-                              _validateForm();
-                            },
-                            title: 'Bio'.tr(),maxLines: 6,color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400),
-                        MultipleImagePickerComponent(
-                          onImagesSelected: _onImagesSelected,
-                          error: imagesList,
-                          removeImage: _removeImage,
-                          defaultImages: workImages,
-                            color: COLORS.neutralDarkOne ,fontWeight: FontWeight.w400,
-                            headerNeed: true,
-                            filedConatinerText :'Upload your work images (Optional) \n(max 2 pictures)'
-                        ),
+
                       ],
                     ),
                   )),

@@ -43,10 +43,10 @@ class RegisterAccountEvent extends InitialRegisterEvent {
   String userLatitude;
   String userLongitude;
   dynamic age;
-   String cityId;
-   String chargeTypeId;
-   String profCategoryId;
-   String localityId;
+  dynamic cityId;
+  dynamic chargeTypeId;
+  dynamic profCategoryId;
+  dynamic localityId;
 
   RegisterAccountEvent(
       {required this.name,

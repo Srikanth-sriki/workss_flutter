@@ -7,6 +7,7 @@ import 'package:works_app/dao/home_dao.dart';
 import 'package:works_app/helper/custom_log.dart';
 import 'package:works_app/models/home_fetch_model.dart';
 
+import '../../core/intercepted_client.dart';
 import '../../models/work_view_model.dart';
 part 'home_event.dart';
 part 'home_state.dart';
@@ -47,6 +48,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
       customLog(jsonDecoded);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
@@ -83,6 +85,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       var response = await homeDao.fetchWorkView(workId: event.workId);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
+      handleAuthFailure(response.statusCode, jsonDecoded);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         WorkViewModel workViewModel;
         workViewModel = WorkViewModel.fromJson(jsonDecoded["data"]);

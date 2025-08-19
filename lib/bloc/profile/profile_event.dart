@@ -49,10 +49,10 @@ class EditProfileAccount extends ProfileEvent {
   String userLatitude;
   String userLongitude;
   dynamic age;
-  String cityId;
-  String chargeTypeId;
-  String profCategoryId;
-  String localityId;
+  dynamic cityId;
+  dynamic chargeTypeId;
+  dynamic profCategoryId;
+  dynamic localityId;
 
   EditProfileAccount(
       {required this.name,

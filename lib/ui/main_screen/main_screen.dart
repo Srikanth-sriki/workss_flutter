@@ -4,19 +4,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:works_app/bloc/home/home_bloc.dart';
-import 'package:works_app/bloc/profile/profile_bloc.dart';
+
+import 'package:works_app/firebase/notification.dart';
 import 'package:works_app/ui/chat/chat_main.dart';
 import 'package:works_app/ui/post_work/post_work.dart';
 
 import '../../bloc/chart/chart_bloc.dart';
 import '../../bloc/friends/friends_bloc.dart';
+import '../../bloc/home/home_bloc.dart';
 import '../../bloc/professional/professional_bloc.dart';
+import '../../bloc/profile/profile_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/config.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
-import '../../models/fetch_profile_model.dart';
 import '../home/home.dart';
 import '../professional/professional.dart';
 import '../profile/profile_screen.dart';
@@ -25,274 +26,214 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+
   int _selectedIndex = 0;
   DateTime? _lastPressed;
 
+  // cache profile
   late final Widget _cachedProfileScreen;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  // keep tab widgets so they’re not rebuilt
+  late final List<Widget> _tabs;
 
+  // create blocs once (and dispose with the screen)
+  late final FriendsBloc _friendsBlocForHome;
+  late final HomeBloc _homeBloc;
 
-    final args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+  late final FriendsBloc _friendsBlocForPros;
+  late final ProfessionalBloc _professionalBloc;
 
-    if (args != null && args.containsKey('selectedIndex')) {
-      setState(() {
-        _selectedIndex = args['selectedIndex'];
-      });
-    }
-  }
+  // Chat tab blocs (or let ChatMainScreen create/fetch its own)
+  late final FriendsBloc _friendsBlocForChat;
+  late final ChartBloc _chartBloc;
+
+  bool _routeArgsApplied = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Cache the Profile screen with its Bloc
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initializeNotifications(context);
+      // read route args once, after first frame
+      if (!_routeArgsApplied) {
+        final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        if (args != null && args.containsKey('selectedIndex')) {
+          final idx = args['selectedIndex'] as int? ?? 0;
+          if (idx != _selectedIndex) {
+            setState(() => _selectedIndex = idx);
+          }
+        }
+        _routeArgsApplied = true;
+      }
+    });
+
+    // create blocs ONCE
+    _friendsBlocForHome = FriendsBloc()
+      ..add(FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''));
+    _homeBloc = HomeBloc()
+      ..add(FetchHomeScreenEvent(
+        page: 1, pageSize: 10, keyWord: '',
+        profession: '', city: '', gender: '',
+        currentLongitude: '', currentLatitude: '',
+        knownLanguages: [], experienceLevel: '',
+      ));
+
+    _friendsBlocForPros = FriendsBloc()
+      ..add(FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''));
+    _professionalBloc = ProfessionalBloc()
+      ..add(ProfessionalListEvent(
+        page: 1, pageSize: 10, keyWord: '',
+        profession: '', city: '', gender: '',
+        currentLongitude: '', currentLatitude: '',
+        knownLanguages: [],
+      ));
+
+    _friendsBlocForChat = FriendsBloc()
+      ..add(FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''));
+    _chartBloc = ChartBloc();
+    // NOTE: let ChatMainScreen trigger its own initial fetch in its initState,
+    // or if you prefer to do it here, do it ONCE:
+    // _chartBloc..add(const ChartListEvent())..add(const RequestedChartListEvent());
+
+    // cache profile
     _cachedProfileScreen = BlocProvider(
       create: (_) => ProfileBloc()..add(const FetchProfileEvent()),
       child: const ProfileScreen(),
     );
+
+    // build tabs ONCE
+    _tabs = _buildTabs();
+  }
+
+  List<Widget> _buildTabs() {
+    final homeTab = MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _friendsBlocForHome),
+        BlocProvider.value(value: _homeBloc),
+      ],
+      child: const HomeScreen(),
+    );
+
+    final prosTab = MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _friendsBlocForPros),
+        BlocProvider.value(value: _professionalBloc),
+        BlocProvider(create: (_) => ChartBloc()), // if Professionals needs ChartBloc separately
+      ],
+      child: const ProfessionalsScreen(),
+    );
+
+    final postWorkTab = const PostWorkScreen(arrowBack: false);
+
+    final chatTab = MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _friendsBlocForChat),
+        BlocProvider.value(value: _chartBloc),
+      ],
+      child: const ChatMainScreen(), // this screen now won’t be recreated
+    );
+
+    // order depends on profileCompleted, but we can assemble consistently:
+    if (Config.profileCompleted) {
+      return [
+        homeTab,       // 0
+        prosTab,       // 1
+        postWorkTab,   // 2
+        chatTab,       // 3
+        _cachedProfileScreen, // 4
+      ];
+    } else {
+      return [
+        homeTab,              // 0
+        prosTab,              // 1
+        chatTab,              // 2  (no post work)
+        _cachedProfileScreen, // 3
+      ];
+    }
+  }
+
+  @override
+  void dispose() {
+    _friendsBlocForHome.close();
+    _homeBloc.close();
+    _friendsBlocForPros.close();
+    _professionalBloc.close();
+    _friendsBlocForChat.close();
+    _chartBloc.close();
+    super.dispose();
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  Widget _getTabScreen(int index) {
-    if (Config.profileCompleted) {
-      switch (index) {
-        case 0:
-          return MultiBlocProvider(providers: [
-            BlocProvider(
-                create: (context) => FriendsBloc()
-                  ..add(FetchFriendsAddListEvent(
-                      page: 1, pageSize: 10, keyWord: ''))),
-            BlocProvider(
-                create: (context) => HomeBloc()
-                  ..add(FetchHomeScreenEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: '',
-                      profession: '',
-                      city: '',
-                      gender: '',
-                      currentLongitude: '',
-                      currentLatitude: '',knownLanguages: [],
-                      experienceLevel: '')))
-          ], child: const HomeScreen());
-        case 1:
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                  create: (context) => FriendsBloc()
-                    ..add(FetchFriendsAddListEvent(
-                        page: 1, pageSize: 10, keyWord: ''))),
-              BlocProvider(
-                create: (_) => ProfessionalBloc()
-                  ..add(ProfessionalListEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: "",
-                      profession: "",
-                      city: "",
-                      gender: "",
-                      currentLongitude: '',knownLanguages: [],
-                      currentLatitude: '')),
-              ),
-              BlocProvider(create: (context) => ChartBloc())
-            ],
-            child: const ProfessionalsScreen(),
-          );
-        case 2:
-          return const PostWorkScreen(
-            arrowBack: false,
-          );
-        case 3:
-          return MultiBlocProvider(providers: [
-            BlocProvider(
-                create: (context) => FriendsBloc()
-                  ..add(FetchFriendsListEvent(
-                      page: 1, pageSize: 10, keyWord: ''))),
-            BlocProvider(
-                create: (context) => ChartBloc()..add(const ChartListEvent())..add(const RequestedChartListEvent()))
-          ], child: const ChatMainScreen());
-        case 4:
-          return _cachedProfileScreen;
-        default:
-          return MultiBlocProvider(providers: [
-            BlocProvider(
-                create: (context) => FriendsBloc()
-                  ..add(FetchFriendsAddListEvent(
-                      page: 1, pageSize: 10, keyWord: ''))),
-            BlocProvider(
-                create: (context) => HomeBloc()
-                  ..add(FetchHomeScreenEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: '',
-                      profession: '',
-                      city: '',
-                      gender: '',
-                      currentLongitude: '',
-                      currentLatitude: '',
-                      knownLanguages: [],
-                      experienceLevel: ''
-                  )))
-          ], child: const HomeScreen());
-      }
-    } else {
-      switch (index) {
-        case 0:
-          return MultiBlocProvider(providers: [
-            BlocProvider(
-                create: (context) => FriendsBloc()
-                  ..add(FetchFriendsAddListEvent(
-                      page: 1, pageSize: 10, keyWord: ''))),
-            BlocProvider(
-                create: (context) => HomeBloc()
-                  ..add(FetchHomeScreenEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: '',
-                      profession: '',
-                      city: '',
-                      gender: '',
-                      currentLongitude: '',
-                      currentLatitude: '',
-                      knownLanguages: [],
-                      experienceLevel: ''
-                  )))
-          ], child: const HomeScreen());
-        case 1:
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider(
-                  create: (context) => FriendsBloc()
-                    ..add(FetchFriendsAddListEvent(
-                        page: 1, pageSize: 10, keyWord: ''))),
-              BlocProvider(
-                create: (_) => ProfessionalBloc()
-                  ..add(ProfessionalListEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: "",
-                      profession: "",
-                      city: "",
-                      gender: "",
-                      currentLongitude: '',
-                      currentLatitude: '',knownLanguages: [],)),
-              ),
-              BlocProvider(create: (context) => ChartBloc())
-            ],
-            child: const ProfessionalsScreen(),
-          );
-        case 2:
-          return MultiBlocProvider(providers: [
-            BlocProvider(
-                create: (context) => FriendsBloc()
-                  ..add(FetchFriendsListEvent(
-                      page: 1, pageSize: 10, keyWord: ''))),
-            BlocProvider(
-                create: (context) => ChartBloc()..add(const ChartListEvent())..add(const RequestedChartListEvent()))
-          ], child: const ChatMainScreen());
-        case 3:
-          return _cachedProfileScreen;
-        default:
-          return MultiBlocProvider(providers: [
-            BlocProvider(
-                create: (context) => FriendsBloc()
-                  ..add(FetchFriendsAddListEvent(
-                      page: 1, pageSize: 10, keyWord: ''))),
-            BlocProvider(
-                create: (context) => HomeBloc()
-                  ..add(FetchHomeScreenEvent(
-                      page: 1,
-                      pageSize: 10,
-                      keyWord: '',
-                      profession: '',
-                      city: '',
-                      gender: '',
-                      currentLongitude: '',
-                      currentLatitude: '', knownLanguages: [],
-                      experienceLevel: '')))
-          ], child: const HomeScreen());
-      }
-    }
+    if (index == _selectedIndex) return; // guard: no-op if same tab tapped
+    setState(() => _selectedIndex = index);
   }
 
   Future<bool> _handlePop() async {
     if (_selectedIndex != 0) {
-      setState(() {
-        _selectedIndex = 0;
-      });
-      return false; // Don't pop
+      setState(() => _selectedIndex = 0);
+      return false;
     } else {
       final now = DateTime.now();
       if (_lastPressed == null || now.difference(_lastPressed!) > const Duration(seconds: 2)) {
         _lastPressed = now;
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text('Press back again to exit',style: TextStyle(
-            color: COLORS.neutralDark,
-            fontSize: SizeConfig.blockWidth * 3,
-            fontWeight: FontWeight.w500,
-            fontFamily: "Poppins",
-          ),),backgroundColor: COLORS.primaryOne,),
-
+          SnackBar(
+            content: Text(
+              'Press back again to exit',
+              style: TextStyle(
+                color: COLORS.neutralDark,
+                fontSize: SizeConfig.blockWidth * 3,
+                fontWeight: FontWeight.w500,
+                fontFamily: "Poppins",
+              ),
+            ),
+            backgroundColor: COLORS.primaryOne,
+          ),
         );
-        // Fluttertoast.showToast(
-        //   msg: "Press back again to exit",
-        //   toastLength: Toast.LENGTH_SHORT,
-        //   gravity: ToastGravity.BOTTOM,
-        //   backgroundColor: Colors.black87,
-        //   textColor: Colors.white,
-        // );
         return false;
       }
-      return true; // Pop (exit app)
+      return true;
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-        onPopInvokedWithResult: (didPop,result) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
-          bool shouldExit = await _handlePop();
-          if (shouldExit) {
-            SystemNavigator.pop();
-          }
+          final shouldExit = await _handlePop();
+          if (shouldExit) SystemNavigator.pop();
         }
       },
       child: Scaffold(
         key: _scaffoldKey,
-        body: _getTabScreen(_selectedIndex), // Dynamically create the screen
+
+        // 🔒 Persist tab widgets and their blocs
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _tabs,
+        ),
+
         bottomNavigationBar: BottomNavigationBar(
           items: [
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/work_01.png'),
               label: 'Works'.tr(),
-              activeIcon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/work_select_01.png'),
+              activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/work_select_01.png'),
             ),
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop_01.png'),
               label: 'Pros'.tr(),
-              activeIcon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/prop_select_01.png'),
+              activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop_select_01.png'),
             ),
-            if (Config.profileCompleted) ...[
+            if (Config.profileCompleted)
               BottomNavigationBarItem(
                 icon: Image.asset(
                   'assets/images/bottom_tab/add_post.png',
@@ -302,10 +243,8 @@ class _MainScreenState extends State<MainScreen> {
                   color: COLORS.neutralDarkOne,
                 ),
                 label: 'Post Works'.tr(),
-                activeIcon: bottomTabIcon(
-                    icon: 'assets/images/bottom_tab/add_post_select.png'),
+                activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/add_post_select.png'),
               ),
-            ],
             BottomNavigationBarItem(
               icon: ValueListenableBuilder<bool>(
                 valueListenable: Config.chatHasNewMessage,
@@ -317,12 +256,9 @@ class _MainScreenState extends State<MainScreen> {
                         top: 0,
                         right: 0,
                         child: Container(
-                          width: SizeConfig.blockWidth*3,
-                          height: SizeConfig.blockWidth*3,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
+                          width: SizeConfig.blockWidth * 3,
+                          height: SizeConfig.blockWidth * 3,
+                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                         ),
                       ),
                   ],
@@ -338,27 +274,16 @@ class _MainScreenState extends State<MainScreen> {
                       Positioned(
                         top: 0,
                         right: 0,
-                        child: Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
                       ),
                   ],
                 ),
               ),
             ),
-
-
             BottomNavigationBarItem(
-              icon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/profile_01.png'),
+              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile_01.png'),
               label: 'Account'.tr(),
-              activeIcon: bottomTabIcon(
-                  icon: 'assets/images/bottom_tab/profile_select_01.png'),
+              activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile_select_01.png'),
             ),
           ],
           currentIndex: _selectedIndex,
@@ -366,17 +291,19 @@ class _MainScreenState extends State<MainScreen> {
           showUnselectedLabels: true,
           landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
           selectedLabelStyle: TextStyle(
-              color: COLORS.neutralDark,
-              fontFamily: "Poppins",
-              fontWeight: FontWeight.w400,
-              height: SizeConfig.blockHeight * 0.25,
-              fontSize: SizeConfig.blockWidth * 2.6),
+            color: COLORS.neutralDark,
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.w400,
+            height: SizeConfig.blockHeight * 0.25,
+            fontSize: SizeConfig.blockWidth * 2.6,
+          ),
           unselectedLabelStyle: TextStyle(
-              color: COLORS.neutralDarkOne,
-              fontFamily: "Poppins",
-              fontWeight: FontWeight.w400,
-              height: SizeConfig.blockHeight * 0.25,
-              fontSize: SizeConfig.blockWidth * 2.6),
+            color: COLORS.neutralDarkOne,
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.w400,
+            height: SizeConfig.blockHeight * 0.25,
+            fontSize: SizeConfig.blockWidth * 2.6,
+          ),
           unselectedItemColor: COLORS.neutralDarkOne,
           selectedItemColor: COLORS.neutralDark,
           type: BottomNavigationBarType.fixed,

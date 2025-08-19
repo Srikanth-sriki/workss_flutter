@@ -185,10 +185,10 @@ class _RegisterFormState extends State<RegisterForm> {
               widget.userType == 'jobs' ? selectedCharge!.label.toLowerCase() : null,
           userLongitude: longitude ?? '0.0',
           userLatitude: longitude ?? '0.0',
-          chargeTypeId: _selectedChargeId!,
-          profCategoryId:_selectedProfessionId! ,
-          localityId: '',
-          cityId: _selectedWorkCityId!
+          chargeTypeId: _selectedChargeId,
+          profCategoryId:_selectedProfessionId ,
+          localityId: null,
+          cityId: _selectedWorkCityId
         ));
         // Navigator.push(
         //   context,

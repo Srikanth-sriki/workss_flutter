@@ -311,14 +311,17 @@ class HomeDao {
 
   Future fetchNotificationListView() async {
     var url = '${Config.url}/user/notification/list';
-    final response = await http.get(
-      Uri.parse(url),
-      headers: Config.authHeaders(),
-    );
-    customLog("Response Status Code : ${response.statusCode}");
-    customLog('Response body:${response.body.toString()}');
-    return response;
+    var headers = Config.authHeaders();
+
+    try {
+      final response = await http.get(Uri.parse(url), headers: headers);
+      return response;
+    } catch (e) {
+
+      return null;
+    }
   }
+
 
   Future fetchNotificationClearSingle({
     required String Id,

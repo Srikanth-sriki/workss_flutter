@@ -82,7 +82,7 @@ class _DeleteGroupModalState extends State<DeleteGroupModal> {
                     customButton(
                       text: widget.buttonText.tr(),
                       onPressed: () {
-                        chartBloc.add(DeleteGroupEvent(
+                        chartBloc.add(DeleteChartEvent(
                             chatId: widget.chatId,
                             onSuccess: (message) {
                               showCustomSnackBar(

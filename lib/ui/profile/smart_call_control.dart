@@ -222,6 +222,7 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
                  smartCallSchedule: schedule,
                  smartCallControl: _mapControlLabel(selectedMode),
                  onSuccess: (){
+                   if (!mounted) return;
                    showCustomSnackBar(
                      context: context,
                      message: 'Schedule Updated ',
@@ -234,6 +235,7 @@ class _SmartCallControlScreenState extends State<SmartCallControlScreen> {
                    );
                  },
                  onError: (){
+                   if (!mounted) return;
                Navigator.pop(context);
                showCustomSnackBar(
                  context: context,

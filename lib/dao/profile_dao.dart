@@ -67,10 +67,10 @@ class ProfileDao {
       required dynamic charge_type,
       required String userLatitude,
       required String userLongitude,
-        required String cityId,
-        required String chargeTypeId,
-        required String profCategoryId,
-        required String localityId,
+        required dynamic cityId,
+        required dynamic chargeTypeId,
+        required dynamic profCategoryId,
+        required dynamic localityId,
       }) async {
     var url = '${Config.url}/user/profile/update';
 

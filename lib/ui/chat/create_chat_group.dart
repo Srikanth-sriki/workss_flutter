@@ -393,7 +393,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                       ? FontWeight.w400
                                       : FontWeight.w500),
                               buildDynamicRadioSelection(
-                                  title: 'Gender'.tr(),
+                                  title: 'Group Type'.tr(),
                                   options: [
                                     {'label': 'Private', 'value': 'private'},
                                     {'label': 'Public', 'value': 'public'}
@@ -405,7 +405,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                     });
                                   },
                                   groupValue: _selectedGroupType,
-                                  color: COLORS.neutralDarkOne ,fontWeight:  FontWeight.w400
+                                  color: COLORS.neutralDark ,fontWeight:  FontWeight.w500,
+
                               ),
                               SizedBox(height: SizeConfig.blockHeight * 1),
                               _buildBioTextField(

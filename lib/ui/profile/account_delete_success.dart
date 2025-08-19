@@ -3,12 +3,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/main.dart';
 import '../../bloc/authentication/authentication_bloc.dart';
+import '../../bloc/login/login_bloc.dart';
 import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../main_screen/main_screen.dart';
+import '../onboarding/splash_screen.dart';
 
 class AccountDeleteSuccess extends StatefulWidget {
   const AccountDeleteSuccess({super.key});
@@ -120,17 +123,29 @@ class _AccountDeleteSuccessState extends State<AccountDeleteSuccess> with Single
                 padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 9),
                 child: customButton(
                   text: 'CREATE ACCOUNT'.tr(),
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
+                  onPressed: ()async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+                    if (!context.mounted) return;
+                    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (context) => BlocProvider(
-                            create: (context) =>
-                            AuthenticationBloc()..add(const InitializeApp()),
-                            child: const Authentication()),
+                        builder: (_) => BlocProvider(
+                          create: (_) => LoginBloc()..add(AppVersionCheck()),
+                          child: const SplashScreen(),
+                        ),
                       ),
                           (Route<dynamic> route) => false,
                     );
+                    // Navigator.pushAndRemoveUntil(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => BlocProvider(
+                    //         create: (context) =>
+                    //         AuthenticationBloc()..add(const InitializeApp()),
+                    //         child: const Authentication()),
+                    //   ),
+                    //       (Route<dynamic> route) => false,
+                    // );
                   },
                   backgroundColor: COLORS.primary,
                   showIcon: false,

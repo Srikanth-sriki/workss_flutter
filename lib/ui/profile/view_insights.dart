@@ -403,7 +403,12 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                                 ),
                               )));
                 },
-                smartControlEnable: professionalData.user!.smartCallControl!,
+               // smartControlEnable: professionalData.user!.smartCallControl!,
+                smartControlEnable: isSmartControlEnabled(
+                  professionalData.user!.smartCallControl,
+                  professionalData.user!.smartCallSchedule,
+                ),
+
                 accountVerified: professionalData!.user!.isVerified!,
                 image: professionalData!.user!.profilePic!,
                 name: professionalData!.user!.name!,
