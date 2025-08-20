@@ -39,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   late final Widget _cachedProfileScreen;
 
   // keep tab widgets so they’re not rebuilt
-  late final List<Widget> _tabs;
+  late List<Widget> _tabs;
 
   // create blocs once (and dispose with the screen)
   late final FriendsBloc _friendsBlocForHome;
@@ -52,7 +52,13 @@ class _MainScreenState extends State<MainScreen> {
   late final FriendsBloc _friendsBlocForChat;
   late final ChartBloc _chartBloc;
 
+  // 🔔 focus notifier for the Chat tab
+  final ValueNotifier<bool> _chatFocus = ValueNotifier<bool>(false);
+
   bool _routeArgsApplied = false;
+
+  // computed index for Chat tab depending on profileCompleted
+  int get _chatTabIndex => Config.profileCompleted ? 3 : 2;
 
   @override
   void initState() {
@@ -62,7 +68,8 @@ class _MainScreenState extends State<MainScreen> {
       initializeNotifications(context);
       // read route args once, after first frame
       if (!_routeArgsApplied) {
-        final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+        final args =
+            ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
         if (args != null && args.containsKey('selectedIndex')) {
           final idx = args['selectedIndex'] as int? ?? 0;
           if (idx != _selectedIndex) {
@@ -71,6 +78,9 @@ class _MainScreenState extends State<MainScreen> {
         }
         _routeArgsApplied = true;
       }
+
+      // set initial focus state
+      _chatFocus.value = (_selectedIndex == _chatTabIndex);
     });
 
     // create blocs ONCE
@@ -78,28 +88,36 @@ class _MainScreenState extends State<MainScreen> {
       ..add(FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''));
     _homeBloc = HomeBloc()
       ..add(FetchHomeScreenEvent(
-        page: 1, pageSize: 10, keyWord: '',
-        profession: '', city: '', gender: '',
-        currentLongitude: '', currentLatitude: '',
-        knownLanguages: [], experienceLevel: '',
+        page: 1,
+        pageSize: 10,
+        keyWord: '',
+        profession: '',
+        city: '',
+        gender: '',
+        currentLongitude: '',
+        currentLatitude: '',
+        knownLanguages: [],
+        experienceLevel: '',
       ));
 
     _friendsBlocForPros = FriendsBloc()
       ..add(FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''));
     _professionalBloc = ProfessionalBloc()
       ..add(ProfessionalListEvent(
-        page: 1, pageSize: 10, keyWord: '',
-        profession: '', city: '', gender: '',
-        currentLongitude: '', currentLatitude: '',
+        page: 1,
+        pageSize: 10,
+        keyWord: '',
+        profession: '',
+        city: '',
+        gender: '',
+        currentLongitude: '',
+        currentLatitude: '',
         knownLanguages: [],
       ));
 
     _friendsBlocForChat = FriendsBloc()
       ..add(FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''));
     _chartBloc = ChartBloc();
-    // NOTE: let ChatMainScreen trigger its own initial fetch in its initState,
-    // or if you prefer to do it here, do it ONCE:
-    // _chartBloc..add(const ChartListEvent())..add(const RequestedChartListEvent());
 
     // cache profile
     _cachedProfileScreen = BlocProvider(
@@ -124,7 +142,9 @@ class _MainScreenState extends State<MainScreen> {
       providers: [
         BlocProvider.value(value: _friendsBlocForPros),
         BlocProvider.value(value: _professionalBloc),
-        BlocProvider(create: (_) => ChartBloc()), // if Professionals needs ChartBloc separately
+        BlocProvider(
+            create: (_) =>
+                ChartBloc()), // if Professionals needs ChartBloc separately
       ],
       child: const ProfessionalsScreen(),
     );
@@ -136,23 +156,23 @@ class _MainScreenState extends State<MainScreen> {
         BlocProvider.value(value: _friendsBlocForChat),
         BlocProvider.value(value: _chartBloc),
       ],
-      child: const ChatMainScreen(), // this screen now won’t be recreated
+      // 👇 pass the focus notifier to the chat tab
+      child: ChatMainScreen(chatFocus: _chatFocus),
     );
 
-    // order depends on profileCompleted, but we can assemble consistently:
     if (Config.profileCompleted) {
       return [
-        homeTab,       // 0
-        prosTab,       // 1
-        postWorkTab,   // 2
-        chatTab,       // 3
+        homeTab, // 0
+        prosTab, // 1
+        postWorkTab, // 2
+        chatTab, // 3
         _cachedProfileScreen, // 4
       ];
     } else {
       return [
-        homeTab,              // 0
-        prosTab,              // 1
-        chatTab,              // 2  (no post work)
+        homeTab, // 0
+        prosTab, // 1
+        chatTab, // 2  (no post work)
         _cachedProfileScreen, // 3
       ];
     }
@@ -166,21 +186,30 @@ class _MainScreenState extends State<MainScreen> {
     _professionalBloc.close();
     _friendsBlocForChat.close();
     _chartBloc.close();
+    _chatFocus.dispose();
     super.dispose();
   }
 
   void _onItemTapped(int index) {
     if (index == _selectedIndex) return; // guard: no-op if same tab tapped
     setState(() => _selectedIndex = index);
+    // update focus state for chat tab
+    _chatFocus.value = (index == _chatTabIndex);
+    // optional: clear red dot when user navigates to chat
+    if (index == _chatTabIndex) {
+      Config.chatHasNewMessage.value = false;
+    }
   }
 
   Future<bool> _handlePop() async {
     if (_selectedIndex != 0) {
       setState(() => _selectedIndex = 0);
+      _chatFocus.value = (_selectedIndex == _chatTabIndex);
       return false;
     } else {
       final now = DateTime.now();
-      if (_lastPressed == null || now.difference(_lastPressed!) > const Duration(seconds: 2)) {
+      if (_lastPressed == null ||
+          now.difference(_lastPressed!) > const Duration(seconds: 2)) {
         _lastPressed = now;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -226,12 +255,14 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/work_01.png'),
               label: 'Works'.tr(),
-              activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/work_select_01.png'),
+              activeIcon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/work_select_01.png'),
             ),
             BottomNavigationBarItem(
               icon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop_01.png'),
               label: 'Pros'.tr(),
-              activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/prop_select_01.png'),
+              activeIcon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/prop_select_01.png'),
             ),
             if (Config.profileCompleted)
               BottomNavigationBarItem(
@@ -243,7 +274,8 @@ class _MainScreenState extends State<MainScreen> {
                   color: COLORS.neutralDarkOne,
                 ),
                 label: 'Post Works'.tr(),
-                activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/add_post_select.png'),
+                activeIcon: bottomTabIcon(
+                    icon: 'assets/images/bottom_tab/add_post_select.png'),
               ),
             BottomNavigationBarItem(
               icon: ValueListenableBuilder<bool>(
@@ -256,9 +288,10 @@ class _MainScreenState extends State<MainScreen> {
                         top: 0,
                         right: 0,
                         child: Container(
-                          width: SizeConfig.blockWidth * 3,
-                          height: SizeConfig.blockWidth * 3,
-                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                          width: SizeConfig.blockWidth * 2.5,
+                          height: SizeConfig.blockWidth * 2.5,
+                          decoration: const BoxDecoration(
+                              color: COLORS.semantic, shape: BoxShape.circle),
                         ),
                       ),
                   ],
@@ -269,21 +302,29 @@ class _MainScreenState extends State<MainScreen> {
                 valueListenable: Config.chatHasNewMessage,
                 builder: (context, hasNewMessage, _) => Stack(
                   children: [
-                    bottomTabIcon(icon: 'assets/images/bottom_tab/chart_select.png'),
+                    bottomTabIcon(
+                        icon: 'assets/images/bottom_tab/chart_select.png'),
                     if (hasNewMessage)
                       Positioned(
                         top: 0,
                         right: 0,
-                        child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle)),
+                        child: Container(
+                            width: SizeConfig.blockWidth * 2,
+                            height: SizeConfig.blockWidth * 2,
+                            decoration: const BoxDecoration(
+                                color: COLORS.semantic,
+                                shape: BoxShape.circle)),
                       ),
                   ],
                 ),
               ),
             ),
             BottomNavigationBarItem(
-              icon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile_01.png'),
+              icon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/profile_01.png'),
               label: 'Account'.tr(),
-              activeIcon: bottomTabIcon(icon: 'assets/images/bottom_tab/profile_select_01.png'),
+              activeIcon: bottomTabIcon(
+                  icon: 'assets/images/bottom_tab/profile_select_01.png'),
             ),
           ],
           currentIndex: _selectedIndex,

@@ -21,6 +21,7 @@ import 'package:works_app/ui/friends/friends_search.dart';
 import 'package:works_app/ui/home/component.dart';
 
 import '../../bloc/chart/chart_bloc.dart';
+import '../../bloc/notification/notification_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
@@ -31,13 +32,17 @@ import '../../global_helper/popup.dart';
 import '../../helper/socket_service.dart';
 import '../../models/chat/charts_list_modal.dart';
 import '../../models/friends/friends_search_list_modal.dart';
+import '../home/notification_list.dart';
 import '../onboarding/select_user_type.dart';
 import '../profile/notification.dart';
 import 'addFriends.dart';
 import 'blocked_chat_list.dart';
 
+
 class ChatMainScreen extends StatefulWidget {
-  const ChatMainScreen({super.key});
+  const ChatMainScreen({super.key, required this.chatFocus});
+
+  final ValueNotifier<bool> chatFocus;
 
   @override
   State<ChatMainScreen> createState() => _ChatMainScreenState();
@@ -94,6 +99,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
 
     _connectToSocket();
 
+    // focus listener from tab
+    widget.chatFocus.addListener(_onTabFocusChanged);
+
     // initial fetch once after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) => _fetchData());
   }
@@ -102,53 +110,63 @@ class _ChatMainScreenState extends State<ChatMainScreen>
   void dispose() {
     _mounted = false;
     _refreshThrottle?.cancel();
-    socket
-      ..off('connect')
-      ..off('connect_error')
-      ..off('reconnect')
-      ..off('disconnect')
-      ..off('new_message')
-      ..disconnect();
+
+    widget.chatFocus.removeListener(_onTabFocusChanged);
+
+    // socket
+    //   ..off('connect')
+    //   ..off('connect_error')
+    //   ..off('reconnect')
+    //   ..off('disconnect')
+    //   ..off('new_message')
+    //   ..disconnect();
 
     _scrollController.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // leave empty to avoid duplicate fetches
+  void _onTabFocusChanged() {
+    if (widget.chatFocus.value) {
+      // tab became visible → light refresh + clear red dot
+      if (!_bgLoading) setState(() => _bgLoading = true);
+      _fetchData(background: true);
+      Config.chatHasNewMessage.value = false;
+    }
   }
 
   // ========== SOCKET ==========
 
   void _connectToSocket() {
+    // autoConnect is true; no explicit connect needed.
+    socket.on('connect', (_) {
+      // join room if backend expects it
+      socket.emit('join', {'userId': Config.id});
+    });
 
-    socket.connect();
-
-    // socket.on('connect', (_) {
-    //   debugPrint('[socket] connected: ${socket.id}');
-    //   socket.emit('join', {'userId': Config.id}); // adjust if your backend needs different key
-    // });
-    //
-    // socket.on('connect_error', (e) => debugPrint('[socket] connect_error: $e'));
-    // socket.on('reconnect', (attempt) {
-    //   debugPrint('[socket] reconnect: $attempt');
-    //   socket.emit('join', {'userId': Config.id});
-    // });
-    // socket.on('disconnect', (reason) => debugPrint('[socket] disconnected: $reason'));
+    socket.on('connect_error', (e) => debugPrint('[socket] connect_error: $e'));
+    socket.on('reconnect', (attempt) {
+      debugPrint('[socket] reconnect: $attempt');
+      socket.emit('join', {'userId': Config.id});
+    });
+    socket.on('disconnect', (reason) => debugPrint('[socket] disconnected: $reason'));
 
     socket.on('new_message', (data) {
-      print(data);
-      _fetchData(background: true);
       if (!_mounted) return;
-      // 1) apply locally → instant UI
+
+      // 1) apply locally → instant UI (optimistic)
       _applyIncomingMessage(data);
-      // 2) reconcile in background (no big loader)
+
+      // 2) one throttled fetch (no immediate + delayed double)
       _refreshThrottle?.cancel();
-      _refreshThrottle = Timer(const Duration(milliseconds: 800), () {
+      _refreshThrottle = Timer(const Duration(milliseconds: 600), () {
         _fetchData(background: true);
       });
+
+      // slim bar
+      if (!_bgLoading) setState(() => _bgLoading = true);
+
+      // show red dot on tab
+      Config.chatHasNewMessage.value = true;
     });
   }
 
@@ -189,7 +207,6 @@ class _ChatMainScreenState extends State<ChatMainScreen>
           _allChats.removeAt(idx);
           _allChats.insert(0, item);
 
-          // show slim bar only (no big spinner)
           if (!_bgLoading) _bgLoading = true;
         });
       } else {
@@ -246,6 +263,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
       onTap: () {
         if (sel) return;
         setState(() => _selectedTab = label);
+
+        // 🔁 Light refresh on tab switch (helps Requests/Groups stay fresh)
+        _fetchData(background: true);
       },
       child: Container(
         padding: EdgeInsets.symmetric(
@@ -284,6 +304,72 @@ class _ChatMainScreenState extends State<ChatMainScreen>
         backgroundColor: COLORS.white,
         titleColors: COLORS.neutralDark,
         actions: [
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) => NotificationBloc()
+                          ..add(const FetchNotificationList()),
+                      ),
+                      BlocProvider(
+                        create: (context) => ShowInterestedBloc(),
+                      ),
+                      BlocProvider(
+                        create: (context) => ChartBloc(),
+                      ),
+                      BlocProvider(
+                        create: (context) => FriendsBloc()
+                          ..add(
+                            FetchFriendsRequestListEvent(
+                              page: 1,
+                              pageSize: 10,
+                              keyWord: '',
+                            ),
+                          ),
+                      ),
+                    ],
+                    child: const NotificationListScreen(),
+                  ),
+                ),
+              );
+            },
+            borderRadius:
+            BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+            child: Stack(
+              children: [
+                Image.asset(
+                  'assets/images/home/notification.png',
+                  width: SizeConfig.blockWidth * 5.5,
+                  height: SizeConfig.blockWidth * 5.5,
+                  fit: BoxFit.contain,
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: Config.notificationReceiveMessage,
+                  builder: (context, hasNewMessage, _) {
+                    return hasNewMessage
+                        ? Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        width: SizeConfig.blockWidth * 3,
+                        height: SizeConfig.blockWidth * 3,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    )
+                        : const SizedBox
+                        .shrink(); // Return empty widget if false
+                  },
+                ),
+              ],
+            ),
+          ),
           IconButton(
             icon: Icon(Icons.more_vert,
                 color: COLORS.black, size: SizeConfig.blockWidth * 6.5),
@@ -300,7 +386,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               if (state is FriendsListSuccess) {
                 setState(() {
                   _friends = state.friendsSearchList;
-                  _friendCount = state.friendsSearchList.length ?? 0;
+                  _friendCount = state.friendsSearchList.length; // ✅ length is never null
                 });
               }
             },
@@ -311,12 +397,43 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               if (state is ChartListSuccess) {
                 setState(() {
                   _allChats = state.chatList;
+
+                  // ✅ Reconcile optimistic overlay with server truth
+                  for (final c in _allChats) {
+                    final o = _overlay[c.chatId];
+                    if (o != null) {
+                      // If server has data, clear unreadDelta and overrides
+                      _overlay[c.chatId!] = o.copyWith(
+                        unreadDelta: 0,
+                        latestPreview: null,
+                        updatedAt: null,
+                        nameOverride: null,
+                        pictureOverride: null,
+                      );
+                    }
+                  }
+
                   _bgLoading = false;
                   _hasLoadedOnce = true;
                 });
               } else if (state is RequestedChartListSuccess) {
                 setState(() {
                   _requests = state.chatList;
+
+                  // Also reconcile any overlays for requests if shared ids
+                  for (final c in _requests) {
+                    final o = _overlay[c.chatId];
+                    if (o != null) {
+                      _overlay[c.chatId!] = o.copyWith(
+                        unreadDelta: 0,
+                        latestPreview: null,
+                        updatedAt: null,
+                        nameOverride: null,
+                        pictureOverride: null,
+                      );
+                    }
+                  }
+
                   _bgLoading = false;
                   _hasLoadedOnce = true;
                 });
@@ -512,8 +629,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                                       // ✅ safe unread cast (fixes Object + int)
                                       final baseUnread = int.tryParse(
                                         chat.unreadCount?.toString() ?? '0',
-                                      ) ??
-                                          0;
+                                      ) ?? 0;
                                       final unread = baseUnread + (o?.unreadDelta ?? 0);
 
                                       final picture = o?.pictureOverride ?? chat.picture!;
@@ -651,6 +767,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
       final o = _overlay[chat.chatId!];
       if (o != null) _overlay[chat.chatId!] = o.copyWith(unreadDelta: 0);
     });
+
+    // remove red dot once user is inside chat tab
+    Config.chatHasNewMessage.value = false;
 
     Navigator.push(
       context,

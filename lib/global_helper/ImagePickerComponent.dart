@@ -88,11 +88,11 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: COLORS.primary,
+                              color: COLORS.primaryOne,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
                               BorderRadius.circular(SizeConfig.blockWidth * 3),
-                          color: COLORS.primaryOne.withOpacity(0.5),
+                          color: COLORS.primaryOne.withOpacity(0.3),
                         ),
                         width: SizeConfig.blockWidth * 30,
                         height: SizeConfig.blockWidth * 30,
@@ -100,13 +100,12 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_camera_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
-                            ),
+                          Image.asset('assets/images/profile/camera_icon.png',
+                          width: SizeConfig.blockWidth*6,
+                            height:SizeConfig.blockWidth*6 ,
+                          ),
                             SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
+                              height: SizeConfig.blockHeight * 1,
                             ),
                             Text(
                               'Camera'.tr(),
@@ -138,7 +137,7 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: COLORS.primary,
+                              color: COLORS.primaryOne,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
                               BorderRadius.circular(SizeConfig.blockWidth * 3),
@@ -150,13 +149,12 @@ class _ImagePickerComponentState extends State<ImagePickerComponent> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
+                            Image.asset('assets/images/profile/gallery_icon.png',
+                              width: SizeConfig.blockWidth*6,
+                              height:SizeConfig.blockWidth*6 ,
                             ),
                             SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
+                              height: SizeConfig.blockHeight * 1,
                             ),
                             Text('Gallery'.tr(),
                                 style: TextStyle(
@@ -291,11 +289,11 @@ class ImagePickerModal extends StatelessWidget {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: COLORS.primary,
+                              color: COLORS.primaryOne,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
                               BorderRadius.circular(SizeConfig.blockWidth * 3),
-                          color: COLORS.primaryOne.withOpacity(0.5),
+                          color: COLORS.primaryOne.withOpacity(0.3),
                         ),
                         width: SizeConfig.blockWidth * 30,
                         height: SizeConfig.blockWidth * 30,
@@ -303,13 +301,12 @@ class ImagePickerModal extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_camera_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
+                            Image.asset('assets/images/profile/camera_icon.png',
+                              width: SizeConfig.blockWidth*6,
+                              height:SizeConfig.blockWidth*6 ,
                             ),
                             SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
+                              height: SizeConfig.blockHeight * 1,
                             ),
                             Text(
                               'Camera'.tr(),
@@ -352,13 +349,12 @@ class ImagePickerModal extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
+                            Image.asset('assets/images/profile/gallery_icon.png',
+                              width: SizeConfig.blockWidth*6,
+                              height:SizeConfig.blockWidth*6 ,
                             ),
                             SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
+                              height: SizeConfig.blockHeight * 1,
                             ),
                             Text('Gallery'.tr(),
                                 style: TextStyle(
@@ -820,11 +816,11 @@ class _MultipleImagePickerComponentState
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: COLORS.primary,
+                              color: COLORS.primaryOne,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
                               BorderRadius.circular(SizeConfig.blockWidth * 3),
-                          color: COLORS.primaryOne.withOpacity(0.5),
+                          color: COLORS.primaryOne.withOpacity(0.3),
                         ),
                         width: SizeConfig.blockWidth * 30,
                         height: SizeConfig.blockWidth * 30,
@@ -832,13 +828,12 @@ class _MultipleImagePickerComponentState
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_camera_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
+                            Image.asset('assets/images/profile/camera_icon.png',
+                              width: SizeConfig.blockWidth*6,
+                              height:SizeConfig.blockWidth*6 ,
                             ),
                             SizedBox(
-                              width: SizeConfig.blockWidth * 2,
+                              height: SizeConfig.blockHeight * 1,
                             ),
                             Text(
                               'Camera'.tr(),
@@ -879,11 +874,11 @@ class _MultipleImagePickerComponentState
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(
-                              color: COLORS.primary,
+                              color: COLORS.primaryOne,
                               width: SizeConfig.blockWidth * 0.15),
                           borderRadius:
                               BorderRadius.circular(SizeConfig.blockWidth * 3),
-                          color: COLORS.primaryOne.withOpacity(0.5),
+                          color: COLORS.primaryOne.withOpacity(0.3),
                         ),
                         width: SizeConfig.blockWidth * 30,
                         height: SizeConfig.blockWidth * 30,
@@ -891,13 +886,12 @@ class _MultipleImagePickerComponentState
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
+                            Image.asset('assets/images/profile/gallery_icon.png',
+                              width: SizeConfig.blockWidth*6,
+                              height:SizeConfig.blockWidth*6 ,
                             ),
                             SizedBox(
-                              width: SizeConfig.blockWidth * 2,
+                              height: SizeConfig.blockHeight * 1,
                             ),
                             Text('Gallery'.tr(),
                                 style: TextStyle(
@@ -1168,6 +1162,177 @@ class _MultipleImagePickerComponentState
             );
           }
         },
+      ),
+    );
+  }
+}
+
+
+
+
+class GroupIconPickerModal extends StatelessWidget {
+  final ValueChanged<File?> onPick;
+
+  const GroupIconPickerModal({super.key, required this.onPick});
+
+  void _showPicker(BuildContext context) {
+    showModalBottomSheet(
+      backgroundColor: COLORS.white,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+          topRight: Radius.circular(SizeConfig.blockWidth * 5),
+        ),
+      ),
+      builder: (BuildContext context) {
+        Widget tile({
+          required String icon,
+          required String label,
+          required VoidCallback onTap,
+          Color? iconColor,
+          Color? borderColor,
+          Color? bgColor,
+        }) {
+          return InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+            child: Container(
+              alignment: Alignment.center,
+              width: SizeConfig.blockWidth * 25,
+              height: SizeConfig.blockWidth * 25,
+              decoration: BoxDecoration(
+                color: COLORS.primaryOne.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(icon, color: iconColor, width: SizeConfig.blockWidth * 5, height: SizeConfig.blockWidth * 5),
+                  SizedBox(height: SizeConfig.blockWidth * 2),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.5,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          padding: EdgeInsets.only(
+            left: SizeConfig.blockWidth * 5,
+            right: SizeConfig.blockWidth * 5,
+            top: SizeConfig.blockHeight * 1.5,
+            bottom: SizeConfig.blockHeight * 3,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Group Icon'.tr(),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 4,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: COLORS.black,
+                      size: SizeConfig.blockWidth * 5,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              Divider(
+                color: COLORS.neutralDarkTwo,
+                thickness: SizeConfig.blockHeight * 0.15,
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 2.5),
+              // Options
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  tile(
+                    icon: 'assets/images/profile/camera_icon.png',
+                    label: 'Camera'.tr(),
+                    onTap: () async {
+                      final picked = await ImagePicker().pickImage(source: ImageSource.camera);
+                      if (picked != null) onPick(File(picked.path));
+                      FocusScope.of(context).unfocus();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  tile(
+                    icon: 'assets/images/profile/gallery_icon.png',
+                    label: 'Gallery'.tr(),
+                    onTap: () async {
+                      final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+                      if (picked != null) onPick(File(picked.path));
+                      FocusScope.of(context).unfocus();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  tile(
+                    icon: 'assets/images/profile/delete.png',
+                    label: 'Delete'.tr(),
+                    iconColor: COLORS.semantic,
+                    borderColor: COLORS.semantic,
+                    bgColor: COLORS.semantic.withOpacity(0.06),
+                    onTap: () {
+                      onPick(null); // send null to clear on server
+                      FocusScope.of(context).unfocus();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Future.delayed(const Duration(seconds: 2), () {
+         // final currentFocus = FocusScope.of(context);
+          // if (!currentFocus.hasPrimaryFocus) currentFocus.unfocus();
+        });
+        _showPicker(context);
+      },
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(SizeConfig.blockWidth * 3.5),
+        bottomRight: Radius.circular(SizeConfig.blockWidth * 3.5),
+      ),
+      child: Container(
+        width: SizeConfig.blockWidth * 10,
+        height: SizeConfig.blockWidth * 10,
+        decoration: BoxDecoration(
+          color: COLORS.primary,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(SizeConfig.blockWidth * 3.5),
+            bottomRight: Radius.circular(SizeConfig.blockWidth * 3.5),
+          ),
+        ),
+        child: Icon(Icons.edit, color: COLORS.white, size: SizeConfig.blockWidth * 5.5),
       ),
     );
   }

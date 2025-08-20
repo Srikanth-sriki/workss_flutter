@@ -10,6 +10,7 @@ import 'package:works_app/global_helper/helper_function.dart';
 import 'package:works_app/ui/chat/addFriends.dart';
 import 'package:works_app/ui/chat/component.dart';
 import 'package:works_app/ui/chat/groupmemeber_list.dart';
+import 'package:works_app/ui/chat/modal/delete_leave_group.dart';
 import 'package:works_app/ui/chat/modal/editGroupDescripation.dart';
 import 'package:works_app/ui/chat/modal/editGroupName.dart';
 import 'package:works_app/ui/chat/remove_friends.dart';
@@ -450,6 +451,37 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                           },
                         )
                       ],
+                      if(isCurrentUserAdmin) ...[
+                        BottomSheetItem(
+                          title: 'Delete Group',
+                          onTap: () => {
+                            showMaterialModalBottomSheet(
+                              enableDrag: true,
+                              expand: false,
+                              isDismissible: true,
+                              backgroundColor: COLORS.white,
+                              context: context,
+                              closeProgressThreshold: 0,
+                              duration: const Duration(seconds: 0),
+                              useRootNavigator: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                              ),
+                              builder: (context) => BlocProvider(
+                                create: (context) => ChartBloc(),
+                                child: DeleteGroupModal(
+                                  buttonText: 'DELETE',
+                                  header:
+                                  'Are you sure you want to \n delete the group?',
+                                  chatId: chatViewGroupInfo!.id!,
+                                  isGroup:chatViewGroupInfo.isGroup!
+                                ),
+                              ),
+                            ),
+                          },
+                        ),
+                  ]
                     ],
                   );
                 },
@@ -954,9 +986,137 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
     );
   }
 
+  // Widget _buildProfilePicture() {
+  //   return Column(
+  //     mainAxisAlignment: MainAxisAlignment.start,
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       if (_profileImage == null && profilePic.isEmpty) ...[
+  //         ImagePickerComponent(
+  //           onImageSelected: (File image) {
+  //             setState(() {
+  //               profilePic = '';
+  //               _profileImage = image;
+  //             });
+  //             initialRegisterBloc
+  //                 .add(UploadImageEvent(imagePath: _profileImage!));
+  //           },
+  //         ),
+  //       ] else if (_profileImage != null) ...[
+  //         Stack(
+  //           children: [
+  //             Container(
+  //               height: SizeConfig.blockWidth * 32,
+  //               width: SizeConfig.blockWidth * 34,
+  //               decoration: BoxDecoration(
+  //                 border: Border.all(
+  //                   color: COLORS.primary,
+  //                   width: SizeConfig.blockWidth * 0.5,
+  //                 ),
+  //                 image: DecorationImage(
+  //                   image: FileImage(
+  //                     File(_profileImage!.path),
+  //                   ),
+  //                   fit: BoxFit.fill,
+  //                 ),
+  //                 borderRadius:
+  //                     BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+  //               ),
+  //             ),
+  //             // Image picker modal for changing the image
+  //             Positioned(
+  //               bottom: 0,
+  //               right: 0,
+  //               child: ImagePickerModal(
+  //                 onImageSelected: (File image) {
+  //                   setState(() {
+  //                     _profileImage = image;
+  //                     profilePic = '';
+  //                   });
+  //                   initialRegisterBloc
+  //                       .add(UploadImageEvent(imagePath: _profileImage!));
+  //                 },
+  //               ),
+  //             )
+  //           ],
+  //         ),
+  //       ] else if (profilePic.isNotEmpty) ...[
+  //         Stack(
+  //           children: [
+  //             Container(
+  //               height: SizeConfig.blockWidth * 30,
+  //               width: SizeConfig.blockWidth * 30,
+  //               decoration: BoxDecoration(
+  //                 border: Border.all(
+  //                   color: COLORS.primary,
+  //                   width: SizeConfig.blockWidth * 0.25,
+  //                 ),
+  //                 image: DecorationImage(
+  //                   image: NetworkImage(profilePic),
+  //                   fit: BoxFit.fill,
+  //                 ),
+  //                 borderRadius:
+  //                     BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+  //               ),
+  //             ),
+  //             // Image picker modal for changing the image
+  //             Positioned(
+  //               bottom: 0,
+  //               right: 0,
+  //               child: ImagePickerModal(
+  //                 onImageSelected: (File image) {
+  //                   setState(() {
+  //                     _profileImage = image;
+  //                     profilePic = '';
+  //                   });
+  //                 },
+  //               ),
+  //             )
+  //           ],
+  //         ),
+  //       ],
+  //       SizedBox(height: SizeConfig.blockHeight * 2),
+  //     ],
+  //   );
+  // }
+
   Widget _buildProfilePicture() {
+    void handlePick(File? file) {
+      setState(() {
+        _profileImage = file;   // null on Delete
+        profilePic = '';        // clear URL
+      });
+
+      if (file != null) {
+        initialRegisterBloc.add(UploadImageEvent(imagePath: file)); // no bang
+      } else {
+        // your delete flow
+        chartBloc.add(EditGroupChatProfileEvent(
+          picture: "",  // tell server to clear
+          name: chatViewGroupInfo.name!,
+          description: chatViewGroupInfo.description!,
+          chatId: chatViewGroupInfo.id!,
+          onSuccess: (message) {
+            setState(() {
+              _refreshPageAfterEdit();
+              showCustomSnackBar(
+                context: context,
+                message: message,
+                backgroundColor: COLORS.neutralDarkTwo,
+              );
+            });
+          },
+          onError: (message) {
+            showCustomSnackBar(
+              context: context,
+              message: 'Something Went wrong',
+            );
+          },
+        ));
+      }
+    }
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (_profileImage == null && profilePic.isEmpty) ...[
@@ -966,8 +1126,7 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                 profilePic = '';
                 _profileImage = image;
               });
-              initialRegisterBloc
-                  .add(UploadImageEvent(imagePath: _profileImage!));
+              initialRegisterBloc.add(UploadImageEvent(imagePath: _profileImage!));
             },
           ),
         ] else if (_profileImage != null) ...[
@@ -977,35 +1136,12 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                 height: SizeConfig.blockWidth * 32,
                 width: SizeConfig.blockWidth * 34,
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: COLORS.primary,
-                    width: SizeConfig.blockWidth * 0.5,
-                  ),
-                  image: DecorationImage(
-                    image: FileImage(
-                      File(_profileImage!.path),
-                    ),
-                    fit: BoxFit.fill,
-                  ),
-                  borderRadius:
-                      BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                  border: Border.all(color: COLORS.primary, width: SizeConfig.blockWidth * 0.5),
+                  image: DecorationImage(image: FileImage(File(_profileImage!.path)), fit: BoxFit.fill),
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                 ),
               ),
-              // Image picker modal for changing the image
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: ImagePickerModal(
-                  onImageSelected: (File image) {
-                    setState(() {
-                      _profileImage = image;
-                      profilePic = '';
-                    });
-                    initialRegisterBloc
-                        .add(UploadImageEvent(imagePath: _profileImage!));
-                  },
-                ),
-              )
+              Positioned(bottom: 0, right: 0, child: GroupIconPickerModal(onPick: handlePick)),
             ],
           ),
         ] else if (profilePic.isNotEmpty) ...[
@@ -1015,31 +1151,12 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
                 height: SizeConfig.blockWidth * 30,
                 width: SizeConfig.blockWidth * 30,
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: COLORS.primary,
-                    width: SizeConfig.blockWidth * 0.25,
-                  ),
-                  image: DecorationImage(
-                    image: NetworkImage(profilePic),
-                    fit: BoxFit.fill,
-                  ),
-                  borderRadius:
-                      BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                  border: Border.all(color: COLORS.primary, width: SizeConfig.blockWidth * 0.25),
+                  image: DecorationImage(image: NetworkImage(profilePic), fit: BoxFit.fill),
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                 ),
               ),
-              // Image picker modal for changing the image
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: ImagePickerModal(
-                  onImageSelected: (File image) {
-                    setState(() {
-                      _profileImage = image;
-                      profilePic = '';
-                    });
-                  },
-                ),
-              )
+              Positioned(bottom: 0, right: 0, child: GroupIconPickerModal(onPick: handlePick)),
             ],
           ),
         ],
@@ -1047,4 +1164,5 @@ class _ChatProfileViewScreenState extends State<ChatProfileViewScreen> {
       ],
     );
   }
+
 }

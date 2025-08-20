@@ -81,8 +81,8 @@ class _FaqScreenState extends State<FaqScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      height: SizeConfig.blockHeight * 60,
+                    Container(
+                      height: SizeConfig.blockHeight * 72,
                       child: ListView.builder(
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,
@@ -182,7 +182,7 @@ class _FaqItemState extends State<FaqItem> {
           fontFamily: "Poppins",
         ),
       ),
-      trailing: Icon(_isExpanded ? Icons.close : Icons.add),
+      trailing: Icon(_isExpanded ? Icons.close : Icons.add,size: SizeConfig.blockHeight*3,),
       initiallyExpanded: _isExpanded,
       onExpansionChanged: (expanded) {
         setState(() {

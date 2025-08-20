@@ -328,33 +328,39 @@ class _AddressListModalBottomSheetState
                                                               addressItem),
                                                         )));
                                           },
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              Image.asset(
-                                                'assets/images/profile/edit.png',
-                                                width:
-                                                SizeConfig.blockWidth * 4,
-                                                height:
-                                                SizeConfig.blockWidth *
-                                                    4,
-                                                fit: BoxFit.contain,
-                                              ),
-                                              SizedBox(width: SizeConfig.blockWidth,),
-                                              Text(
-                                                'EDIT'.tr(),
-                                                style: TextStyle(
-                                                  fontSize: SizeConfig
-                                                      .blockWidth *
-                                                      3,
-                                                  fontWeight:
-                                                  FontWeight.w500,
-                                                  fontFamily: "Poppins",
-                                                  color: COLORS.accent,
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              top: SizeConfig.blockHeight,
+                                              bottom: SizeConfig.blockHeight
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Image.asset(
+                                                  'assets/images/profile/edit.png',
+                                                  width:
+                                                  SizeConfig.blockWidth * 4,
+                                                  height:
+                                                  SizeConfig.blockWidth *
+                                                      4,
+                                                  fit: BoxFit.contain,
                                                 ),
-                                              )
-                                            ],
+                                                SizedBox(width: SizeConfig.blockWidth,),
+                                                Text(
+                                                  'EDIT'.tr(),
+                                                  style: TextStyle(
+                                                    fontSize: SizeConfig
+                                                        .blockWidth *
+                                                        3,
+                                                    fontWeight:
+                                                    FontWeight.w500,
+                                                    fontFamily: "Poppins",
+                                                    color: COLORS.accent,
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       )

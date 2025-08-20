@@ -136,7 +136,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
           return Container(
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.blockWidth * 4.5,
-                vertical: SizeConfig.blockHeight * 0.5),
+                vertical: SizeConfig.blockHeight * 1.5),
             child: buildProfessionalCard(
                 accountVerified: professionalData!.isVerified!,
                 image: professionalData!.profilePic!,

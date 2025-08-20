@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:works_app/helper/custom_log.dart';
+import '../../core/intercepted_client.dart';
 import '../../dao/home_dao.dart';
 import '../../dao/profile_dao.dart';
 import '../../models/dropDown_modal.dart';
@@ -74,6 +75,7 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
@@ -97,6 +99,7 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
 
       var response = await homeDao.uploadWorksPic(imagePath: event.imagePath);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String filePath = jsonDecoded["data"];
@@ -133,6 +136,7 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
           locality: event.locality);
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
@@ -176,9 +180,9 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
       emit(const FetchDropDownLoading());
       var response = await profileDao.fetchWorkPlace();
       customLog(response);
-
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
       if (response.statusCode == 200) {
-        Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
         if (jsonDecoded['status'] == true) {
           FetchDropDown fetchDropDown = FetchDropDown.fromJson(jsonDecoded);
           emit(FetchDropDownSuccess(

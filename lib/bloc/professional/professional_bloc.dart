@@ -7,6 +7,7 @@ import 'package:works_app/dao/home_dao.dart';
 import 'package:works_app/models/category_list_modal.dart';
 import 'package:works_app/models/professionals_list_model.dart';
 
+import '../../core/intercepted_client.dart';
 import '../../helper/custom_log.dart';
 import '../../models/professional_view_model.dart';
 
@@ -50,6 +51,7 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(jsonDecoded);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (jsonDecoded['status'] == true) {
         int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
@@ -90,6 +92,7 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
       var response = await homeDao.fetchProfessionalView(professionalId: event.professionalId);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
+      handleAuthFailure(response.statusCode, jsonDecoded);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         ProfessionalViewModel professionalViewModel;
         professionalViewModel = ProfessionalViewModel.fromJson(jsonDecoded["data"]);

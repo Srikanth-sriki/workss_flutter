@@ -357,6 +357,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                         friendId:
                                                             professional.id!,
                                                         onSuccess: (message) {
+                                                          Navigator.pop(context);
                                                           setState(() {
                                                             professional
                                                                     .isFriend =
@@ -365,7 +366,6 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                                     .friendRequestSent =
                                                                 null;
                                                             widget.refreshPageCallback();
-                                                            Navigator.pop(context);
                                                           });
                                                           showCustomSnackBar(
                                                               context: context,
@@ -389,12 +389,12 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                         userId:
                                                             professional.id!,
                                                         onSuccess: (message) {
+                                                          Navigator.pop(context);
                                                           setState(() {
                                                             professional.isFriend = null;
                                                             professional.friendRequestSent = null;
 
                                                             widget.refreshPageCallback();
-                                                            Navigator.pop(context);
                                                           });
                                                           showCustomSnackBar(
                                                             context: context,

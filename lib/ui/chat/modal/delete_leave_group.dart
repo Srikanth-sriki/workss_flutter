@@ -10,9 +10,11 @@ class DeleteGroupModal extends StatefulWidget {
   final String header;
   final String buttonText;
   final String chatId;
+  final bool isGroup;
+
 
   const DeleteGroupModal(
-      {super.key, required this.header, required this.buttonText,required this.chatId});
+      {super.key, required this.header, required this.buttonText,required this.chatId,required this.isGroup});
 
   @override
   _DeleteGroupModalState createState() => _DeleteGroupModalState();
@@ -82,25 +84,47 @@ class _DeleteGroupModalState extends State<DeleteGroupModal> {
                     customButton(
                       text: widget.buttonText.tr(),
                       onPressed: () {
-                        chartBloc.add(DeleteChartEvent(
-                            chatId: widget.chatId,
-                            onSuccess: (message) {
-                              showCustomSnackBar(
+                        if(widget.isGroup){
+                          chartBloc.add(DeleteGroupEvent(
+                              chatId: widget.chatId,
+                              onSuccess: (message) {
+                                showCustomSnackBar(
+                                    context: context,
+                                    message: message,
+                                    backgroundColor: COLORS.neutralDarkTwo);
+                                Navigator.pushNamed(
+                                  context,
+                                  '/main_screen',
+                                  arguments: {'selectedIndex': 3},
+                                );
+                              },
+                              onError: (message) {
+                                showCustomSnackBar(
                                   context: context,
                                   message: message,
-                                  backgroundColor: COLORS.neutralDarkTwo);
-                              Navigator.pushNamed(
-                                context,
-                                '/main_screen',
-                                arguments: {'selectedIndex': 3},
-                              );
-                            },
-                            onError: (message) {
-                              showCustomSnackBar(
-                                context: context,
-                                message: message,
-                              );
-                            }));
+                                );
+                              }));
+                        }else {
+                          chartBloc.add(DeleteChartEvent(
+                              chatId: widget.chatId,
+                              onSuccess: (message) {
+                                showCustomSnackBar(
+                                    context: context,
+                                    message: message,
+                                    backgroundColor: COLORS.neutralDarkTwo);
+                                Navigator.pushNamed(
+                                  context,
+                                  '/main_screen',
+                                  arguments: {'selectedIndex': 3},
+                                );
+                              },
+                              onError: (message) {
+                                showCustomSnackBar(
+                                  context: context,
+                                  message: message,
+                                );
+                              }));
+                        }
                       },
                       backgroundColor: COLORS.primary,
                       showIcon: false,

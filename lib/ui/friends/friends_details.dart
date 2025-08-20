@@ -1061,42 +1061,47 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                   SizedBox(height: SizeConfig.blockHeight * 2),
                                 ],
 
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: SizeConfig.blockHeight * 0.5),
-                                  child: Text(
-                                    'Bio'.tr(),
-                                    style: TextStyle(
-                                      color: COLORS.neutralDarkOne,
-                                      fontSize: SizeConfig.blockWidth * 3.4,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
+                                if(friendView.bio.isNotEmpty)...[
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: SizeConfig.blockHeight * 0.5),
+                                    child: Text(
+                                      'Bio'.tr(),
+                                      style: TextStyle(
+                                        color: COLORS.neutralDarkOne,
+                                        fontSize: SizeConfig.blockWidth * 3.4,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
+                                      ),
                                     ),
                                   ),
-                                ),
-                                ReadMoreText(
-                                  text: friendView.bio,
-                                ),
-                                const Divider(
-                                  color: COLORS.neutralDarkTwo,
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: SizeConfig.blockHeight * 0.5),
-                                  child: Text(
-                                    'Gallery'.tr(),
-                                    style: TextStyle(
-                                      color: COLORS.neutralDarkOne,
-                                      fontSize: SizeConfig.blockWidth * 3.6,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
+                                  ReadMoreText(
+                                    text: friendView.bio,
+                                  ),
+                                  const Divider(
+                                    color: COLORS.neutralDarkTwo,
+                                  )
+                                ],
+
+                                if(friendView.workImages.isNotEmpty)...[
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: SizeConfig.blockHeight * 0.5),
+                                    child: Text(
+                                      'Gallery'.tr(),
+                                      style: TextStyle(
+                                        color: COLORS.neutralDarkOne,
+                                        fontSize: SizeConfig.blockWidth * 3.6,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: "Poppins",
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(height: SizeConfig.blockHeight),
-                                DynamicGridExample(
-                                  imageUrls: friendView.workImages,
-                                ),
+                                  SizedBox(height: SizeConfig.blockHeight),
+                                  DynamicGridExample(
+                                    imageUrls: friendView.workImages,
+                                  )
+                                ],
                               ],
                             ),
                           ),

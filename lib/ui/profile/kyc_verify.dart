@@ -27,6 +27,7 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
   List<String> workImages = [];
   bool loading = false;
   late PostWorkBloc postWorkBloc;
+  final Set<String> _dispatchedLocalPaths = <String>{};
 
   @override
   void initState() {
@@ -35,25 +36,36 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
   }
 
   void _onImagesSelected(List<File> images) {
+    final desired = images.take(2).toList();
+
     setState(() {
-      _selectedImages = images;
+      _selectedImages = desired;
     });
 
-    for (final image in _selectedImages) {
-      postWorkBloc.add(UploadMultipleImageEvent(imagePath: image));
+    for (final f in desired) {
+      final path = f.path;
+      if (!_dispatchedLocalPaths.contains(path)) {
+        _dispatchedLocalPaths.add(path);
+        postWorkBloc.add(UploadMultipleImageEvent(
+          imagePath: f,
+        ));
+      }
     }
   }
+
 
   void _removeImage(int index) {
     setState(() {
       if (index >= 0 && index < _selectedImages.length) {
-        _selectedImages.removeAt(index);
+        final removed = _selectedImages.removeAt(index);
+        _dispatchedLocalPaths.remove(removed.path);
       }
       if (index < workImages.length) {
         workImages.removeAt(index);
       }
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +91,16 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
         listener: (context, state) {
           if (state is UploadMultipleImageSuccess) {
             FocusScope.of(context).unfocus();
+            if (workImages.contains(state.filePath)) return;
+            if (workImages.length >= 2) return;
+
             setState(() {
               workImages.add(state.filePath);
             });
           } else if (state is UploadImageFailed) {
             FocusScope.of(context).unfocus();
             setState(() => loading = false);
-            showCustomSnackBar(context: context, message: state.message);
+            showCustomSnackBar(context: context, message: state.message,backgroundColor: COLORS.semanticTwo);
           } else if (state is KycImageAddedSuccess) {
             if (mounted) {
               showCustomSnackBar(context: context, message: state.message);

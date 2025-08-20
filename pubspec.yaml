@@ -200,6 +200,8 @@ flutter:
      - assets/images/profile/kyc_verifying.png
      - assets/images/profile/kyc_success.png
      - assets/images/profile/verify.png
+     - assets/images/profile/camera_icon.png
+     - assets/images/profile/gallery_icon.png
 
 
   #   - images/a_dot_ham.jpeg

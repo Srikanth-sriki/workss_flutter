@@ -15,6 +15,7 @@ import 'package:works_app/models/setting_fetch_model.dart';
 
 import '../../components/config.dart';
 import '../../components/local_constant.dart';
+import '../../core/intercepted_client.dart';
 import '../../dao/profile_dao.dart';
 import '../../helper/custom_log.dart';
 import '../../models/fetch_profile_model.dart';
@@ -92,6 +93,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       var response = await profileDao.fetchProfile();
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         Config.phoneNumber = jsonDecoded["data"]["mobile"] ?? "";
@@ -160,6 +162,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(const ProfileLoading());
       var response = await profileDao.fetchPostedWork();
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         List<FetchPostedModel> fetchPostedModel = [];
@@ -186,6 +189,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(const ProfileLoading());
       var response = await profileDao.fetchInterestedWork();
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         List<FetchPostedModel> fetchPostedModel = [];
@@ -261,6 +265,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       );
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
 
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
@@ -325,6 +330,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(const PostedWorkViewLoading());
       var response = await profileDao.accountDelete(reason: event.reason);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      handleAuthFailure(response.statusCode, jsonDecoded);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
         event.onSuccess(message);
@@ -358,6 +364,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           groupAlert: event.groupAlert);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
+      handleAuthFailure(response.statusCode, jsonDecoded);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
         emit(NotificationSettingSuccess(message: message));
@@ -436,6 +443,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           message: event.message);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
+      handleAuthFailure(response.statusCode, jsonDecoded);
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
         emit(ContactUsSuccess(message: message));

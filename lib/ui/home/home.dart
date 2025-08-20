@@ -203,18 +203,59 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
-        child: Container(
-          width: SizeConfig.screenWidth,
-          padding: EdgeInsets.only(top: SizeConfig.blockHeight * 2),
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: MultiBlocListener(
-                      listeners: [
-                        BlocListener<HomeBloc, HomeState>(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _fetchData(isNewFetch: true); // your existing method
+
+          },
+          child: Container(
+            width: SizeConfig.screenWidth,
+            padding: EdgeInsets.only(top: SizeConfig.blockHeight * 2),
+            child: Stack(
+              children: [
+                Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(
+                      child: MultiBlocListener(
+                        listeners: [
+                          BlocListener<HomeBloc, HomeState>(
+                            listener: (context, state) {
+                              if (state is FetchHomeScreenSuccess) {
+                                setState(() {
+                                  if (currentPage == 1) {
+                                    homeFetchModel = state.homeFetchModel;
+                                  } else {
+                                    final newItems = state.homeFetchModel.where(
+                                        (item) => !homeFetchModel.contains(item));
+                                    homeFetchModel.addAll(newItems);
+                                  }
+                                  maxPageNumber = state.maxPageNumber;
+                                  isFetchingMore = false;
+                                });
+
+                                //context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
+                              } else if (state is FetchHomeScreenFailed) {
+                                setState(() {
+                                  isFetchingMore = false;
+                                });
+                              }
+                            },
+                          ),
+                          BlocListener<FriendsBloc, FriendsState>(
+                            listener: (context, state) {
+                              if (state is FriendsAddListSuccess) {
+                                setState(() {
+                                  searchFriendLists = state.searchFriendLists
+                                      .where((friend) => friend.isFriend == null)
+                                      .toList();
+                                  ;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                        child: BlocConsumer<HomeBloc, HomeState>(
                           listener: (context, state) {
                             if (state is FetchHomeScreenSuccess) {
                               setState(() {
@@ -228,117 +269,82 @@ class _HomeScreenState extends State<HomeScreen> {
                                 maxPageNumber = state.maxPageNumber;
                                 isFetchingMore = false;
                               });
-
-                              //context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
                             } else if (state is FetchHomeScreenFailed) {
                               setState(() {
                                 isFetchingMore = false;
                               });
                             }
                           },
-                        ),
-                        BlocListener<FriendsBloc, FriendsState>(
-                          listener: (context, state) {
-                            if (state is FriendsAddListSuccess) {
-                              setState(() {
-                                searchFriendLists = state.searchFriendLists
-                                    .where((friend) => friend.isFriend == null)
-                                    .toList();
-                                ;
+                          builder: (context, state) {
+                            if (state is HomeScreenLoading && currentPage == 1 ||
+                                state is HomeInitial) {
+                              return const ShimmerJobCards();
+                            } else if (state is FetchHomeScreenSuccess) {
+                              return _buildListView();
+                            } else if (state is FetchHomeScreenFailed) {
+                              return ErrorScreen(onRetry: () {
+                                context.read<HomeBloc>().add(FetchHomeScreenEvent(
+                                    page: currentPage,
+                                    pageSize: pageSize,
+                                    keyWord: "",
+                                    profession: "",
+                                    city: "",
+                                    gender: "",
+                                    currentLongitude: '',
+                                    currentLatitude: '',
+                                    knownLanguages: [],
+                                    experienceLevel: ''));
                               });
                             }
+                            return Container();
                           },
                         ),
-                      ],
-                      child: BlocConsumer<HomeBloc, HomeState>(
-                        listener: (context, state) {
-                          if (state is FetchHomeScreenSuccess) {
-                            setState(() {
-                              if (currentPage == 1) {
-                                homeFetchModel = state.homeFetchModel;
-                              } else {
-                                final newItems = state.homeFetchModel.where(
-                                    (item) => !homeFetchModel.contains(item));
-                                homeFetchModel.addAll(newItems);
-                              }
-                              maxPageNumber = state.maxPageNumber;
-                              isFetchingMore = false;
-                            });
-                          } else if (state is FetchHomeScreenFailed) {
-                            setState(() {
-                              isFetchingMore = false;
-                            });
-                          }
-                        },
-                        builder: (context, state) {
-                          if (state is HomeScreenLoading && currentPage == 1 ||
-                              state is HomeInitial) {
-                            return const ShimmerJobCards();
-                          } else if (state is FetchHomeScreenSuccess) {
-                            return _buildListView();
-                          } else if (state is FetchHomeScreenFailed) {
-                            return ErrorScreen(onRetry: () {
-                              context.read<HomeBloc>().add(FetchHomeScreenEvent(
-                                  page: currentPage,
-                                  pageSize: pageSize,
-                                  keyWord: "",
-                                  profession: "",
-                                  city: "",
-                                  gender: "",
-                                  currentLongitude: '',
-                                  currentLatitude: '',
-                                  knownLanguages: [],
-                                  experienceLevel: ''));
-                            });
-                          }
-                          return Container();
-                        },
                       ),
                     ),
-                  ),
-                ],
-              ),
-              // if (Config.profileCompleted) ...[
-              //   Positioned(
-              //     bottom: SizeConfig.blockHeight * 2.5,
-              //     right: SizeConfig.blockHeight * 4,
-              //     child: FloatingActionButton(
-              //         onPressed: () {
-              //           Navigator.push(
-              //               context,
-              //               MaterialPageRoute(
-              //                   builder: (context) => MultiBlocProvider(
-              //                         providers: [
-              //                           BlocProvider(
-              //                             create: (context) {
-              //                               final bloc = PostWorkBloc();
-              //                               bloc.add(
-              //                                   const FetchWorkPlaceEvent());
-              //                               bloc.add(
-              //                                   const FetchWorkKnownLanguageEvent());
-              //                               return bloc;
-              //                             },
-              //                           ),
-              //                           BlocProvider(
-              //                               create: (context) => ProfileBloc()),
-              //                           BlocProvider(
-              //                               create: (context) =>
-              //                                   ProfessionalBloc()),
-              //                         ],
-              //                         child: const PostWorkScreen(
-              //                           arrowBack: true,
-              //                         ),
-              //                       )));
-              //         },
-              //         backgroundColor: COLORS.primary,
-              //         child: Icon(
-              //           Icons.add,
-              //           color: COLORS.white,
-              //           size: SizeConfig.blockWidth * 6.5,
-              //         )),
-              //   )
-              // ]
-            ],
+                  ],
+                ),
+                // if (Config.profileCompleted) ...[
+                //   Positioned(
+                //     bottom: SizeConfig.blockHeight * 2.5,
+                //     right: SizeConfig.blockHeight * 4,
+                //     child: FloatingActionButton(
+                //         onPressed: () {
+                //           Navigator.push(
+                //               context,
+                //               MaterialPageRoute(
+                //                   builder: (context) => MultiBlocProvider(
+                //                         providers: [
+                //                           BlocProvider(
+                //                             create: (context) {
+                //                               final bloc = PostWorkBloc();
+                //                               bloc.add(
+                //                                   const FetchWorkPlaceEvent());
+                //                               bloc.add(
+                //                                   const FetchWorkKnownLanguageEvent());
+                //                               return bloc;
+                //                             },
+                //                           ),
+                //                           BlocProvider(
+                //                               create: (context) => ProfileBloc()),
+                //                           BlocProvider(
+                //                               create: (context) =>
+                //                                   ProfessionalBloc()),
+                //                         ],
+                //                         child: const PostWorkScreen(
+                //                           arrowBack: true,
+                //                         ),
+                //                       )));
+                //         },
+                //         backgroundColor: COLORS.primary,
+                //         child: Icon(
+                //           Icons.add,
+                //           color: COLORS.white,
+                //           size: SizeConfig.blockWidth * 6.5,
+                //         )),
+                //   )
+                // ]
+              ],
+            ),
           ),
         ),
       ),

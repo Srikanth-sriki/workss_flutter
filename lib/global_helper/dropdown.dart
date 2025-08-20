@@ -315,7 +315,16 @@ Widget buildDropdownTwo({
   FontWeight? fontWeight = FontWeight.w500,
 }) {
   final TextEditingController textEditingController = TextEditingController();
-  List<DropdownItemValue> filteredItems = items;
+  // List<DropdownItemValue> filteredItems = items;
+  // List<DropdownItemValue> filteredItems = [...items]
+  //   ..sort((a, b) => ascending
+  //       ? a.label.toLowerCase().compareTo(b.label.toLowerCase())
+  //       : b.label.toLowerCase().compareTo(a.label.toLowerCase()));
+  List<DropdownItemValue> filteredItems = [...items]
+    ..sort((a, b) =>
+         a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+
+
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,

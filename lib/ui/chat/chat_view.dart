@@ -782,6 +782,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                               header:
                                                   'Are you sure you want to \n delete the chat?',
                                               chatId: chatViewGroupInfo!.id!,
+                                              isGroup: chatViewGroupInfo!.isGroup,
                                             ),
                                           ),
                                         ),
@@ -1306,7 +1307,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                         : '',
                                                     isSender: true,
                                                   ),
-                                                  sendName: message.sender!.name!)
+                                                  sendName: widget.isGroup == true?message.sender!.name!:"")
                                             ]
                                           ],
                                         ],
