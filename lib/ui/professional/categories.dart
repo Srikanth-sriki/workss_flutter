@@ -54,38 +54,55 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                             Radius.circular(SizeConfig.blockWidth * 4)),
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                              vertical: SizeConfig.blockHeight * 2,
+                              vertical: SizeConfig.blockHeight * 1.5,
                               horizontal: SizeConfig.blockWidth * 5),
                           decoration: BoxDecoration(
                               color: COLORS.primaryOne.withOpacity(0.2),
                               borderRadius: BorderRadius.all(
                                   Radius.circular(SizeConfig.blockWidth * 4))),
                           margin: EdgeInsets.symmetric(
-                              vertical: SizeConfig.blockHeight),
+                              vertical: SizeConfig.blockHeight*0.8),
                           width: SizeConfig.blockWidth * 100,
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Container(
-                                width: SizeConfig.blockWidth * 18,
-                                height: SizeConfig.blockWidth * 18,
-                                margin: EdgeInsets.only(
-                                    right: SizeConfig.blockWidth * 4),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: COLORS.primaryOne.withOpacity(0.5),
-                                ),
-                                child: Center(
-                                  child: AspectRatio(
-                                    aspectRatio: 1 / 1.5,
-                                    child: Image.network(
-                                      widget.categoriesData[index].image,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              // Container(
+                              //   width: SizeConfig.blockWidth * 18,
+                              //   height: SizeConfig.blockWidth * 18,
+                              //   margin: EdgeInsets.only(
+                              //       right: SizeConfig.blockWidth * 4),
+                              //   decoration: BoxDecoration(
+                              //     shape: BoxShape.circle,
+                              //     color: COLORS.primaryOne.withOpacity(0.5),
+                              //   ),
+                              //   child: Center(
+                              //     child: AspectRatio(
+                              //       aspectRatio: 1 / 1.5,
+                              //       child: Image.network(
+                              //         widget.categoriesData[index].image,
+                              //         fit: BoxFit.contain,
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
+                          Container(
+                          width: SizeConfig.blockWidth * 19,
+                            height: SizeConfig.blockWidth * 19,
+                              margin: EdgeInsets.only(
+                                  right: SizeConfig.blockWidth * 4),
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: COLORS.primaryOne
+                                    .withOpacity(0.3),
+                                image: DecorationImage(image: NetworkImage(
+                                    widget.categoriesData[index]
+                                        .image,
+                                    scale: SizeConfig.blockWidth*1
+
+                                ))
+                            ),
+                          ),
                               SizedBox(
                                 height: SizeConfig.blockHeight * 0.5,
                               ),

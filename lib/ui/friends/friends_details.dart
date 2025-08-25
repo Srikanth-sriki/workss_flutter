@@ -298,7 +298,9 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                   }
                                 },
                                 width: SizeConfig.blockWidth * 35,
-                                height: SizeConfig.blockHeight * 6.25,
+                                height: SizeConfig.blockHeight * 6,
+                                textFontSize: 3.2,
+                                verticalSpaceButton: 1.5,
                                 backgroundColor: (friendList[index].user!.isFriend != null || filteredFriendList[index].user!.friendRequestSent != null)
                                     ? COLORS.neutralDarkTwo : COLORS.primary,
                                 textColor:  (friendList[index].user!.isFriend != null || filteredFriendList[index].user!.friendRequestSent != null)
@@ -404,7 +406,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                         fit: BoxFit.cover,
                                       ),
                                       borderRadius: BorderRadius.circular(
-                                        SizeConfig.blockWidth * 2,
+                                        SizeConfig.blockWidth * 6,
                                       ),
                                     ),
                                   ),
@@ -1164,6 +1166,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                     ? Padding(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: SizeConfig.blockWidth * 5,
+                                    vertical: SizeConfig.blockHeight*0.8
                                   ),
                                   child: friendSearchDetailsCards(
                                     image: friendList[index].user!.profilePic,
@@ -1266,8 +1269,10 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                           ));
                                         }
                                       },
-                                      width: SizeConfig.blockWidth * 35,
-                                      height: SizeConfig.blockHeight * 6.25,
+                                      width: SizeConfig.blockWidth * 32,
+                                      height: SizeConfig.blockHeight * 6,
+                                      textFontSize: 3.2,
+                                      verticalSpaceButton: 1.5,
                                       backgroundColor:
                                       (friendList[index].user!.isFriend != null ||
                                           friendList[index].user!.friendRequestSent != null)
@@ -1284,7 +1289,8 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                 )
                                     : const SizedBox(); // Return an empty widget if user is null
 
-                              })
+                              }),
+                          SizedBox(height: SizeConfig.blockHeight,)
                         ],
                       ),
                     ))

@@ -411,7 +411,32 @@
   "Block all incoming calls to focus on your work or personal time.": "अपने कार्य या व्यक्तिगत समय पर ध्यान केंद्रित करने के लिए सभी कॉल्स ब्लॉक करें।",
   "You have unsaved changes. Are you sure you want to discard them?": "आपके पास बिना सहेजे गए परिवर्तन हैं। क्या आप वाकई उन्हें छोड़ना चाहते हैं?",
   "UPDATE": "अपडेट करें",
-  "Your Smart Call settings have been modified. Do you want to save these changes?": "आपकी स्मार्ट कॉल सेटिंग्स बदल दी गई हैं। क्या आप इन परिवर्तनों को सहेजना चाहते हैं?"
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "आपकी स्मार्ट कॉल सेटिंग्स बदल दी गई हैं। क्या आप इन परिवर्तनों को सहेजना चाहते हैं?",
+  "Group Type": "समूह प्रकार",
+  "English": "अंग्रेज़ी",
+  "Kannada": "कन्नड़",
+  "Hindi": "हिंदी",
+  "Tamil": "तमिल",
+  "Telugu": "तेलुगु",
+  "Gujarati": "गुजराती",
+  "Malayalam": "मलयालम",
+  "Marathi": "मराठी",
+  "Bengali": "बांग्ला",
+  "Odia": "उड़िया",
+  "Punjabi": "पंजाबी",
+  "Assamese": "असमिया",
+  "Urdu": "उर्दू",
+  "Per Day": "प्रति दिन",
+  "Per Hour": "प्रति घंटा",
+  "Per Month": "प्रति माह",
+  "Per Week": "प्रति सप्ताह",
+  "Per Year": "प्रति वर्ष",
+  "View Insights":"इनसाइट्स देखें",
+  "Select": "चुनें",
+  "Years": "वर्ष",
+  "Create an Account": "खाता बनाएं",
+  "Register now to unlock full access and personalized features.": "पूर्ण पहुंच और व्यक्तिगत सुविधाओं को अनलॉक करने के लिए अभी पंजीकरण करें।",
+  "REGISTER NOW": "अभी पंजीकरण करें"
 }
 
 

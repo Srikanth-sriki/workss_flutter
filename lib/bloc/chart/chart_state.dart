@@ -565,3 +565,30 @@ class RejectChartRequestFailed extends ChartState {
   @override
   List<Object> get props => [message];
 }
+
+class AcceptInvitePublicChatRequestSuccess extends ChartState {
+  String message;
+  AcceptInvitePublicChatRequestSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class AcceptInvitePublicChatRequestFailed extends ChartState {
+  String message;
+  AcceptInvitePublicChatRequestFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+
+class RejectInvitePublicChatRequestFailed extends ChartState {
+  String message;
+  RejectInvitePublicChatRequestFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+class RejectInvitePublicChatRequestSuccess extends ChartState {
+  String message;
+  RejectInvitePublicChatRequestSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}

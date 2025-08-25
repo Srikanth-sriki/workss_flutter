@@ -653,22 +653,28 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
                                                 color: COLORS.primaryOne
-                                                    .withOpacity(0.5),
+                                                    .withOpacity(0.3),
+                                                image: DecorationImage(image: NetworkImage(
+                                                  categoriesData[index]
+                                                      .image,
+                                                  scale: SizeConfig.blockWidth*1
+
+                                                ))
                                               ),
-                                              child: Center(
-                                                child: AspectRatio(
-                                                  aspectRatio: 1 / 1.25,
-                                                  child: categoriesData[index]
-                                                          .image
-                                                          .isNotEmpty
-                                                      ? Image.network(
-                                                          categoriesData[index]
-                                                              .image,
-                                                          fit: BoxFit.contain,
-                                                        )
-                                                      : null,
-                                                ),
-                                              ),
+                                              // child: Center(
+                                              //   child: AspectRatio(
+                                              //     aspectRatio: 1 / 1.25,
+                                              //     child: categoriesData[index]
+                                              //             .image
+                                              //             .isNotEmpty
+                                              //         ? Image.network(
+                                              //             categoriesData[index]
+                                              //                 .image,
+                                              //             fit: BoxFit.contain,
+                                              //           )
+                                              //         : null,
+                                              //   ),
+                                              // ),
                                             ),
                                             SizedBox(
                                               height:
@@ -786,7 +792,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                   }),
                                               SizedBox(
                                                 height:
-                                                    SizeConfig.blockHeight * 33,
+                                                    SizeConfig.blockHeight * 26,
                                                 child: ListView.builder(
                                                     itemCount: searchFriendLists
                                                                 .length >=
@@ -912,7 +918,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               ),
                                               SizedBox(
                                                   height:
-                                                      SizeConfig.blockHeight * 2),
+                                                      SizeConfig.blockHeight ),
                                             ],
                                             buildProfessionalCard(
                                                 accountVerified:

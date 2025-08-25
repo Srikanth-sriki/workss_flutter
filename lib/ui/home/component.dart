@@ -6,7 +6,7 @@ import '../../components/colors.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
 
-class WorkCard extends StatelessWidget {
+ class WorkCard extends StatelessWidget {
   final String title;
   final String location;
   final String timeAgo;
@@ -62,7 +62,8 @@ class WorkCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
+                  Container(
+                    width: SizeConfig.blockWidth*60,
                     padding: EdgeInsets.symmetric(
                         horizontal: SizeConfig.blockWidth * 0.5),
                     child: Text(
@@ -73,6 +74,8 @@ class WorkCard extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         fontFamily: "Poppins",
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
@@ -222,8 +225,8 @@ Widget addFriendCard({required bool added,required String image,required String 
     splashColor: Colors.white.withOpacity(0.1),
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
     child: Container(
-      width: SizeConfig.blockWidth * 40,
-      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 4 ),
+      width: SizeConfig.blockWidth * 36,
+      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,bottom: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 3 ),
       padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
       decoration: BoxDecoration(
         borderRadius:
@@ -234,25 +237,26 @@ Widget addFriendCard({required bool added,required String image,required String 
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: SizeConfig.blockHeight*2),
-          Container(
-            width: SizeConfig.blockWidth * 18,
-            height: SizeConfig.blockWidth * 18,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(image),
-                  fit: BoxFit.fill,
-                ),
-                borderRadius: BorderRadius.all(
-                    Radius.circular(SizeConfig.blockWidth * 2.5))),
-          ),
+
+          AvatarImage(image: image,size:18 ,),
+          // Container(
+          //   width: SizeConfig.blockWidth * 18,
+          //   height: SizeConfig.blockWidth * 18,
+          //   decoration: BoxDecoration(
+          //       image: DecorationImage(
+          //         image: NetworkImage(image),
+          //         fit: BoxFit.fill,
+          //       ),
+          //       borderRadius: BorderRadius.all(
+          //           Radius.circular(SizeConfig.blockWidth * 2.5))),
+          // ),
 
           SizedBox(height: SizeConfig.blockHeight*0.5),
           Text(
             name,
             style: TextStyle(
               color: COLORS.neutralDark,
-              fontSize: SizeConfig.blockWidth * 3.25,
+              fontSize: SizeConfig.blockWidth * 3,
               fontWeight: FontWeight.w500,
               fontFamily: "Poppins",
             ),
@@ -264,10 +268,12 @@ Widget addFriendCard({required bool added,required String image,required String 
           customIconButton(
               text: added?'Request Sent':'Add Friend',
               onPressed: onTap,
-              width: SizeConfig.blockWidth*32,
-              height: SizeConfig.blockHeight * 6.5,
+              width: SizeConfig.blockWidth*30,
+              height: SizeConfig.blockHeight * 5.25,
               backgroundColor: added?COLORS.neutralDarkTwo:COLORS.primary,
               textColor: added?COLORS.neutralDark:COLORS.white,
+              textFontSize: 3,
+              verticalSpaceButton: 1.25,
               showIcon: false)
         ],
       ),
@@ -276,51 +282,61 @@ Widget addFriendCard({required bool added,required String image,required String 
 }
 
 Widget friendViewCard({required String image,required String name,required VoidCallback onTap}){
+
+  final double size = SizeConfig.blockWidth * 17;
   return InkWell(
-    onTap: onTap,splashColor: COLORS.white.withOpacity(0.2),
-
-    child: Container(
-      width: SizeConfig.blockWidth * 25,
-      height: SizeConfig.blockWidth * 25,
-
-      margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1,right: SizeConfig.blockWidth * 0.6 ),
-      padding: EdgeInsets.all(SizeConfig.blockWidth * 0.5),
-      decoration: const BoxDecoration(
-        color: COLORS.white,
-      ),
+    onTap: onTap,
+    splashColor: COLORS.white.withOpacity(0.2),
+    borderRadius: BorderRadius.circular(size / 2),
+    child: SizedBox(
+      width: size,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: SizeConfig.blockWidth * 20,
-            height: SizeConfig.blockWidth * 20,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(image),
-                  fit: BoxFit.cover,
+          Hero(
+            tag: image,
+            child: ClipOval(
+              child: SizedBox.square(
+                dimension: size,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(color: COLORS.neutralDarkTwo),
+                    ),
+                    Positioned.fill(
+                      child: Image.network(
+                        image,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        loadingBuilder: (c, child, p) =>
+                        p == null ? child : Container(color: COLORS.neutralDarkTwo),
+                        errorBuilder: (c, e, s) =>
+                            Container(color: COLORS.neutralDarkTwo),
+                      ),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.all(
-                    Radius.circular(SizeConfig.blockWidth * 3))),
+              ),
+            ),
           ),
-          SizedBox(height: SizeConfig.blockHeight*0.8),
+          SizedBox(height: SizeConfig.blockHeight * 0.8),
+
           SizedBox(
-            width: SizeConfig.blockWidth * 23,
+            width: size,
+            height: SizeConfig.blockHeight * 4.2,
             child: Text(
               capitalizeEachWord(name),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: COLORS.neutralDark,
                 fontSize: SizeConfig.blockWidth * 3,
                 fontWeight: FontWeight.w400,
                 fontFamily: "Poppins",
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              // textAlign: TextAlign.end,
             ),
           ),
-
         ],
       ),
     ),

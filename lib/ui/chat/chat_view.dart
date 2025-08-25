@@ -522,7 +522,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                               splashColor: COLORS.white.withOpacity(0.2),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Container(
                                     width: SizeConfig.blockWidth * 12,
@@ -542,7 +542,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             : null,
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(
-                                                SizeConfig.blockWidth * 3))),
+                                                SizeConfig.blockWidth * 6))),
                                   ),
                                   SizedBox(width: SizeConfig.blockWidth * 2),
                                   Column(
@@ -563,6 +563,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             ),
                                             maxLines: 1),
                                       ),
+                                      if (widget.isGroup
+                                          ? (chatViewGroupInfo.description?.isNotEmpty ?? false)
+                                          : (filteredParticipants[0].user.professionType.isNotEmpty))
                                       SizedBox(
                                         width: SizeConfig.blockWidth * 45,
                                         child: Text(

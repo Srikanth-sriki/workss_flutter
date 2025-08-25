@@ -346,7 +346,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       feesChargesItem.clear();
                       feesChargesItem.addAll([
                         for (var  charge in state.fetchChargeFeesItems)
-                          DropdownItemValue(id: charge.id, label: charge.type),
+                          DropdownItemValue(id: charge.id, label: charge.type.tr()),
                       ]);
                       feesChargesLoading = false;
                     });
@@ -381,7 +381,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         int index = entry.key + 1;
                         var item = entry.value;
                         return DropdownItem(
-                            label: item.language,
+                            label: item.language.tr(),
                             value: Language(name: item.language, id: index));
                       }).toList();
                       knowLanguageLoading = false;
@@ -708,7 +708,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                       horizontal: SizeConfig.blockWidth * 2.5,
                                       vertical: SizeConfig.blockWidth * 1),
                                   child: Text(
-                                    'Years',
+                                    'Years'.tr(),
                                     style: TextStyle(
                                         color: COLORS.accent,
                                         fontWeight: FontWeight.w400,
@@ -943,7 +943,7 @@ class _RegisterFormState extends State<RegisterForm> {
                                         horizontal: SizeConfig.blockWidth * 2.5,
                                         vertical: SizeConfig.blockWidth * 1),
                                     child: Text(
-                                      'Years',
+                                      'Years'.tr(),
                                       style: TextStyle(
                                           color: COLORS.accent,
                                           fontWeight: FontWeight.w400,

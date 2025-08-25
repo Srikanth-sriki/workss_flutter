@@ -208,7 +208,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                       _showHint = true;
                       _showHintDone = true;
                     });
-                    _hintTimer = Timer(const Duration(seconds: 3), () {
+                    _hintTimer = Timer(const Duration(seconds: 1), () {
                       if (!mounted) return;
                       setState(() => _showHint = false);
                     });
@@ -284,7 +284,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
 
                   final n = item.notification!;
                   final bool isActionableType =
-                  (n.type == 'friend_request' || n.type == 'group_invite');
+                  (n.type == 'friend_request' || n.type == 'group_invite' || n.type == 'group_join_request');
                   final bool showActions =
                       isActionableType && (n.isRead == false);
                   final bool hasPic =
@@ -453,6 +453,29 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                         ),
                                       );
                                     }
+                                    else if (n.type == 'group_join_request') {
+                                      chartBloc.add(
+                                        RejectChatPublicGroupEvent(
+                                          requiredId: n.content!.requestId!,
+                                          onSuccess: (msg) {
+                                            showCustomSnackBar(
+                                              context: context,
+                                              message: msg,
+                                              backgroundColor:
+                                              COLORS.neutralDarkTwo,
+                                            );
+                                            notificationBloc.add(
+                                              FetchNotificationViewEvent(
+                                                  id: n.id!),
+                                            );
+                                          },
+                                          onError: (msg) => showCustomSnackBar(
+                                            context: context,
+                                            message: msg,
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   },
                                   icon: Icons.clear,
                                 ),
@@ -466,9 +489,9 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                   child: FittedBox(
                                     fit: BoxFit.scaleDown,
                                     child: customIconButton(
-                                      text: n.type == 'friend_request'
+                                      text: (n.type == 'friend_request' || n.type == 'group_join_request')
                                           ? 'Accept'
-                                          : (n.type == 'group_invite' ? 'Join' : ''),
+                                          : ((n.type == 'group_invite') ? 'Join' : ''),
                                       onPressed: () {
                                         if (n.type == 'friend_request') {
                                           showInterestedBloc.add(
@@ -515,6 +538,29 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                             ),
                                           );
                                         }
+                                        else if (n.type == 'group_join_request') {
+                                          chartBloc.add(
+                                            AcceptChatPublicGroupEvent(
+                                              requiredId:n.content!.requestId!,
+                                              onSuccess: (msg) {
+                                                showCustomSnackBar(
+                                                  context: context,
+                                                  message: msg,
+                                                  backgroundColor:
+                                                  COLORS.neutralDarkTwo,
+                                                );
+                                                notificationBloc.add(
+                                                  FetchNotificationViewEvent(
+                                                      id: n.id!),
+                                                );
+                                              },
+                                              onError: (msg) => showCustomSnackBar(
+                                                context: context,
+                                                message: msg,
+                                              ),
+                                            ),
+                                          );
+                                        }
                                       },
                                       width: SizeConfig.blockWidth * 23,
                                       height: SizeConfig.blockHeight * 6.5,
@@ -538,7 +584,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
 
           if (_showHint)
             Positioned(
-              top: SizeConfig.blockHeight * 20,
+              bottom: SizeConfig.blockHeight * 20,
               left: 0,
               right: 0,
               child: Center(

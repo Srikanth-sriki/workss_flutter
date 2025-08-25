@@ -60,7 +60,7 @@ class CustomDropdownButtonFormField extends StatelessWidget {
         ),
       ),
       hint: Text(
-        hintText,
+        hintText.tr(),
         style: TextStyle(
           color: COLORS.accent,
           fontSize: SizeConfig.blockWidth * 3.5,

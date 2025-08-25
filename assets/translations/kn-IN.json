@@ -413,7 +413,33 @@
   "Block all incoming calls to focus on your work or personal time.": "ನಿಮ್ಮ ಕೆಲಸ ಅಥವಾ ವೈಯಕ್ತಿಕ ಸಮಯದಲ್ಲಿ ಗಮನ ಹರಿಸಲು ಎಲ್ಲ ಇನ್‌ಕಮಿಂಗ್ ಕರೆಗಳನ್ನು ತಡೆಹಿಡಿಯಿರಿ.",
   "You have unsaved changes. Are you sure you want to discard them?": "ನೀವು ಉಳಿಸದ ಬದಲಾವಣೆಗಳಿವೆ. ಅವುಗಳನ್ನು ಕೈಬಿಡಲು ನಿಮಗೆ ಖಚಿತವಿದೆಯೇ?",
   "UPDATE": "ನವೀಕರಿಸಿ",
-  "Your Smart Call settings have been modified. Do you want to save these changes?": "ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್ ಕರೆ ಸೆಟ್ಟಿಂಗ್ಗಳು ಬದಲಾಗಿದೆ. ಈ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಲು ಬಯಸುತ್ತೀರಾ?"
+  "Your Smart Call settings have been modified. Do you want to save these changes?": "ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್ ಕರೆ ಸೆಟ್ಟಿಂಗ್ಗಳು ಬದಲಾಗಿದೆ. ಈ ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಲು ಬಯಸುತ್ತೀರಾ?",
+
+  "Group Type": "ಗುಂಪಿನ ಪ್ರಕಾರ",
+  "English": "ಇಂಗ್ಲಿಷ್",
+  "Kannada": "ಕನ್ನಡ",
+  "Hindi": "ಹಿಂದಿ",
+  "Tamil": "ತಮಿಳು",
+  "Telugu": "ತೆಲುಗು",
+  "Gujarati": "ಗುಜರಾತಿ",
+  "Malayalam": "ಮಲಯಾಳಂ",
+  "Marathi": "ಮರಾಠಿ",
+  "Bengali": "ಬಂಗಾಳಿ",
+  "Odia": "ಒಡಿಯಾ",
+  "Punjabi": "ಪಂಜಾಬಿ",
+  "Assamese": "ಅಸ್ಸಾಮಿ",
+  "Urdu": "ಉರ್ದು",
+  "Per Day": "ಪ್ರತಿ ದಿನ",
+  "Per Hour": "ಪ್ರತಿ ಗಂಟೆ",
+  "Per Month": "ಪ್ರತಿ ತಿಂಗಳು",
+  "Per Week": "ಪ್ರತಿ ವಾರ",
+  "Per Year": "ಪ್ರತಿ ವರ್ಷ",
+  "View Insights": "ಅವಲೋಕನವನ್ನು ನೋಡಿ",
+  "Select": "ಆಯ್ಕೆಮಾಡಿ",
+  "Years": "ವರ್ಷಗಳು",
+  "Create an Account": "ಖಾತೆ ರಚಿಸಿ",
+  "Register now to unlock full access and personalized features.": "ಪೂರ್ಣ ಪ್ರವೇಶ ಮತ್ತು ವೈಯಕ್ತಿಕ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಅನ್ಲಾಕ್ ಮಾಡಲು ಈಗ ನೋಂದಾಯಿಸಿ.",
+  "REGISTER NOW": "ಈಗ ನೋಂದಾಯಿಸಿ"
 }
 
 

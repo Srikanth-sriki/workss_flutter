@@ -682,4 +682,38 @@ class FriendsDao {
     return response;
   }
 
+
+  Future acceptInvitePublicGroupRequest({
+    required String requestId,
+  }) async {
+    Map<String, dynamic> body = {
+      "requestId": requestId
+    };
+    var url = '${Config.url}/user/chat/accept-join-request';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+  Future rejectInvitePublicGroupRequest({
+    required String requestId,
+  }) async {
+    Map<String, dynamic> body = {
+      "requestId": requestId
+    };
+    var url = '${Config.url}/user/chat/reject-join-request';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    return response;
+  }
+
+
 }

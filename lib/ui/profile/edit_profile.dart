@@ -414,7 +414,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                     feesChargesItem.clear();
                     for (final category in state.fetchChargeFeesItems) {
                       feesChargesItem.add(DropdownItemValue(
-                          id: category.id, label: category.type));
+                          id: category.id, label: category.type.tr()));
                     }
 
                     feesChargesItem.sort((a, b) =>
@@ -465,7 +465,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                       int index = entry.key + 1;
                       var item = entry.value;
                       return DropdownItem(
-                          label: item.language,
+                          label: item.language.tr(),
                           value: Language(name: item.language, id: index));
                     }).toList();
                     knowLanguageLoading = false;
@@ -928,7 +928,7 @@ class _EditProfileRegisterFormState extends State<EditProfileRegisterForm> {
                                         horizontal: SizeConfig.blockWidth * 2.5,
                                         vertical: SizeConfig.blockWidth * 1),
                                     child: Text(
-                                      'Year',
+                                      'Year'.tr(),
                                       style: TextStyle(
                                           color: COLORS.accent,
                                           fontWeight: FontWeight.w400,

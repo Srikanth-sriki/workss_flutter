@@ -484,6 +484,8 @@ Widget customIconButton(
     bool? prefixIconBool = false,
     bool? image = false,
     Widget? imageChild,
+      double? textFontSize = 3.5,
+      double? verticalSpaceButton = 2,
     IconData? prefixIcon}) {
   return SizedBox(
     width: width ?? double.infinity,
@@ -500,7 +502,7 @@ Widget customIconButton(
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
           ),
           padding: EdgeInsets.symmetric(
-            vertical: SizeConfig.blockHeight * 2,
+            vertical: SizeConfig.blockHeight * verticalSpaceButton!,
             horizontal: SizeConfig.blockWidth * 4,
           ),
           child: Row(
@@ -521,7 +523,7 @@ Widget customIconButton(
                   text.tr(),
                   style: TextStyle(
                     color: textColor ?? COLORS.white,
-                    fontSize: SizeConfig.blockWidth * 3.5,
+                    fontSize: SizeConfig.blockWidth * textFontSize!,
                     fontWeight: FontWeight.w500,
                     fontFamily: "Poppins",
                   ),
@@ -826,11 +828,11 @@ Widget buildProfessionalCard(
                       decoration: BoxDecoration(
                           border: Border.all(
                               color: COLORS.primary,
-                              width: SizeConfig.blockWidth * 0.2),
+                              width: SizeConfig.blockWidth * 0.25),
                           image: DecorationImage(
                               image: NetworkImage(image), fit: BoxFit.cover),
                           borderRadius: BorderRadius.all(
-                              Radius.circular(SizeConfig.blockWidth * 2))),
+                              Radius.circular(SizeConfig.blockWidth * 6))),
                     ),
                     SizedBox(width: SizeConfig.blockWidth * 2),
                     Column(

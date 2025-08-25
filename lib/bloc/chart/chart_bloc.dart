@@ -130,6 +130,14 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<RejectChartRequestEvent>((event, emit) async {
       await mapRejectChatRequestEvent(event, emit);
     });
+
+    on<AcceptChatPublicGroupEvent>((event, emit) async {
+      await mapAcceptInvitePublicChatRequestEvent(event, emit);
+    });
+
+    on<RejectChatPublicGroupEvent>((event, emit) async {
+      await mapRejectInvitePublicChatRequestChatEvent(event, emit);
+    });
   }
 
   Future<void> mapCharListEvent(
@@ -1006,6 +1014,58 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     } catch (error) {
       customLog("The error is : $error");
       emit(RejectChartRequestFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+
+  Future<void> mapAcceptInvitePublicChatRequestEvent(
+      AcceptChatPublicGroupEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const AcceptInviteChatLoading());
+      var response = await friendsDao.acceptInvitePublicGroupRequest(
+        requestId: event.requiredId
+
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(AcceptInvitePublicChatRequestSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(AcceptInvitePublicChatRequestFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(AcceptInvitePublicChatRequestFailed(message: "Something Went wrong"));
+      event.onError('Something Went wrong"');
+    }
+  }
+
+  Future<void> mapRejectInvitePublicChatRequestChatEvent(
+      RejectChatPublicGroupEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const RejectInviteChatLoading());
+      var response = await friendsDao.rejectInvitePublicGroupRequest(
+        requestId: event.requiredId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(RejectInvitePublicChatRequestSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(RejectInvitePublicChatRequestFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("The error is : $error");
+      emit(RejectInvitePublicChatRequestFailed(message: "Something Went wrong"));
       event.onError('Something Went wrong"');
     }
   }

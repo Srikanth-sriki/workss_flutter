@@ -536,13 +536,12 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                               ),
                             ),
                             SizedBox(
-                              height: SizeConfig.blockHeight * 18,
-                              child: ListView.builder(
-                                itemCount: min(_friends.length, 8),
-                                shrinkWrap: true,
+                              height: SizeConfig.blockHeight * 14.5,
+                              child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: SizeConfig.blockWidth * 2.5),
+                                itemCount: min(_friends.length, 8),
+                                padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4.5),
+                                separatorBuilder: (_, __) => SizedBox(width: SizeConfig.blockWidth * 4), // exact inter-card gap
                                 itemBuilder: (context, index) {
                                   final f = _friends[index].friends;
                                   return friendViewCard(
@@ -597,7 +596,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                             Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal: SizeConfig.blockWidth * 4.5,
-                                vertical: SizeConfig.blockHeight * 0.2,
+                                vertical: SizeConfig.blockHeight * 0.8,
                               ),
                               child: Builder(
                                 builder: (_) {
@@ -634,6 +633,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
 
                                       final picture = o?.pictureOverride ?? chat.picture!;
                                       final name = o?.nameOverride ?? chat.name!;
+                                      final tag = 'avatar_${chat.chatId}_$index';
 
                                       return GestureDetector(
                                         onLongPress: () =>{
@@ -649,6 +649,8 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                                           count: unread.toString(),
                                           isGroup: chat.isGroup!,
                                           date: formatChatDate(ts),
+                                            context: context,
+                                          heroTag: tag,
                                         ),
                                       );
                                     },

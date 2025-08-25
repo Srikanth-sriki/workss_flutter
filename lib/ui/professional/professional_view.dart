@@ -124,7 +124,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                           fit: BoxFit.cover),
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(
-                                              SizeConfig.blockWidth * 2))),
+                                              SizeConfig.blockWidth * 6))),
                                 ),
                                 SizedBox(width: SizeConfig.blockWidth * 2),
                                 Column(
@@ -723,7 +723,8 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                             ),
                                                             BlocProvider(
                                                                 create: (context) =>
-                                                                    ReportPostBloc())
+                                                                    ReportPostBloc()),
+                                                            BlocProvider(create: (context) => ChartBloc())
                                                           ],
                                                           child:
                                                               ProfessionalViewScreen(

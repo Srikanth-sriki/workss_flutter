@@ -125,7 +125,10 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
                                   : "",
                               count: chatList[index].unreadCount!,
                               isGroup: chatList[index].isGroup!,
-                              date: formatChatDate(chatList[index].updatedAt!));
+                              date: formatChatDate(chatList[index].updatedAt!),
+                            context: context,
+                            heroTag: 'avatar_${chatList[index].chatId}_$index',
+                          );
                         }),
                   ),
                 ),

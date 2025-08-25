@@ -17,9 +17,9 @@ Widget friendSearchCards(
     onTap: onTapCard,
     child: Container(
       margin: EdgeInsets.symmetric(
-        vertical: SizeConfig.blockHeight * 1,
+        vertical: SizeConfig.blockHeight * 0.8,
       ),
-      padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4,vertical: SizeConfig.blockWidth * 3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
         color: COLORS.primaryOne.withOpacity(0.1),
@@ -41,7 +41,7 @@ Widget friendSearchCards(
                       fit: BoxFit.fill,
                     ),
                     borderRadius: BorderRadius.all(
-                        Radius.circular(SizeConfig.blockWidth * 3))),
+                        Radius.circular(SizeConfig.blockWidth * 7.5))),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
@@ -125,24 +125,24 @@ Widget friendSearchDetailsCards({
             children: [
               if(image.isNotEmpty)...[
                 Container(
-                  width: SizeConfig.blockWidth * 12,
-                  height: SizeConfig.blockWidth * 12,
+                  width: SizeConfig.blockWidth * 14,
+                  height: SizeConfig.blockWidth * 14,
                   decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(image),
                         fit: BoxFit.fill,
                       ),
                       borderRadius: BorderRadius.all(
-                          Radius.circular(SizeConfig.blockWidth * 2.5))),
+                          Radius.circular(SizeConfig.blockWidth * 7))),
                 )
               ]
               else...[
                 Container(
-                  width: SizeConfig.blockWidth * 14,
-                  height: SizeConfig.blockWidth * 14,
+                  width: SizeConfig.blockWidth * 15,
+                  height: SizeConfig.blockWidth * 15,
                   decoration: BoxDecoration(
                     color: COLORS.neutralDarkTwo,
-                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 7.5),
                   ),
                   child: Icon(
                     isGroup ? Icons.people : Icons.person,
@@ -170,6 +170,7 @@ Widget friendSearchDetailsCards({
                       overflow: TextOverflow.ellipsis,
                       // textAlign: TextAlign.end,
                     ),
+                    if(disc.isNotEmpty)
                     Text(
                       disc,
                       style: TextStyle(
@@ -192,9 +193,11 @@ Widget friendSearchDetailsCards({
                 text: added ? buttonText1 : buttonText2,
                 onPressed: onTapButtonCard,
                 width: SizeConfig.blockWidth * buttonWidth,
-                height: SizeConfig.blockHeight * 6.25,
+                height: SizeConfig.blockHeight * 6,
                 backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
                 textColor: added ? COLORS.neutralDark : COLORS.white,
+                textFontSize: 3.2,
+                verticalSpaceButton: 1.5,
                 showIcon: false)
           ],
           if(widgetButtonRequired)...[
@@ -203,7 +206,7 @@ Widget friendSearchDetailsCards({
           if (sendMessageButtonRequired) ...[
           SizedBox(
             width: SizeConfig.blockWidth * buttonWidth,
-            height: SizeConfig.blockHeight * 6.25,
+            height: SizeConfig.blockHeight * 6,
             child: TouchRippleEffect(
               borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
               rippleColor: Colors.white60,
@@ -222,14 +225,14 @@ Widget friendSearchDetailsCards({
                           color: COLORS.neutralDark,
                           width: SizeConfig.blockWidth * 0.3)),
                   padding: EdgeInsets.symmetric(
-                    // vertical: SizeConfig.blockHeight*2,
+                    // vertical: SizeConfig.blockHeight,
                     horizontal: SizeConfig.blockWidth * 4,
                   ),
                   child: Text(
                     'Message'.tr(),
                     style: TextStyle(
                       color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 3.5,
+                      fontSize: SizeConfig.blockWidth * 3.2,
                       fontWeight: FontWeight.w500,
                       fontFamily: "Poppins",
                     ),
@@ -292,7 +295,7 @@ Widget friendChatRemoveSearchDetailsCards({
                         fit: BoxFit.cover),
                     borderRadius: BorderRadius.all(
                         Radius.circular(
-                            SizeConfig.blockWidth * 2.5))),
+                            SizeConfig.blockWidth * 6))),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
@@ -313,6 +316,7 @@ Widget friendChatRemoveSearchDetailsCards({
                       overflow: TextOverflow.ellipsis,
                       // textAlign: TextAlign.end,
                     ),
+                    if(disc.isNotEmpty)
                     Text(
                       disc,
                       style: TextStyle(

@@ -172,7 +172,10 @@ class _ChatListSearchState extends State<ChatListSearch> {
                                   : "",
                               count: chatList[index].unreadCount!,
                               isGroup: chatList[index].isGroup!,
-                              date: formatChatDate(chatList[index].updatedAt!));
+                              date: formatChatDate(chatList[index].updatedAt!),
+                              context: context,
+                            heroTag: 'avatar_${chatList[index].chatId}_$index',
+                          );
                         }),
                   ),
                 )

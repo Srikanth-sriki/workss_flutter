@@ -365,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final work = homeFetchModel[index];
           return Container(
             padding:
-                EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
+                EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4.5),
             margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 1.8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -424,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     )));
                       }),
                   SizedBox(
-                    height: SizeConfig.blockHeight * 33,
+                    height: SizeConfig.blockHeight * 26,
                     child: ListView.builder(
                         itemCount: searchFriendLists.length >= 6
                             ? 6
@@ -519,7 +519,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               });
                         }),
                   ),
-                  SizedBox(height: SizeConfig.blockHeight * 2),
+                  SizedBox(height: SizeConfig.blockHeight * 1),
                 ],
                 WorkCard(
                   title: work.requiredProfession ?? '--',

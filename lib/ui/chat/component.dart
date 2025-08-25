@@ -10,6 +10,7 @@ import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:works_app/global_helper/helper_function.dart';
 import 'dart:math' as math;
+import '../../global_helper/image_preview_modal.dart';
 import '../../global_helper/reuse_widget.dart';
 // import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';dart
 
@@ -21,6 +22,8 @@ Widget chartSearchCards({
   required String date,
   required String count,
   required bool isGroup,
+  required BuildContext context,
+  required Object heroTag,
 }) {
   return Material(
     color: Colors.transparent,
@@ -31,7 +34,7 @@ Widget chartSearchCards({
       splashColor: Colors.white.withOpacity(0.1), // Customize ripple color
       child: Container(
         margin: EdgeInsets.symmetric(
-          vertical: SizeConfig.blockHeight * 1,
+          vertical: SizeConfig.blockHeight * 0.8,
         ),
         padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
         decoration: BoxDecoration(
@@ -46,16 +49,48 @@ Widget chartSearchCards({
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (image.isNotEmpty)
-                  Container(
-                    width: SizeConfig.blockWidth * 14,
-                    height: SizeConfig.blockWidth * 14,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(image),
-                        fit: BoxFit.fill,
-                      ),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(SizeConfig.blockWidth * 2),
+                  // Container(
+                  //   width: SizeConfig.blockWidth * 14,
+                  //   height: SizeConfig.blockWidth * 14,
+                  //   decoration: BoxDecoration(
+                  //     image: DecorationImage(
+                  //       image: NetworkImage(image),
+                  //       fit: BoxFit.fill,
+                  //     ),
+                  //     borderRadius: BorderRadius.all(
+                  //       Radius.circular(SizeConfig.blockWidth * 2),
+                  //     ),
+                  //   ),
+                  // )
+                  InkWell(
+                    onTap: () => showSimpleImagePreview(context, image),
+                    splashColor: COLORS.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
+                    child: Hero(
+                      tag: heroTag,
+                      child: ClipOval(
+                        child: SizedBox.square(
+                          dimension: SizeConfig.blockWidth * 14,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: Container(color: COLORS.neutralDarkTwo),
+                              ),
+                              Positioned.fill(
+                                child: Image.network(
+                                  image,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.center,
+                                  loadingBuilder: (c, child, p) => p == null
+                                      ? child
+                                      : Container(color: COLORS.neutralDarkTwo),
+                                  errorBuilder: (c, e, s) =>
+                                      Container(color: COLORS.neutralDarkTwo),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   )
@@ -65,7 +100,8 @@ Widget chartSearchCards({
                     height: SizeConfig.blockWidth * 14,
                     decoration: BoxDecoration(
                       color: COLORS.neutralDarkTwo,
-                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 7),
                     ),
                     child: Icon(
                       isGroup ? Icons.people : Icons.person,
@@ -131,7 +167,8 @@ Widget chartSearchCards({
                     width: SizeConfig.blockWidth * 4,
                     height: SizeConfig.blockWidth * 4,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 4),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 4),
                       color: COLORS.accent,
                     ),
                     child: Text(
@@ -152,7 +189,6 @@ Widget chartSearchCards({
     ),
   );
 }
-
 
 class DynamicBottomSheet extends StatelessWidget {
   final String header;
@@ -263,14 +299,13 @@ void showDynamicBottomSheet(
   );
 }
 
-Widget createGroupInviteCard({
-  required String image,
-  required String name,
-  required bool added,
-  required VoidCallback onTapCard,
-  required String disc,
-  required bool checkSelected
-}) {
+Widget createGroupInviteCard(
+    {required String image,
+    required String name,
+    required bool added,
+    required VoidCallback onTapCard,
+    required String disc,
+    required bool checkSelected}) {
   return Expanded(
     child: Container(
       padding: EdgeInsets.symmetric(
@@ -298,15 +333,13 @@ Widget createGroupInviteCard({
                         ),
                         image: DecorationImage(
                             image: NetworkImage(
-                              image
-                                  .isEmpty
+                              image.isEmpty
                                   ? 'https://via.placeholder.com/150'
                                   : image,
                             ),
                             fit: BoxFit.cover),
                         borderRadius: BorderRadius.all(
-                            Radius.circular(
-                                SizeConfig.blockWidth * 3))),
+                            Radius.circular(SizeConfig.blockWidth * 3))),
                   ),
                   SizedBox(width: SizeConfig.blockWidth * 2),
                   SizedBox(
@@ -344,13 +377,14 @@ Widget createGroupInviteCard({
                   ),
                 ],
               ),
-              if(!checkSelected)...[
+              if (!checkSelected) ...[
                 customIconButton(
                     text: added ? 'Request Sent' : 'Invite',
                     onPressed: onTapCard,
                     width: SizeConfig.blockWidth * 32,
                     height: SizeConfig.blockHeight * 6.25,
-                    backgroundColor: added ? COLORS.neutralDarkTwo : COLORS.primary,
+                    backgroundColor:
+                        added ? COLORS.neutralDarkTwo : COLORS.primary,
                     textColor: added ? COLORS.neutralDark : COLORS.white,
                     showIcon: false)
               ]
@@ -373,7 +407,7 @@ Widget chartMemberCardViewSearchCards(
     {required String image,
     required String name,
     required VoidCallback onTapCard,
-      required bool admin,
+    required bool admin,
     required String message}) {
   return TouchRippleEffect(
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
@@ -399,7 +433,9 @@ Widget chartMemberCardViewSearchCards(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.center,crossAxisAlignment: CrossAxisAlignment.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
                           width: SizeConfig.blockWidth * 12,
@@ -411,15 +447,13 @@ Widget chartMemberCardViewSearchCards(
                               ),
                               image: DecorationImage(
                                   image: NetworkImage(
-                                    image
-                                        .isEmpty
+                                    image.isEmpty
                                         ? 'https://via.placeholder.com/150'
                                         : image,
                                   ),
                                   fit: BoxFit.cover),
                               borderRadius: BorderRadius.all(
-                                  Radius.circular(
-                                      SizeConfig.blockWidth * 3))),
+                                  Radius.circular(SizeConfig.blockWidth * 6))),
                         ),
                         SizedBox(width: SizeConfig.blockWidth * 3),
                         Column(
@@ -441,6 +475,7 @@ Widget chartMemberCardViewSearchCards(
                                 // textAlign: TextAlign.end,
                               ),
                             ),
+                            if(message.isNotEmpty)
                             SizedBox(
                               width: SizeConfig.blockWidth * 50,
                               child: Text(
@@ -460,12 +495,15 @@ Widget chartMemberCardViewSearchCards(
                         ),
                       ],
                     ),
-                    if(admin)...[
+                    if (admin) ...[
                       Container(
-                        padding: EdgeInsets.symmetric(vertical: SizeConfig.blockHeight*0.6,horizontal: SizeConfig.blockWidth*3,
+                        padding: EdgeInsets.symmetric(
+                          vertical: SizeConfig.blockHeight * 0.6,
+                          horizontal: SizeConfig.blockWidth * 3,
                         ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 1.5),
+                          borderRadius: BorderRadius.circular(
+                              SizeConfig.blockWidth * 1.5),
                           color: COLORS.semanticTwo.withOpacity(0.15),
                         ),
                         child: Text(
@@ -479,13 +517,14 @@ Widget chartMemberCardViewSearchCards(
                         ),
                       )
                     ]
-
                   ],
                 ),
               ],
             ),
           ),
-          SizedBox(height: SizeConfig.blockHeight * 2,)
+          SizedBox(
+            height: SizeConfig.blockHeight * 2,
+          )
         ],
       ),
     ),
@@ -908,11 +947,15 @@ class SendMessage extends StatelessWidget {
     ));
 
     return Padding(
-      padding: EdgeInsets.only(right: SizeConfig.blockWidth*5, left: SizeConfig.blockWidth*20, top: SizeConfig.blockWidth*1.5, bottom: SizeConfig.blockWidth*1.5),
+      padding: EdgeInsets.only(
+          right: SizeConfig.blockWidth * 5,
+          left: SizeConfig.blockWidth * 20,
+          top: SizeConfig.blockWidth * 1.5,
+          bottom: SizeConfig.blockWidth * 1.5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          SizedBox(height: SizeConfig.blockHeight*4),
+          SizedBox(height: SizeConfig.blockHeight * 4),
           messageTextGroup,
         ],
       ),
@@ -1050,9 +1093,6 @@ class SendMessage extends StatelessWidget {
 //   }
 // }
 
-
-
-
 class ReceivedMessage extends StatelessWidget {
   final bool isSeenByMe;
   final String message;
@@ -1090,7 +1130,6 @@ class ReceivedMessage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-
           Transform(
             alignment: Alignment.center,
             transform: Matrix4.rotationX(math.pi),
@@ -1098,8 +1137,6 @@ class ReceivedMessage extends StatelessWidget {
               painter: Triangle(COLORS.primaryOne.withOpacity(0.5)),
             ),
           ),
-
-
           ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: SizeConfig.blockWidth * 70,
@@ -1121,7 +1158,8 @@ class ReceivedMessage extends StatelessWidget {
                     // Message Text
                     if (textShow)
                       Padding(
-                        padding:  EdgeInsets.only(bottom:SizeConfig.blockHeight * 0.2),
+                        padding: EdgeInsets.only(
+                            bottom: SizeConfig.blockHeight * 0.2),
                         child: Text(
                           message,
                           style: TextStyle(
@@ -1134,14 +1172,14 @@ class ReceivedMessage extends StatelessWidget {
                         ),
                       ),
 
-
                     if (imageShow)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 4.0),
                         child: GestureDetector(
                           onTap: () => _showImageDialog(context, imageUrl),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3),
                             child: Image.network(
                               imageUrl,
                               width: SizeConfig.blockWidth * 40,
@@ -1152,13 +1190,12 @@ class ReceivedMessage extends StatelessWidget {
                         ),
                       ),
 
-
                     if (audioShow && audioWidget != null)
                       Padding(
-                        padding:  EdgeInsets.only(bottom: SizeConfig.blockHeight * 0.2),
+                        padding: EdgeInsets.only(
+                            bottom: SizeConfig.blockHeight * 0.2),
                         child: audioWidget!,
                       ),
-
 
                     Padding(
                       padding: EdgeInsets.only(top: SizeConfig.blockWidth * 2),
@@ -1177,7 +1214,7 @@ class ReceivedMessage extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(width: SizeConfig.blockWidth*4),
+                          SizedBox(width: SizeConfig.blockWidth * 4),
                           Text(
                             time.toUpperCase(),
                             style: TextStyle(
@@ -1200,7 +1237,6 @@ class ReceivedMessage extends StatelessWidget {
     );
   }
 }
-
 
 void _showImageDialog(BuildContext context, String imageUrl) {
   showGeneralDialog(
@@ -1241,8 +1277,6 @@ void _showImageDialog(BuildContext context, String imageUrl) {
   );
 }
 
-
-
 Widget BlockedChartCards({
   required String image,
   required String name,
@@ -1266,7 +1300,7 @@ Widget BlockedChartCards({
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if(image.isNotEmpty)...[
+            if (image.isNotEmpty) ...[
               Container(
                 width: SizeConfig.blockWidth * 14,
                 height: SizeConfig.blockWidth * 14,
@@ -1276,22 +1310,23 @@ Widget BlockedChartCards({
                       fit: BoxFit.fill,
                     ),
                     borderRadius: BorderRadius.all(
-                        Radius.circular(SizeConfig.blockWidth * 2))),
+                        Radius.circular(SizeConfig.blockWidth * 7))),
               ),
-
-            ]
-            else...[
+            ] else ...[
               Container(
                 width: SizeConfig.blockWidth * 14,
                 height: SizeConfig.blockWidth * 14,
                 decoration: BoxDecoration(
                     color: COLORS.neutralDarkTwo,
-                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth*3)
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 7)),
+                child: Icon(
+                  isGroup ? Icons.people : Icons.person,
+                  color: COLORS.neutralDark,
+                  size: SizeConfig.blockWidth * 7,
                 ),
-                child: Icon(isGroup?Icons.people:Icons.person,color: COLORS.neutralDark,size: SizeConfig.blockWidth*7,),
               )
-            ]
-            ,
+            ],
             SizedBox(width: SizeConfig.blockWidth * 3),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1328,8 +1363,6 @@ Widget BlockedChartCards({
     ),
   );
 }
-
-
 
 // Future<File?> compressAudio(File inputFile) async {
 //   final dir = await getTemporaryDirectory();

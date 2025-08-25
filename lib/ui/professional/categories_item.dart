@@ -87,22 +87,22 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
             ),
           ),
 
-          SizedBox(height: SizeConfig.blockHeight * 2),
-          Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.blockWidth * 6.5,
-                vertical: SizeConfig.blockHeight),
-            child: Text(
-              capitalizeEachWord(widget.categoriesItem.name),
-              style: TextStyle(
-                color: COLORS.primary,
-                fontSize: SizeConfig.blockWidth * 4.5,
-                fontWeight: FontWeight.w500,
-                fontFamily: "Poppins",
-              ),
-              textAlign: TextAlign.start,
-            ),
-          ),
+          // SizedBox(height: SizeConfig.blockHeight * 2),
+          // Padding(
+          //   padding: EdgeInsets.symmetric(
+          //       horizontal: SizeConfig.blockWidth * 6.5,
+          //       vertical: SizeConfig.blockHeight),
+          //   child: Text(
+          //     capitalizeEachWord(widget.categoriesItem.name),
+          //     style: TextStyle(
+          //       color: COLORS.primary,
+          //       fontSize: SizeConfig.blockWidth * 4.5,
+          //       fontWeight: FontWeight.w500,
+          //       fontFamily: "Poppins",
+          //     ),
+          //     textAlign: TextAlign.start,
+          //   ),
+          // ),
           Expanded(
               child: ListView.builder(
                   itemCount:

@@ -11,6 +11,7 @@ import 'package:works_app/bloc/register_account/initial_register_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/helper_function.dart';
+import 'package:works_app/global_helper/image_preview_modal.dart';
 import 'package:works_app/ui/profile/Interested_works.dart';
 import 'package:works_app/ui/profile/bookmark_list.dart';
 import 'package:works_app/ui/profile/conatct_us.dart';
@@ -107,19 +108,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
                       child: Row(
                         children: [
-                          Container(
-                            width: SizeConfig.blockWidth * 20,
-                            height: SizeConfig.blockWidth * 20,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(Config.profilePic),
-                                  fit: BoxFit.fill,
-                                ),
-                                border: Border.all(
-                                    color: COLORS.primary,
-                                    width: SizeConfig.blockWidth * 0.15),
-                                borderRadius: BorderRadius.all(Radius.circular(
-                                    SizeConfig.blockWidth * 3))),
+                          InkWell(
+                            onTap: ()=>{
+                              showSimpleImagePreview(context, Config.profilePic)
+                            },
+                            child: Container(
+                              width: SizeConfig.blockWidth * 20,
+                              height: SizeConfig.blockWidth * 20,
+                              decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(Config.profilePic),
+                                    fit: BoxFit.fill,
+                                  ),
+                                  border: Border.all(
+                                      color: COLORS.primary,
+                                      width: SizeConfig.blockWidth * 0.15),
+                                  borderRadius: BorderRadius.all(Radius.circular(
+                                      SizeConfig.blockWidth * 3))),
+                            ),
                           ),
                           SizedBox(width: SizeConfig.blockWidth * 6),
                           Column(

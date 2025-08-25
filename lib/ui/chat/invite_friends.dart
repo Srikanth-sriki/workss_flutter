@@ -376,7 +376,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                   added: inviteList.user!.isInvited != null
                                       ? true
                                       : false,
-                                  disc: inviteList.user!.bio!,
+                                  disc: inviteList.user!.professionType!,
                                   buttonText1: 'Cancel',
                                   buttonText2: 'Invite',
                                   onTapButtonCard: () {

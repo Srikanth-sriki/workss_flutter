@@ -104,137 +104,144 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 5
+                  horizontal: SizeConfig.blockWidth * 5,
+                  vertical: SizeConfig.blockHeight*0.8
               ),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: filteredFriendList.length,
+                padding: EdgeInsets.symmetric( vertical: SizeConfig.blockHeight*0.8),
                 itemBuilder: (context, index) {
                   return filteredFriendList[index].user != null ?
 
-                  friendSearchDetailsCards(
-                      image: filteredFriendList[index].user!.profilePic,
-                      name: filteredFriendList[index].user!.name,
-                      onTapCard: () {
-                        Navigator.pop(context); // Close the search modal
-                        Future.delayed(Duration(milliseconds: 100), () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                    create: (context) {
-                                      final bloc = FriendsBloc();
-                                      bloc.add(FetchFriendsSingleView(
-                                          friendId: filteredFriendList[index].friendId!));
-                                      return bloc;
-                                    },
+                  Padding(
+                    padding:  EdgeInsets.symmetric(vertical: SizeConfig.blockHeight*0.8),
+                    child: friendSearchDetailsCards(
+                        image: filteredFriendList[index].user!.profilePic,
+                        name: filteredFriendList[index].user!.name,
+                        onTapCard: () {
+                          Navigator.pop(context); // Close the search modal
+                          Future.delayed(Duration(milliseconds: 100), () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) {
+                                        final bloc = FriendsBloc();
+                                        bloc.add(FetchFriendsSingleView(
+                                            friendId: filteredFriendList[index].friendId!));
+                                        return bloc;
+                                      },
+                                    ),
+                                    BlocProvider(create: (context) => ShowInterestedBloc()),
+                                    BlocProvider(create: (context) => ReportPostBloc()),
+                                    BlocProvider(create: (context) => ShowInterestedBloc()),
+                                    BlocProvider(create: (context) => ChartBloc()),
+                                  ],
+                                  child: FriendsDetailsScreen(
+                                    refreshPageCallback: widget.refreshPageCallback,
+                                    id: filteredFriendList[index].friendId!,
                                   ),
-                                  BlocProvider(create: (context) => ShowInterestedBloc()),
-                                  BlocProvider(create: (context) => ReportPostBloc()),
-                                  BlocProvider(create: (context) => ShowInterestedBloc()),
-                                  BlocProvider(create: (context) => ChartBloc()),
-                                ],
-                                child: FriendsDetailsScreen(
-                                  refreshPageCallback: widget.refreshPageCallback,
-                                  id: filteredFriendList[index].friendId!,
                                 ),
                               ),
-                            ),
-                          );
-                        });
-                      },
+                            );
+                          });
+                        },
 
-                      onTapButtonCard: () {},
-                      added: filteredFriendList[index].user!.friendRequestSent != null
-                          ? true
-                          : false,
-                      disc: filteredFriendList[index].user!.professionType,
-                      buttonRequired: false,
-                      widgetButtonRequired: true,
-                      widgetButton:  customIconButton(
-                          text:  filteredFriendList[index].user!.isFriend != null
-                              ? 'UNFRIEND'.tr():
-                          filteredFriendList[index].user!.friendRequestSent != null?'REQUEST SENT'.tr()
-                              : 'ADD FRIEND'.tr(),
-                          onPressed: (){
-                            if(filteredFriendList[index].user!.isFriend != null ){
-                              showInterestedBloc.add(UnfriendsEvent(
-                                  friendId: filteredFriendList[index].user!.id,
-                                  onSuccess: (message) {
-                                    setState(() {
-                                      filteredFriendList[index].user!.isFriend = null;
-                                      filteredFriendList[index].user!.friendRequestSent = null;
-                                      widget.refreshPageCallback();
-                                      widget.refreshPageCallback();
-                                    });
-                                    showCustomSnackBar(
+                        onTapButtonCard: () {},
+                        added: filteredFriendList[index].user!.friendRequestSent != null
+                            ? true
+                            : false,
+                        disc: filteredFriendList[index].user!.professionType,
+                        buttonRequired: false,
+                        widgetButtonRequired: true,
+                        widgetButton:  customIconButton(
+                            text:  filteredFriendList[index].user!.isFriend != null
+                                ? 'UNFRIEND'.tr():
+                            filteredFriendList[index].user!.friendRequestSent != null?'REQUEST SENT'.tr()
+                                : 'ADD FRIEND'.tr(),
+                            onPressed: (){
+                              if(filteredFriendList[index].user!.isFriend != null ){
+                                showInterestedBloc.add(UnfriendsEvent(
+                                    friendId: filteredFriendList[index].user!.id,
+                                    onSuccess: (message) {
+                                      setState(() {
+                                        filteredFriendList[index].user!.isFriend = null;
+                                        filteredFriendList[index].user!.friendRequestSent = null;
+                                        widget.refreshPageCallback();
+                                        widget.refreshPageCallback();
+                                      });
+                                      showCustomSnackBar(
+                                          context: context,
+                                          message:
+                                          "Successfully unfriended!",
+                                          backgroundColor:
+                                          COLORS.semanticTwo);
+                                    },
+                                    onError: (message) {
+                                      showCustomSnackBar(
                                         context: context,
-                                        message:
-                                        "Successfully unfriended!",
-                                        backgroundColor:
-                                        COLORS.semanticTwo);
-                                  },
-                                  onError: (message) {
-                                    showCustomSnackBar(
-                                      context: context,
-                                      message: message,
-                                    );
-                                  }));
-                            }
-                            else if(filteredFriendList[index].user!.friendRequestSent != null) {
-                              showInterestedBloc.add(UnSendFriendEvent(
-                                  userId: filteredFriendList[index].user!.id,
-                                  onSuccess: (message) {
-                                    setState(() {
-                                      filteredFriendList[index].user!.isFriend = null;
-                                      filteredFriendList[index].user!.friendRequestSent = null;
-                                      widget.refreshPageCallback();
-                                      // _refreshPageAfterEdit();
-                                    });
-                                    showCustomSnackBar(
-                                        context: context,
-                                        message:message,
-                                        backgroundColor:
-                                        COLORS.semanticTwo);
-                                  },
-                                  onError: (message) {
-                                    showCustomSnackBar(
-                                      context: context,
-                                      message: message,
-                                    );
-                                  }));
-                            }
-
-                            else{
-                              showInterestedBloc.add(AddFriendEvent(
-                                  userId: filteredFriendList[index].user!.id,
-                                  onSuccess: (message) {
-                                    setState(() {
-                                      filteredFriendList[index].user!.friendRequestSent = FriendRequestSent(
-                                        id:  filteredFriendList[index].user!.id,
+                                        message: message,
                                       );
-                                    });
+                                    }));
+                              }
+                              else if(filteredFriendList[index].user!.friendRequestSent != null) {
+                                showInterestedBloc.add(UnSendFriendEvent(
+                                    userId: filteredFriendList[index].user!.id,
+                                    onSuccess: (message) {
+                                      setState(() {
+                                        filteredFriendList[index].user!.isFriend = null;
+                                        filteredFriendList[index].user!.friendRequestSent = null;
+                                        widget.refreshPageCallback();
+                                        // _refreshPageAfterEdit();
+                                      });
+                                      showCustomSnackBar(
+                                          context: context,
+                                          message:message,
+                                          backgroundColor:
+                                          COLORS.semanticTwo);
+                                    },
+                                    onError: (message) {
+                                      showCustomSnackBar(
+                                        context: context,
+                                        message: message,
+                                      );
+                                    }));
+                              }
 
-                                    widget.refreshPageCallback();
-                                  },
-                                  onError: (message) {
-                                    showCustomSnackBar(
-                                      context: context,
-                                      message: message,
-                                    );
+                              else{
+                                showInterestedBloc.add(AddFriendEvent(
+                                    userId: filteredFriendList[index].user!.id,
+                                    onSuccess: (message) {
+                                      setState(() {
+                                        filteredFriendList[index].user!.friendRequestSent = FriendRequestSent(
+                                          id:  filteredFriendList[index].user!.id,
+                                        );
+                                      });
 
-                                  }));
-                            }
-                          },
-                          width: SizeConfig.blockWidth * 35,
-                          height: SizeConfig.blockHeight * 6.25,
-                          backgroundColor: (filteredFriendList[index].user!.isFriend != null || filteredFriendList[index].user!.friendRequestSent != null)
-                              ? COLORS.neutralDarkTwo : COLORS.primary,
-                          textColor:  (filteredFriendList[index].user!.isFriend != null || filteredFriendList[index].user!.friendRequestSent != null)
-                              ? COLORS.neutralDark : COLORS.white,
-                          showIcon: false)
+                                      widget.refreshPageCallback();
+                                    },
+                                    onError: (message) {
+                                      showCustomSnackBar(
+                                        context: context,
+                                        message: message,
+                                      );
+
+                                    }));
+                              }
+                            },
+                            width: SizeConfig.blockWidth * 32,
+                            height: SizeConfig.blockHeight * 6,
+                            textFontSize: 3.2,
+                            verticalSpaceButton: 1.5,
+                            backgroundColor: (filteredFriendList[index].user!.isFriend != null || filteredFriendList[index].user!.friendRequestSent != null)
+                                ? COLORS.neutralDarkTwo : COLORS.primary,
+                            textColor:  (filteredFriendList[index].user!.isFriend != null || filteredFriendList[index].user!.friendRequestSent != null)
+                                ? COLORS.neutralDark : COLORS.white,
+                            showIcon: false)
+                    ),
                   ):const SizedBox(); ;
                 },
               ),

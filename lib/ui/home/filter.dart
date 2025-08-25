@@ -146,7 +146,7 @@ class _SearchFilterBottomSheetState extends State<SearchFilterBottomSheet> {
                         int index = entry.key + 1;
                         var item = entry.value;
                         return DropdownItem(
-                            label: item.language,
+                            label: item.language.tr(),
                             value: Language(name: item.language, id: index));
                       }).toList();
                   knownLanguageUpdate();

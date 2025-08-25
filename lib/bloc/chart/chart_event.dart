@@ -385,3 +385,28 @@ class RejectChartRequestEvent extends ChartEvent {
   @override
   List<Object> get props => [chatId,onError,onSuccess];
 }
+
+
+class AcceptChatPublicGroupEvent extends ChartEvent {
+  String requiredId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  AcceptChatPublicGroupEvent({
+    required this.requiredId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [requiredId,onError,onSuccess];
+}
+
+class RejectChatPublicGroupEvent extends ChartEvent {
+  String requiredId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  RejectChatPublicGroupEvent({
+    required this.requiredId,
+    required this.onSuccess,required this.onError
+  });
+  @override
+  List<Object> get props => [requiredId,onError,onSuccess];
+}

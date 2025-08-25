@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/size_config.dart';
 
 import '../models/fetch_profile_model.dart';
 
@@ -368,4 +370,38 @@ bool _isTimeInRange(TimeOfDay current, TimeOfDay from, TimeOfDay to) {
   final toMinutes = to.hour * 60 + to.minute;
 
   return currentMinutes >= fromMinutes && currentMinutes <= toMinutes;
+}
+
+
+
+
+class AvatarImage extends StatelessWidget {
+  final String image;
+  final double size;
+  final BoxFit fit;
+
+  const AvatarImage({
+    super.key,
+    required this.image,
+    this.size = 15,
+    this.fit = BoxFit.cover,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipOval(
+      child: SizedBox.square(
+        dimension: SizeConfig.blockWidth*size,
+        child: Image.network(
+          image,
+          fit: fit,
+          alignment: Alignment.center,
+          loadingBuilder: (c, child, p) =>
+          p == null ? child : Container(color: COLORS.neutralDarkTwo),
+          errorBuilder: (c, e, s) =>
+              Container(color: COLORS.neutralDarkTwo),
+        ),
+      ),
+    );
+  }
 }

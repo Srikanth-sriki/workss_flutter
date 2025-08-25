@@ -385,9 +385,30 @@
   "UPDATE": "UPDATE",
   "Your Smart Call settings have been modified. Do you want to save these changes?": "Your Smart Call settings have been modified. Do you want to save these changes?",
 
-  "Group Type":"Group Type"
-
-
-
+  "Group Type":"Group Type",
+  "English": "English",
+  "Kannada": "Kannada",
+  "Hindi": "Hindi",
+  "Tamil": "Tamil",
+  "Telugu": "Telugu",
+  "Gujarati": "Gujarati",
+  "Malayalam": "Malayalam",
+  "Marathi": "Marathi",
+  "Bengali": "Bengali",
+  "Odia": "Odia",
+  "Punjabi": "Punjabi",
+  "Assamese": "Assamese",
+  "Urdu": "Urdu",
+  "Per Day": "Per Day",
+  "Per Hour": "Per Hour",
+  "Per Month": "Per Month",
+  "Per Week": "Per Week",
+  "Per Year": "Per Year",
+  "View Insights": "View Insights",
+  "Select": "Select",
+  "Years": "Years",
+  "Create an Account": "Create an Account",
+  "Register now to unlock full access and personalized features.": "Register now to unlock full access and personalized features.",
+  "REGISTER NOW":"REGISTER NOW"
 
 }
