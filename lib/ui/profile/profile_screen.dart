@@ -110,21 +110,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           InkWell(
                             onTap: ()=>{
-                              showSimpleImagePreview(context, Config.profilePic)
+                              showModernImagePreview(context,Config.profilePic, heroTag: Config.profilePic)
                             },
-                            child: Container(
-                              width: SizeConfig.blockWidth * 20,
-                              height: SizeConfig.blockWidth * 20,
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: NetworkImage(Config.profilePic),
-                                    fit: BoxFit.fill,
-                                  ),
-                                  border: Border.all(
-                                      color: COLORS.primary,
-                                      width: SizeConfig.blockWidth * 0.15),
-                                  borderRadius: BorderRadius.all(Radius.circular(
-                                      SizeConfig.blockWidth * 3))),
+                            splashColor: COLORS.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 20 / 2),
+                            child: Hero(
+                              tag: Config.profilePic,
+                              child: Container(
+                                width: SizeConfig.blockWidth * 20,
+                                height: SizeConfig.blockWidth * 20,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(Config.profilePic),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    border: Border.all(
+                                        color: COLORS.primary,
+                                        width: SizeConfig.blockWidth * 0.15),
+                                    borderRadius: BorderRadius.all(Radius.circular(
+                                        SizeConfig.blockWidth * 3))),
+                              ),
                             ),
                           ),
                           SizedBox(width: SizeConfig.blockWidth * 6),

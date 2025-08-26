@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/image_preview_modal.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 
 import '../../bloc/chart/chart_bloc.dart';
@@ -111,20 +112,28 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: SizeConfig.blockWidth * 12,
-                                  height: SizeConfig.blockWidth * 12,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: COLORS.primary,
-                                          width: SizeConfig.blockWidth * 0.2),
-                                      image: DecorationImage(
-                                          image: NetworkImage(
-                                              professional.profilePic!),
-                                          fit: BoxFit.cover),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(
-                                              SizeConfig.blockWidth * 6))),
+                                InkWell(
+                                  onTap: () => showModernImagePreview(context, professional.profilePic!,heroTag:  professional.profilePic!),
+                                  splashColor: COLORS.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 12 / 2),
+                                  child: Hero(
+                                    tag:  professional.profilePic!,
+                                    child: Container(
+                                      width: SizeConfig.blockWidth * 12,
+                                      height: SizeConfig.blockWidth * 12,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: COLORS.primary,
+                                              width: SizeConfig.blockWidth * 0.2),
+                                          image: DecorationImage(
+                                              image: NetworkImage(
+                                                  professional.profilePic!),
+                                              fit: BoxFit.cover),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                  SizeConfig.blockWidth * 6))),
+                                    ),
+                                  ),
                                 ),
                                 SizedBox(width: SizeConfig.blockWidth * 2),
                                 Column(
@@ -601,6 +610,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                         vertical: SizeConfig.blockWidth * 2,
                                       ),
                                       child: buildProfessionalCard(
+                                          context: context,
                                           accountVerified:
                                               professionalData!.isVerified!,
                                           image: professionalData!.profilePic!,

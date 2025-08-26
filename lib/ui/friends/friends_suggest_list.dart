@@ -117,6 +117,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                   Padding(
                     padding:  EdgeInsets.symmetric(vertical: SizeConfig.blockHeight*0.8),
                     child: friendSearchDetailsCards(
+                        context: context,
                         image: filteredFriendList[index].user!.profilePic,
                         name: filteredFriendList[index].user!.name,
                         onTapCard: () {

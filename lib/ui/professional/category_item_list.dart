@@ -271,7 +271,8 @@ class _CategoryItemListState extends State<CategoryItemList> {
                       },
                     ),
                   );
-                }
+                },
+                context: context
             ),
           );
         } else if (isFetchingMore) {

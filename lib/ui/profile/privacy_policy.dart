@@ -51,14 +51,14 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
             });
           },
           onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://workss.co/privacy-policy')) {
+            if (request.url.startsWith('https://privacy.workss.co.in/privacy-policy')) {
               return NavigationDecision.navigate;
             }
             return NavigationDecision.prevent;
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://workss.co/privacy-policy'));
+      ..loadRequest(Uri.parse('https://privacy.workss.co.in/privacy-policy'));
   }
 
   @override

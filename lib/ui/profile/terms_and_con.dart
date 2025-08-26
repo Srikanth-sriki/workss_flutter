@@ -51,14 +51,14 @@ class _TermsAndConditionState extends State<TermsAndCondition> {
             });
           },
           onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://workss.co/terms&conditions')) {
+            if (request.url.startsWith('https://privacy.workss.co.in/terms-conditions')) {
               return NavigationDecision.navigate;
             }
             return NavigationDecision.prevent;
           },
         ),
       )
-      ..loadRequest(Uri.parse('https://workss.co/terms&conditions'));
+      ..loadRequest(Uri.parse('https://privacy.workss.co.in/terms-conditions'));
   }
 
   @override

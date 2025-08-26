@@ -245,13 +245,13 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
-      backgroundColor: COLORS.white,
+      backgroundColor: COLORS.primary,
       appBar: AppBar(
         systemOverlayStyle: customSystemOverlayStyle(
           statusBarColor: COLORS.primary,
         ),
         toolbarHeight: 0,
-        backgroundColor: COLORS.white,
+        backgroundColor: COLORS.primary,
       ),
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {

@@ -100,10 +100,10 @@ class _KYCVerificationScreenState extends State<KYCVerificationScreen> {
           } else if (state is UploadImageFailed) {
             FocusScope.of(context).unfocus();
             setState(() => loading = false);
-            showCustomSnackBar(context: context, message: state.message,backgroundColor: COLORS.semanticTwo);
+            showCustomSnackBar(context: context, message: state.message);
           } else if (state is KycImageAddedSuccess) {
             if (mounted) {
-              showCustomSnackBar(context: context, message: state.message);
+              showCustomSnackBar(context: context, message: state.message,backgroundColor: COLORS.semanticTwo);
               setState(() => loading = false);
               Navigator.pushNamed(context, '/main_screen', arguments: {'selectedIndex': 0});
             }

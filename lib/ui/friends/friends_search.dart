@@ -228,6 +228,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                           controller: _scrollController,
                           itemBuilder: (context, index) {
                             return friendSearchCards(
+                              context: context,
                               image: state.friendsSearchList[index].friends.profilePic,
                               name: state.friendsSearchList[index].friends.name,
                               onTapCard: () {

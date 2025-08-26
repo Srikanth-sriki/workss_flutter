@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/image_preview_modal.dart';
 
 import '../../global_helper/reuse_widget.dart';
 
@@ -12,7 +13,9 @@ Widget friendSearchCards(
     required String name,
     required VoidCallback onTapCard,
     required VoidCallback onTapMessage,
+      required BuildContext context,
     required VoidCallback onTapIcon}) {
+  final tag = 'avatarTag_$image';
   return InkWell(
     onTap: onTapCard,
     child: Container(
@@ -32,16 +35,24 @@ Widget friendSearchCards(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: SizeConfig.blockWidth * 15,
-                height: SizeConfig.blockWidth * 15,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(image),
-                      fit: BoxFit.fill,
-                    ),
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(SizeConfig.blockWidth * 7.5))),
+              InkWell(
+                onTap: () => showModernImagePreview(context,image,heroTag: tag),
+                splashColor: COLORS.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
+                child: Hero(
+                  tag: tag,
+                  child: Container(
+                    width: SizeConfig.blockWidth * 15,
+                    height: SizeConfig.blockWidth * 15,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(image),
+                          fit: BoxFit.fill,
+                        ),
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(SizeConfig.blockWidth * 7.5))),
+                  ),
+                ),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
@@ -103,8 +114,10 @@ Widget friendSearchDetailsCards({
   bool sendMessageButtonRequired = false,
   Widget? widgetButton,
   bool widgetButtonRequired = false,
-  bool isGroup = false
+  bool isGroup = false,
+  required BuildContext context,
 }) {
+  final tag = 'avatarTag_$image';
   return InkWell(
     onTap: onTapCard,
     splashColor: COLORS.white.withOpacity(0.1),
@@ -124,16 +137,26 @@ Widget friendSearchDetailsCards({
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if(image.isNotEmpty)...[
-                Container(
-                  width: SizeConfig.blockWidth * 14,
-                  height: SizeConfig.blockWidth * 14,
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(image),
-                        fit: BoxFit.fill,
-                      ),
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(SizeConfig.blockWidth * 7))),
+                InkWell(
+                  onTap: (){
+                    showModernImagePreview(context, image, heroTag: tag);
+                  },
+                  splashColor: COLORS.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
+                  child: Hero(
+                    tag: tag,
+                    child: Container(
+                      width: SizeConfig.blockWidth * 14,
+                      height: SizeConfig.blockWidth * 14,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(image),
+                            fit: BoxFit.fill,
+                          ),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(SizeConfig.blockWidth * 7))),
+                    ),
+                  ),
                 )
               ]
               else...[
@@ -206,7 +229,7 @@ Widget friendSearchDetailsCards({
           if (sendMessageButtonRequired) ...[
           SizedBox(
             width: SizeConfig.blockWidth * buttonWidth,
-            height: SizeConfig.blockHeight * 6,
+            height: SizeConfig.blockHeight * 5.6,
             child: TouchRippleEffect(
               borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
               rippleColor: Colors.white60,

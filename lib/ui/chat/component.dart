@@ -63,7 +63,7 @@ Widget chartSearchCards({
                   //   ),
                   // )
                   InkWell(
-                    onTap: () => showSimpleImagePreview(context, image),
+                    onTap: () => showModernImagePreview(context,image,heroTag: heroTag),
                     splashColor: COLORS.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
                     child: Hero(

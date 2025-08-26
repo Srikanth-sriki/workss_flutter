@@ -921,6 +921,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                       SizeConfig.blockHeight ),
                                             ],
                                             buildProfessionalCard(
+                                                context: context,
                                                 accountVerified:
                                                     professionalData!.isVerified!,
                                                 image:

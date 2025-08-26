@@ -370,6 +370,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                           return Column(
                             children: [
                               friendSearchDetailsCards(
+                                  context: context,
                                   image: inviteList.user!.profilePic!,
                                   name: inviteList.user!.name!,
                                   onTapCard: () {},
@@ -463,6 +464,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                     },
                                   ),
                                   friendSearchDetailsCards(
+                                    context: context,
                                     image: inviteList.user!.profilePic!, //
                                     name: inviteList.user!
                                         .name!, // Use data from InviteFriend

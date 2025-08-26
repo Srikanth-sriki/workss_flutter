@@ -180,6 +180,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                         return filteredFriendList[index].user != null ?
 
                           friendSearchDetailsCards(
+                              context: context,
                             image: filteredFriendList[index].user!.profilePic,
                             name: filteredFriendList[index].user!.name,
                             onTapCard: () {
@@ -1169,6 +1170,7 @@ class _FriendsDetailsScreenState extends State<FriendsDetailsScreen> {
                                     vertical: SizeConfig.blockHeight*0.8
                                   ),
                                   child: friendSearchDetailsCards(
+                                    context: context,
                                     image: friendList[index].user!.profilePic,
                                     name: friendList[index].user!.name,
                                     onTapCard: () {

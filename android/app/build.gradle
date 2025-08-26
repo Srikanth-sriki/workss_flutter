@@ -30,16 +30,25 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        targetSdk = 35
+        versionCode = 12
+        versionName = "1.0.10"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('upload-keystore.jks') // relative to android/app
+            storePassword 'PondyRent'
+            keyAlias 'upload'
+            keyPassword 'PondyRent'
+        }
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.release
             shrinkResources false
             minifyEnabled false
         }
