@@ -152,7 +152,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          singleWork.requiredProfession!,
+                          singleWork.professionalSubCategory != null ? getCategoryProfessionCardName(singleWork.professionalSubCategory) :singleWork.requiredProfession!,
                           style: TextStyle(
                             color: COLORS.black,
                             fontSize: SizeConfig.blockWidth * 3.8,
@@ -263,7 +263,7 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                       ),
                     ),
                     registerTextCard(
-                        text: singleWork.workPlace!,
+                        text: singleWork.workPlaceCategory != null ? getCategoryWorkPlaceCardName(singleWork.workPlaceCategory) :singleWork.workPlace!,
                         image: 'assets/images/home/home.png',
                         color: COLORS.primary,
                         textColor: COLORS.neutralDark),
@@ -273,7 +273,9 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                         color: COLORS.primary,
                         textColor: COLORS.neutralDark),
                     registerTextCard(
-                        text: singleWork.knowLanguage!.join(", "),
+                        text: singleWork.knowLanguage!
+                            .map((lang) => lang.tr())
+                            .join(", "),
                         image: 'assets/images/home/speak.png',
                         color: COLORS.primary,
                         textColor: COLORS.neutralDark),
@@ -491,22 +493,25 @@ class _WorkDetailsScreenState extends State<WorkDetailsScreen> {
                         itemCount: similarWorks.length,
                         itemBuilder: (context, index) {
                           var work = similarWorks[index]!;
+                          final languages = work.knowLanguage!
+                              .map((lang) => lang.tr())
+                              .join(", ");
                           return Container(
                             padding: EdgeInsets.symmetric(
                               vertical: SizeConfig.blockWidth * 2,
                             ),
                             child: WorkCard(
-                              title: work.requiredProfession ?? '--',
-                              location:'${work.locality} ${work.city}' ?? '--',
+                              title:work.professionalSubCategory != null ? getCategoryProfessionCardName(work.professionalSubCategory) :work.requiredProfession?? '--',
+                              location: '${work.locality} ${work.city}' ?? '--',
                               timeAgo: timeAgo(work.updatedAt!),
-                              jobType: work.workPlace ?? '--',
+                              jobType: work.workPlaceCategory != null ? getCategoryWorkPlaceCardName(work.workPlaceCategory) :work.workPlace ?? '--',
                               experience: work.experienceLevel ?? '--',
                               experienceImage:
                                   'assets/images/home/work_select.png',
                               gender: work.gender ?? '--',
                               genderImage: 'assets/images/home/gender.png',
                               jobTypeImage: 'assets/images/home/home.png',
-                              language: work.knowLanguage!.join(", ") ?? '--',
+                              language: languages ?? '--',
                               languageImage: 'assets/images/home/speak.png',
                               onShowInterest: () {},
                               onCardClick: () {

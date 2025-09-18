@@ -198,7 +198,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      viewFetchPostedWork.requiredProfession!,
+                      viewFetchPostedWork.professionalSubCategory != null ? getCategoryProfessionCardName(viewFetchPostedWork.professionalSubCategory) :viewFetchPostedWork.requiredProfession!,
                       style: TextStyle(
                         color: COLORS.white,
                         fontSize: SizeConfig.blockWidth * 4.2,
@@ -253,7 +253,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               registerTextCard(
-                  text: viewFetchPostedWork.workPlace!,
+                  text: viewFetchPostedWork.workPlaceCategory != null ? getCategoryWorkPlaceCardName(viewFetchPostedWork.workPlaceCategory) :viewFetchPostedWork.workPlace!,
                   image: "assets/images/home/home.png",
                   color: COLORS.white,
                   textColor: COLORS.primaryOne,
@@ -267,7 +267,8 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                   imageSize: 3.4,
                   textFontSize: 3.2),
               registerTextCard(
-                  text: viewFetchPostedWork.knowLanguage!.join(", "),
+                  text: viewFetchPostedWork.knowLanguage!.map((lang) => lang.tr())
+                      .join(", "),
                   image: "assets/images/home/speak.png",
                   color: COLORS.white,
                   textColor: COLORS.primaryOne,
@@ -368,6 +369,9 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
         itemBuilder: (context, index) {
           var professionalData =
               viewFetchPostedWork.workIntrestsDetailsView![index];
+          final languages = professionalData.user?.knownLanguages!
+              .map((lang) => lang.tr())
+              .join(", ");
           return Container(
             padding: EdgeInsets.symmetric(
                 vertical: SizeConfig.blockWidth * 2,
@@ -413,9 +417,9 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                 accountVerified: professionalData!.user!.isVerified!,
                 image: professionalData!.user!.profilePic!,
                 name: professionalData!.user!.name!,
-                profession: professionalData.user!.professionType!,
+                profession: professionalData.user!.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.user!.professionalSubCategory) :professionalData.user!.professionType!,
                 location: professionalData.user!.city!,
-                languages: professionalData.user!.knownLanguages!.join(", "),
+                languages: languages!,
                 gender: professionalData.user!.gender!,
                 price: professionalData.user!.charges!,
                 paymentType: professionalData.user!.chargeType!,
@@ -423,7 +427,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
                 experienceImage: 'assets/images/home/work_select.png',
                 genderImage: 'assets/images/home/gender.png',
                 jobTypeImage: 'assets/images/profile/prof.png',
-                language: professionalData.user!.knownLanguages!.join(", "),
+                language: languages!,
                 languageImage: 'assets/images/home/speak.png',
                 contacted:
                 professionalData.user!.isContacted != null,

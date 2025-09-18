@@ -288,6 +288,9 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
       itemBuilder: (context, index) {
         if (index < professionalsPostedWork.length) {
           final professionalData = professionalsPostedWork[index];
+          final languages = professionalData?.knownLanguages!
+              .map((lang) => lang.tr())
+              .join(", ");
           return Container(
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.blockWidth * 4.5,
@@ -297,9 +300,10 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 accountVerified: professionalData!.isVerified!,
                 image: professionalData!.profilePic!,
                 name: professionalData!.name!,
-                profession: professionalData.professionType!,
+                profession: professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
+                    .professionType!,
                 location: professionalData.city!,
-                languages: professionalData.knownLanguages!.join(", "),
+                languages: languages!,
                 gender: professionalData.gender!,
                 price: professionalData.charges!,
                 paymentType: professionalData.chargeType!,
@@ -313,7 +317,7 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 experienceImage: 'assets/images/home/work_select.png',
                 genderImage: 'assets/images/home/gender.png',
                 jobTypeImage: 'assets/images/profile/prof.png',
-                language: professionalData.knownLanguages!.join(", "),
+                language: languages!,
                 languageImage: 'assets/images/home/speak.png',
                 messageOnTap: (){
                   chartBloc.add(

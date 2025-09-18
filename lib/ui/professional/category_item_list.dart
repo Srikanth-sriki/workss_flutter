@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +18,7 @@ import '../../models/professionals_list_model.dart';
 import '../chat/chat_view.dart';
 
 class CategoryItemList extends StatefulWidget {
-  final String subCategory;
+  final dynamic subCategory;
   const CategoryItemList({super.key,required this.subCategory});
 
   @override
@@ -61,7 +62,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
         page: currentPage,
         pageSize: pageSize,
         keyWord: "",
-        profession: widget.subCategory,
+        profession: widget.subCategory.name!,
         city: "",
         gender: "",
         currentLongitude: '',knownLanguages: [],
@@ -87,7 +88,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
     return Scaffold(
       backgroundColor: COLORS.white,
       appBar: CustomAppBar(
-          title: widget.subCategory,
+          title: capitalizeEachWord(getCategoryName(widget.subCategory)),
           backgroundColor: COLORS.white,
           borderColor: false,
           titleColors: COLORS.neutralDark),
@@ -133,6 +134,9 @@ class _CategoryItemListState extends State<CategoryItemList> {
       itemBuilder: (context, index) {
         if (index < professionalsPostedWork.length) {
           final professionalData = professionalsPostedWork[index];
+          final languages = professionalData?.knownLanguages!
+              .map((lang) => lang.tr())
+              .join(", ");
           return Container(
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.blockWidth * 4.5,
@@ -141,9 +145,10 @@ class _CategoryItemListState extends State<CategoryItemList> {
                 accountVerified: professionalData!.isVerified!,
                 image: professionalData!.profilePic!,
                 name: professionalData!.name!,
-                profession: professionalData.professionType!,
+                profession:  professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
+                    .professionType!,
                 location: professionalData.city!,
-                languages: professionalData.knownLanguages!.join(", "),
+                languages: languages!,
                 gender: professionalData.gender!,
                 price: professionalData.charges!,
                 paymentType: professionalData.chargeType!,
@@ -153,7 +158,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
                 experienceImage: 'assets/images/home/work_select.png',
                 genderImage: 'assets/images/home/gender.png',
                 jobTypeImage: 'assets/images/profile/prof.png',
-                language: professionalData.knownLanguages!.join(", "),
+                language: languages!,
                 languageImage: 'assets/images/home/speak.png',
                 smartControlEnable: isSmartControlEnabled(
                   professionalData.smartCallControl,

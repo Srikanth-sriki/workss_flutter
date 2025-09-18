@@ -163,7 +163,7 @@ Widget registerText({required String text, required String image}) {
         SizedBox(width: SizeConfig.blockWidth * 2),
         Flexible(
           child: Text(
-            capitalizeEachWord(text),
+            capitalizeEachWord(text).tr(),
             style: TextStyle(
               color: COLORS.neutralDarkOne,
               fontSize: SizeConfig.blockWidth * 3.3,

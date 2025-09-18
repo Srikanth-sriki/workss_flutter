@@ -28,6 +28,7 @@ class ProfessionalsPostedWork {
   IsContacted? isContacted;
   List<SmartCallSchedule>? smartCallSchedule;
   String? smartCallControl;
+  ProfessionalSubCategory? professionalSubCategory;
 
   ProfessionalsPostedWork({
     this.id,
@@ -49,6 +50,7 @@ class ProfessionalsPostedWork {
     this.isContacted,
     this.smartCallSchedule,
     this.smartCallControl,
+    this.professionalSubCategory,
   });
 
   factory ProfessionalsPostedWork.fromJson(Map<String, dynamic> json) => ProfessionalsPostedWork(
@@ -82,6 +84,8 @@ class ProfessionalsPostedWork {
         ? List<SmartCallSchedule>.from(
         (json["smart_call_schedule"] as List).map((x) => SmartCallSchedule.fromJson(x)))
         : null,
+    professionalSubCategory: json["professionalSubCategory"] != null?
+    ProfessionalSubCategory.fromJson(json["professionalSubCategory"]):null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -109,6 +113,7 @@ class ProfessionalsPostedWork {
     "smart_call_control":smartCallControl,
     "smart_call_control": smartCallControl,
     "smart_call_schedule": smartCallSchedule?.map((x) => x.toJson()).toList(),
+    "professionalSubCategory": professionalSubCategory!.toJson(),
   };
 }
 
@@ -136,3 +141,72 @@ class IsContacted {
   };
 }
 
+class ProfessionalSubCategory {
+  String? id;
+  String? name;
+  String? categoryId;
+  Translation? translation;
+
+
+  ProfessionalSubCategory({
+    this.id,
+    this.name,
+    this.categoryId,
+    this.translation,
+
+  });
+
+  factory ProfessionalSubCategory.fromJson(Map<String, dynamic> json) => ProfessionalSubCategory(
+    id: json["id"],
+    name: json["name"],
+    categoryId: json["category_id"],
+    translation: json["translation"] != null?Translation.fromJson(json["translation"]):null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "category_id": categoryId,
+    "translation": translation!.toJson(),
+  };
+}
+
+class Translation {
+  String? hindi;
+  String? tamil;
+  String ?telugu;
+  String ?kannada;
+  String? marathi;
+  String? gujarati;
+  String? malayalam;
+
+  Translation({
+    this.hindi,
+    this.tamil,
+    this.telugu,
+    this.kannada,
+    this.marathi,
+    this.gujarati,
+    this.malayalam,
+  });
+
+  factory Translation.fromJson(Map<String, dynamic> json) => Translation(
+    hindi: json["hindi"],
+    tamil: json["tamil"],
+    telugu: json["telugu"],
+    kannada: json["kannada"],
+    marathi: json["marathi"],
+    gujarati: json["gujarati"],
+    malayalam: json["malayalam"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "hindi": hindi,
+    "tamil": tamil,
+    "telugu": telugu,
+    "kannada": kannada,
+    "marathi": marathi,
+    "gujarati": gujarati,
+    "malayalam": malayalam,
+  };
+}

@@ -168,7 +168,7 @@ Widget registerTextCard(
         SizedBox(width: SizeConfig.blockWidth * 2),
         Flexible(
           child: Text(
-            capitalizeEachWord(text),
+            capitalizeEachWord(text).tr(),
             style: TextStyle(
               color: textColor,
               fontSize: SizeConfig.blockWidth * textFontSize!,

@@ -162,6 +162,8 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
     citySelected = widget.fetchPostedModel.city!;
     localitySelected = widget.fetchPostedModel.locality!;
     pincodeSelected = widget.fetchPostedModel.pincode!;
+    _selectedWorkCityId = widget.fetchPostedModel.cityId!;
+    _selectedWorkLocalityId = widget.fetchPostedModel.localityId!;
   }
 
   void knownLanguageUpdate() {
@@ -207,8 +209,12 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
         longitude: longitude!,
         description: bioController.text,
         city: citySelected,
-      pincode: pincodeSelected,
-      locality:localitySelected
+        pincode: pincodeSelected,
+        locality:localitySelected,
+        workPlaceId: _selectedWorkPlaceId!,
+        profCategoryId: _selectedProfessionId!,
+        localityId: _selectedWorkLocalityId!,
+        cityId: _selectedWorkCityId!
     ));
   }
 
@@ -492,6 +498,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                           items: professionalTypesItem,
                           onChanged: (value) => setState(() {
                             _selectedProfession = value;
+                            _selectedProfessionId = value.id;
                             _validateForm();
                           }),
                           itemLoading:professionalTypesLoading ,
@@ -658,6 +665,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                                       pincodeSelected = pincodeAdd;
                                       _selectedWorkCityId=cityId;
                                       _selectedWorkLocalityId=localityId;
+
                                     });
                                   },
                                 ),
@@ -728,6 +736,7 @@ class _EditPostWorkScreenState extends State<EditPostWorkScreen> {
                           items: dropdownWorkPlaceItem,
                           onChanged: (value) => setState(() {
                             _selectedWorkPlace = value;
+                            _selectedWorkPlaceId = value.id;
                             _validateForm();
                           }),
                           itemLoading: workPlaceLoading,

@@ -108,19 +108,22 @@ class _PostedWorkListState extends State<PostedWorkList> {
                             itemCount: fetchPostedModel.length,
                             itemBuilder: (context, index) {
                               var profile = fetchPostedModel[index];
+                              final languages = profile.knowLanguage!
+                                  .map((lang) => lang.tr())
+                                  .join(", ");
                               return Padding(
                                 padding: EdgeInsets.symmetric(
                                   vertical: SizeConfig.blockWidth * 1.5,
                                   horizontal: SizeConfig.blockHeight * 2.5,
                                 ),
                                 child: WorkCard(
-                                  title: profile.requiredProfession!,
+                                  title: profile.professionalSubCategory != null ? getCategoryProfessionCardName(profile.professionalSubCategory) :profile.requiredProfession!,
                                   location:'${profile.locality} ${profile.city}' ?? '--',
                                   timeAgo: timeAgo(profile.updatedAt!),
-                                  jobType: profile.workPlace!,
+                                  jobType: profile.workPlaceCategory != null ? getCategoryWorkPlaceCardName(profile.workPlaceCategory) :profile.workPlace!,
                                   experience: profile.experienceLevel!,
                                   gender: profile.gender!,
-                                  language: profile.knowLanguage!.join(", "),
+                                  language: languages,
                                   experienceImage:
                                       'assets/images/home/work_select.png',
                                   genderImage: 'assets/images/home/gender.png',

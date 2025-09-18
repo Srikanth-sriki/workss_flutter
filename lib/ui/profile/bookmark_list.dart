@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,6 +98,9 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                               itemBuilder: (context, index) {
                                 var professionalData =
                                     professionalsPostedWork![index];
+                                final languages = professionalData?.knownLanguages!
+                                    .map((lang) => lang.tr())
+                                    .join(", ");
                                 return Container(
                                   padding: EdgeInsets.symmetric(
                                       vertical: SizeConfig.blockWidth * 2,
@@ -172,11 +176,10 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                       image: professionalData!.profilePic!,
                                       name: professionalData!.name!,
                                       profession:
-                                          professionalData.professionType!,
+                                      professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
+                                          .professionType!,
                                       location: professionalData.city!,
-                                      languages: professionalData
-                                          .knownLanguages!
-                                          .join(", "),
+                                      languages: languages!,
                                       gender: professionalData.gender!,
                                       price: professionalData.charges!,
                                       paymentType: professionalData.chargeType!,

@@ -334,21 +334,24 @@ class _WorkSearchListState extends State<WorkSearchList> {
       itemBuilder: (context, index) {
         if (index < homeFetchModel.length) {
           final work = homeFetchModel[index];
+          final languages = work.knowLanguage!
+              .map((lang) => lang.tr())
+              .join(", ");
           return Container(
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.blockWidth * 4.5,
                 vertical: SizeConfig.blockHeight * 0.5),
             child: WorkCard(
-              title: work.requiredProfession ?? '--',
-              location:'${work.locality} ${work.city}' ?? '--',
+              title:work.professionalSubCategory != null ? getCategoryProfessionCardName(work.professionalSubCategory) :work.requiredProfession?? '--',
+              location: '${work.locality} ${work.city}' ?? '--',
               timeAgo: timeAgo(work.updatedAt!),
-              jobType: work.workPlace ?? '--',
+              jobType: work.workPlaceCategory != null ? getCategoryWorkPlaceCardName(work.workPlaceCategory) :work.workPlace ?? '--',
               experience: work.experienceLevel ?? '--',
               experienceImage: 'assets/images/home/work_select.png',
               gender: work.gender ?? '--',
               genderImage: 'assets/images/home/gender.png',
               jobTypeImage: 'assets/images/home/home.png',
-              language: work.knowLanguage!.join(", ") ?? '--',
+              language: languages ?? '--',
               languageImage: 'assets/images/home/speak.png',
               onShowInterest: () {},
               onCardClick: () {

@@ -54,6 +54,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     profileBloc = BlocProvider.of<ProfileBloc>(context);
+    _refreshPageAfterEdit();
+
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _refreshPageAfterEdit();
   }
 
   void _refreshPageAfterEdit() {

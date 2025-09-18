@@ -684,7 +684,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                               width: SizeConfig.blockWidth * 19,
                                               child: Text(
                                                 capitalizeEachWord(
-                                                    categoriesData[index].name),
+                                                    getCategoryName(categoriesData[index])),
                                                 style: TextStyle(
                                                   color: COLORS.neutralDark,
                                                   fontSize:
@@ -735,6 +735,9 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                     itemBuilder: (context, index) {
                                       var professionalData =
                                           professionalsPostedWork![index];
+                                      final languages = professionalData?.knownLanguages!
+                                          .map((lang) => lang.tr())
+                                          .join(", ");
                                       return Container(
                                         padding: EdgeInsets.symmetric(
                                             vertical: SizeConfig.blockWidth * 2,
@@ -927,12 +930,10 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                 image:
                                                     professionalData!.profilePic!,
                                                 name: professionalData!.name!,
-                                                profession: professionalData
+                                                profession: professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
                                                     .professionType!,
                                                 location: professionalData.city!,
-                                                languages: professionalData
-                                                    .knownLanguages!
-                                                    .join(", "),
+                                                languages: languages!,
                                                 gender: professionalData.gender!,
                                                 price: professionalData.charges!,
                                                 paymentType:
@@ -954,9 +955,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                                                     'assets/images/home/gender.png',
                                                 jobTypeImage:
                                                     'assets/images/profile/prof.png',
-                                                language: professionalData
-                                                    .knownLanguages!
-                                                    .join(", "),
+                                                language: languages!,
                                                 languageImage:
                                                     'assets/images/home/speak.png',
                                                 onShowInterest: () {

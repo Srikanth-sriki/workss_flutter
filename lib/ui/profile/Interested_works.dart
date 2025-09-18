@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -94,6 +95,9 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                           itemCount: fetchPostedModel.length,
                           itemBuilder: (context, index) {
                             var profile = fetchPostedModel[index];
+                            final languages = profile.knowLanguage!
+                                .map((lang) => lang.tr())
+                                .join(", ");
                             return Container(
                               padding: EdgeInsets.symmetric(
                                 vertical: SizeConfig.blockWidth * 1.5,
@@ -104,13 +108,13 @@ class _InterestedWorkListState extends State<InterestedWorkList> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   WorkCard(
-                                    title: profile.requiredProfession!,
+                                    title: profile.professionalSubCategory != null ? getCategoryProfessionCardName(profile.professionalSubCategory) :profile.requiredProfession!,
                                     location:'${profile.locality} ${profile.city}' ?? '--',
                                     timeAgo: timeAgo(profile.updatedAt!),
-                                    jobType: profile.workPlace!,
+                                    jobType: profile.workPlaceCategory != null ? getCategoryWorkPlaceCardName(profile.workPlaceCategory) :profile.workPlace!,
                                     experience: profile.experienceLevel!,
                                     gender: profile.gender!,
-                                    language: profile.knowLanguage!.join(", "),
+                                    language: languages,
                                     experienceImage:
                                         'assets/images/home/work_select.png',
                                     genderImage:

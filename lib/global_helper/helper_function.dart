@@ -9,7 +9,10 @@ import 'package:image/image.dart' as img;
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:works_app/components/colors.dart';
+import 'package:works_app/components/config.dart';
 import 'package:works_app/components/size_config.dart';
+import 'package:works_app/global_helper/reuse_widget.dart';
+import 'package:works_app/models/category_list_modal.dart';
 
 import '../models/fetch_profile_model.dart';
 
@@ -405,3 +408,53 @@ class AvatarImage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+// String getCategoryName(category) {
+//   final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
+//   final translated = category.translation?.getTranslation(langKey);
+//   return translated?.isNotEmpty == true ? translated! : category.name;
+// }
+
+
+
+String _pickLang(dynamic t, String key) {
+  if (t == null) return '';
+  switch (key) {
+    case 'hindi': return t.hindi;
+    case 'tamil': return t.tamil;
+    case 'telugu': return t.telugu;
+    case 'kannada': return t.kannada;
+    case 'marathi': return t.marathi;
+    case 'gujarati': return t.gujarati;
+    case 'malayalam': return t.malayalam;
+    default: return ''; // e.g., "english"
+  }
+}
+
+String getCategoryProfessionCardName(dynamic category) {
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
+  final tr = _pickLang(category?.translation, langKey).trim();
+  final base = (category?.name ?? '').trim(); // ensure fromJson maps name/place
+  return( category?.translation !=null && langKey != 'english') ? tr : (base.isNotEmpty ? base : '--');
+}
+
+String getCategoryWorkPlaceCardName(dynamic workPlace) {
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
+  final tr = _pickLang(workPlace?.translation, langKey).trim();
+  final base = (workPlace?.place ?? '').trim();
+  return (workPlace?.translation !=null && langKey != 'english') ? tr : (base.isNotEmpty ? base : '--');
+}
+
+
+String getCategoryName(dynamic category) {
+  final langKey = languageCodeToTranslationKey[Config.languageSelected] ?? 'english';
+  final translated = _pickLang(category?.translation, langKey).trim();
+  final base = (category?.name ?? category?['name'] ?? category?['place'] ?? '').toString().trim();
+  return translated.isNotEmpty ? translated : (base.isNotEmpty ? base : '--');
+}
+
+
+

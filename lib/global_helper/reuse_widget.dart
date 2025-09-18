@@ -800,7 +800,7 @@ Widget buildProfessionalCard(
       required BuildContext context,
       required bool smartControlEnable,
     required VoidCallback messageOnTap}) {
-  final tag = 'avatarTag_$image';
+  final tag = image;
   return TouchRippleEffect(
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
     rippleColor: Colors.white60,
@@ -913,7 +913,7 @@ Widget buildProfessionalCard(
                                 imageSize: 3.4,
                                 textFontSize: 3),
                             registerTextCard(
-                                text: "${experience}y experience",
+                                text: "${experience}y ${'Experience'.tr()}",
                                 image: experienceImage,
                                 imageSize: 3.4,
                                 textFontSize: 3),
@@ -943,7 +943,7 @@ Widget buildProfessionalCard(
                               height: SizeConfig.blockHeight * 0.2),softWrap: true,
                         ),
                         Text(
-                          paymentType == 'perday'?'Per Day':capitalizeEachWord(paymentType),
+                          paymentType == 'perday'?'Per Day':capitalizeEachWord(paymentType).tr(),
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
                             fontSize: SizeConfig.blockWidth * 2.8,

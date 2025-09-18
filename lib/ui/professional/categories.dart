@@ -110,7 +110,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                 width: SizeConfig.blockWidth * 55,
                                 child: Text(
                                   capitalizeEachWord(
-                                      widget.categoriesData[index].name),
+                                      getCategoryName(widget.categoriesData[index])),
                                   softWrap: true,
                                   style: TextStyle(
                                     color: COLORS.neutralDark,

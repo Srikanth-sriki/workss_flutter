@@ -31,6 +31,8 @@ class ViewFetchPostedWork {
   // dynamic? deletedAt;
   List<WorkViewDetails>? workIntrestsDetailsView;
   List<WorkViewDetails>? workViewsDetailsView;
+  ProfessionalSubCategory? professionalSubCategory;
+  ProfessionalSubCategory? workPlaceCategory;
 
   ViewFetchPostedWork({
     this.id,
@@ -52,6 +54,8 @@ class ViewFetchPostedWork {
     // this.deletedAt,
     this.workIntrestsDetailsView,
     this.workViewsDetailsView,
+    this.professionalSubCategory,
+    this.workPlaceCategory
   });
 
   factory ViewFetchPostedWork.fromJson(Map<String, dynamic> json) => ViewFetchPostedWork(
@@ -71,6 +75,9 @@ class ViewFetchPostedWork {
     isVerified: json["is_verified"] ?? false,
     workIntrestsDetailsView: json.containsKey('workIntrests')?json["workIntrests"] != null ? List<WorkViewDetails>.from(json["workIntrests"].map((x) => WorkViewDetails.fromJson(x))) : null:null,
     workViewsDetailsView: json.containsKey('workViews')?json["workViews"] != null ? List<WorkViewDetails>.from(json["workViews"].map((x) => WorkViewDetails.fromJson(x))) : null:[],
+    professionalSubCategory: json["professionalSubCategory"] != null?
+    ProfessionalSubCategory.fromJson(json["professionalSubCategory"]):null,
+    workPlaceCategory: json.containsKey("workPlace")?json["workPlace"] == null ? null : ProfessionalSubCategory.fromJson(json["workPlace"]):null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -93,6 +100,8 @@ class ViewFetchPostedWork {
     // "deletedAt": deletedAt,
     "workIntrests": List<dynamic>.from(workIntrestsDetailsView!.map((x) => x.toJson())),
     "workViews": List<dynamic>.from(workViewsDetailsView!.map((x) => x.toJson())),
+    "professionalSubCategory": professionalSubCategory!.toJson(),
+    "workPlace": workPlaceCategory!.toJson(),
   };
 
 }
@@ -106,6 +115,7 @@ class WorkViewDetails {
   // DateTime? updatedAt;
   User? user;
 
+
   WorkViewDetails({
     this.id,
     this.userId,
@@ -114,6 +124,7 @@ class WorkViewDetails {
     // this.updatedAt,
     this.isContacted,
      this.user,
+
   });
 
   factory WorkViewDetails.fromJson(Map<String, dynamic> json) => WorkViewDetails(
@@ -121,7 +132,7 @@ class WorkViewDetails {
     userId: json.containsKey('userId')?json["userId"] ?? "":"",
     workId: json.containsKey('workId')?json["workId"] ?? "":"",
     isContacted: json.containsKey('is_contacted')?json["is_contacted"] ?? false:false,  // Default to false if null
-    user: json.containsKey('user')?json["user"] != null ? User.fromJson(json["user"]) : null:null,  // Handle null case
+    user: json.containsKey('user')?json["user"] != null ? User.fromJson(json["user"]) : null:null,
   );
 
 
@@ -168,6 +179,7 @@ class User {
   IsContacted? isContacted;
   String? smartCallControl;
   List<SmartCallSchedule>? smartCallSchedule;
+  ProfessionalSubCategory? professionalSubCategory;
 
   User({
     this.id,
@@ -200,7 +212,8 @@ class User {
     this.isSaved,
     this.isContacted,
     this.smartCallControl,
-    this.smartCallSchedule
+    this.smartCallSchedule,
+    this.professionalSubCategory,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -233,6 +246,8 @@ class User {
         ? List<SmartCallSchedule>.from(
         (json["smart_call_schedule"] as List).map((x) => SmartCallSchedule.fromJson(x)))
         : null,
+    professionalSubCategory: json["professionalSubCategory"] != null?
+    ProfessionalSubCategory.fromJson(json["professionalSubCategory"]):null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -254,6 +269,7 @@ class User {
     "isContacted": isContacted?.toJson(),
     "smart_call_control": smartCallControl,
     "smart_call_schedule": smartCallSchedule?.map((x) => x.toJson()).toList(),
+    "professionalSubCategory": professionalSubCategory!.toJson(),
   };
 }
 
@@ -280,5 +296,79 @@ class IsContacted {
     "id": id,
     "userId": userId,
     "professionalId": professionalId,
+  };
+}
+
+class ProfessionalSubCategory {
+  String? id;
+  String? name;
+  String? categoryId;
+  Translation? translation;
+  String? place;
+
+
+  ProfessionalSubCategory({
+    this.id,
+    this.name,
+    this.categoryId,
+    this.translation,
+    this.place
+
+  });
+
+  factory ProfessionalSubCategory.fromJson(Map<String, dynamic> json) => ProfessionalSubCategory(
+    id: json["id"],
+    name: json["name"],
+    place: json["place"],
+    categoryId: json["category_id"],
+    translation: json.containsKey('translation')?json["translation"] == null ? null : Translation.fromJson(json["translation"]):null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "place":place,
+    "category_id": categoryId,
+    "translation": translation!.toJson(),
+  };
+}
+
+class Translation {
+  String? hindi;
+  String? tamil;
+  String ?telugu;
+  String ?kannada;
+  String? marathi;
+  String? gujarati;
+  String? malayalam;
+
+  Translation({
+    this.hindi,
+    this.tamil,
+    this.telugu,
+    this.kannada,
+    this.marathi,
+    this.gujarati,
+    this.malayalam,
+  });
+
+  factory Translation.fromJson(Map<String, dynamic> json) => Translation(
+    hindi: json["hindi"],
+    tamil: json["tamil"],
+    telugu: json["telugu"],
+    kannada: json["kannada"],
+    marathi: json["marathi"],
+    gujarati: json["gujarati"],
+    malayalam: json["malayalam"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "hindi": hindi,
+    "tamil": tamil,
+    "telugu": telugu,
+    "kannada": kannada,
+    "marathi": marathi,
+    "gujarati": gujarati,
+    "malayalam": malayalam,
   };
 }

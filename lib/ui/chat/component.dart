@@ -36,7 +36,9 @@ Widget chartSearchCards({
         margin: EdgeInsets.symmetric(
           vertical: SizeConfig.blockHeight * 0.8,
         ),
-        padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4,
+        vertical: SizeConfig.blockWidth * 2
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
           color: COLORS.primaryOne.withOpacity(0.1),

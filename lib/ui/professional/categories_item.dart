@@ -52,7 +52,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
     return Scaffold(
       backgroundColor: COLORS.white,
       appBar: CustomAppBar(
-          title: widget.categoriesItem.name,
+          title: getCategoryName(widget.categoriesItem),
           backgroundColor: COLORS.primaryOne.withOpacity(0.15),
           borderColor: false,
           titleColors: COLORS.neutralDark),
@@ -141,7 +141,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                                         BlocProvider(create: (context) => ChartBloc())
                                       ],
                                       child: CategoryItemList(
-                                        subCategory: item.name,
+                                        subCategory: item,
                                       ),
                                     )));
                       },
@@ -158,7 +158,7 @@ class _CategoriesItemScreenState extends State<CategoriesItemScreen>
                                     color: COLORS.neutralDarkTwo,
                                     width: SizeConfig.blockWidth * 0.15))),
                         child: Text(
-                          capitalizeEachWord(item.name),
+                          capitalizeEachWord(getCategoryName(item)),
                           textAlign: TextAlign.start,
                           style: TextStyle(
                             color: COLORS.neutralDark,

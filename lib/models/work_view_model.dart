@@ -61,6 +61,8 @@ class Work {
   String? city;
   String? pincode;
   String? locality;
+  ProfessionalSubCategory? professionalSubCategory;
+  ProfessionalSubCategory? workPlaceCategory;
 
   Work({
     this.id,
@@ -84,6 +86,8 @@ class Work {
     this.city,
     this.pincode,
     this.locality,
+    this.professionalSubCategory,
+    this.workPlaceCategory
   });
 
   factory Work.fromJson(Map<String, dynamic> json) => Work(
@@ -115,7 +119,11 @@ class Work {
       updatedAt: DateTime.parse(json["updatedAt"]),
       locality: json["locality"] ?? "",
       pincode: json["pincode"] ?? "",
-      city: json["city"] ?? '');
+      city: json["city"] ?? '',
+    professionalSubCategory: json["professionalSubCategory"] != null?
+    ProfessionalSubCategory.fromJson(json["professionalSubCategory"]):null,
+    workPlaceCategory: json.containsKey("workPlace")?json["workPlace"] == null ? null : ProfessionalSubCategory.fromJson(json["workPlace"]):null,
+  );
 
   Map<String, dynamic> toJson() => {
         "id": id,
@@ -139,6 +147,8 @@ class Work {
         "city": city,
         "pincode": pincode,
         "locality": locality,
+    "professionalSubCategory": professionalSubCategory!.toJson(),
+    "workPlace": workPlaceCategory!.toJson(),
       };
 }
 
@@ -204,4 +214,79 @@ class User {
         "country_code": countryCode,
         "mobile": mobile,
       };
+}
+
+
+class ProfessionalSubCategory {
+  String? id;
+  String? name;
+  String? categoryId;
+  Translation? translation;
+  String? place;
+
+
+  ProfessionalSubCategory({
+    this.id,
+    this.name,
+    this.categoryId,
+    this.translation,
+    this.place
+
+  });
+
+  factory ProfessionalSubCategory.fromJson(Map<String, dynamic> json) => ProfessionalSubCategory(
+    id: json["id"],
+    name: json["name"],
+    place: json["place"],
+    categoryId: json["category_id"],
+    translation: json.containsKey('translation')?json["translation"] == null ? null : Translation.fromJson(json["translation"]):null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "place":place,
+    "category_id": categoryId,
+    "translation": translation!.toJson(),
+  };
+}
+
+class Translation {
+  String? hindi;
+  String? tamil;
+  String ?telugu;
+  String ?kannada;
+  String? marathi;
+  String? gujarati;
+  String? malayalam;
+
+  Translation({
+    this.hindi,
+    this.tamil,
+    this.telugu,
+    this.kannada,
+    this.marathi,
+    this.gujarati,
+    this.malayalam,
+  });
+
+  factory Translation.fromJson(Map<String, dynamic> json) => Translation(
+    hindi: json["hindi"],
+    tamil: json["tamil"],
+    telugu: json["telugu"],
+    kannada: json["kannada"],
+    marathi: json["marathi"],
+    gujarati: json["gujarati"],
+    malayalam: json["malayalam"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "hindi": hindi,
+    "tamil": tamil,
+    "telugu": telugu,
+    "kannada": kannada,
+    "marathi": marathi,
+    "gujarati": gujarati,
+    "malayalam": malayalam,
+  };
 }

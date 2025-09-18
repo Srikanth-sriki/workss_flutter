@@ -484,13 +484,14 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               ),
                             ),
                             registerTextCard(
-                                text: professional.professionType!,
+                                text: professional.professionalSubCategory != null ? getCategoryProfessionCardName(professional.professionalSubCategory) :professional
+                                    .professionType!,
                                 image: 'assets/images/home/home.png',
                                 color: COLORS.primary,
                                 textColor: COLORS.neutralDark),
                             registerTextCard(
                                 text:
-                                    "${professional.experiencedYears!}y experience",
+                                    "${professional.experiencedYears!}y ${'Experience'.tr()}",
                                 image: 'assets/images/home/work_select.png',
                                 color: COLORS.primary,
                                 textColor: COLORS.neutralDark),
@@ -507,6 +508,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                     children: [
                                       registerTextCard(
                                           text: professional.knownLanguages!
+                                              .map((lang) => lang.tr())
                                               .join(", "),
                                           image: 'assets/images/home/speak.png',
                                           color: COLORS.primary,
@@ -535,7 +537,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                     ),
                                     Text(
                                       capitalizeEachWord(
-                                          professional.chargeType!),
+                                          professional.chargeType!).tr(),
                                       style: TextStyle(
                                         color: COLORS.neutralDarkOne,
                                         fontSize: SizeConfig.blockWidth * 2.8,
@@ -605,6 +607,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                   itemBuilder: (context, index) {
                                     var professionalData =
                                         similarProfessionals![index];
+                                    final languages = professionalData?.knownLanguages!
+                                        .map((lang) => lang.tr())
+                                        .join(", ");
                                     return Container(
                                       padding: EdgeInsets.symmetric(
                                         vertical: SizeConfig.blockWidth * 2,
@@ -620,11 +625,10 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                             professionalData.smartCallSchedule,
                                           ),
                                           profession:
-                                              professionalData.professionType!,
+                                          professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
+                                              .professionType!,
                                           location: professionalData.city!,
-                                          languages: professionalData
-                                              .knownLanguages!
-                                              .join(", "),
+                                          languages: languages!,
                                           gender: professionalData.gender!,
                                           price: professionalData.charges!,
                                           paymentType:
@@ -641,9 +645,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                               'assets/images/home/gender.png',
                                           jobTypeImage:
                                               'assets/images/profile/prof.png',
-                                          language: professionalData
-                                              .knownLanguages!
-                                              .join(", "),
+                                          language: languages!,
                                           languageImage:
                                               'assets/images/home/speak.png',
                                           onShowInterest: () {

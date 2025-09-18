@@ -32,6 +32,10 @@ class FetchPostedModel {
   String? locality;
   String? profCategoryId;
   String? workPlaceId;
+  String?localityId;
+  String? cityId;
+  ProfessionalSubCategory? professionalSubCategory;
+  ProfessionalSubCategory? workPlaceCategory;
 
   FetchPostedModel({
     this.id,
@@ -58,6 +62,10 @@ class FetchPostedModel {
      this. locality,
     this.workPlaceId,
     this.profCategoryId,
+    this.professionalSubCategory,
+    this.workPlaceCategory,
+    this.cityId,
+    this.localityId
     // this.deletedAt,
   });
 
@@ -85,7 +93,12 @@ class FetchPostedModel {
     pincode: json["pincode"] ??"",
     city: json["city"] ??'',
     profCategoryId: json["prof_category_id"]??'',
-    workPlaceId: json["work_place_id"]??""
+    workPlaceId: json["work_place_id"]??"",
+    localityId: json["locality_id"]??"",
+    cityId: json["city_id"]??"",
+    professionalSubCategory: json["professionalSubCategory"] != null?
+    ProfessionalSubCategory.fromJson(json["professionalSubCategory"]):null,
+    workPlaceCategory: json.containsKey("workPlace")?json["workPlace"] == null ? null : ProfessionalSubCategory.fromJson(json["workPlace"]):null,
     // deletedAt: json["deletedAt"],
   );
 
@@ -112,6 +125,12 @@ class FetchPostedModel {
     "city":city,
     "pincode": pincode,
     "locality": locality,
+    "professionalSubCategory": professionalSubCategory!.toJson(),
+    "workPlace": workPlaceCategory!.toJson(),
+    "prof_category_id": profCategoryId,
+    "work_place_id": workPlaceId,
+    "locality_id": localityId,
+    "city_id": cityId,
     // "deletedAt": deletedAt,
   };
 }
@@ -188,5 +207,79 @@ class User {
     "profession_type": professionType,
     "country_code": countryCode,
     "mobile": mobile,
+  };
+}
+
+class ProfessionalSubCategory {
+  String? id;
+  String? name;
+  String? categoryId;
+  Translation? translation;
+  String? place;
+
+
+  ProfessionalSubCategory({
+    this.id,
+    this.name,
+    this.categoryId,
+    this.translation,
+    this.place
+
+  });
+
+  factory ProfessionalSubCategory.fromJson(Map<String, dynamic> json) => ProfessionalSubCategory(
+    id: json["id"],
+    name: json["name"],
+    place: json["place"],
+    categoryId: json["category_id"],
+    translation: json.containsKey('translation')?json["translation"] == null ? null : Translation.fromJson(json["translation"]):null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "place":place,
+    "category_id": categoryId,
+    "translation": translation!.toJson(),
+  };
+}
+
+class Translation {
+  String? hindi;
+  String? tamil;
+  String ?telugu;
+  String ?kannada;
+  String? marathi;
+  String? gujarati;
+  String? malayalam;
+
+  Translation({
+    this.hindi,
+    this.tamil,
+    this.telugu,
+    this.kannada,
+    this.marathi,
+    this.gujarati,
+    this.malayalam,
+  });
+
+  factory Translation.fromJson(Map<String, dynamic> json) => Translation(
+    hindi: json["hindi"],
+    tamil: json["tamil"],
+    telugu: json["telugu"],
+    kannada: json["kannada"],
+    marathi: json["marathi"],
+    gujarati: json["gujarati"],
+    malayalam: json["malayalam"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "hindi": hindi,
+    "tamil": tamil,
+    "telugu": telugu,
+    "kannada": kannada,
+    "marathi": marathi,
+    "gujarati": gujarati,
+    "malayalam": malayalam,
   };
 }

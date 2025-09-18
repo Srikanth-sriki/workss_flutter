@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 class Config {
-  static String url = "https://43.204.94.146/api";
-  static String socketUrl = "https://43.204.94.146";
+  static String url = "https://api.workss.co.in/api";
+  static String socketUrl = "https://api.workss.co.in";
   static String accessToken = '';
   static String id = '';
   static bool profileCompleted = false;

@@ -363,6 +363,9 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (context, index) {
         if (index < homeFetchModel.length) {
           final work = homeFetchModel[index];
+          final languages = work.knowLanguage!
+              .map((lang) => lang.tr())
+              .join(", ");
           return Container(
             padding:
                 EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4.5),
@@ -522,16 +525,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: SizeConfig.blockHeight * 1),
                 ],
                 WorkCard(
-                  title: work.requiredProfession ?? '--',
+                  title:work.professionalSubCategory != null ? getCategoryProfessionCardName(work.professionalSubCategory) :work.requiredProfession?? '--',
                   location: '${work.locality} ${work.city}' ?? '--',
                   timeAgo: timeAgo(work.updatedAt!),
-                  jobType: work.workPlace ?? '--',
+                  jobType: work.workPlaceCategory != null ? getCategoryWorkPlaceCardName(work.workPlaceCategory) :work.workPlace ?? '--',
                   experience: work.experienceLevel ?? '--',
                   experienceImage: 'assets/images/home/work_select.png',
                   gender: work.gender ?? '--',
                   genderImage: 'assets/images/home/gender.png',
                   jobTypeImage: 'assets/images/home/home.png',
-                  language: work.knowLanguage!.join(", ") ?? '--',
+                  language: languages ?? '--',
                   languageImage: 'assets/images/home/speak.png',
                   onShowInterest: () {},
                   onCardClick: () {

@@ -94,6 +94,10 @@ class EditPostWorkEvent extends PostWorkEvent {
   String city;
   String pincode;
   String locality;
+  String profCategoryId;
+  String workPlaceId;
+  String localityId;
+  String cityId;
 
   EditPostWorkEvent({
     required this.workId,
@@ -111,6 +115,10 @@ class EditPostWorkEvent extends PostWorkEvent {
     required this. city,
     required this. pincode,
     required this. locality,
+    required this.profCategoryId,
+    required this.workPlaceId,
+    required this.localityId,
+    required this.cityId
   });
 
   @override
@@ -126,7 +134,8 @@ class EditPostWorkEvent extends PostWorkEvent {
         isProfessionalCanCall,
         latitude,
         longitude,
-        description,city,pincode,locality
+        description,city,pincode,locality,
+    profCategoryId,workPlaceId,localityId,cityId
       ];
 }
 
