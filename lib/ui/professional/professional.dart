@@ -1,11 +1,9 @@
-import 'dart:io' as io;
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 import 'package:works_app/bloc/professional/professional_bloc.dart';
 import 'package:works_app/bloc/show_interested/show_interested_bloc.dart';
 import 'package:works_app/components/config.dart';
@@ -38,43 +36,65 @@ import 'categories_item.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class ProfessionalsScreen extends StatefulWidget {
-  const ProfessionalsScreen({super.key});
+  const ProfessionalsScreen({
+    super.key,
+    this.tabNotifier, // optional: refresh on tab taps (including re-taps)
+    this.myIndex,     // optional: index of this tab in bottom bar
+  });
+
+  final ValueListenable<int>? tabNotifier;
+  final int? myIndex;
 
   @override
   State<ProfessionalsScreen> createState() => _ProfessionalsScreenState();
 }
 
-class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
+class _ProfessionalsScreenState extends State<ProfessionalsScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   late ProfessionalBloc professionalBloc;
   late ShowInterestedBloc showInterestedBloc;
   late FriendsBloc friendsBloc;
   late ChartBloc chartBloc;
+
   List<ProfessionalsPostedWork> professionalsPostedWork = [];
   late List<SearchFriendLists> searchFriendLists = [];
+
   final ScrollController _scrollController = ScrollController();
+
   bool isFetchingMore = false;
   bool isProfessionalLoad = true;
   bool isCategoryLoad = true;
+
   int currentPage = 1;
   int pageSize = 10;
   int maxPageNumber = 1;
+
   String? selectedProfession = '';
   String? selectedCity = '';
   String selectedGender = '';
-  late List<CategorySub> categoriesData = [];
   List<String> selectedLanguage = [];
+
   late io.Socket socket;
   bool _isMounted = false;
+
+  List<CategorySub> categoriesData = [];
 
   @override
   void initState() {
     super.initState();
+    _isMounted = true;
+
     professionalBloc = BlocProvider.of<ProfessionalBloc>(context);
     showInterestedBloc = BlocProvider.of<ShowInterestedBloc>(context);
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
+
     _fetchData();
     _fetchFriendList();
+
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge && !isFetchingMore) {
         final isBottom = _scrollController.position.pixels ==
@@ -84,15 +104,35 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         }
       }
     });
+
+// socket
     socket = io.io(Config.socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
     });
-
     if (!socket.connected) {
       SocketService().reconnect();
     }
     connectToSocket();
+
+// 🔔 listen to tab taps (if provided)
+    widget.tabNotifier?.addListener(_onTabChange);
+  }
+
+// refresh when this tab becomes active (or re-tapped)
+  void _onTabChange() {
+    final idx = widget.tabNotifier?.value;
+    if (idx != null && widget.myIndex != null && idx == widget.myIndex) {
+      _fetchData(isNewFetch: true);
+      _fetchFriendList();
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    }
   }
 
   void connectToSocket() {
@@ -100,11 +140,18 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
       if (_isMounted) {
         setState(() {
           Config.notificationReceiveMessage.value = true;
-
-          print(data);
         });
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfessionalsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tabNotifier != widget.tabNotifier) {
+      oldWidget.tabNotifier?.removeListener(_onTabChange);
+      widget.tabNotifier?.addListener(_onTabChange);
+    }
   }
 
   @override
@@ -119,14 +166,16 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
       currentPage = 1;
     }
     professionalBloc.add(ProfessionalListEvent(
-        page: currentPage,
-        pageSize: pageSize,
-        keyWord: "",
-        profession: "",
-        city: "",
-        gender: "",
-        currentLongitude: '',knownLanguages: [],
-        currentLatitude: ''));
+      page: currentPage,
+      pageSize: pageSize,
+      keyWord: "",
+      profession: selectedProfession ?? "",
+      city: selectedCity ?? "",
+      gender: selectedGender ?? "",
+      currentLongitude: '',
+      currentLatitude: '',
+      knownLanguages: selectedLanguage,
+    ));
     professionalBloc.add(const FetchCategoryListEvent());
   }
 
@@ -147,30 +196,46 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
   }
 
   void filterProfessionalScreenData(
-      String? profession, String? city, String gender,List<String>selectedLanguages) {
+      String? profession,
+      String? city,
+      String gender,
+      List<String> selectedLanguages,
+      ) {
     setState(() {
+      selectedProfession = profession;
+      selectedCity = city;
+      selectedGender = gender;
+      selectedLanguage = selectedLanguages;
+
       currentPage = 1;
       isFetchingMore = false;
       professionalBloc.add(ProfessionalListEvent(
-          page: currentPage,
-          pageSize: pageSize,
-          keyWord: "",
-          profession: profession ?? "",
-          city: city ?? "",
-          gender: gender ?? "",
-          currentLongitude: '', knownLanguages: selectedLanguages,
-          currentLatitude: ''));
+        page: currentPage,
+        pageSize: pageSize,
+        keyWord: "",
+        profession: profession ?? "",
+        city: city ?? "",
+        gender: gender ?? "",
+        currentLongitude: '',
+        currentLatitude: '',
+        knownLanguages: selectedLanguages,
+      ));
     });
   }
 
   @override
   void dispose() {
+    _isMounted = false;
+    widget.tabNotifier?.removeListener(_onTabChange);
     _scrollController.dispose();
+// socket.off('new_notification');
+// socket.disconnect();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // for AutomaticKeepAliveClientMixin
     return Scaffold(
       backgroundColor: COLORS.white,
       appBar: AppBar(
@@ -191,10 +256,11 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                   if (currentPage == 1) {
                     professionalsPostedWork = state.professionalsPostedWork;
                   } else {
-                    // Filter out duplicates by checking ID before adding
                     final newItems = state.professionalsPostedWork.where(
-                        (newItem) => !professionalsPostedWork.any(
-                            (existingItem) => existingItem.id == newItem.id));
+                          (newItem) => !professionalsPostedWork.any(
+                            (existingItem) => existingItem.id == newItem.id,
+                      ),
+                    );
                     professionalsPostedWork.addAll(newItems);
                   }
                   maxPageNumber = state.maxPageNumber;
@@ -220,7 +286,6 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                   isCategoryLoad = false;
                 });
               }
-              setState(() {});
             },
           ),
           BlocListener<FriendsBloc, FriendsState>(
@@ -230,7 +295,6 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                   searchFriendLists = state.searchFriendLists
                       .where((friend) => friend.isFriend == null)
                       .toList();
-                  ;
                 });
               }
             },
@@ -239,8 +303,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              _fetchData(isNewFetch: true); // your existing method
-
+              _fetchData(isNewFetch: true);
             },
             child: Container(
               width: SizeConfig.screenWidth,
@@ -249,294 +312,7 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 5,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '.Workss',
-                          style: TextStyle(
-                            color: COLORS.primary,
-                            fontSize: SizeConfig.blockWidth * 6,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          const LanguageSelectionScreen(
-                                            routeType: 'homo',
-                                          )),
-                                );
-                              },
-                              borderRadius: BorderRadius.circular(
-                                  SizeConfig.blockWidth * 2.5),
-                              child: Container(
-                                padding:
-                                    EdgeInsets.all(SizeConfig.blockWidth * 3),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                        SizeConfig.blockWidth * 2.5),
-                                    color: COLORS.primaryOne.withOpacity(0.3)),
-                                child: Image.asset(
-                                  'assets/images/home/translation.png',
-                                  width: SizeConfig.blockWidth * 5.5,
-                                  height: SizeConfig.blockWidth * 5.5,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: SizeConfig.blockWidth * 2.8,
-                            ),
-                            InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => NotificationBloc()
-                                            ..add(const FetchNotificationList()),
-                                        ),
-                                        BlocProvider(
-                                          create: (context) => ShowInterestedBloc(),
-                                        ),
-                                        BlocProvider(
-                                          create: (context) => ChartBloc(),
-                                        ),
-                                        BlocProvider(
-                                          create: (context) => FriendsBloc()
-                                            ..add(
-                                              FetchFriendsRequestListEvent(
-                                                page: 1,
-                                                pageSize: 10,
-                                                keyWord: '',
-                                              ),
-                                            ),
-                                        ),
-                                      ],
-                                      child: const NotificationListScreen(),
-                                    ),
-                                  ),
-                                );
-                              },
-                              borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                              child: Container(
-                                padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                  BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                                  color: COLORS.primaryOne.withOpacity(0.3),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    Image.asset(
-                                      'assets/images/home/notification.png',
-                                      width: SizeConfig.blockWidth * 5.5,
-                                      height: SizeConfig.blockWidth * 5.5,
-                                      fit: BoxFit.contain,
-                                    ),
-                                    ValueListenableBuilder<bool>(
-                                      valueListenable: Config.notificationReceiveMessage,
-                                      builder: (context, hasNewMessage, _) {
-                                        return hasNewMessage
-                                            ? Positioned(
-                                          top: 0,
-                                          right: 0,
-                                          child: Container(
-                                            width: SizeConfig.blockWidth * 3,
-                                            height: SizeConfig.blockWidth * 3,
-                                            decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                        )
-                                            : const SizedBox
-                                            .shrink(); // Return empty widget if false
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: SizeConfig.blockHeight * 3.5,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 5,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MultiBlocProvider(
-                                          providers: [
-                                            BlocProvider(
-                                                create: (context) =>
-                                                    ProfessionalBloc()
-                                                      ..add(ProfessionalListEvent(
-                                                          page: 1,
-                                                          pageSize: 20,
-                                                          profession: '',
-                                                          keyWord: '',
-                                                          city: '',
-                                                          currentLongitude: '',
-                                                          currentLatitude: '',knownLanguages: [],
-                                                          gender: ''))),
-                                            BlocProvider(
-                                              create: (context) =>
-                                                  ShowInterestedBloc(),
-                                            ),
-                                            BlocProvider(create: (context) => ChartBloc())
-                                          ],
-                                          child: const ProfessionalSearchList(),
-                                        )));
-                          },
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                          child: Container(
-                            width: SizeConfig.blockWidth * 72,
-                            height: SizeConfig.blockHeight * 8,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 3.25),
-                                color: COLORS.neutralDarkTwo.withOpacity(0.6)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: SizeConfig.blockWidth * 4),
-                                  child: Image.asset(
-                                    'assets/images/home/search.png',
-                                    width: SizeConfig.blockWidth * 5.5,
-                                    height: SizeConfig.blockWidth * 5.5,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: SizeConfig.blockWidth * 50,
-                                  child: Text(
-                                    'Search by Profession type'.tr(),
-                                    style: TextStyle(
-                                      color: COLORS.neutralDarkOne,
-                                      fontSize: SizeConfig.blockWidth * 3.3,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () async {
-                            final result = await showMaterialModalBottomSheet(
-                                enableDrag: true,
-                                expand: false,
-                                isDismissible: true,
-                                backgroundColor: COLORS.white,
-                                closeProgressThreshold: 0,
-                                duration: const Duration(seconds: 0),
-                                context: context,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(
-                                          SizeConfig.blockWidth * 6)),
-                                ),
-                                builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) {
-                                            final bloc = InitialRegisterBloc();
-                                            bloc.add(const FetchCityEvent());
-                                            bloc.add(
-                                                const FetchChargeFeesEvent());
-                                            bloc.add(
-                                                const FetchWorkKnownLanguageProfileEvent());
-                                            return bloc;
-                                          },
-                                        ),
-                                        BlocProvider(
-                                            create: (context) => ProfessionalBloc()
-                                              ..add(
-                                                  const FetchCategoryListEvent())),
-                                      ],
-                                      child: SearchFilterBottomSheet(
-                                        initialProfession: selectedProfession,
-                                        initialCity: selectedCity,
-                                        initialGender: selectedGender,
-                                        selectedLanguage: selectedLanguage,
-                                        experienceLevelVisible: false,
-                                        selectedLanguageVisible: true,
-                                      ),
-                                    ));
-
-                            if (result != null) {
-                              selectedProfession = result['selectedProfession'];
-                              selectedCity = result['selectedCity'];
-                              selectedGender = result['selectedGender'];
-                              selectedLanguage = List<String>.from(result['selectedLanguage'] ?? []);
-                              filterProfessionalScreenData(
-                                selectedProfession,
-                                selectedCity,
-                                selectedGender, selectedLanguage
-                              );
-                            }
-                          },
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 2.5),
-                          splashColor: COLORS.white.withOpacity(0.2),
-                          child: Container(
-                            padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-                            height: SizeConfig.blockHeight * 8,
-                            width: SizeConfig.blockHeight * 8,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    SizeConfig.blockWidth * 2.5),
-                                color: COLORS.neutralDarkTwo.withOpacity(0.6)),
-                            child: Image.asset(
-                              'assets/images/home/filter.png',
-                              width: SizeConfig.blockWidth * 5.5,
-                              height: SizeConfig.blockWidth * 5.5,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  _buildHeader(context),
                   Padding(
                     padding: EdgeInsets.symmetric(
                         vertical: SizeConfig.blockHeight * 1.5),
@@ -550,164 +326,12 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: _scrollController,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildCategories(context),
                           Padding(
                             padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 5,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Categories'.tr(),
-                                  style: TextStyle(
-                                    color: COLORS.neutralDark,
-                                    fontSize: SizeConfig.blockWidth * 3.8,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: "Poppins",
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              CategoriesScreen(
-                                                  categoriesData:
-                                                      categoriesData)),
-                                    );
-                                  },
-                                  child: Text(
-                                    'See All'.tr(),
-                                    style: TextStyle(
-                                      color: COLORS.accent,
-                                      fontSize: SizeConfig.blockWidth * 3.6,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: "Poppins",
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isCategoryLoad) ...[
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  left: SizeConfig.blockWidth * 6,
-                                  right: SizeConfig.blockWidth * 6,
-                                  top: SizeConfig.blockHeight * 3),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  categoryLoading(),
-                                  categoryLoading(),
-                                  categoryLoading(),
-                                  categoryLoading()
-                                ],
-                              ),
-                            ),
-                          ],
-                          if (!isCategoryLoad) ...[
-                            SizedBox(
-                              height: SizeConfig.blockHeight * 20.5,
-                              child: ListView.builder(
-                                  itemCount: categoriesData.length,
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: SizeConfig.blockWidth * 5,
-                                      vertical: SizeConfig.blockHeight * 0.5),
-                                  itemBuilder: (context, index) {
-                                    return InkWell(
-                                      splashColor: Colors.white.withOpacity(0),
-                                      borderRadius: BorderRadius.circular(
-                                          SizeConfig.blockWidth * 4),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (BuildContext context) =>
-                                                  CategoriesItemScreen(
-                                                      categoriesItem:
-                                                          categoriesData[index])),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: SizeConfig.blockWidth * 3,
-                                            vertical: SizeConfig.blockHeight),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              width: SizeConfig.blockWidth * 19,
-                                              height: SizeConfig.blockWidth * 19,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: COLORS.primaryOne
-                                                    .withOpacity(0.3),
-                                                image: DecorationImage(image: NetworkImage(
-                                                  categoriesData[index]
-                                                      .image,
-                                                  scale: SizeConfig.blockWidth*1
-
-                                                ))
-                                              ),
-                                              // child: Center(
-                                              //   child: AspectRatio(
-                                              //     aspectRatio: 1 / 1.25,
-                                              //     child: categoriesData[index]
-                                              //             .image
-                                              //             .isNotEmpty
-                                              //         ? Image.network(
-                                              //             categoriesData[index]
-                                              //                 .image,
-                                              //             fit: BoxFit.contain,
-                                              //           )
-                                              //         : null,
-                                              //   ),
-                                              // ),
-                                            ),
-                                            SizedBox(
-                                              height:
-                                                  SizeConfig.blockHeight * 0.5,
-                                            ),
-                                            SizedBox(
-                                              width: SizeConfig.blockWidth * 19,
-                                              child: Text(
-                                                capitalizeEachWord(
-                                                    getCategoryName(categoriesData[index])),
-                                                style: TextStyle(
-                                                  color: COLORS.neutralDark,
-                                                  fontSize:
-                                                      SizeConfig.blockWidth * 3,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontFamily: "Poppins",
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                                maxLines: 2,
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                            )
-                          ],
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 5,
-                            ),
+                                horizontal: SizeConfig.blockWidth * 5),
                             child: Text(
                               'Professionals'.tr(),
                               style: TextStyle(
@@ -719,417 +343,38 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
                               textAlign: TextAlign.end,
                             ),
                           ),
-                          SizedBox(
-                            height: SizeConfig.blockHeight * 0.5,
-                          ),
-                          if (isProfessionalLoad == true) ...[
+                          SizedBox(height: SizeConfig.blockHeight * 0.5),
+                          if (isProfessionalLoad) ...[
                             professionalLoading(),
                             professionalLoading(),
                             professionalLoading(),
                           ] else ...[
                             professionalsPostedWork.isNotEmpty
                                 ? ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemCount: professionalsPostedWork.length!,
-                                    itemBuilder: (context, index) {
-                                      var professionalData =
-                                          professionalsPostedWork![index];
-                                      final languages = professionalData?.knownLanguages!
-                                          .map((lang) => lang.tr())
-                                          .join(", ");
-                                      return Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: SizeConfig.blockWidth * 2,
-                                            horizontal:
-                                                SizeConfig.blockWidth * 4),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            if ((index == 3 ||
-                                                    index == 15 ||
-                                                    index == 30 ||
-                                                    index == 50) &&
-                                                searchFriendLists.isNotEmpty &&
-                                                Config.profileCompleted) ...[
-                                              SizedBox(
-                                                  height: SizeConfig.blockHeight),
-                                              addFriendText(
-                                                  textOne: 'Add Friends',
-                                                  textTwo: 'View All',
-                                                  onTap: () {
-                                                    Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                MultiBlocProvider(
-                                                                  providers: [
-                                                                    BlocProvider(
-                                                                      create: (context) => FriendsBloc()
-                                                                        ..add(FetchFriendsAddListEvent(
-                                                                            page:
-                                                                                1,
-                                                                            pageSize:
-                                                                                10,
-                                                                            keyWord:
-                                                                                '')),
-                                                                    ),
-                                                                    BlocProvider(
-                                                                        create: (context) =>
-                                                                            ShowInterestedBloc()),
-                                                                    BlocProvider(
-                                                                        create: (context) =>
-                                                                            ChartBloc() ..add(FetchChartSearchListEvent(page: 1, pageSize: 10, keyWord: '')))
-                                                                  ],
-                                                                  child:
-                                                                      AddFriendsScreen(
-                                                                    header:
-                                                                        'Friend Suggestion',
-                                                                    refreshPageCallback:
-                                                                        _fetchFriendList,
-                                                                  ),
-                                                                )));
-                                                  }),
-                                              SizedBox(
-                                                height:
-                                                    SizeConfig.blockHeight * 26,
-                                                child: ListView.builder(
-                                                    itemCount: searchFriendLists
-                                                                .length >=
-                                                            6
-                                                        ? 6
-                                                        : searchFriendLists
-                                                            .length,
-                                                    shrinkWrap: true,
-                                                    scrollDirection:
-                                                        Axis.horizontal,
-                                                    itemBuilder:
-                                                        (context, index) {
-                                                      return addFriendCard(
-                                                          added: searchFriendLists[
-                                                                          index]
-                                                                      .friendRequestSent !=
-                                                                  null
-                                                              ? true
-                                                              : false,
-                                                          image:
-                                                              searchFriendLists[
-                                                                      index]
-                                                                  .profilePic,
-                                                          name: searchFriendLists[
-                                                                  index]
-                                                              .name,
-                                                          onTap: () {
-                                                            if (Config
-                                                                .isRegistered) {
-                                                              if (searchFriendLists[
-                                                                          index]
-                                                                      .friendRequestSent !=
-                                                                  null) {
-                                                                showInterestedBloc.add(
-                                                                    UnSendFriendEvent(
-                                                                        userId:
-                                                                            searchFriendLists[index]
-                                                                                .id,
-                                                                        onSuccess:
-                                                                            (message) {
-                                                                          setState(
-                                                                              () {
-                                                                            searchFriendLists[index].friendRequestSent =
-                                                                                null;
-                                                                          });
-                                                                        },
-                                                                        onError:
-                                                                            (message) {
-                                                                          showCustomSnackBar(
-                                                                            context:
-                                                                                context,
-                                                                            message:
-                                                                                message,
-                                                                          );
-                                                                        }));
-                                                              } else {
-                                                                showInterestedBloc.add(
-                                                                    AddFriendEvent(
-                                                                        userId:
-                                                                            searchFriendLists[index]
-                                                                                .id,
-                                                                        onSuccess:
-                                                                            (message) {
-                                                                          setState(
-                                                                              () {
-                                                                            searchFriendLists[index].friendRequestSent =
-                                                                                FriendRequestSent(
-                                                                              userId:
-                                                                                  searchFriendLists[index].id,
-                                                                            );
-                                                                          });
-                                                                        },
-                                                                        onError:
-                                                                            (message) {
-                                                                          showCustomSnackBar(
-                                                                            context:
-                                                                                context,
-                                                                            message:
-                                                                                message,
-                                                                          );
-                                                                        }));
-                                                              }
-                                                            } else {
-                                                              loginUserBottomSheet(
-                                                                  context);
-                                                            }
-                                                          },
-                                                          onTapCard: () {
-                                                            if (Config
-                                                                .isRegistered) {
-                                                              Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              MultiBlocProvider(
-                                                                                providers: [
-                                                                                  BlocProvider(
-                                                                                    create: (context) {
-                                                                                      final bloc = FriendsBloc();
-                                                                                      bloc.add(FetchFriendsSingleView(friendId: searchFriendLists[index].id));
-                                                                                      return bloc;
-                                                                                    },
-                                                                                  ),
-                                                                                  BlocProvider(
-                                                                                    create: (context) => ShowInterestedBloc(),
-                                                                                  ),
-                                                                                  BlocProvider(create: (context) => ReportPostBloc()),
-                                                                                  BlocProvider(create: (context) => ShowInterestedBloc()),
-                                                                                  BlocProvider(create: (context) => ChartBloc())
-                                                                                ],
-                                                                                child: FriendsDetailsScreen(
-                                                                                  refreshPageCallback: _fetchFriendList,
-                                                                                  id: searchFriendLists[index].id,
-                                                                                ),
-                                                                              )));
-                                                            } else {
-                                                              loginUserBottomSheet(
-                                                                  context);
-                                                            }
-                                                          });
-                                                    }),
-                                              ),
-                                              SizedBox(
-                                                  height:
-                                                      SizeConfig.blockHeight ),
-                                            ],
-                                            buildProfessionalCard(
-                                                context: context,
-                                                accountVerified:
-                                                    professionalData!.isVerified!,
-                                                image:
-                                                    professionalData!.profilePic!,
-                                                name: professionalData!.name!,
-                                                profession: professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
-                                                    .professionType!,
-                                                location: professionalData.city!,
-                                                languages: languages!,
-                                                gender: professionalData.gender!,
-                                                price: professionalData.charges!,
-                                                paymentType:
-                                                    professionalData.chargeType!,
-                                                smartControlEnable: isSmartControlEnabled(
-                                                  professionalData.smartCallControl,
-                                                  professionalData.smartCallSchedule,
-                                                ),
-                                                contacted: professionalData
-                                                        .isContacted !=
-                                                    null,
-                                                saved: professionalData.isSaved !=
-                                                    null,
-                                                experience: professionalData
-                                                    .experiencedYears!,
-                                                experienceImage:
-                                                    'assets/images/home/work_select.png',
-                                                genderImage:
-                                                    'assets/images/home/gender.png',
-                                                jobTypeImage:
-                                                    'assets/images/profile/prof.png',
-                                                language: languages!,
-                                                languageImage:
-                                                    'assets/images/home/speak.png',
-                                                onShowInterest: () {
-                                                  if (Config.profileCompleted) {
-                                                    if (professionalData
-                                                            .isContacted ==
-                                                        null) {
-                                                      showInterestedBloc.add(
-                                                          ProfessionalContactUs(
-                                                        PropId:
-                                                            professionalData.id!,
-                                                        onSuccess: () {
-                                                          setState(() {
-                                                            professionalData
-                                                                    .isContacted =
-                                                                IsContacted(
-                                                                    id: '');
-                                                            makePhoneCall(
-                                                                professionalData
-                                                                    .mobile!);
-                                                          });
-                                                        },
-                                                        onError: () {},
-                                                      ));
-                                                    } else {
-                                                      makePhoneCall(
-                                                          professionalData
-                                                              .mobile!);
-                                                    }
-                                                  }
-                                                  else {loginUserBottomSheet(context);}
-                                                },
-                                                messageOnTap: (){
-                                                  chartBloc.add(
-                                                    StartMessageEvent(
-                                                      chatId: professionalData.id!,
-                                                      onSuccess: (chatId) {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) => MultiBlocProvider(
-                                                              providers: [
-                                                                BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
-                                                                BlocProvider(create: (context) => InitialRegisterBloc()),
-                                                                BlocProvider(create: (context) => ShowInterestedBloc()),
-                                                              ],
-                                                              child: ChatViewScreen(
-                                                                refreshPageCallback: (){
-                                                                  _fetchData(isNewFetch: true);
-                                                                },
-                                                                chatId: chatId,
-                                                                isGroup: false,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                      onError: (message) {
-                                                        showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
-                                                      },
-                                                    ),
-                                                  );
-                                                },
-                                                jobType: professionalData
-                                                    .professionType!,
-                                                onShare: () {
-                                                  if (Config.profileCompleted){
-                                                    shareJobDetails(
-                                                      experience: professionalData
-                                                          .experiencedYears!,
-                                                      location:
-                                                      professionalData.city!,
-                                                      jobTitle: professionalData
-                                                          .professionType!,
-                                                    );
-                                                  }
-                                                  else {loginUserBottomSheet(context);}
-
-                                                },
-                                                onTap: () {
-                                                  if (Config.profileCompleted){
-                                                    Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                MultiBlocProvider(
-                                                                  providers: [
-                                                                    BlocProvider(
-                                                                      create: (context) => ProfessionalBloc()
-                                                                        ..add(FetchProfessionalView(
-                                                                            professionalData
-                                                                                .id!)),
-                                                                    ),
-                                                                    BlocProvider(
-                                                                      create: (context) =>
-                                                                          ShowInterestedBloc(),
-                                                                    ),
-                                                                    BlocProvider(
-                                                                        create: (context) =>
-                                                                            ReportPostBloc()),
-                                                                    BlocProvider(create: (context) => ChartBloc())
-                                                                  ],
-                                                                  child:
-                                                                  ProfessionalViewScreen(
-                                                                    id: professionalData
-                                                                        .id!,
-                                                                    refreshPageCallback:
-                                                                        () {
-                                                                      _fetchData(
-                                                                          isNewFetch:
-                                                                          true);
-                                                                    },
-                                                                  ),
-                                                                )));
-                                                  }
-                                                  else {loginUserBottomSheet(context);}
-
-                                                },
-                                                savedTap: () {
-                if (Config.profileCompleted){
-                  if (professionalData.isSaved ==
-            null) {
-                    showInterestedBloc
-              .add(ProfessionalSavedUs(
-            PropId:
-            professionalData.id!,
-            onSuccess: () {
-              setState(() {
-                professionalData
-                    .isSaved =
-                    IsContacted(id: '');
-              });
-            },
-            onError: () {
-              showCustomSnackBar(
-                context: context,
-                message:
-                "Something Went wrong",
-              );
-            },
-                    ));
-                  } else {
-                    showInterestedBloc
-              .add(ProfessionalSavedUs(
-            PropId:
-            professionalData.id!,
-            onSuccess: () {
-              setState(() {
-                professionalData
-                    .isSaved = null;
-              });
-            },
-            onError: () {
-              showCustomSnackBar(
-                context: context,
-                message:
-                "Something Went wrong",
-              );
-            },
-                    ));
-                  }
-                }
-                else {loginUserBottomSheet(context);}
-
-                                                }),
-                                          ],
-                                        ),
-                                      );
-                                    })
+                              shrinkWrap: true,
+                              physics:
+                              const NeverScrollableScrollPhysics(),
+                              itemCount: professionalsPostedWork.length,
+                              itemBuilder: (context, index) {
+                                final professionalData =
+                                professionalsPostedWork[index];
+                                final languages =
+                                professionalData.knownLanguages!
+                                    .map((lang) => lang.tr())
+                                    .join(", ");
+                                return _buildProfessionalItem(
+                                  context,
+                                  professionalData,
+                                  languages,
+                                  index,
+                                );
+                              },
+                            )
                                 : Padding(
-                                    padding: EdgeInsets.only(
-                                        top: SizeConfig.blockHeight * 6),
-                                    child: emptyComponent(),
-                                  )
+                              padding: EdgeInsets.only(
+                                  top: SizeConfig.blockHeight * 6),
+                              child: emptyComponent(),
+                            )
                           ],
                         ],
                       ),
@@ -1141,6 +386,744 @@ class _ProfessionalsScreenState extends State<ProfessionalsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockWidth * 5,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '.Workss',
+                style: TextStyle(
+                  color: COLORS.primary,
+                  fontSize: SizeConfig.blockWidth * 6,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Poppins",
+                ),
+              ),
+              Row(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                          const LanguageSelectionScreen(routeType: 'homo'),
+                        ),
+                      );
+                    },
+                    borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                    child: Container(
+                      padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                        color: COLORS.primaryOne.withOpacity(0.3),
+                      ),
+                      child: Image.asset(
+                        'assets/images/home/translation.png',
+                        width: SizeConfig.blockWidth * 5.5,
+                        height: SizeConfig.blockWidth * 5.5,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: SizeConfig.blockWidth * 2.8),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => NotificationBloc()
+                                  ..add(const FetchNotificationList()),
+                              ),
+                              BlocProvider(create: (context) => ShowInterestedBloc()),
+                              BlocProvider(create: (context) => ChartBloc()),
+                              BlocProvider(
+                                create: (context) => FriendsBloc()
+                                  ..add(FetchFriendsRequestListEvent(
+                                    page: 1,
+                                    pageSize: 10,
+                                    keyWord: '',
+                                  )),
+                              ),
+                            ],
+                            child:  NotificationListScreen(
+                              refreshPageCallback: () {},
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                    child: Container(
+                      padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                        color: COLORS.primaryOne.withOpacity(0.3),
+                      ),
+                      child: Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/home/notification.png',
+                            width: SizeConfig.blockWidth * 5.5,
+                            height: SizeConfig.blockWidth * 5.5,
+                            fit: BoxFit.contain,
+                          ),
+                          ValueListenableBuilder<bool>(
+                            valueListenable: Config.notificationReceiveMessage,
+                            builder: (context, hasNewMessage, _) {
+                              return hasNewMessage
+                                  ? Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  width: SizeConfig.blockWidth * 3,
+                                  height: SizeConfig.blockWidth * 3,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              )
+                                  : const SizedBox.shrink();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+        SizedBox(height: SizeConfig.blockHeight * 3.5),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockWidth * 5,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => ProfessionalBloc()
+                              ..add(ProfessionalListEvent(
+                                page: 1,
+                                pageSize: 20,
+                                profession: '',
+                                keyWord: '',
+                                city: '',
+                                currentLongitude: '',
+                                currentLatitude: '',
+                                knownLanguages: [],
+                                gender: '',
+                              )),
+                          ),
+                          BlocProvider(create: (context) => ShowInterestedBloc()),
+                          BlocProvider(create: (context) => ChartBloc()),
+                        ],
+                        child: const ProfessionalSearchList(),
+                      ),
+                    ),
+                  );
+                },
+                borderRadius:
+                BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                child: Container(
+                  width: SizeConfig.blockWidth * 72,
+                  height: SizeConfig.blockHeight * 8,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                    color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.blockWidth * 4),
+                        child: Image.asset(
+                          'assets/images/home/search.png',
+                          width: SizeConfig.blockWidth * 5.5,
+                          height: SizeConfig.blockWidth * 5.5,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      SizedBox(
+                        width: SizeConfig.blockWidth * 50,
+                        child: Text(
+                          'Search by Profession type'.tr(),
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.3,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: "Poppins",
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () async {
+                  final result = await showMaterialModalBottomSheet(
+                    enableDrag: true,
+                    expand: false,
+                    isDismissible: true,
+                    backgroundColor: COLORS.white,
+                    closeProgressThreshold: 0,
+                    duration: const Duration(seconds: 0),
+                    context: context,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(SizeConfig.blockWidth * 6),
+                      ),
+                    ),
+                    builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) {
+                            final bloc = InitialRegisterBloc();
+                            bloc.add(const FetchCityEvent());
+                            bloc.add(const FetchChargeFeesEvent());
+                            bloc.add(const FetchWorkKnownLanguageProfileEvent());
+                            return bloc;
+                          },
+                        ),
+                        BlocProvider(
+                          create: (context) => ProfessionalBloc()
+                            ..add(const FetchCategoryListEvent()),
+                        ),
+                      ],
+                      child: SearchFilterBottomSheet(
+                        initialProfession: selectedProfession,
+                        initialCity: selectedCity,
+                        initialGender: selectedGender,
+                        selectedLanguage: selectedLanguage,
+                        experienceLevelVisible: false,
+                        selectedLanguageVisible: true,
+                      ),
+                    ),
+                  );
+
+                  if (result != null) {
+                    selectedProfession = result['selectedProfession'];
+                    selectedCity = result['selectedCity'];
+                    selectedGender = result['selectedGender'];
+                    selectedLanguage = List<String>.from(
+                        result['selectedLanguage'] ?? []);
+                    filterProfessionalScreenData(
+                      selectedProfession,
+                      selectedCity,
+                      selectedGender,
+                      selectedLanguage,
+                    );
+                  }
+                },
+                borderRadius:
+                BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                splashColor: COLORS.white.withOpacity(0.2),
+                child: Container(
+                  padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                  height: SizeConfig.blockHeight * 8,
+                  width: SizeConfig.blockHeight * 8,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                    color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                  ),
+                  child: Image.asset(
+                    'assets/images/home/filter.png',
+                    width: SizeConfig.blockWidth * 5.5,
+                    height: SizeConfig.blockWidth * 5.5,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategories(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockWidth * 5,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Categories'.tr(),
+                style: TextStyle(
+                  color: COLORS.neutralDark,
+                  fontSize: SizeConfig.blockWidth * 3.8,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Poppins",
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          CategoriesScreen(categoriesData: categoriesData),
+                    ),
+                  );
+                },
+                child: Text(
+                  'See All'.tr(),
+                  style: TextStyle(
+                    color: COLORS.accent,
+                    fontSize: SizeConfig.blockWidth * 3.6,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isCategoryLoad) ...[
+          Padding(
+            padding: EdgeInsets.only(
+              left: SizeConfig.blockWidth * 6,
+              right: SizeConfig.blockWidth * 6,
+              top: SizeConfig.blockHeight * 3,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                categoryLoading(),
+                categoryLoading(),
+                categoryLoading(),
+                categoryLoading(),
+              ],
+            ),
+          ),
+        ] else ...[
+          SizedBox(
+            height: SizeConfig.blockHeight * 20.5,
+            child: ListView.builder(
+              itemCount: categoriesData.length,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.blockWidth * 5,
+                vertical: SizeConfig.blockHeight * 0.5,
+              ),
+              itemBuilder: (context, index) {
+                return InkWell(
+                  splashColor: Colors.white.withOpacity(0),
+                  borderRadius:
+                  BorderRadius.circular(SizeConfig.blockWidth * 4),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => CategoriesItemScreen(
+                          categoriesItem: categoriesData[index],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.blockWidth * 3,
+                      vertical: SizeConfig.blockHeight,
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: SizeConfig.blockWidth * 19,
+                          height: SizeConfig.blockWidth * 19,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: COLORS.primaryOne.withOpacity(0.3),
+                            image: DecorationImage(
+                              image: NetworkImage(categoriesData[index].image),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: SizeConfig.blockHeight * 0.5),
+                        SizedBox(
+                          width: SizeConfig.blockWidth * 19,
+                          child: Text(
+                            capitalizeEachWord(
+                                getCategoryName(categoriesData[index])),
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: "Poppins",
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildProfessionalItem(
+      BuildContext context,
+      ProfessionalsPostedWork professionalData,
+      String languages,
+      int index,
+      ) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        vertical: SizeConfig.blockWidth * 2,
+        horizontal: SizeConfig.blockWidth * 4,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if ((index == 3 || index == 15 || index == 30 || index == 50) &&
+              searchFriendLists.isNotEmpty &&
+              Config.profileCompleted) ...[
+            SizedBox(height: SizeConfig.blockHeight),
+            addFriendText(
+              textOne: 'Add Friends',
+              textTwo: 'View All',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => FriendsBloc()
+                            ..add(FetchFriendsAddListEvent(
+                              page: 1,
+                              pageSize: 10,
+                              keyWord: '',
+                            )),
+                        ),
+                        BlocProvider(create: (context) => ShowInterestedBloc()),
+                        BlocProvider(
+                          create: (context) => ChartBloc()
+                            ..add(FetchChartSearchListEvent(
+                              page: 1,
+                              pageSize: 10,
+                              keyWord: '',
+                            )),
+                        )
+                      ],
+                      child: AddFriendsScreen(
+                        header: 'Friend Suggestion',
+                        refreshPageCallback: _fetchFriendList,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            SizedBox(height: SizeConfig.blockHeight * 26, child: _buildFriendsStrip()),
+            SizedBox(height: SizeConfig.blockHeight),
+          ],
+          buildProfessionalCard(
+            context: context,
+            accountVerified: professionalData.isVerified!,
+            image: professionalData.profilePic!,
+            name: professionalData.name!,
+            profession: professionalData.professionalSubCategory != null
+                ? getCategoryProfessionCardName(
+                professionalData.professionalSubCategory)
+                : professionalData.professionType!,
+            location: professionalData.city!,
+            languages: languages,
+            gender: professionalData.gender!,
+            price: professionalData.charges!,
+            paymentType: professionalData.chargeType!,
+            smartControlEnable: isSmartControlEnabled(
+              professionalData.smartCallControl,
+              professionalData.smartCallSchedule,
+            ),
+            contacted: professionalData.isContacted != null,
+            saved: professionalData.isSaved != null,
+            experience: professionalData.experiencedYears!,
+            experienceImage: 'assets/images/home/work_select.png',
+            genderImage: 'assets/images/home/gender.png',
+            jobTypeImage: 'assets/images/profile/prof.png',
+            language: languages,
+            languageImage: 'assets/images/home/speak.png',
+            onShowInterest: () {
+              if (Config.profileCompleted) {
+                if (professionalData.isContacted == null) {
+                  showInterestedBloc.add(ProfessionalContactUs(
+                    PropId: professionalData.id!,
+                    onSuccess: () {
+                      setState(() {
+                        professionalData.isContacted = IsContacted(id: '');
+                        makePhoneCall(professionalData.mobile!);
+                      });
+                    },
+                    onError: () {},
+                  ));
+                } else {
+                  makePhoneCall(professionalData.mobile!);
+                }
+              } else {
+                loginUserBottomSheet(context);
+              }
+            },
+            messageOnTap: () {
+              chartBloc.add(
+                StartMessageEvent(
+                  chatId: professionalData.id!,
+                  onSuccess: (chatId) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => ChartBloc()
+                                ..add(FetchChartViewEvent(
+                                  page: 1,
+                                  pageSize: 10,
+                                  chatId: chatId,
+                                )),
+                            ),
+                            BlocProvider(create: (context) => InitialRegisterBloc()),
+                            BlocProvider(create: (context) => ShowInterestedBloc()),
+                          ],
+                          child: ChatViewScreen(
+                            refreshPageCallback: () {
+                              _fetchData(isNewFetch: true);
+                            },
+                            chatId: chatId,
+                            isGroup: false,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                  onError: (message) {
+                    showCustomSnackBar(
+                      context: context,
+                      message: message,
+                      backgroundColor: COLORS.neutralDarkTwo,
+                    );
+                  },
+                ),
+              );
+            },
+            jobType: professionalData.professionType!,
+            onShare: () {
+              if (Config.profileCompleted) {
+                shareJobDetails(
+                  experience: professionalData.experiencedYears!,
+                  location: professionalData.city!,
+                  jobTitle: professionalData.professionType!,
+                );
+              } else {
+                loginUserBottomSheet(context);
+              }
+            },
+            onTap: () {
+              if (Config.profileCompleted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (context) => ProfessionalBloc()
+                            ..add(FetchProfessionalView(professionalData.id!)),
+                        ),
+                        BlocProvider(create: (context) => ShowInterestedBloc()),
+                        BlocProvider(create: (context) => ReportPostBloc()),
+                        BlocProvider(create: (context) => ChartBloc()),
+                      ],
+                      child: ProfessionalViewScreen(
+                        id: professionalData.id!,
+                        refreshPageCallback: () {
+                          _fetchData(isNewFetch: true);
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                loginUserBottomSheet(context);
+              }
+            },
+            savedTap: () {
+              if (Config.profileCompleted) {
+                if (professionalData.isSaved == null) {
+                  showInterestedBloc.add(
+                    ProfessionalSavedUs(
+                      PropId: professionalData.id!,
+                      onSuccess: () {
+                        setState(() {
+                          professionalData.isSaved = IsContacted(id: '');
+                        });
+                      },
+                      onError: () {
+                        showCustomSnackBar(
+                          context: context,
+                          message: "Something Went wrong",
+                        );
+                      },
+                    ),
+                  );
+                } else {
+                  showInterestedBloc.add(
+                    ProfessionalSavedUs(
+                      PropId: professionalData.id!,
+                      onSuccess: () {
+                        setState(() {
+                          professionalData.isSaved = null;
+                        });
+                      },
+                      onError: () {
+                        showCustomSnackBar(
+                          context: context,
+                          message: "Something Went wrong",
+                        );
+                      },
+                    ),
+                  );
+                }
+              } else {
+                loginUserBottomSheet(context);
+              }
+            },
+            itemID: professionalData.id!
+
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFriendsStrip() {
+    return ListView.builder(
+      itemCount: searchFriendLists.length >= 6 ? 6 : searchFriendLists.length,
+      shrinkWrap: true,
+      scrollDirection: Axis.horizontal,
+      itemBuilder: (context, i) {
+        return addFriendCard(
+          added: searchFriendLists[i].friendRequestSent != null ? true : false,
+          image: searchFriendLists[i].profilePic,
+          name: searchFriendLists[i].name,
+          onTap: () {
+            if (Config.isRegistered) {
+              if (searchFriendLists[i].friendRequestSent != null) {
+                showInterestedBloc.add(
+                  UnSendFriendEvent(
+                    userId: searchFriendLists[i].id,
+                    onSuccess: (message) {
+                      setState(() {
+                        searchFriendLists[i].friendRequestSent = null;
+                      });
+                    },
+                    onError: (message) {
+                      showCustomSnackBar(
+                        context: context,
+                        message: message,
+                      );
+                    },
+                  ),
+                );
+              } else {
+                showInterestedBloc.add(
+                  AddFriendEvent(
+                    userId: searchFriendLists[i].id,
+                    onSuccess: (message) {
+                      setState(() {
+                        searchFriendLists[i].friendRequestSent =
+                            FriendRequestSent(userId: searchFriendLists[i].id);
+                      });
+                    },
+                    onError: (message) {
+                      showCustomSnackBar(
+                        context: context,
+                        message: message,
+                      );
+                    },
+                  ),
+                );
+              }
+            } else {
+              loginUserBottomSheet(context);
+            }
+          },
+          onTapCard: () {
+            if (Config.isRegistered) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) {
+                          final bloc = FriendsBloc();
+                          bloc.add(FetchFriendsSingleView(
+                            friendId: searchFriendLists[i].id,
+                          ));
+                          return bloc;
+                        },
+                      ),
+                      BlocProvider(create: (context) => ShowInterestedBloc()),
+                      BlocProvider(create: (context) => ReportPostBloc()),
+                      BlocProvider(create: (context) => ShowInterestedBloc()),
+                      BlocProvider(create: (context) => ChartBloc()),
+                    ],
+                    child: FriendsDetailsScreen(
+                      refreshPageCallback: _fetchFriendList,
+                      id: searchFriendLists[i].id,
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              loginUserBottomSheet(context);
+            }
+          },
+        );
+      },
     );
   }
 }

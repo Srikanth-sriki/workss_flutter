@@ -73,10 +73,12 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
         ));
       } else {
         emit(FriendsListFailed(message: jsonDecoded["message"] ?? 'Error'));
+        customLog('1111111111111111');
         customLog(jsonDecoded["message"]);
       }
     } catch (error) {
       emit(FriendsListFailed(message: "Something went wrong"));
+      customLog('1222222222222222');
       customLog('jsonDecoded["message"]');
     }
   }

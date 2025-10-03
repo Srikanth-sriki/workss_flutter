@@ -170,6 +170,7 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     friendSearchDetailsCards(
+                      itemID: friend.id,
                       context: context,
                       image: friend.profilePic,
                       name: friend.name,

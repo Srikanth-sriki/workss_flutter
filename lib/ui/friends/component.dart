@@ -14,8 +14,10 @@ Widget friendSearchCards(
     required VoidCallback onTapCard,
     required VoidCallback onTapMessage,
       required BuildContext context,
+      required String itemID,
     required VoidCallback onTapIcon}) {
-  final tag = 'avatarTag_$image';
+  //final tag = 'avatarTag_$image';
+  final tag = 'fri_${itemID}';
   return InkWell(
     onTap: onTapCard,
     child: Container(
@@ -115,9 +117,11 @@ Widget friendSearchDetailsCards({
   Widget? widgetButton,
   bool widgetButtonRequired = false,
   bool isGroup = false,
+  required String itemID,
   required BuildContext context,
 }) {
-  final tag = 'avatarTag_$image';
+  //final tag = 'avatarTag_$image';
+  final tag = 'friDel_${itemID}';
   return InkWell(
     onTap: onTapCard,
     splashColor: COLORS.white.withOpacity(0.1),
@@ -143,19 +147,16 @@ Widget friendSearchDetailsCards({
                   },
                   splashColor: COLORS.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
-                  child: Hero(
-                    tag: tag,
-                    child: Container(
-                      width: SizeConfig.blockWidth * 14,
-                      height: SizeConfig.blockWidth * 14,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(image),
-                            fit: BoxFit.fill,
-                          ),
-                          borderRadius: BorderRadius.all(
-                              Radius.circular(SizeConfig.blockWidth * 7))),
-                    ),
+                  child: Container(
+                    width: SizeConfig.blockWidth * 14,
+                    height: SizeConfig.blockWidth * 14,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(image),
+                          fit: BoxFit.fill,
+                        ),
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(SizeConfig.blockWidth * 7))),
                   ),
                 )
               ]

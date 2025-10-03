@@ -329,7 +329,7 @@ void _handleNotificationNavigation(BuildContext context, RemoteMessage message) 
                 )),
             ),
           ],
-          child: const NotificationListScreen(),
+          child: NotificationListScreen(refreshPageCallback: (){}),
         ),
       ),
     );

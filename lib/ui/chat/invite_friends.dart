@@ -370,6 +370,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                           return Column(
                             children: [
                               friendSearchDetailsCards(
+                                itemID: inviteList.user!.id!,
                                   context: context,
                                   image: inviteList.user!.profilePic!,
                                   name: inviteList.user!.name!,
@@ -464,6 +465,7 @@ class _InviteFriendsListState extends State<InviteFriendsList> {
                                     },
                                   ),
                                   friendSearchDetailsCards(
+                                    itemID: inviteList.user!.id!,
                                     context: context,
                                     image: inviteList.user!.profilePic!, //
                                     name: inviteList.user!

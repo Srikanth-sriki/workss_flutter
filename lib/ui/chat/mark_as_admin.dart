@@ -64,6 +64,7 @@ class _MarkAsAdminListState extends State<MarkAsAdminList> {
                       Participant member = membersList[index];
 
                       return friendSearchDetailsCards(
+                        itemID:member.user!.id! ,
                         context: context,
                         image: member.user!.profilePic!,
                         name: member.user!.name!,

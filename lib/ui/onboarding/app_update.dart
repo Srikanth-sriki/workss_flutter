@@ -86,8 +86,9 @@ class _ForceUpdateScreenState extends State<ForceUpdateScreen> {
                 backgroundColor: COLORS.primary,
                 showIcon: false,
                 width: SizeConfig.blockWidth * 50,
-                height: SizeConfig.blockHeight * 8,
+                height: SizeConfig.blockHeight * 6.5,
                 textColor: COLORS.white,
+
               )
 
             ],

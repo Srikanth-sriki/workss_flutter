@@ -95,7 +95,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                   backgroundColor: COLORS.primary,
                   showIcon: false,
                   width: SizeConfig.blockWidth * 40,
-                  height: SizeConfig.blockHeight * 8,
+                  height: SizeConfig.blockHeight * 6.5,
                   textColor: COLORS.white,
                 )
 

@@ -122,7 +122,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   void _updateSelectedItemsList() {
     selectedItems = friends
-        .map((friend) => {"id": friend.friends.id, "selected": false})
+        .map((friend) => {"id": friend.friends!.id, "selected": false})
         .toList();
   }
 
@@ -579,7 +579,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                 itemBuilder: (context, index) {
                                   final friend = friends[index].friends;
                                   final isSelected =
-                                      selectedFriends.contains(friend.id);
+                                      selectedFriends.contains(friend!.id);
                                   if (index < friends.length) {
                                     return Row(
                                       mainAxisAlignment:
@@ -609,12 +609,12 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                                           )
                                         ],
                                         createGroupInviteCard(
-                                            image: friend.profilePic,
-                                            name: friend.name,
-                                            disc: friend.bio,
+                                            image: friend!.profilePic,
+                                            name: friend!.name,
+                                            disc: friend!.bio,
                                             added: isSelected,
                                             onTapCard: () =>
-                                                toggleSelection(friend.id),
+                                                toggleSelection(friend!.id),
                                             checkSelected: selectAll),
                                       ],
                                     );

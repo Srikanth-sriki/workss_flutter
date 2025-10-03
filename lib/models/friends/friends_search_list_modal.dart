@@ -41,7 +41,7 @@ class Friend {
     id: json["id"],
     userId: json["userId"],
     friendId: json["friendId"],
-    friends: Friends.fromJson(json["friends"]),
+    friends: json["friends"] != null ? Friends.fromJson(json["friends"]):Friends(id: '', name: '', profilePic: '', bio: '', userType: '', professionType: '')
   );
 
   Map<String, dynamic> toJson() => {

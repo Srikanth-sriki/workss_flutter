@@ -113,26 +113,23 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 InkWell(
-                                  onTap: () => showModernImagePreview(context, professional.profilePic!,heroTag:  professional.profilePic!),
+                                  onTap: () => showModernImagePreview(context, professional.profilePic!,heroTag:  'profView_${professional.id!}'),
                                   splashColor: COLORS.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 12 / 2),
-                                  child: Hero(
-                                    tag:  professional.profilePic!,
-                                    child: Container(
-                                      width: SizeConfig.blockWidth * 12,
-                                      height: SizeConfig.blockWidth * 12,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: COLORS.primary,
-                                              width: SizeConfig.blockWidth * 0.2),
-                                          image: DecorationImage(
-                                              image: NetworkImage(
-                                                  professional.profilePic!),
-                                              fit: BoxFit.cover),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(
-                                                  SizeConfig.blockWidth * 6))),
-                                    ),
+                                  child: Container(
+                                    width: SizeConfig.blockWidth * 12,
+                                    height: SizeConfig.blockWidth * 12,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: COLORS.primary,
+                                            width: SizeConfig.blockWidth * 0.2),
+                                        image: DecorationImage(
+                                            image: NetworkImage(
+                                                professional.profilePic!),
+                                            fit: BoxFit.cover),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(
+                                                SizeConfig.blockWidth * 6))),
                                   ),
                                 ),
                                 SizedBox(width: SizeConfig.blockWidth * 2),
@@ -615,6 +612,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                         vertical: SizeConfig.blockWidth * 2,
                                       ),
                                       child: buildProfessionalCard(
+                                          itemID:professionalData.id! ,
                                           context: context,
                                           accountVerified:
                                               professionalData!.isVerified!,

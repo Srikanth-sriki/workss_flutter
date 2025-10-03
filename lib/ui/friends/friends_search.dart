@@ -228,9 +228,10 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                           controller: _scrollController,
                           itemBuilder: (context, index) {
                             return friendSearchCards(
+                              itemID: state.friendsSearchList[index].friendId,
                               context: context,
-                              image: state.friendsSearchList[index].friends.profilePic,
-                              name: state.friendsSearchList[index].friends.name,
+                              image: state.friendsSearchList[index].friends!.profilePic,
+                              name: state.friendsSearchList[index].friends!.name,
                               onTapCard: () {
                                 Navigator.push(
                                     context,
@@ -276,7 +277,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                     BottomSheetItem(
                                       title: 'Send Message',
                                       onTap: () => {
-                                        chartBloc.add(StartMessageEvent(chatId: state.friendsSearchList[index].friends.id,
+                                        chartBloc.add(StartMessageEvent(chatId: state.friendsSearchList[index].friends!.id,
                                             onSuccess: (chatId){
                                          widget.refreshPageCallback();
                                           Navigator.push(
@@ -401,7 +402,7 @@ class _FriendsSearchListScreenState extends State<FriendsSearchListScreen> {
                                 );
                               },
                               onTapMessage: () {
-                                chartBloc.add(StartMessageEvent(chatId: state.friendsSearchList[index].friends.id,
+                                chartBloc.add(StartMessageEvent(chatId: state.friendsSearchList[index].friends!.id,
                                     onSuccess: (chatId){
                                       widget.refreshPageCallback();
                                       Navigator.push(

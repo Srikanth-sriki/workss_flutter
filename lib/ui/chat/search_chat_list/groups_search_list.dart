@@ -155,6 +155,7 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     friendSearchDetailsCards(
+                      itemID: chart.id!,
                       context: context,
                       image: chart.picture ?? '',
                       name: chart.name ?? '',

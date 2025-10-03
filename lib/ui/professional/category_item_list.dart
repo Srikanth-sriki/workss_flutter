@@ -142,6 +142,7 @@ class _CategoryItemListState extends State<CategoryItemList> {
                 horizontal: SizeConfig.blockWidth * 4.5,
                 vertical: SizeConfig.blockHeight * 1.5),
             child: buildProfessionalCard(
+              itemID:professionalData.id! ,
                 accountVerified: professionalData!.isVerified!,
                 image: professionalData!.profilePic!,
                 name: professionalData!.name!,

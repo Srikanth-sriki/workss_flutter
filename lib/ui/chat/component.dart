@@ -68,30 +68,27 @@ Widget chartSearchCards({
                     onTap: () => showModernImagePreview(context,image,heroTag: heroTag),
                     splashColor: COLORS.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
-                    child: Hero(
-                      tag: heroTag,
-                      child: ClipOval(
-                        child: SizedBox.square(
-                          dimension: SizeConfig.blockWidth * 14,
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                child: Container(color: COLORS.neutralDarkTwo),
+                    child: ClipOval(
+                      child: SizedBox.square(
+                        dimension: SizeConfig.blockWidth * 14,
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: Container(color: COLORS.neutralDarkTwo),
+                            ),
+                            Positioned.fill(
+                              child: Image.network(
+                                image,
+                                fit: BoxFit.contain,
+                                alignment: Alignment.center,
+                                loadingBuilder: (c, child, p) => p == null
+                                    ? child
+                                    : Container(color: COLORS.neutralDarkTwo),
+                                errorBuilder: (c, e, s) =>
+                                    Container(color: COLORS.neutralDarkTwo),
                               ),
-                              Positioned.fill(
-                                child: Image.network(
-                                  image,
-                                  fit: BoxFit.contain,
-                                  alignment: Alignment.center,
-                                  loadingBuilder: (c, child, p) => p == null
-                                      ? child
-                                      : Container(color: COLORS.neutralDarkTwo),
-                                  errorBuilder: (c, e, s) =>
-                                      Container(color: COLORS.neutralDarkTwo),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -1245,29 +1242,29 @@ void _showImageDialog(BuildContext context, String imageUrl) {
     context: context,
     barrierDismissible: true,
     barrierLabel: "ImageDialog",
-    transitionDuration: const Duration(milliseconds: 100),
+    transitionDuration: const Duration(milliseconds: 200),
     pageBuilder: (context, animation, secondaryAnimation) {
-      return Scaffold(
-        backgroundColor: COLORS.white,
-        body: GestureDetector(
-          onTap: () => Navigator.pop(context),
+      return GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Container(
+          color: Colors.black, // WhatsApp-style background
           child: Stack(
             children: [
-              PhotoView(
-                imageProvider: NetworkImage(imageUrl),
-                backgroundDecoration: const BoxDecoration(
-                  color: Colors.white, // Background color
+              Center(
+                child: PhotoView(
+                  imageProvider: NetworkImage(imageUrl),
+                  backgroundDecoration:
+                  const BoxDecoration(color: Colors.black),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.contained * 3.0,
                 ),
-                minScale: PhotoViewComputedScale.contained,
-                // maxScale: PhotoViewComputedScale.covered * 2.0, // Zoom settings
               ),
               Positioned(
                 top: MediaQuery.of(context).padding.top + 10,
                 right: 10,
                 child: IconButton(
-                  icon: Icon(Icons.close,
-                      color: COLORS.neutralDark,
-                      size: SizeConfig.blockWidth * 6.5),
+                  icon: const Icon(Icons.close,
+                      color: Colors.white, size: 30),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -1278,6 +1275,7 @@ void _showImageDialog(BuildContext context, String imageUrl) {
     },
   );
 }
+
 
 Widget BlockedChartCards({
   required String image,

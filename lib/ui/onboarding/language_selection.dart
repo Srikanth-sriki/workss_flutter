@@ -232,6 +232,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       }
 
     }
+    else{
+      showCustomSnackBar(
+          context: context,
+          message: 'Please select a language',
+          backgroundColor: COLORS.primaryOne);
+    }
   }
 
   @override
@@ -273,10 +279,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 languageTile(const Locale('en', 'US'), 'English', 'A'),
                 languageTile(const Locale('kn', 'IN'), 'ಕನ್ನಡ', 'ಕ'),
                 languageTile(const Locale('hi', 'IN'), 'हिंदी', 'हिं'),
-                languageTile(const Locale('ta', 'IN'), 'தமிழ்', 'த'),
-                languageTile(const Locale('te', 'IN'), 'తెలుగు', 'తె'),
+                languageTile(const Locale('ta', 'IN'), 'தமிழ்', 'த',enabled: false),
+                languageTile(const Locale('te', 'IN'), 'తెలుగు', 'తె',enabled: false),
                 // languageTile(const Locale('gu', 'IN'), 'ગુજરાતી', 'ગુ'),
-                languageTile(const Locale('ml', 'IN'), 'മലയാളം', 'മ'),
+                languageTile(const Locale('ml', 'IN'), 'മലയാളം', 'മ',enabled: false),
                 // languageTile(const Locale('mr', 'IN'), 'मराठी', 'म'),
               ],
             ),
@@ -308,39 +314,124 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     );
   }
 
-  Widget languageTile(Locale locale, String name, String header) {
-    bool isSelected = selectedLocale == locale;
-    return GestureDetector(
-      onTap: () => toggleLocale(locale),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
-        decoration: BoxDecoration(
-            border: Border.all(
-                color: isSelected ? COLORS.primary : COLORS.primaryOne),
+  // Widget languageTile(Locale locale, String name, String header) {
+  //   bool isSelected = selectedLocale == locale;
+  //   return GestureDetector(
+  //     onTap: () => toggleLocale(locale),
+  //     child: AnimatedContainer(
+  //       duration: const Duration(milliseconds: 500),
+  //       curve: Curves.easeInOut,
+  //       padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
+  //       decoration: BoxDecoration(
+  //           border: Border.all(
+  //               color: isSelected ? COLORS.primary : COLORS.primaryOne),
+  //           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+  //           color: isSelected ? COLORS.primary : COLORS.white),
+  //       child: Column(
+  //         mainAxisAlignment: MainAxisAlignment.center,
+  //         children: [
+  //           Text(header,
+  //               style: TextStyle(
+  //                   fontSize: SizeConfig.blockWidth * 6.8,
+  //                   fontFamily: "Poppins",
+  //                   color: isSelected ? COLORS.white : COLORS.primary,
+  //                   fontWeight: FontWeight.w700)),
+  //           SizedBox(height: SizeConfig.blockHeight * 1.2),
+  //           Text(name,
+  //               style: TextStyle(
+  //                 fontSize: SizeConfig.blockWidth * 4.5,
+  //                 fontWeight: FontWeight.w400,
+  //                 fontFamily: "Poppins",
+  //                 color: isSelected ? COLORS.white : COLORS.neutralDark,
+  //               )),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  Widget languageTile(
+      Locale locale,
+      String name,
+      String header, {
+        bool enabled = true,
+      }) {
+    final bool isSelected = selectedLocale == locale;
+
+    final Color borderColor = !enabled
+        ? COLORS.neutralDarkOne.withOpacity(0.25)
+        : (isSelected ? COLORS.primary : COLORS.primaryOne);
+
+    final Color bgColor = !enabled
+        ? COLORS.neutralDarkTwo.withOpacity(0.08)
+        : (isSelected ? COLORS.primary : COLORS.white);
+
+    final Color headerColor = !enabled
+        ? COLORS.neutralDark.withOpacity(0.4)
+        : (isSelected ? COLORS.white : COLORS.primary);
+
+    final Color nameColor = !enabled
+        ? COLORS.neutralDark.withOpacity(0.4)
+        : (isSelected ? COLORS.white : COLORS.neutralDark);
+
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: name,
+      child: GestureDetector(
+        onTap: () {
+          if (enabled) {
+            toggleLocale(locale);
+          }
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
+          decoration: BoxDecoration(
+            border: Border.all(color: borderColor),
             borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
-            color: isSelected ? COLORS.primary : COLORS.white),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(header,
+            color: bgColor,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                header,
                 style: TextStyle(
-                    fontSize: SizeConfig.blockWidth * 6.8,
-                    fontFamily: "Poppins",
-                    color: isSelected ? COLORS.white : COLORS.primary,
-                    fontWeight: FontWeight.w700)),
-            SizedBox(height: SizeConfig.blockHeight * 1.2),
-            Text(name,
+                  fontSize: SizeConfig.blockWidth * 6.8,
+                  fontFamily: "Poppins",
+                  color: headerColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 1.2),
+              Text(
+                name,
                 style: TextStyle(
                   fontSize: SizeConfig.blockWidth * 4.5,
                   fontWeight: FontWeight.w400,
                   fontFamily: "Poppins",
-                  color: isSelected ? COLORS.white : COLORS.neutralDark,
-                )),
-          ],
+                  color: nameColor,
+                ),
+              ),
+              if (!enabled) ...[
+                SizedBox(height: SizeConfig.blockHeight * 1.2),
+                Text(
+                  'Coming soon',
+                  style: TextStyle(
+                    fontSize: SizeConfig.blockWidth * 3.2,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                    color: COLORS.neutralDark.withOpacity(0.45),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
+
 }

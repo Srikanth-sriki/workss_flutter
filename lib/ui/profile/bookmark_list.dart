@@ -106,6 +106,7 @@ class _BookMarkListScreenState extends State<BookMarkListScreen> {
                                       vertical: SizeConfig.blockWidth * 2,
                                       horizontal: SizeConfig.blockWidth * 4),
                                   child: buildProfessionalCard(
+                                      itemID:professionalData.id! ,
                                       context: context,
                                       onTap: () {
                                         Navigator.push(

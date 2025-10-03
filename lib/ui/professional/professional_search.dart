@@ -296,6 +296,7 @@ class _ProfessionalSearchListState extends State<ProfessionalSearchList> {
                 horizontal: SizeConfig.blockWidth * 4.5,
                 vertical: SizeConfig.blockHeight * 0.5),
             child: buildProfessionalCard(
+                itemID:professionalData.id! ,
                 context: context,
                 accountVerified: professionalData!.isVerified!,
                 image: professionalData!.profilePic!,

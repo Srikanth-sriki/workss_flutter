@@ -17,7 +17,8 @@ import '../../global_helper/reuse_widget.dart';
 import '../../models/notification_list_model.dart';
 
 class NotificationListScreen extends StatefulWidget {
-  const NotificationListScreen({super.key});
+  final VoidCallback refreshPageCallback;
+  const NotificationListScreen({super.key, required this.refreshPageCallback,});
 
   @override
   State<NotificationListScreen> createState() => _NotificationListScreenState();
@@ -423,6 +424,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                               FetchNotificationViewEvent(
                                                   id: n.id!),
                                             );
+                                            widget.refreshPageCallback();
                                           },
                                           onError: (msg) => showCustomSnackBar(
                                             context: context,
@@ -445,6 +447,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                               FetchNotificationViewEvent(
                                                   id: n.id!),
                                             );
+                                            widget.refreshPageCallback();
                                           },
                                           onError: (msg) => showCustomSnackBar(
                                             context: context,
@@ -508,6 +511,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                                   FetchNotificationViewEvent(
                                                       id: n.id!),
                                                 );
+                                                widget.refreshPageCallback();
                                               },
                                               onError: (msg) => showCustomSnackBar(
                                                 context: context,
@@ -530,6 +534,7 @@ class _NotificationListScreenState extends State<NotificationListScreen>
                                                   FetchNotificationViewEvent(
                                                       id: n.id!),
                                                 );
+                                                widget.refreshPageCallback();
                                               },
                                               onError: (msg) => showCustomSnackBar(
                                                 context: context,

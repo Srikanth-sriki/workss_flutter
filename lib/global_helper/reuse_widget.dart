@@ -798,9 +798,12 @@ Widget buildProfessionalCard(
     required VoidCallback onTap,
     required String image,
       required BuildContext context,
+      required String itemID,
       required bool smartControlEnable,
     required VoidCallback messageOnTap}) {
   final tag = image;
+  final heroTag = 'pro_${itemID}';
+  //final String _heroTag =  'proHero_${image}_${name.hashCode}_${location.hashCode}';
   return TouchRippleEffect(
     borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
     rippleColor: Colors.white60,
@@ -826,23 +829,20 @@ Widget buildProfessionalCard(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () => showModernImagePreview(context,image,heroTag: tag),
+                      onTap: () => showModernImagePreview(context,image,heroTag: heroTag),
                       splashColor: COLORS.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 12 / 2),
-                      child: Hero(
-                        tag: tag,
-                        child: Container(
-                          width: SizeConfig.blockWidth * 12,
-                          height: SizeConfig.blockWidth * 12,
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: COLORS.primary,
-                                  width: SizeConfig.blockWidth * 0.25),
-                              image: DecorationImage(
-                                  image: NetworkImage(image), fit: BoxFit.cover),
-                              borderRadius: BorderRadius.all(
-                                  Radius.circular(SizeConfig.blockWidth * 6))),
-                        ),
+                      child: Container(
+                        width: SizeConfig.blockWidth * 12,
+                        height: SizeConfig.blockWidth * 12,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                                color: COLORS.primary,
+                                width: SizeConfig.blockWidth * 0.25),
+                            image: DecorationImage(
+                                image: NetworkImage(image), fit: BoxFit.cover),
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(SizeConfig.blockWidth * 6))),
                       ),
                     ),
                     SizedBox(width: SizeConfig.blockWidth * 2),

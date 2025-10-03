@@ -379,6 +379,7 @@ class _ViewInsightsScreenState extends State<ViewInsightsScreen> {
             child: professionalData.user != null?
 
             buildProfessionalCard(
+                itemID:professionalData.user!.id! ,
                 context: context,
                 onTap: (){
                   Navigator.push(

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -39,13 +40,24 @@ import 'filter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.tabNotifier, // optional: used to refresh on tab taps
+    this.myIndex,     // optional: index of this tab
+  });
+
+  final ValueListenable<int>? tabNotifier;
+  final int? myIndex;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   late HomeBloc homeBloc;
   late ShowInterestedBloc showInterestedBloc;
   late FriendsBloc friendsBloc;
@@ -75,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchFriendList();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent &&
+          _scrollController.position.maxScrollExtent &&
           !isFetchingMore &&
           currentPage < maxPageNumber) {
         _loadMoreData();
@@ -90,6 +102,25 @@ class _HomeScreenState extends State<HomeScreen> {
       SocketService().reconnect();
     }
     connectToSocket();
+
+    // listen to tab changes (if provided)
+    widget.tabNotifier?.addListener(_onTabChange);
+  }
+
+  // refresh when this tab is selected (or reselected)
+  void _onTabChange() {
+    final idx = widget.tabNotifier?.value;
+    if (idx != null && widget.myIndex != null && idx == widget.myIndex) {
+      _fetchData(isNewFetch: true);
+      _fetchFriendList();
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    }
   }
 
   void connectToSocket() {
@@ -97,11 +128,19 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_isMounted) {
         setState(() {
           Config.notificationReceiveMessage.value = true;
-
-          print(data);
+          // print(data);
         });
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tabNotifier != widget.tabNotifier) {
+      oldWidget.tabNotifier?.removeListener(_onTabChange);
+      widget.tabNotifier?.addListener(_onTabChange);
+    }
   }
 
   @override
@@ -110,17 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchData();
   }
 
-  // void _fetchData() {
-  //   homeBloc.add(FetchHomeScreenEvent(
-  //       page: currentPage,
-  //       pageSize: pageSize,
-  //       keyWord: "",
-  //       profession: "",
-  //       city: "",
-  //       gender: "",
-  //       currentLongitude: '',
-  //       currentLatitude: ''));
-  // }
   void _fetchData({bool isNewFetch = false}) {
     if (isNewFetch) {
       homeFetchModel.clear();
@@ -146,13 +174,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // void _loadMoreData() {
-  //   setState(() {
-  //     isFetchingMore = true;
-  //   });
-  //   currentPage++;
-  //   _fetchData();
-  // }
   void _loadMoreData() {
     if (!isFetchingMore && currentPage < maxPageNumber) {
       setState(() {
@@ -185,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _isMounted = false;
+    widget.tabNotifier?.removeListener(_onTabChange);
     // socket.off('new_notification');
     // socket.disconnect();
     _scrollController.dispose();
@@ -193,6 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: COLORS.white,
       appBar: AppBar(
@@ -205,8 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            _fetchData(isNewFetch: true); // your existing method
-
+            _fetchData(isNewFetch: true);
           },
           child: Container(
             width: SizeConfig.screenWidth,
@@ -227,14 +249,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     homeFetchModel = state.homeFetchModel;
                                   } else {
                                     final newItems = state.homeFetchModel.where(
-                                        (item) => !homeFetchModel.contains(item));
+                                            (item) => !homeFetchModel.contains(item));
                                     homeFetchModel.addAll(newItems);
                                   }
                                   maxPageNumber = state.maxPageNumber;
                                   isFetchingMore = false;
                                 });
-
-                                //context.read<FriendsBloc>().add(FetchFriendsListEvent(page: 1,pageSize: 10, keyWord: ''),);
                               } else if (state is FetchHomeScreenFailed) {
                                 setState(() {
                                   isFetchingMore = false;
@@ -249,7 +269,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   searchFriendLists = state.searchFriendLists
                                       .where((friend) => friend.isFriend == null)
                                       .toList();
-                                  ;
                                 });
                               }
                             },
@@ -263,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   homeFetchModel = state.homeFetchModel;
                                 } else {
                                   final newItems = state.homeFetchModel.where(
-                                      (item) => !homeFetchModel.contains(item));
+                                          (item) => !homeFetchModel.contains(item));
                                   homeFetchModel.addAll(newItems);
                                 }
                                 maxPageNumber = state.maxPageNumber;
@@ -303,46 +322,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                // if (Config.profileCompleted) ...[
-                //   Positioned(
-                //     bottom: SizeConfig.blockHeight * 2.5,
-                //     right: SizeConfig.blockHeight * 4,
-                //     child: FloatingActionButton(
-                //         onPressed: () {
-                //           Navigator.push(
-                //               context,
-                //               MaterialPageRoute(
-                //                   builder: (context) => MultiBlocProvider(
-                //                         providers: [
-                //                           BlocProvider(
-                //                             create: (context) {
-                //                               final bloc = PostWorkBloc();
-                //                               bloc.add(
-                //                                   const FetchWorkPlaceEvent());
-                //                               bloc.add(
-                //                                   const FetchWorkKnownLanguageEvent());
-                //                               return bloc;
-                //                             },
-                //                           ),
-                //                           BlocProvider(
-                //                               create: (context) => ProfileBloc()),
-                //                           BlocProvider(
-                //                               create: (context) =>
-                //                                   ProfessionalBloc()),
-                //                         ],
-                //                         child: const PostWorkScreen(
-                //                           arrowBack: true,
-                //                         ),
-                //                       )));
-                //         },
-                //         backgroundColor: COLORS.primary,
-                //         child: Icon(
-                //           Icons.add,
-                //           color: COLORS.white,
-                //           size: SizeConfig.blockWidth * 6.5,
-                //         )),
-                //   )
-                // ]
               ],
             ),
           ),
@@ -363,12 +342,11 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (context, index) {
         if (index < homeFetchModel.length) {
           final work = homeFetchModel[index];
-          final languages = work.knowLanguage!
-              .map((lang) => lang.tr())
-              .join(", ");
+          final languages =
+          work.knowLanguage!.map((lang) => lang.tr()).join(", ");
           return Container(
             padding:
-                EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4.5),
+            EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4.5),
             margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 1.8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -377,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (index == 0) ...[
                   Padding(
                     padding:
-                        EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
+                    EdgeInsets.symmetric(vertical: SizeConfig.blockHeight),
                     child: Text(
                       'Works'.tr(),
                       style: TextStyle(
@@ -402,29 +380,29 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => MultiBlocProvider(
-                                      providers: [
-                                        BlocProvider(
-                                          create: (context) => FriendsBloc()
-                                            ..add(FetchFriendsAddListEvent(
-                                                page: 1,
-                                                pageSize: 10,
-                                                keyWord: '')),
-                                        ),
-                                        BlocProvider(
-                                            create: (context) =>
-                                                ShowInterestedBloc()),
-                                        BlocProvider(
-                                            create: (context) => ChartBloc()
-                                              ..add(FetchChartSearchListEvent(
-                                                  page: 1,
-                                                  pageSize: 10,
-                                                  keyWord: '')))
-                                      ],
-                                      child: AddFriendsScreen(
-                                        header: 'Friend Suggestion',
-                                        refreshPageCallback: _fetchFriendList,
-                                      ),
-                                    )));
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) => FriendsBloc()
+                                        ..add(FetchFriendsAddListEvent(
+                                            page: 1,
+                                            pageSize: 10,
+                                            keyWord: '')),
+                                    ),
+                                    BlocProvider(
+                                        create: (context) =>
+                                            ShowInterestedBloc()),
+                                    BlocProvider(
+                                        create: (context) => ChartBloc()
+                                          ..add(FetchChartSearchListEvent(
+                                              page: 1,
+                                              pageSize: 10,
+                                              keyWord: '')))
+                                  ],
+                                  child: AddFriendsScreen(
+                                    header: 'Friend Suggestion',
+                                    refreshPageCallback: _fetchFriendList,
+                                  ),
+                                )));
                       }),
                   SizedBox(
                     height: SizeConfig.blockHeight * 26,
@@ -437,15 +415,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemBuilder: (context, index) {
                           return addFriendCard(
                               added:
-                                  searchFriendLists[index].friendRequestSent !=
-                                          null
-                                      ? true
-                                      : false,
+                              searchFriendLists[index].friendRequestSent !=
+                                  null
+                                  ? true
+                                  : false,
                               image: searchFriendLists[index].profilePic,
                               name: searchFriendLists[index].name,
                               onTap: () {
                                 if (searchFriendLists[index]
-                                        .friendRequestSent !=
+                                    .friendRequestSent !=
                                     null) {
                                   showInterestedBloc.add(UnSendFriendEvent(
                                       userId: searchFriendLists[index].id,
@@ -467,10 +445,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                       onSuccess: (message) {
                                         setState(() {
                                           searchFriendLists[index]
-                                                  .friendRequestSent =
+                                              .friendRequestSent =
                                               FriendRequestSent(
-                                            userId: searchFriendLists[index].id,
-                                          );
+                                                userId: searchFriendLists[index].id,
+                                              );
                                         });
                                       },
                                       onError: (message) {
@@ -486,49 +464,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(
-                                                  create: (context) {
-                                                    final bloc = FriendsBloc();
-                                                    bloc.add(
-                                                        FetchFriendsSingleView(
-                                                            friendId:
-                                                                searchFriendLists[
-                                                                        index]
-                                                                    .id));
-                                                    return bloc;
-                                                  },
-                                                ),
-                                                BlocProvider(
-                                                  create: (context) =>
-                                                      ShowInterestedBloc(),
-                                                ),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ReportPostBloc()),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ShowInterestedBloc()),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ChartBloc())
-                                              ],
-                                              child: FriendsDetailsScreen(
-                                                refreshPageCallback:
-                                                    _fetchFriendList,
-                                                id: searchFriendLists[index].id,
-                                              ),
-                                            )));
+                                          providers: [
+                                            BlocProvider(
+                                              create: (context) {
+                                                final bloc = FriendsBloc();
+                                                bloc.add(
+                                                    FetchFriendsSingleView(
+                                                        friendId:
+                                                        searchFriendLists[
+                                                        index]
+                                                            .id));
+                                                return bloc;
+                                              },
+                                            ),
+                                            BlocProvider(
+                                              create: (context) =>
+                                                  ShowInterestedBloc(),
+                                            ),
+                                            BlocProvider(
+                                                create: (context) =>
+                                                    ReportPostBloc()),
+                                            BlocProvider(
+                                                create: (context) =>
+                                                    ShowInterestedBloc()),
+                                            BlocProvider(
+                                                create: (context) =>
+                                                    ChartBloc())
+                                          ],
+                                          child: FriendsDetailsScreen(
+                                            refreshPageCallback:
+                                            _fetchFriendList,
+                                            id: searchFriendLists[index].id,
+                                          ),
+                                        )));
                               });
                         }),
                   ),
                   SizedBox(height: SizeConfig.blockHeight * 1),
                 ],
                 WorkCard(
-                  title:work.professionalSubCategory != null ? getCategoryProfessionCardName(work.professionalSubCategory) :work.requiredProfession?? '--',
+                  title: work.professionalSubCategory != null
+                      ? getCategoryProfessionCardName(
+                      work.professionalSubCategory)
+                      : work.requiredProfession ?? '--',
                   location: '${work.locality} ${work.city}' ?? '--',
                   timeAgo: timeAgo(work.updatedAt!),
-                  jobType: work.workPlaceCategory != null ? getCategoryWorkPlaceCardName(work.workPlaceCategory) :work.workPlace ?? '--',
+                  jobType: work.workPlaceCategory != null
+                      ? getCategoryWorkPlaceCardName(work.workPlaceCategory)
+                      : work.workPlace ?? '--',
                   experience: work.experienceLevel ?? '--',
                   experienceImage: 'assets/images/home/work_select.png',
                   gender: work.gender ?? '--',
@@ -543,27 +526,28 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => MultiBlocProvider(
-                                    providers: [
-                                      BlocProvider(
-                                        create: (context) => HomeBloc()
-                                          ..add(FetchWorkSingleView(
-                                              workId: work.id!)),
-                                      ),
-                                      BlocProvider(
-                                        create: (context) =>
-                                            ShowInterestedBloc(),
-                                      ),
-                                      BlocProvider(
-                                          create: (context) => ReportPostBloc())
-                                    ],
-                                    child: WorkDetailsScreen(
-                                      id: work.id!,
-                                      refreshPageCallback: () {
-                                        _fetchData(isNewFetch: true);
-                                      },
-                                      routeType: 'general',
-                                    ),
-                                  )));
+                                providers: [
+                                  BlocProvider(
+                                    create: (context) => HomeBloc()
+                                      ..add(FetchWorkSingleView(
+                                          workId: work.id!)),
+                                  ),
+                                  BlocProvider(
+                                    create: (context) =>
+                                        ShowInterestedBloc(),
+                                  ),
+                                  BlocProvider(
+                                      create: (context) =>
+                                          ReportPostBloc())
+                                ],
+                                child: WorkDetailsScreen(
+                                  id: work.id!,
+                                  refreshPageCallback: () {
+                                    _fetchData(isNewFetch: true);
+                                  },
+                                  routeType: 'general',
+                                ),
+                              )));
                     } else {
                       loginUserBottomSheet(context);
                     }
@@ -604,7 +588,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     context: context,
                                     title: 'Are you Sure?',
                                     message:
-                                        'Do you want to Uninterest this Work?',
+                                    'Do you want to Uninterest this Work?',
                                     positiveButtonText: 'YES',
                                     negativeButtonText: 'NO',
                                     onPositivePressed: () {
@@ -620,7 +604,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         onError: () {
                                           showCustomSnackBar(
                                             context: context,
-                                            message: "Something Went wrong",
+                                            message:
+                                            "Something Went wrong",
                                           );
                                           Navigator.of(context).pop();
                                         },
@@ -647,7 +632,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           image: true,
                           imageChild: Padding(
                             padding:
-                                EdgeInsets.only(right: SizeConfig.blockWidth),
+                            EdgeInsets.only(right: SizeConfig.blockWidth),
                             child: Image.asset(
                               work.intrestShown == null
                                   ? 'assets/images/profile/like.png'
@@ -764,13 +749,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                const LanguageSelectionScreen(
-                                  routeType: 'homo',
-                                )),
+                            const LanguageSelectionScreen(
+                              routeType: 'homo',
+                            )),
                       );
                     },
                     borderRadius:
-                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
@@ -816,18 +801,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                               ),
                             ],
-                            child: const NotificationListScreen(),
+                            child:  NotificationListScreen(
+                              refreshPageCallback: (){},
+                            ),
                           ),
                         ),
                       );
                     },
                     borderRadius:
-                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                     child: Container(
                       padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
                       decoration: BoxDecoration(
                         borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                        BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                         color: COLORS.primaryOne.withOpacity(0.3),
                       ),
                       child: Stack(
@@ -843,19 +830,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (context, hasNewMessage, _) {
                               return hasNewMessage
                                   ? Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: Container(
-                                        width: SizeConfig.blockWidth * 3,
-                                        height: SizeConfig.blockWidth * 3,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    )
-                                  : const SizedBox
-                                      .shrink(); // Return empty widget if false
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  width: SizeConfig.blockWidth * 3,
+                                  height: SizeConfig.blockWidth * 3,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              )
+                                  : const SizedBox.shrink();
                             },
                           ),
                         ],
@@ -882,35 +868,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                      create: (context) => HomeBloc()
-                                        ..add(FetchHomeScreenEvent(
-                                            page: 1,
-                                            pageSize: 20,
-                                            profession: '',
-                                            keyWord: '',
-                                            city: '',
-                                            currentLongitude: '',
-                                            currentLatitude: '',
-                                            gender: '',
-                                            knownLanguages: [],
-                                            experienceLevel: ''))),
-                                  BlocProvider(
-                                    create: (context) => ShowInterestedBloc(),
-                                  )
-                                ],
-                                child: const WorkSearchList(),
-                              )));
+                            providers: [
+                              BlocProvider(
+                                  create: (context) => HomeBloc()
+                                    ..add(FetchHomeScreenEvent(
+                                        page: 1,
+                                        pageSize: 20,
+                                        profession: '',
+                                        keyWord: '',
+                                        city: '',
+                                        currentLongitude: '',
+                                        currentLatitude: '',
+                                        gender: '',
+                                        knownLanguages: [],
+                                        experienceLevel: ''))),
+                              BlocProvider(
+                                create: (context) => ShowInterestedBloc(),
+                              )
+                            ],
+                            child: const WorkSearchList(),
+                          )));
                 },
                 borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                 child: Container(
                   width: SizeConfig.blockWidth * 72,
                   height: SizeConfig.blockHeight * 8,
                   decoration: BoxDecoration(
                       borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                      BorderRadius.circular(SizeConfig.blockWidth * 3.25),
                       color: COLORS.neutralDarkTwo.withOpacity(0.6)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -959,30 +945,30 @@ class _HomeScreenState extends State<HomeScreen> {
                             top: Radius.circular(SizeConfig.blockWidth * 6)),
                       ),
                       builder: (context) => MultiBlocProvider(
-                            providers: [
-                              BlocProvider(
-                                create: (context) {
-                                  final bloc = InitialRegisterBloc();
-                                  bloc.add(const FetchCityEvent());
-                                  bloc.add(const FetchChargeFeesEvent());
-                                  bloc.add(
-                                      const FetchWorkKnownLanguageProfileEvent());
-                                  return bloc;
-                                },
-                              ),
-                              BlocProvider(
-                                  create: (context) => ProfessionalBloc()
-                                    ..add(const FetchCategoryListEvent())),
-                            ],
-                            child: SearchFilterBottomSheet(
-                              initialProfession: selectedProfession,
-                              initialCity: selectedCity,
-                              initialGender: selectedGender,
-                              experienceLevel: experienceLevel,
-                              experienceLevelVisible: true,
-                              selectedLanguageVisible: false,
-                            ),
-                          ));
+                        providers: [
+                          BlocProvider(
+                            create: (context) {
+                              final bloc = InitialRegisterBloc();
+                              bloc.add(const FetchCityEvent());
+                              bloc.add(const FetchChargeFeesEvent());
+                              bloc.add(
+                                  const FetchWorkKnownLanguageProfileEvent());
+                              return bloc;
+                            },
+                          ),
+                          BlocProvider(
+                              create: (context) => ProfessionalBloc()
+                                ..add(const FetchCategoryListEvent())),
+                        ],
+                        child: SearchFilterBottomSheet(
+                          initialProfession: selectedProfession,
+                          initialCity: selectedCity,
+                          initialGender: selectedGender,
+                          experienceLevel: experienceLevel,
+                          experienceLevelVisible: true,
+                          selectedLanguageVisible: false,
+                        ),
+                      ));
 
                   if (result != null) {
                     selectedProfession = result['selectedProfession'];
@@ -995,14 +981,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
                 borderRadius:
-                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                 child: Container(
                   padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
                   height: SizeConfig.blockHeight * 8,
                   width: SizeConfig.blockHeight * 8,
                   decoration: BoxDecoration(
                       borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                      BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                       color: COLORS.neutralDarkTwo.withOpacity(0.6)),
                   child: Image.asset(
                     'assets/images/home/filter.png',

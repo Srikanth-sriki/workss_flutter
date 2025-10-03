@@ -125,14 +125,24 @@ class _ChatMainScreenState extends State<ChatMainScreen>
     super.dispose();
   }
 
+  // void _onTabFocusChanged() {
+  //   if (widget.chatFocus.value) {
+  //     // tab became visible → light refresh + clear red dot
+  //     if (!_bgLoading) setState(() => _bgLoading = true);
+  //     _fetchData(background: true);
+  //     Config.chatHasNewMessage.value = false;
+  //   }
+  // }
+
+  // ChatMainScreen
   void _onTabFocusChanged() {
     if (widget.chatFocus.value) {
-      // tab became visible → light refresh + clear red dot
       if (!_bgLoading) setState(() => _bgLoading = true);
-      _fetchData(background: true);
+      _fetchData(background: true); // <- dispatch FetchFriendsListEvent here
       Config.chatHasNewMessage.value = false;
     }
   }
+
 
   // ========== SOCKET ==========
 
@@ -332,7 +342,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                           ),
                       ),
                     ],
-                    child: const NotificationListScreen(),
+                    child:  NotificationListScreen(refreshPageCallback: (){
+                      _fetchData(background: true);
+                    },),
                   ),
                 ),
               );
@@ -386,7 +398,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               if (state is FriendsListSuccess) {
                 setState(() {
                   _friends = state.friendsSearchList;
-                  _friendCount = state.friendsSearchList.length; // ✅ length is never null
+                  _friendCount = state.friendsSearchList.length;
+                  print('_friends_friends');
+                  print(_friends);
                 });
               }
             },
@@ -544,11 +558,11 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                                 separatorBuilder: (_, __) => SizedBox(width: SizeConfig.blockWidth * 4), // exact inter-card gap
                                 itemBuilder: (context, index) {
                                   final f = _friends[index].friends;
-                                  return friendViewCard(
-                                    image: f.profilePic,
-                                    name: f.name,
+                                  return f.id.isNotEmpty?friendViewCard(
+                                    image: f!.profilePic,
+                                    name: f!.name,
                                     onTap: () => _startDirectChat(f.id),
-                                  );
+                                  ):null;
                                 },
                               ),
                             ),
