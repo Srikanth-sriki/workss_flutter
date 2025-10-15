@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +15,6 @@ import 'package:works_app/components/config.dart';
 import 'package:works_app/global_helper/loading_placeholder/home_layout.dart';
 import 'package:works_app/ui/chat/chat_profile_view.dart';
 import 'package:works_app/ui/chat/modal/delete_leave_group.dart';
-import 'package:works_app/ui/chat/remove_friends.dart';
 
 import '../../bloc/friends/friends_bloc.dart';
 import '../../bloc/profile/profile_bloc.dart';
@@ -25,20 +22,16 @@ import '../../bloc/register_account/initial_register_bloc.dart';
 import '../../bloc/report_post_bloc.dart';
 import '../../bloc/show_interested/show_interested_bloc.dart';
 import '../../components/size_config.dart';
-import '../../global_helper/ImagePickerComponent.dart';
 import '../../global_helper/helper_function.dart';
 import '../../global_helper/popup.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../helper/socket_service.dart';
-import '../../models/chat/charts_list_modal.dart';
 import '../../models/chat/chat_view_modal.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
 import '../friends/friends_details.dart';
 import '../profile/notification.dart';
 import 'component.dart';
 import 'chat_wave_form.dart';
-import 'invite_friends.dart';
-import 'modal/markas_admin_modal.dart';
 import 'modal/report_or_block.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
@@ -51,7 +44,8 @@ class ChatViewScreen extends StatefulWidget {
       {super.key,
       required this.refreshPageCallback,
       required this.chatId,
-      required this.isGroup,  this.isRequest = false});
+      required this.isGroup,
+      this.isRequest = false});
 
   @override
   State<ChatViewScreen> createState() => _ChatViewScreenState();
@@ -89,6 +83,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   bool sentAudio = false;
   bool sentAudioSent = false;
   late bool isRequestLocal;
+  bool _sending = false;
 
   @override
   void initState() {
@@ -125,10 +120,26 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   void connectToSocket() {
     socket.on('new_message', (data) {
       if (_isMounted) {
-        setState(() {
-          _fetchData();
-          print(data);
-        });
+        // Only fetch data if we don't have temporary messages being processed
+        bool hasTemporaryMessages = false;
+        for (var chatDate in chatView) {
+          for (var message in chatDate.messages) {
+            if (message.tempId != null &&
+                (message.messageState == MessageState.sending ||
+                    message.messageState == MessageState.sent)) {
+              hasTemporaryMessages = true;
+              break;
+            }
+          }
+          if (hasTemporaryMessages) break;
+        }
+
+        if (!hasTemporaryMessages) {
+          setState(() {
+            _fetchData();
+            print(data);
+          });
+        }
       }
     });
   }
@@ -141,11 +152,18 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   }
 
   void _initialiseControllers() {
-    recorderController = RecorderController()
-      ..androidEncoder = AndroidEncoder.aac
-      ..androidOutputFormat = AndroidOutputFormat.mpeg4
-      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
-      ..sampleRate = 44100;
+    try {
+      recorderController = RecorderController()
+        ..androidEncoder = AndroidEncoder.aac
+        ..androidOutputFormat = AndroidOutputFormat.mpeg4
+        ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
+        ..sampleRate = 44100;
+
+      debugPrint("RecorderController initialized successfully");
+    } catch (e) {
+      debugPrint("Error initializing RecorderController: $e");
+      _showErrorSnackBar("Audio recording not available");
+    }
   }
 
   void _fetchData() {
@@ -172,16 +190,6 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     }
   }
 
-  void _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      musicFile = result.files.single.path;
-      setState(() {});
-    } else {
-      debugPrint("File not picked");
-    }
-  }
-
   void _startOrStopRecording() async {
     setState(() {
       sentAudio = false;
@@ -189,28 +197,112 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     });
     try {
       if (isRecording) {
-        recorderController.reset();
+        // Stop recording with timeout
+        try {
+          path = await recorderController.stop(false).timeout(
+            Duration(seconds: 5),
+            onTimeout: () {
+              debugPrint("Recording stop timeout");
+              return null;
+            },
+          );
+        } catch (e) {
+          debugPrint("Error stopping recorder: $e");
+          _showErrorSnackBar("Failed to stop recording");
+          return;
+        }
 
-        path = await recorderController.stop(false);
+        if (path != null && path!.isNotEmpty) {
+          final recordedFile = File(path!);
 
-        if (path != null) {
-          isRecordingCompleted = true;
-          debugPrint(path);
-          debugPrint("Recorded file size: ${File(path!).lengthSync()}");
-          chartBloc.add(UploadFileEvent(filePath: File(path!)));
-          setState(() {
-            sentAudioSent = true;
-          });
+          // Check if file exists and has content
+          if (await recordedFile.exists()) {
+            final fileSize = await recordedFile.length();
+            debugPrint("Recorded file size: $fileSize bytes");
+
+            if (fileSize > 0) {
+              isRecordingCompleted = true;
+              chartBloc.add(UploadFileEvent(filePath: recordedFile));
+              setState(() {
+                sentAudioSent = true;
+              });
+            } else {
+              debugPrint("Recorded file is empty");
+              _showErrorSnackBar("Recording failed - empty file");
+            }
+          } else {
+            debugPrint("Recorded file does not exist");
+            _showErrorSnackBar("Recording failed - file not created");
+          }
+        } else {
+          debugPrint("Recording path is null or empty");
+          _showErrorSnackBar("Recording failed - no file path");
         }
       } else {
-        await recorderController.record(path: path);
+        // Check if recording is available before starting
+        final isAvailable = await _isRecordingAvailable();
+        if (!isAvailable) {
+          _showErrorSnackBar("Audio recording is not available on this device");
+          return;
+        }
+
+        // Start recording with error handling
+        try {
+          final dir = await getApplicationDocumentsDirectory();
+          path =
+              '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+          await recorderController.record(path: path).timeout(
+            Duration(seconds: 10),
+            onTimeout: () {
+              debugPrint("Recording start timeout");
+              throw Exception("Recording start timeout");
+            },
+          );
+          debugPrint("Started recording to: $path");
+        } catch (e) {
+          debugPrint("Error starting recording: $e");
+          _showErrorSnackBar("Failed to start recording. Please try again.");
+          return;
+        }
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("Recording error: ${e.toString()}");
+      _showErrorSnackBar("Recording error: ${e.toString()}");
     } finally {
       setState(() {
         isRecording = !isRecording;
       });
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (_isMounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.black12,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  Future<bool> _isRecordingAvailable() async {
+    try {
+      // Test if we can initialize the recorder
+      final testController = RecorderController()
+        ..androidEncoder = AndroidEncoder.aac
+        ..androidOutputFormat = AndroidOutputFormat.mpeg4
+        ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
+        ..sampleRate = 44100;
+
+      // Dispose the test controller
+      testController.dispose();
+      return true;
+    } catch (e) {
+      debugPrint("Recording not available: $e");
+      return false;
     }
   }
 
@@ -260,23 +352,115 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   //   }
   // }
 
+  void _retryMessage(Message message) {
+    if (message.tempId != null) {
+      // Retry sending the message
+      setState(() {
+        message.messageState = MessageState.sending;
+        message.isUploading = true;
+      });
 
-  void _refreshWave() {
-    if (isRecording) recorderController.refresh();
+      if (message.type == 'text') {
+        chartBloc.add(ChartSendMessageEvent(
+          chatId: widget.chatId,
+          content: message.content,
+          messageType: 'text',
+          fileName: null,
+          fileUrl: null,
+          fileType: null,
+          fileSize: null,
+        ));
+      } else if (message.type == 'media') {
+        // Handle media retry
+        if (message.messageMedia.isNotEmpty) {
+          final media = message.messageMedia[0];
+          if (media.fileType == 'audio') {
+            // Retry audio upload
+            chartBloc.add(UploadFileEvent(filePath: File(media.fileUrl)));
+          } else if (media.fileType == 'image') {
+            // Retry image upload
+            initialRegisterBloc
+                .add(UploadImageEvent(imagePath: File(media.fileUrl)));
+          }
+        }
+      }
+    }
   }
 
-  void onSendMessage() {
-    chartBloc.add(ChartSendMessageEvent(
-      chatId: widget.chatId,
-      content: _messageController.text,
-      messageType: _messageController.text.isEmpty ? 'media' : "text",
-      fileName: _messageController.text.isEmpty ? '' : null,
-      fileUrl: _messageController.text.isEmpty ? '' : null,
-      fileType: _messageController.text.isEmpty ? '' : null,
-      fileSize: _messageController.text.isEmpty ? '' : null,
-    ));
-    FocusScope.of(context).unfocus();
-    _messageController.clear();
+  void _addMessageWithAnimation(Message message) {
+    setState(() {
+      if (chatView.isNotEmpty) {
+        chatView[0].messages.insert(0, message);
+      }
+    });
+  }
+
+  void _cleanupTemporaryMessages() {
+    setState(() {
+      for (var chatDate in chatView) {
+        chatDate.messages.removeWhere((message) =>
+            message.tempId != null &&
+            message.messageState == MessageState.sent);
+      }
+    });
+  }
+
+  Future<void> onSendMessage() async {
+    if (_sending) return;
+    _sending = true;
+
+    try {
+      final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+      final messageContent = _messageController.text;
+
+      // Create a temporary message with sending state
+      final tempMessage = Message(
+        id: tempId,
+        chatId: widget.chatId,
+        senderId: Config.id,
+        content: messageContent,
+        type: 'text',
+        deletedFor: [],
+        messageMedia: [],
+        messageState: MessageState.sending,
+        isUploading: false,
+        tempId: tempId,
+      );
+
+      // Add temporary message to the list with animation
+      _addMessageWithAnimation(tempMessage);
+
+      // Add timeout to handle stuck messages
+      Future.delayed(Duration(seconds: 10), () {
+        if (_isMounted) {
+          setState(() {
+            for (var chatDate in chatView) {
+              for (var message in chatDate.messages) {
+                if (message.tempId == tempId &&
+                    message.messageState == MessageState.sending) {
+                  message.messageState = MessageState.failed;
+                  message.isUploading = false;
+                }
+              }
+            }
+          });
+        }
+      });
+
+      chartBloc.add(ChartSendMessageEvent(
+        chatId: widget.chatId,
+        content: messageContent,
+        messageType: 'text',
+        fileName: null,
+        fileUrl: null,
+        fileType: null,
+        fileSize: null,
+      ));
+      FocusScope.of(context).unfocus();
+      _messageController.clear();
+    } finally {
+      _sending = false;
+    }
   }
 
   @override
@@ -372,43 +556,206 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   isFetchingMore = false;
                 });
               } else if (state is UploadFileSuccess) {
-                chartBloc.add(ChartSendMessageEvent(
-                  chatId: widget.chatId,
-                  content: 'media',
-                  messageType: 'media',
-                  fileName: state.filePath.split('/').last,
-                  fileUrl: state.filePath,
-                  fileType: 'audio',
-                  fileSize: '1mb',
-                ));
-                FocusScope.of(context).unfocus();
+                try {
+                  final tempId =
+                      DateTime.now().millisecondsSinceEpoch.toString();
+
+                  // Create temporary message for audio
+                  final tempMessage = Message(
+                    id: tempId,
+                    chatId: widget.chatId,
+                    senderId: Config.id,
+                    content: 'media',
+                    type: 'media',
+                    deletedFor: [],
+                    messageMedia: [
+                      MessageMedia(
+                        id: tempId,
+                        messageId: tempId,
+                        fileName: state.filePath.split('/').last,
+                        fileUrl: state.filePath,
+                        fileType: 'audio',
+                        fileSize: '1mb',
+                      ),
+                    ],
+                    messageState: MessageState.sending,
+                    isUploading: true,
+                    tempId: tempId,
+                  );
+
+                  // Add temporary message to the list with animation
+                  _addMessageWithAnimation(tempMessage);
+
+                  // Add timeout to handle stuck audio messages
+                  Future.delayed(Duration(seconds: 15), () {
+                    if (_isMounted) {
+                      setState(() {
+                        for (var chatDate in chatView) {
+                          for (var message in chatDate.messages) {
+                            if (message.tempId == tempId &&
+                                message.messageState == MessageState.sending) {
+                              message.messageState = MessageState.failed;
+                              message.isUploading = false;
+                            }
+                          }
+                        }
+                      });
+                    }
+                  });
+
+                  chartBloc.add(ChartSendMessageEvent(
+                    chatId: widget.chatId,
+                    content: 'media',
+                    messageType: 'media',
+                    fileName: state.filePath.split('/').last,
+                    fileUrl: state.filePath,
+                    fileType: 'audio',
+                    fileSize: '1mb',
+                  ));
+                  FocusScope.of(context).unfocus();
+                } catch (e) {
+                  debugPrint("Error handling UploadFileSuccess: $e");
+                  _showErrorSnackBar("Error processing audio upload");
+                }
               } else if (state is UploadFileFailed) {
+                // Update any uploading audio messages to failed state
                 setState(() {
-                  isChartViewLoading = false;
-                  isFetchingMore = false;
+                  for (var chatDate in chatView) {
+                    for (var message in chatDate.messages) {
+                      if (message.tempId != null &&
+                          message.messageState == MessageState.sending &&
+                          message.type == 'media' &&
+                          message.messageMedia.isNotEmpty &&
+                          message.messageMedia[0].fileType == 'audio') {
+                        message.messageState = MessageState.failed;
+                        message.isUploading = false;
+                      }
+                    }
+                  }
                 });
               } else if (state is ChartSendMessageSuccess) {
-                _fetchData();
+                // Update message state to sent
+                setState(() {
+                  for (var chatDate in chatView) {
+                    for (var message in chatDate.messages) {
+                      if (message.tempId != null &&
+                          message.messageState == MessageState.sending) {
+                        message.messageState = MessageState.sent;
+                        message.isUploading = false;
+                        // Message ID will be updated when we fetch new data
+                      }
+                    }
+                  }
+                });
+
+                // Clean up temporary messages after a short delay
+                Future.microtask(() {
+                  if (_isMounted) {
+                    _cleanupTemporaryMessages();
+                    _fetchData();
+                  }
+                });
+              } else if (state is ChartSendMessageFailed) {
+                // Update message state to failed
+                setState(() {
+                  for (var chatDate in chatView) {
+                    for (var message in chatDate.messages) {
+                      if (message.tempId != null &&
+                          (message.messageState == MessageState.sending ||
+                              message.messageState == MessageState.sent)) {
+                        message.messageState = MessageState.failed;
+                        message.isUploading = false;
+                      }
+                    }
+                  }
+                });
               }
             }),
             BlocListener<InitialRegisterBloc, InitialRegisterState>(
               listener: (context, state) {
                 if (state is UploadImageSuccess) {
-                  setState(() {
-                    profilePicture = state.filePath;
+                  try {
+                    final tempId =
+                        DateTime.now().millisecondsSinceEpoch.toString();
+
+                    // Create temporary message for image
+                    final tempMessage = Message(
+                      id: tempId,
+                      chatId: widget.chatId,
+                      senderId: Config.id,
+                      content: 'media',
+                      type: 'media',
+                      deletedFor: [],
+                      messageMedia: [
+                        MessageMedia(
+                          id: tempId,
+                          messageId: tempId,
+                          fileName: state.filePath.split('/').last,
+                          fileUrl: state.filePath,
+                          fileType: 'image',
+                          fileSize: '1mb',
+                        ),
+                      ],
+                      messageState: MessageState.sending,
+                      isUploading: true,
+                      tempId: tempId,
+                    );
+
+                    // Add temporary message to the list with animation
+                    setState(() {
+                      profilePicture = state.filePath;
+                    });
+                    _addMessageWithAnimation(tempMessage);
+
+                    // Add timeout to handle stuck image messages
+                    Future.delayed(Duration(seconds: 15), () {
+                      if (_isMounted) {
+                        setState(() {
+                          for (var chatDate in chatView) {
+                            for (var message in chatDate.messages) {
+                              if (message.tempId == tempId &&
+                                  message.messageState ==
+                                      MessageState.sending) {
+                                message.messageState = MessageState.failed;
+                                message.isUploading = false;
+                              }
+                            }
+                          }
+                        });
+                      }
+                    });
 
                     chartBloc.add(ChartSendMessageEvent(
                       chatId: widget.chatId,
                       content: 'media',
                       messageType: 'media',
-                      fileName: profilePicture.split('/').last,
-                      fileUrl: profilePicture,
+                      fileName: state.filePath.split('/').last,
+                      fileUrl: state.filePath,
                       fileType: 'image',
                       fileSize: '1mb',
                     ));
                     FocusScope.of(context).unfocus();
-                  });
+                  } catch (e) {
+                    debugPrint("Error handling UploadImageSuccess: $e");
+                    _showErrorSnackBar("Error processing image upload");
+                  }
                 } else if (state is UploadImageFailed) {
+                  // Update any uploading image messages to failed state
+                  setState(() {
+                    for (var chatDate in chatView) {
+                      for (var message in chatDate.messages) {
+                        if (message.tempId != null &&
+                            message.messageState == MessageState.sending &&
+                            message.type == 'media' &&
+                            message.messageMedia.isNotEmpty &&
+                            message.messageMedia[0].fileType == 'image') {
+                          message.messageState = MessageState.failed;
+                          message.isUploading = false;
+                        }
+                      }
+                    }
+                  });
+
                   showCustomSnackBar(
                     context: context,
                     message: state.message,
@@ -480,43 +827,48 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder:
-                                              (context) => MultiBlocProvider(
-                                                    providers: [
-                                                      BlocProvider(
-                                                        create: (context) {
-                                                          final bloc =
-                                                              FriendsBloc();
-                                                          bloc.add(FetchFriendsSingleView(
+                                          builder: (context) =>
+                                              MultiBlocProvider(
+                                                providers: [
+                                                  BlocProvider(
+                                                    create: (context) {
+                                                      final bloc =
+                                                          FriendsBloc();
+                                                      bloc.add(
+                                                          FetchFriendsSingleView(
                                                               friendId:
                                                                   filteredParticipants[
                                                                           0]
                                                                       .userId));
-                                                          return bloc;
-                                                        },
-                                                      ),
-                                                      BlocProvider(
-                                                        create: (context) =>
-                                                            ShowInterestedBloc(),
-                                                      ),
-                                                      BlocProvider(
-                                                          create: (context) =>
-                                                              ReportPostBloc()),
-                                                      BlocProvider(
-                                                          create: (context) =>
-                                                              ShowInterestedBloc()),
-                                                      BlocProvider(
-                                                          create: (context) =>
-                                                              ChartBloc())
-                                                    ],
-                                                    child: FriendsDetailsScreen(
-                                                      refreshPageCallback:
-                                                          _refreshPageAfterEdit,
-                                                      id: chatViewGroupInfo
+                                                      return bloc;
+                                                    },
+                                                  ),
+                                                  BlocProvider(
+                                                    create: (context) =>
+                                                        ShowInterestedBloc(),
+                                                  ),
+                                                  BlocProvider(
+                                                      create: (context) =>
+                                                          ReportPostBloc()),
+                                                  BlocProvider(
+                                                      create: (context) =>
+                                                          ShowInterestedBloc()),
+                                                  BlocProvider(
+                                                      create: (context) =>
+                                                          ChartBloc())
+                                                ],
+                                                child: FriendsDetailsScreen(
+                                                  refreshPageCallback:
+                                                      _refreshPageAfterEdit,
+                                                  id: filteredParticipants
+                                                          .isNotEmpty
+                                                      ? filteredParticipants[0]
+                                                          .userId
+                                                      : chatViewGroupInfo
                                                           .participants[0]
                                                           .userId,
-                                                    ),
-                                                  )));
+                                                ),
+                                              )));
                                 }
                               },
                               splashColor: COLORS.white.withOpacity(0.2),
@@ -532,8 +884,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                           color: COLORS.primary,
                                           width: SizeConfig.blockWidth * 0.3,
                                         ),
-                                        image: chatViewGroupInfo
-                                                .picture!.isNotEmpty
+                                        image: (chatViewGroupInfo
+                                                    .picture?.isNotEmpty ??
+                                                false)
                                             ? DecorationImage(
                                                 image: NetworkImage(
                                                   chatViewGroupInfo.picture!,
@@ -564,26 +917,37 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                             maxLines: 1),
                                       ),
                                       if (widget.isGroup
-                                          ? (chatViewGroupInfo.description?.isNotEmpty ?? false)
-                                          : (filteredParticipants[0].user.professionType.isNotEmpty))
-                                      SizedBox(
-                                        width: SizeConfig.blockWidth * 45,
-                                        child: Text(
-                                            widget.isGroup
-                                                ? chatViewGroupInfo.description!
-                                                : filteredParticipants[0]
-                                                    .user
-                                                    .professionType,
-                                            style: TextStyle(
-                                              color: COLORS.neutralDarkOne,
-                                              fontSize:
-                                                  SizeConfig.blockWidth * 3.25,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Poppins",
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            maxLines: 1),
-                                      ),
+                                          ? (chatViewGroupInfo
+                                                  .description?.isNotEmpty ??
+                                              false)
+                                          : (filteredParticipants.isNotEmpty &&
+                                              filteredParticipants[0]
+                                                  .user
+                                                  .professionType
+                                                  .isNotEmpty))
+                                        SizedBox(
+                                          width: SizeConfig.blockWidth * 45,
+                                          child: Text(
+                                              widget.isGroup
+                                                  ? chatViewGroupInfo
+                                                      .description!
+                                                  : filteredParticipants
+                                                          .isNotEmpty
+                                                      ? filteredParticipants[0]
+                                                          .user
+                                                          .professionType
+                                                      : '',
+                                              style: TextStyle(
+                                                color: COLORS.neutralDarkOne,
+                                                fontSize:
+                                                    SizeConfig.blockWidth *
+                                                        3.25,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: "Poppins",
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              maxLines: 1),
+                                        ),
                                     ],
                                   ),
                                 ],
@@ -624,7 +988,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                   )))
                                     },
                                   ),
-                                  if (widget.isGroup == false) ...[
+                                  if (widget.isGroup == false &&
+                                      filteredParticipants.isNotEmpty) ...[
                                     BottomSheetItem(
                                       title: filteredParticipants[0]
                                                   .user
@@ -685,15 +1050,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                             .userId!,
                                                     onSuccess: (message) {
                                                       setState(() {
-                                                        filteredParticipants[
-                                                        0]
+                                                        filteredParticipants[0]
                                                             .user
                                                             .isFriend = null;
-                                                        filteredParticipants[
-                                                        0]
-                                                            .user
-                                                            .friendRequestSent =
-                                                        null;
+                                                        filteredParticipants[0]
+                                                                .user
+                                                                .friendRequestSent =
+                                                            null;
                                                         Navigator.pushNamed(
                                                           context,
                                                           '/main_screen',
@@ -705,7 +1068,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                             context: context,
                                                             message: message,
                                                             backgroundColor:
-                                                            COLORS.semanticTwo);
+                                                                COLORS
+                                                                    .semanticTwo);
                                                         widget
                                                             .refreshPageCallback();
                                                       });
@@ -748,7 +1112,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                             context: context,
                                                             message: message,
                                                             backgroundColor:
-                                                            COLORS.semanticTwo);
+                                                                COLORS
+                                                                    .semanticTwo);
                                                         widget
                                                             .refreshPageCallback();
                                                       });
@@ -785,7 +1150,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                               header:
                                                   'Are you sure you want to \n delete the chat?',
                                               chatId: chatViewGroupInfo!.id!,
-                                              isGroup: chatViewGroupInfo!.isGroup,
+                                              isGroup:
+                                                  chatViewGroupInfo!.isGroup,
                                             ),
                                           ),
                                         ),
@@ -1177,11 +1543,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         ),
                         child: ListView.builder(
                             controller: _scrollController,
+                            reverse: true,
                             itemCount:
                                 chatView.length + (isFetchingMore ? 1 : 0),
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            reverse: true,
                             itemBuilder: (context, index) {
                               if (index == chatView.length) {
                                 return isFetchingMore
@@ -1189,136 +1553,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                         child: LoadingAnimationWidget
                                             .discreteCircle(
                                           color: COLORS.primary,
-                                          // secondRingColor: COLORS.semanticTwo,
-                                          // thirdRingColor: COLORS.accent,
                                           size: SizeConfig.blockHeight * 3.5,
                                         ),
                                       )
                                     : const SizedBox.shrink();
                               }
                               ChatView chatDate = chatView[index];
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: SizeConfig.blockHeight,
-                                        top: SizeConfig.blockHeight),
-                                    child: Text(
-                                      chatDate.date,
-                                      style: TextStyle(
-                                        color: COLORS.neutralDarkOne,
-                                        fontSize: SizeConfig.blockWidth * 3.25,
-                                        fontWeight: FontWeight.w400,
-                                        fontFamily: "Poppins",
-                                      ),
-                                    ),
-                                  ),
-                                  ListView.builder(
-                                    itemCount: chatDate.messages.length,
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    reverse: true,
-                                    itemBuilder: (context, msgIndex) {
-                                      Message message =
-                                          chatDate.messages[msgIndex];
-                                      return Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          if (message.senderId ==
-                                              Config.id) ...[
-                                            SendMessage(
-                                              message: message.content!,
-                                              key: null,
-                                              isSeenByMe: true,
-                                              time: formatTime(message
-                                                  .updatedAt!
-                                                  .toString()),
-                                              audioShow:
-                                                  message.type == 'media' &&
-                                                      message.messageMedia!
-                                                          .isNotEmpty &&
-                                                      message.messageMedia![0]
-                                                              .fileType ==
-                                                          "audio",
-                                              textShow: message.type == 'text',
-                                              imageShow:
-                                                  message.type == 'media' &&
-                                                      message.messageMedia!
-                                                          .isNotEmpty &&
-                                                      message.messageMedia![0]
-                                                              .fileType ==
-                                                          "image",
-                                              imageUrl: message
-                                                      .messageMedia!.isNotEmpty
-                                                  ? message
-                                                      .messageMedia![0].fileUrl!
-                                                  : '',
-                                              audioWidget: WaveBubble(
-                                                audioUrl: message.messageMedia!
-                                                        .isNotEmpty
-                                                    ? message.messageMedia![0]
-                                                        .fileUrl!
-                                                    : '',
-                                                isSender: true,
-                                                downloaded: sentAudio,
-                                              ),
-                                            )
-                                          ] else ...[
-                                            if (message.sender != null) ...[
-                                              ReceivedMessage(
-                                                  message: message.content!,
-                                                  key: null,
-                                                  isSeenByMe: true,
-                                                  time: formatTime(
-                                                      message
-                                                          .updatedAt!
-                                                          .toString()),
-                                                  audioShow: message.type ==
-                                                          'media' &&
-                                                      message.messageMedia!
-                                                          .isNotEmpty &&
-                                                      message.messageMedia![0]
-                                                              .fileType ==
-                                                          "audio",
-                                                  textShow:
-                                                      message.type == 'text',
-                                                  imageShow: message.type ==
-                                                          'media' &&
-                                                      message.messageMedia!
-                                                          .isNotEmpty &&
-                                                      message.messageMedia![0]
-                                                              .fileType ==
-                                                          "image",
-                                                  imageUrl: message
-                                                          .messageMedia!
-                                                          .isNotEmpty
-                                                      ? message.messageMedia![0]
-                                                          .fileUrl!
-                                                      : '',
-                                                  audioWidget: WaveBubble(
-                                                    audioUrl: message
-                                                            .messageMedia!
-                                                            .isNotEmpty
-                                                        ? message
-                                                            .messageMedia![0]
-                                                            .fileUrl!
-                                                        : '',
-                                                    isSender: true,
-                                                  ),
-                                                  sendName: widget.isGroup == true?message.sender!.name!:"")
-                                            ]
-                                          ],
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
+                              return _buildDateSection(chatDate);
                             })),
                   )
                 ] else ...[
@@ -1350,133 +1591,137 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
               ),
               color: COLORS.white,
             ),
-            child: isRequestLocal ?Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'New Chat? You Decide!',
-                  style: TextStyle(
-                    color: COLORS.neutralDark,
-                    fontSize: SizeConfig.blockWidth * 3.6,
-                    fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",
-                  ),
-                ),
-                SizedBox(height: SizeConfig.blockHeight,),
-                Text(
-                  'Review and respond to chat requests securely.',
-                  style: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.3,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: "Poppins",
-                  ),
-                  softWrap: true,
-                ),
-                SizedBox(height: SizeConfig.blockHeight,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    customButton(
-                      text: 'Reject'.tr(),
-                      onPressed: () {
-                        chartBloc.add(RejectChartRequestEvent(
-                            chatId: chatViewGroupInfo.id,
-                            onSuccess: (message) {
-                              setState(() {
-                                isRequestLocal = false;
-                              });
-                              showCustomSnackBar(
-                                  context: context,
-                                  message: message,
-                                  backgroundColor:
-                                  COLORS.neutralDarkOne);
-                              Navigator.pushNamed(
-                                context,
-                                '/main_screen',
-                                arguments: {
-                                  'selectedIndex': 3
-                                },
-                              );
-                            },
-                            onError: (message) {
-                              showCustomSnackBar(
-                                context: context,
-                                message: message,
-                              );
-                            }));
-                      },
-                      backgroundColor: COLORS.neutralDarkTwo,
-                      showIcon: false,
-                      width: SizeConfig.blockWidth * 44,
-                      height: SizeConfig.blockHeight * 8,
-                      textColor: COLORS.neutralDark,
-                    ),
-                    customButton(
-                      text: 'Accept'.tr(),
-                      onPressed: () {
-                        chartBloc.add(ApproveChartRequestEvent(
-                            chatId: chatViewGroupInfo.id,
-                            onSuccess: (message) {
-                              setState(() {
-                                isRequestLocal = false;
-                              });
-                            },
-                            onError: (message) {
-                              showCustomSnackBar(
-                                context: context,
-                                message: message,
-                              );
-                            }));
-                      },
-                      backgroundColor: COLORS.primary,
-                      showIcon: false,
-                      width: SizeConfig.blockWidth * 44,
-                      height: SizeConfig.blockHeight * 8,
-                      textColor: COLORS.white,
-                    ),
-                  ],
-                ),
-              ],
-            ): Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (!isRecording) ...[
-                  InkWell(
-                    onTap: () => _showPicker(context, (File image) {
-                      setState(() {
-                        _profileImage = image;
-                        profilePicture = '';
-                        initialRegisterBloc
-                            .add(UploadImageEvent(imagePath: _profileImage!));
-                      });
-                    }),
-                    child: Container(
-                      padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
-                      height: SizeConfig.blockHeight * 8,
-                      decoration: BoxDecoration(
-                        color: COLORS.primaryOne.withOpacity(0.35),
-                        borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+            child: isRequestLocal
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'New Chat? You Decide!',
+                        style: TextStyle(
+                          color: COLORS.neutralDark,
+                          fontSize: SizeConfig.blockWidth * 3.6,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                        ),
                       ),
-                      child: Icon(
-                        Icons.add,
-                        color: COLORS.primary,
-                        size: SizeConfig.blockWidth * 6,
+                      SizedBox(
+                        height: SizeConfig.blockHeight,
                       ),
-                    ),
+                      Text(
+                        'Review and respond to chat requests securely.',
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.3,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        softWrap: true,
+                      ),
+                      SizedBox(
+                        height: SizeConfig.blockHeight,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          customButton(
+                            text: 'Reject'.tr(),
+                            onPressed: () {
+                              chartBloc.add(RejectChartRequestEvent(
+                                  chatId: chatViewGroupInfo.id,
+                                  onSuccess: (message) {
+                                    setState(() {
+                                      isRequestLocal = false;
+                                    });
+                                    showCustomSnackBar(
+                                        context: context,
+                                        message: message,
+                                        backgroundColor: COLORS.neutralDarkOne);
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/main_screen',
+                                      arguments: {'selectedIndex': 3},
+                                    );
+                                  },
+                                  onError: (message) {
+                                    showCustomSnackBar(
+                                      context: context,
+                                      message: message,
+                                    );
+                                  }));
+                            },
+                            backgroundColor: COLORS.neutralDarkTwo,
+                            showIcon: false,
+                            width: SizeConfig.blockWidth * 44,
+                            height: SizeConfig.blockHeight * 8,
+                            textColor: COLORS.neutralDark,
+                          ),
+                          customButton(
+                            text: 'Accept'.tr(),
+                            onPressed: () {
+                              chartBloc.add(ApproveChartRequestEvent(
+                                  chatId: chatViewGroupInfo.id,
+                                  onSuccess: (message) {
+                                    setState(() {
+                                      isRequestLocal = false;
+                                    });
+                                  },
+                                  onError: (message) {
+                                    showCustomSnackBar(
+                                      context: context,
+                                      message: message,
+                                    );
+                                  }));
+                            },
+                            backgroundColor: COLORS.primary,
+                            showIcon: false,
+                            width: SizeConfig.blockWidth * 44,
+                            height: SizeConfig.blockHeight * 8,
+                            textColor: COLORS.white,
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (!isRecording) ...[
+                        InkWell(
+                          onTap: () => _showPicker(context, (File image) {
+                            setState(() {
+                              _profileImage = image;
+                              profilePicture = '';
+                              initialRegisterBloc.add(
+                                  UploadImageEvent(imagePath: _profileImage!));
+                            });
+                          }),
+                          child: Container(
+                            padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                            height: SizeConfig.blockHeight * 8,
+                            decoration: BoxDecoration(
+                              color: COLORS.primaryOne.withOpacity(0.35),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 3.5),
+                            ),
+                            child: Icon(
+                              Icons.add,
+                              color: COLORS.primary,
+                              size: SizeConfig.blockWidth * 6,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: SizeConfig.blockWidth * 4),
+                      ],
+                      Expanded(
+                        child: isRecording
+                            ? _buildRecordingUI()
+                            : _buildTextInputUI(),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: SizeConfig.blockWidth * 4),
-                ],
-                Expanded(
-                  child:
-                      isRecording ? _buildRecordingUI() : _buildTextInputUI(),
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -1608,6 +1853,107 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDateSection(ChatView chatDate) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(
+              bottom: SizeConfig.blockHeight, top: SizeConfig.blockHeight),
+          child: Text(
+            chatDate.date,
+            style: TextStyle(
+              color: COLORS.neutralDarkOne,
+              fontSize: SizeConfig.blockWidth * 3.25,
+              fontWeight: FontWeight.w400,
+              fontFamily: "Poppins",
+            ),
+          ),
+        ),
+        ListView.builder(
+          itemCount: chatDate.messages.length,
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          reverse: true,
+          itemBuilder: (context, msgIndex) {
+            Message message = chatDate.messages[msgIndex];
+            String _safeTime(Message m) {
+              final ts = m.updatedAt;
+              return ts != null
+                  ? formatTime(ts.toString())
+                  : formatTime(DateTime.now().toString());
+            }
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (message.senderId == Config.id) ...[
+                  SendMessage(
+                    message: message.content!,
+                    key: null,
+                    isSeenByMe: true,
+                    time: _safeTime(message),
+                    audioShow: message.type == 'media' &&
+                        message.messageMedia!.isNotEmpty &&
+                        message.messageMedia![0].fileType == "audio",
+                    textShow: message.type == 'text',
+                    imageShow: message.type == 'media' &&
+                        message.messageMedia!.isNotEmpty &&
+                        message.messageMedia![0].fileType == "image",
+                    imageUrl: message.messageMedia!.isNotEmpty
+                        ? message.messageMedia![0].fileUrl!
+                        : '',
+                    messageState: message.messageState,
+                    isUploading: message.isUploading,
+                    onRetry: () => _retryMessage(message),
+                    audioWidget: WaveBubble(
+                      audioUrl: message.messageMedia!.isNotEmpty
+                          ? message.messageMedia![0].fileUrl!
+                          : '',
+                      isSender: true,
+                      downloaded: sentAudio,
+                      messageState: message.messageState,
+                      isUploading: message.isUploading,
+                      onRetry: () => _retryMessage(message),
+                    ),
+                  )
+                ] else ...[
+                  if (message.sender != null) ...[
+                    ReceivedMessage(
+                        message: message.content!,
+                        key: null,
+                        isSeenByMe: true,
+                        time: formatTime(message.updatedAt!.toString()),
+                        audioShow: message.type == 'media' &&
+                            message.messageMedia!.isNotEmpty &&
+                            message.messageMedia![0].fileType == "audio",
+                        textShow: message.type == 'text',
+                        imageShow: message.type == 'media' &&
+                            message.messageMedia!.isNotEmpty &&
+                            message.messageMedia![0].fileType == "image",
+                        imageUrl: message.messageMedia!.isNotEmpty
+                            ? message.messageMedia![0].fileUrl!
+                            : '',
+                        audioWidget: WaveBubble(
+                          audioUrl: message.messageMedia!.isNotEmpty
+                              ? message.messageMedia![0].fileUrl!
+                              : '',
+                          isSender: true,
+                        ),
+                        sendName:
+                            widget.isGroup == true ? message.sender!.name! : "")
+                  ]
+                ],
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 

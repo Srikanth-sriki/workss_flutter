@@ -11,6 +11,7 @@ import '../../components/size_config.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
+import '../../models/chat/chat_view_modal.dart';
 
 class ChatBubble extends StatelessWidget {
   final String text;
@@ -59,12 +60,18 @@ class WaveBubble extends StatefulWidget {
   final bool isSender;
   final String? audioUrl;
   final bool? downloaded;
+  final MessageState messageState;
+  final bool isUploading;
+  final VoidCallback? onRetry;
 
   const WaveBubble({
     super.key,
     required this.audioUrl,
     this.isSender = false,
-    this.downloaded = false
+    this.downloaded = false,
+    this.messageState = MessageState.sent,
+    this.isUploading = false,
+    this.onRetry,
   });
 
   @override
@@ -94,115 +101,158 @@ class _WaveBubbleState extends State<WaveBubble> {
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
-    _playerController = PlayerController();
-    _audioPlayer.playerStateStream.listen((state) {
-      if (mounted) {
-        setState(() {
-          isPlaying = state.playing;
-        });
-      }
-    });
+    try {
+      _audioPlayer = AudioPlayer();
+      _playerController = PlayerController();
 
-    _audioPlayer.positionStream.listen((position) async {
-      final duration = await _audioPlayer.duration;
-      if (duration != null && position.inMilliseconds > 0) {
-        setState(() {
-          progress = position.inMilliseconds / duration.inMilliseconds;
-        });
-      }
+      _audioPlayer.playerStateStream.listen((state) {
+        if (mounted) {
+          setState(() {
+            isPlaying = state.playing;
+          });
+        }
+      });
 
-      if (duration != null && position >= duration) {
-        setState(() {
-          isPlaying = false;
-          progress = 0.0;
-        });
-        await _audioPlayer.stop();
-      }
-    });
+      _audioPlayer.positionStream.listen((position) async {
+        try {
+          final duration = await _audioPlayer.duration;
+          if (duration != null && position.inMilliseconds > 0) {
+            if (mounted) {
+              setState(() {
+                progress = position.inMilliseconds / duration.inMilliseconds;
+              });
+            }
+          }
 
-    _checkLocalFile();
-    if(widget.downloaded == true){
-      _downloadAudio();
+          if (duration != null && position >= duration) {
+            if (mounted) {
+              setState(() {
+                isPlaying = false;
+                progress = 0.0;
+              });
+            }
+            await _audioPlayer.stop();
+          }
+        } catch (e) {
+          debugPrint("Audio position stream error: $e");
+        }
+      });
+
+      _checkLocalFile();
+      if (widget.downloaded == true) {
+        _downloadAudio();
+      }
+    } catch (e) {
+      debugPrint("WaveBubble initState error: $e");
     }
   }
 
   Future<void> _checkLocalFile() async {
     if (widget.audioUrl == null) return;
 
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
-    final file = File(filePath);
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath =
+          '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
+      final file = File(filePath);
 
-    if (await file.exists()) {
-      setState(() {
-        localFilePath = filePath;
-      });
-      await _preparePlayer();
+      if (await file.exists()) {
+        if (mounted) {
+          setState(() {
+            localFilePath = filePath;
+          });
+        }
+        await _preparePlayer();
+      }
+    } catch (e) {
+      debugPrint("Error checking local file: $e");
     }
   }
 
   Future<void> _downloadAudio() async {
     if (widget.audioUrl == null || isDownloading) return;
 
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
-    final file = File(filePath);
-
-    if (await file.exists()) {
-      setState(() {
-        localFilePath = filePath;
-      });
-      await _preparePlayer();
-      return;
-    }
-
-    setState(() {
-      isDownloading = true;
-    });
-
     try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath =
+          '${directory.path}/audio_${widget.audioUrl.hashCode}.mp3';
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        if (mounted) {
+          setState(() {
+            localFilePath = filePath;
+          });
+        }
+        await _preparePlayer();
+        return;
+      }
+
+      if (mounted) {
+        setState(() {
+          isDownloading = true;
+        });
+      }
+
       final response = await http.get(Uri.parse(widget.audioUrl!));
       if (response.statusCode == 200) {
         await file.writeAsBytes(response.bodyBytes);
-        setState(() {
-          localFilePath = filePath;
-        });
+        if (mounted) {
+          setState(() {
+            localFilePath = filePath;
+          });
+        }
         await _preparePlayer();
+      } else {
+        debugPrint("Failed to download audio: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Error downloading audio: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isDownloading = false;
+        });
+      }
     }
-
-    setState(() {
-      isDownloading = false;
-    });
   }
 
   Future<void> _preparePlayer() async {
     if (localFilePath != null) {
-      await _audioPlayer.setFilePath(localFilePath!);
-      _playerController.preparePlayer(path: localFilePath!);
+      try {
+        await _audioPlayer.setFilePath(localFilePath!);
+        _playerController.preparePlayer(path: localFilePath!);
+      } catch (e) {
+        debugPrint("Error preparing player: $e");
+      }
     }
   }
 
   void _togglePlayPause() async {
-    if (isPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      if (_globalAudioPlayer != null && _globalAudioPlayer != _audioPlayer) {
-        await _globalAudioPlayer!.stop();
+    try {
+      if (isPlaying) {
+        await _audioPlayer.pause();
+      } else {
+        if (_globalAudioPlayer != null && _globalAudioPlayer != _audioPlayer) {
+          await _globalAudioPlayer!.stop();
+        }
+        _globalAudioPlayer = _audioPlayer;
+        await _audioPlayer.seek(Duration.zero);
+        await _audioPlayer.play();
       }
-      _globalAudioPlayer = _audioPlayer;
-      await _audioPlayer.seek(Duration.zero);
-      await _audioPlayer.play();
+    } catch (e) {
+      debugPrint("Error toggling play/pause: $e");
     }
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
-    _playerController.dispose();
+    try {
+      _audioPlayer.dispose();
+      _playerController.dispose();
+    } catch (e) {
+      debugPrint("Error disposing audio player: $e");
+    }
     super.dispose();
   }
 
@@ -214,110 +264,149 @@ class _WaveBubbleState extends State<WaveBubble> {
                 widget.isSender ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              child: Row(
-                children: [
-                  if (localFilePath == null)
-                    isDownloading
-                        ? Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Center(
-                                child: LoadingAnimationWidget.hexagonDots(
-                                  color: COLORS.primary,
-                                  size: SizeConfig.blockHeight * 3,
-                                ),
-                              ),
-                            SizedBox(
-                              width: SizeConfig.blockWidth*3,
-                            ),
-                            Text(
-                              'downloading....',
-                              style: TextStyle(
-                                color: COLORS.neutralDark,
-                                fontSize: SizeConfig.blockWidth * 2.5,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
-                            ),
-                          ],
-                        )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                  onTap: _downloadAudio,
-                                  child: Icon(
-                                    Icons.download,
-                                    color: COLORS.neutralDark,
-                                    size: SizeConfig.blockHeight * 3.25,
-                                  )),
-                              SizedBox(
-                                width: SizeConfig.blockWidth,
-                              ),
-                              Text(
-                                'audio.mp3',
-                                style: TextStyle(
-                                  color: COLORS.neutralDarkOne,
-                                  fontSize: SizeConfig.blockWidth * 2.5,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: "Poppins",
-                                ),
-                              ),
-                            ],
-                          ),
-                  if (localFilePath != null) ...[
-                    Row(
-                      mainAxisSize:
-                          MainAxisSize.min, // Ensures minimal required space
-                      children: [
-                        InkWell(
-                          onTap: _togglePlayPause,
-                          child: Icon(
-                            isPlaying ? Icons.pause : Icons.play_circle,
-                            color: COLORS.neutralDark,
-                            size: SizeConfig.blockWidth * 8,
-                          ),
-                        ),
-                        SizedBox(width: SizeConfig.blockWidth * 1.5),
-                        AudioFileWaveforms(
-                          size: Size(SizeConfig.blockWidth * 40,
-                              SizeConfig.blockHeight * 3),
-                          playerController: _playerController,
-                          waveformType: WaveformType.fitWidth,
-                          playerWaveStyle: playerWaveStyle,
-                          continuousWaveform: true,
-                          enableSeekGesture: true,
-                        ),
-
-                        // Reduce width if needed
-                        // AudioFileWaveforms(
-                        //   size: Size(SizeConfig.blockWidth * 30, SizeConfig.blockHeight * 3),
-                        //   padding: EdgeInsets.zero,
-                        //   margin: EdgeInsets.zero,
-                        //   backgroundColor: Colors.transparent, // Try removing background if it has extra padding
-                        //   continuousWaveform: true,
-                        //   playerController: _playerController,
-                        //   playerWaveStyle: PlayerWaveStyle(
-                        //     fixedWaveColor: COLORS.neutralDark,
-                        //     liveWaveColor: COLORS.neutralDark,
-                        //     spacing: 3,  // Reduce spacing if the waves are pushing apart
-                        //     waveThickness: 1.5,
-                        //     waveCap: StrokeCap.round,
-                        //     showSeekLine: false,
-                        //     showBottom: true,
-                        //     showTop: true,
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
+              child: _buildAudioContent(),
             ),
           )
         : const SizedBox.shrink();
+  }
+
+  Widget _buildAudioContent() {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: widget.isUploading || widget.messageState == MessageState.sending
+          ? Row(
+              key: ValueKey('uploading'),
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(COLORS.primary),
+                  strokeWidth: 2,
+                ),
+                SizedBox(width: SizeConfig.blockWidth * 3),
+                Text(
+                  'Uploading...',
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 2.5,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ],
+            )
+          : widget.messageState == MessageState.failed
+              ? Row(
+                  key: ValueKey('failed'),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: widget.onRetry,
+                      child: Container(
+                        padding: EdgeInsets.all(SizeConfig.blockWidth * 1),
+                        decoration: BoxDecoration(
+                          color: COLORS.accent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.refresh,
+                          color: COLORS.white,
+                          size: SizeConfig.blockWidth * 4,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: SizeConfig.blockWidth * 2),
+                    Text(
+                      'Retry',
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 2.5,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                  ],
+                )
+              : _buildNormalAudioContent(),
+    );
+  }
+
+  Widget _buildNormalAudioContent() {
+    // Show downloading state
+    if (localFilePath == null) {
+      return isDownloading
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Center(
+                  child: LoadingAnimationWidget.hexagonDots(
+                    color: COLORS.primary,
+                    size: SizeConfig.blockHeight * 3,
+                  ),
+                ),
+                SizedBox(width: SizeConfig.blockWidth * 3),
+                Text(
+                  'downloading....',
+                  style: TextStyle(
+                    color: COLORS.neutralDark,
+                    fontSize: SizeConfig.blockWidth * 2.5,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: _downloadAudio,
+                  child: Icon(
+                    Icons.download,
+                    color: COLORS.neutralDark,
+                    size: SizeConfig.blockHeight * 3.25,
+                  ),
+                ),
+                SizedBox(width: SizeConfig.blockWidth),
+                Text(
+                  'audio.mp3',
+                  style: TextStyle(
+                    color: COLORS.neutralDarkOne,
+                    fontSize: SizeConfig.blockWidth * 2.5,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                ),
+              ],
+            );
+    }
+
+    // Show normal audio player
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: _togglePlayPause,
+          child: Icon(
+            isPlaying ? Icons.pause : Icons.play_circle,
+            color: COLORS.neutralDark,
+            size: SizeConfig.blockWidth * 8,
+          ),
+        ),
+        SizedBox(width: SizeConfig.blockWidth * 1.5),
+        AudioFileWaveforms(
+          size: Size(SizeConfig.blockWidth * 40, SizeConfig.blockHeight * 3),
+          playerController: _playerController,
+          waveformType: WaveformType.fitWidth,
+          playerWaveStyle: playerWaveStyle,
+          continuousWaveform: true,
+          enableSeekGesture: true,
+        ),
+      ],
+    );
   }
 }
 

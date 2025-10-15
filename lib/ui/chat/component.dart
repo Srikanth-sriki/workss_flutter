@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:touch_ripple_effect/touch_ripple_effect.dart';
 import 'package:works_app/components/colors.dart';
@@ -12,6 +9,7 @@ import 'package:works_app/global_helper/helper_function.dart';
 import 'dart:math' as math;
 import '../../global_helper/image_preview_modal.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../models/chat/chat_view_modal.dart';
 // import 'package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart';dart
 
 Widget chartSearchCards({
@@ -36,9 +34,9 @@ Widget chartSearchCards({
         margin: EdgeInsets.symmetric(
           vertical: SizeConfig.blockHeight * 0.8,
         ),
-        padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4,
-        vertical: SizeConfig.blockWidth * 2
-        ),
+        padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.blockWidth * 4,
+            vertical: SizeConfig.blockWidth * 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
           color: COLORS.primaryOne.withOpacity(0.1),
@@ -65,9 +63,11 @@ Widget chartSearchCards({
                   //   ),
                   // )
                   InkWell(
-                    onTap: () => showModernImagePreview(context,image,heroTag: heroTag),
+                    onTap: () => showModernImagePreview(context, image,
+                        heroTag: heroTag),
                     splashColor: COLORS.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
                     child: ClipOval(
                       child: SizedBox.square(
                         dimension: SizeConfig.blockWidth * 14,
@@ -474,22 +474,22 @@ Widget chartMemberCardViewSearchCards(
                                 // textAlign: TextAlign.end,
                               ),
                             ),
-                            if(message.isNotEmpty)
-                            SizedBox(
-                              width: SizeConfig.blockWidth * 50,
-                              child: Text(
-                                message,
-                                style: TextStyle(
-                                  color: COLORS.neutralDarkOne,
-                                  fontSize: SizeConfig.blockWidth * 3,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: "Poppins",
+                            if (message.isNotEmpty)
+                              SizedBox(
+                                width: SizeConfig.blockWidth * 50,
+                                child: Text(
+                                  message,
+                                  style: TextStyle(
+                                    color: COLORS.neutralDarkOne,
+                                    fontSize: SizeConfig.blockWidth * 3,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: "Poppins",
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  // textAlign: TextAlign.end,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                // textAlign: TextAlign.end,
                               ),
-                            ),
                           ],
                         ),
                       ],
@@ -830,6 +830,9 @@ class SendMessage extends StatelessWidget {
   final bool audioShow;
   final Widget? audioWidget;
   final String imageUrl;
+  final MessageState messageState;
+  final bool isUploading;
+  final VoidCallback? onRetry;
   const SendMessage(
       {required super.key,
       required this.message,
@@ -840,124 +843,238 @@ class SendMessage extends StatelessWidget {
       required this.audioShow,
       this.audioWidget,
       this.isRead = false,
-      required this.imageUrl});
+      required this.imageUrl,
+      this.messageState = MessageState.sent,
+      this.isUploading = false,
+      this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    final messageTextGroup = Flexible(
-        child: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          constraints: BoxConstraints(
-            maxWidth: SizeConfig.blockWidth * 70,
-          ),
-          child: IntrinsicWidth(
-            child: Container(
-              padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
-              decoration: BoxDecoration(
-                color: COLORS.neutralDarkTwo.withOpacity(0.9),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(SizeConfig.blockWidth * 2),
-                  bottomLeft: Radius.circular(SizeConfig.blockWidth * 2),
-                  topRight: Radius.circular(SizeConfig.blockWidth * 2),
+    try {
+      final messageTextGroup = Flexible(
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            constraints: BoxConstraints(
+              maxWidth: SizeConfig.blockWidth * 70,
+            ),
+            child: IntrinsicWidth(
+              child: Container(
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+                decoration: BoxDecoration(
+                  color: COLORS.neutralDarkTwo.withOpacity(0.9),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(SizeConfig.blockWidth * 2),
+                    bottomLeft: Radius.circular(SizeConfig.blockWidth * 2),
+                    topRight: Radius.circular(SizeConfig.blockWidth * 2),
+                  ),
                 ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (textShow) ...[
-                    Text(
-                      message,
-                      style: TextStyle(
-                        color: COLORS.neutralDark,
-                        fontSize: SizeConfig.blockWidth * 3.25,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
-                      ),
-                      softWrap: true,
-                    )
-                  ],
-                  if (imageShow) ...[
-                    GestureDetector(
-                      onTap: () => _showImageDialog(context, imageUrl),
-                      child: Container(
-                        width: SizeConfig.blockWidth * 40,
-                        height: SizeConfig.blockWidth * 40,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: NetworkImage(
-                                  imageUrl,
-                                ),
-                                fit: BoxFit.cover),
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(SizeConfig.blockWidth * 3))),
-                      ),
-                    ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (textShow) ...[
+                      Text(
+                        message,
+                        style: TextStyle(
+                          color: COLORS.neutralDark,
+                          fontSize: SizeConfig.blockWidth * 3.25,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        softWrap: true,
+                      )
+                    ],
+                    if (imageShow) ...[
+                      _buildImageWithState(context, imageUrl),
+                      SizedBox(
+                        height: SizeConfig.blockHeight,
+                      )
+                    ],
+                    if (audioShow && audioWidget != null) ...[audioWidget!],
                     SizedBox(
-                      height: SizeConfig.blockHeight,
+                      width: SizeConfig.blockWidth * 20,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            time.toUpperCase(),
+                            style: TextStyle(
+                              color: COLORS.neutralDarkOne,
+                              fontSize: SizeConfig.blockWidth * 2.6,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                          SizedBox(
+                            width: SizeConfig.blockWidth * 1.5,
+                          ),
+                          _buildMessageStatusIcon()
+                        ],
+                      ),
                     )
                   ],
-                  if (audioShow && audioWidget != null) ...[audioWidget!],
-                  SizedBox(
-                    width: SizeConfig.blockWidth * 20,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          time.toUpperCase(),
-                          style: TextStyle(
-                            color: COLORS.neutralDarkOne,
-                            fontSize: SizeConfig.blockWidth * 2.6,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                        SizedBox(
-                          width: SizeConfig.blockWidth * 1.5,
-                        ),
-                        Image.asset(
-                          isSeenByMe
-                              ? 'assets/images/chat/read_done.png'
-                              : 'assets/images/chat/read.png',
-                          width: SizeConfig.blockWidth * 3,
-                          height: SizeConfig.blockWidth * 3,
-                        )
-                      ],
-                    ),
-                  )
-                ],
+                ),
               ),
             ),
           ),
-        ),
-        Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.rotationX(math.pi),
-          child: CustomPaint(
-            painter: Triangle(COLORS.neutralDarkTwo.withOpacity(0.9)),
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationX(math.pi),
+            child: CustomPaint(
+              painter: Triangle(COLORS.neutralDarkTwo.withOpacity(0.9)),
+            ),
           ),
-        ),
-        // CustomPaint(painter: Triangle(Colors.grey[300]!),),
-      ],
-    ));
+          // CustomPaint(painter: Triangle(Colors.grey[300]!),),
+        ],
+      ));
 
-    return Padding(
-      padding: EdgeInsets.only(
-          right: SizeConfig.blockWidth * 5,
-          left: SizeConfig.blockWidth * 20,
-          top: SizeConfig.blockWidth * 1.5,
-          bottom: SizeConfig.blockWidth * 1.5),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          SizedBox(height: SizeConfig.blockHeight * 4),
-          messageTextGroup,
+      return Padding(
+        padding: EdgeInsets.only(
+            right: SizeConfig.blockWidth * 5,
+            left: SizeConfig.blockWidth * 20,
+            top: SizeConfig.blockWidth * 1.5,
+            bottom: SizeConfig.blockWidth * 1.5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            SizedBox(height: SizeConfig.blockHeight * 4),
+            messageTextGroup,
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint("SendMessage build error: $e");
+      return Container(
+        padding: EdgeInsets.all(SizeConfig.blockWidth * 3),
+        child: Text(
+          "Error displaying message",
+          style: TextStyle(color: Colors.red),
+        ),
+      );
+    }
+  }
+
+  Widget _buildImageWithState(BuildContext context, String imageUrl) {
+    return GestureDetector(
+      onTap: () {
+        try {
+          _showImageDialog(context, imageUrl);
+        } catch (e) {
+          debugPrint("Error showing image dialog: $e");
+        }
+      },
+      child: Stack(
+        children: [
+          Container(
+            width: SizeConfig.blockWidth * 40,
+            height: SizeConfig.blockWidth * 40,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                    fit: BoxFit.cover,
+                    onError: (exception, stackTrace) {
+                      debugPrint("Error loading image: $exception");
+                    }),
+                borderRadius: BorderRadius.all(
+                    Radius.circular(SizeConfig.blockWidth * 3))),
+          ),
+          AnimatedSwitcher(
+            duration: Duration(milliseconds: 300),
+            child: isUploading || messageState == MessageState.sending
+                ? Container(
+                    key: ValueKey('uploading'),
+                    width: SizeConfig.blockWidth * 40,
+                    height: SizeConfig.blockWidth * 40,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(SizeConfig.blockWidth * 3)),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(COLORS.white),
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  )
+                : messageState == MessageState.failed
+                    ? Container(
+                        key: ValueKey('failed'),
+                        width: SizeConfig.blockWidth * 40,
+                        height: SizeConfig.blockWidth * 40,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(SizeConfig.blockWidth * 3)),
+                        ),
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: onRetry,
+                            child: Container(
+                              padding:
+                                  EdgeInsets.all(SizeConfig.blockWidth * 2),
+                              decoration: BoxDecoration(
+                                color: COLORS.accent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.refresh,
+                                color: COLORS.white,
+                                size: SizeConfig.blockWidth * 4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : SizedBox.shrink(),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMessageStatusIcon() {
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 300),
+      child: messageState == MessageState.failed
+          ? GestureDetector(
+              key: ValueKey('failed'),
+              onTap: onRetry,
+              child: Container(
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 0.5),
+                decoration: BoxDecoration(
+                  color: COLORS.accent,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.refresh,
+                  color: COLORS.white,
+                  size: SizeConfig.blockWidth * 2.5,
+                ),
+              ),
+            )
+          : isUploading || messageState == MessageState.sending
+              ? SizedBox(
+                  key: ValueKey('sending'),
+                  width: SizeConfig.blockWidth * 3,
+                  height: SizeConfig.blockWidth * 3,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(COLORS.primary),
+                    strokeWidth: 1.5,
+                  ),
+                )
+              : Image.asset(
+                  key: ValueKey('sent'),
+                  isSeenByMe
+                      ? 'assets/images/chat/read_done.png'
+                      : 'assets/images/chat/read.png',
+                  width: SizeConfig.blockWidth * 3,
+                  height: SizeConfig.blockWidth * 3,
+                ),
     );
   }
 }
@@ -1254,7 +1371,7 @@ void _showImageDialog(BuildContext context, String imageUrl) {
                 child: PhotoView(
                   imageProvider: NetworkImage(imageUrl),
                   backgroundDecoration:
-                  const BoxDecoration(color: Colors.black),
+                      const BoxDecoration(color: Colors.black),
                   minScale: PhotoViewComputedScale.contained,
                   maxScale: PhotoViewComputedScale.contained * 3.0,
                 ),
@@ -1263,8 +1380,7 @@ void _showImageDialog(BuildContext context, String imageUrl) {
                 top: MediaQuery.of(context).padding.top + 10,
                 right: 10,
                 child: IconButton(
-                  icon: const Icon(Icons.close,
-                      color: Colors.white, size: 30),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -1275,7 +1391,6 @@ void _showImageDialog(BuildContext context, String imageUrl) {
     },
   );
 }
-
 
 Widget BlockedChartCards({
   required String image,
