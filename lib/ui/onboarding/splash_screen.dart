@@ -293,11 +293,9 @@
 // }
 //
 
-
 import 'dart:async';
 import 'dart:io'; // For platform check
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -307,10 +305,10 @@ import '../../components/colors.dart';
 import '../../components/local_constant.dart';
 import '../../components/size_config.dart';
 import '../../global_helper/reuse_widget.dart';
+import '../../helper/network_helper.dart';
 import '../../main.dart';
 import '../../models/app_version_modal.dart';
 import '../onboarding/language_selection.dart';
-import '../onboarding/phone_number.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -320,20 +318,61 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  StreamSubscription? _networkSubscription;
+  bool _isWaitingForNetwork = false;
+  bool _hasHandledVersion = false;
+
   @override
   void initState() {
     super.initState();
     _startBlocFlow();
   }
 
+  @override
+  void dispose() {
+    _networkSubscription?.cancel();
+    super.dispose();
+  }
+
   void _startBlocFlow() {
     context.read<LoginBloc>().add(AppVersionCheck());
+  }
+
+  /// Listen for network restoration and retry API call
+  void _setupNetworkRetry() {
+    if (_isWaitingForNetwork) return; // Already listening
+
+    _isWaitingForNetwork = true;
+    _networkSubscription?.cancel();
+
+    _networkSubscription = NetworkHelper.connectivityStream.listen(
+      (connectivityResults) async {
+        // Debounce: Wait a bit before checking
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Check if we actually have internet
+        final hasInternet = await NetworkHelper.hasInternetConnection();
+
+        if (hasInternet &&
+            _isWaitingForNetwork &&
+            mounted &&
+            !_hasHandledVersion) {
+          debugPrint("Network restored, retrying AppVersionCheck...");
+          _isWaitingForNetwork = false;
+          // Retry the API call
+          context.read<LoginBloc>().add(AppVersionCheck());
+        }
+      },
+      onError: (error) {
+        debugPrint("Network stream error in splash: $error");
+      },
+    );
   }
 
   void _handleVersionLogic(List<AppVersion> versions) async {
     final platformType = Platform.isAndroid ? "android" : "ios";
     final platformVersion = versions.firstWhere(
-          (item) => item.type?.toLowerCase() == platformType,
+      (item) => item.type?.toLowerCase() == platformType,
       orElse: () => AppVersion(),
     );
 
@@ -359,7 +398,7 @@ class _SplashScreenState extends State<SplashScreen> {
         MaterialPageRoute(
           builder: (BuildContext context) => BlocProvider(
             create: (context) =>
-            AuthenticationBloc()..add(const InitializeApp()),
+                AuthenticationBloc()..add(const InitializeApp()),
             child: const Authentication(),
           ),
         ),
@@ -368,7 +407,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (BuildContext context) =>
-          const LanguageSelectionScreen(routeType: 'intro'),
+              const LanguageSelectionScreen(routeType: 'intro'),
         ),
       );
     }
@@ -389,7 +428,35 @@ class _SplashScreenState extends State<SplashScreen> {
       body: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state is AppVersionSuccess) {
-            _handleVersionLogic(state.appVersion);
+            // Mark as handled to prevent multiple calls
+            if (!_hasHandledVersion) {
+              _hasHandledVersion = true;
+              _networkSubscription?.cancel();
+              _handleVersionLogic(state.appVersion);
+            }
+          } else if (state is AppVersionFailed) {
+            // Check if it's a network error
+            final isNetworkError =
+                NetworkHelper.isNetworkError(state.message) ||
+                    state.message.toLowerCase().contains('internet') ||
+                    state.message.toLowerCase().contains('network') ||
+                    state.message.toLowerCase().contains('connection');
+
+            if (isNetworkError && !_hasHandledVersion) {
+              debugPrint(
+                  "Network error detected in splash, waiting for connection...");
+              // Set up listener to retry when network is restored
+              _setupNetworkRetry();
+              // Don't navigate away - wait for network to be restored
+            } else if (!_hasHandledVersion) {
+              // Non-network error - proceed after delay
+              Future.delayed(const Duration(seconds: 4), () {
+                if (mounted && !_hasHandledVersion) {
+                  _hasHandledVersion = true;
+                  _initializeApp();
+                }
+              });
+            }
           }
         },
         child: SafeArea(
@@ -398,23 +465,23 @@ class _SplashScreenState extends State<SplashScreen> {
             width: SizeConfig.screenWidth,
             color: COLORS.primary,
             child: Center(
-              // No AnimatedBuilder anymore — just static text
-              child:
-                Image.asset('assets/images/home/works_logo.png',
-                width: SizeConfig.blockWidth*35,
-                  height: SizeConfig.blockWidth*35,
-                  fit: BoxFit.contain,
-                )
-              // Text(
-              //   'Workss',
-              //   style: TextStyle(
-              //     fontFamily: "Poppins",
-              //     fontSize: SizeConfig.blockWidth * 7,
-              //     fontWeight: FontWeight.w700,
-              //     color: COLORS.white,
-              //   ),
-              // ),
-            ),
+                // No AnimatedBuilder anymore — just static text
+                child: Image.asset(
+              'assets/images/home/works_logo.png',
+              width: SizeConfig.blockWidth * 35,
+              height: SizeConfig.blockWidth * 35,
+              fit: BoxFit.contain,
+            )
+                // Text(
+                //   'Workss',
+                //   style: TextStyle(
+                //     fontFamily: "Poppins",
+                //     fontSize: SizeConfig.blockWidth * 7,
+                //     fontWeight: FontWeight.w700,
+                //     color: COLORS.white,
+                //   ),
+                // ),
+                ),
           ),
         ),
       ),

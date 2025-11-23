@@ -11,6 +11,8 @@ import '../../components/config.dart';
 import '../../components/local_constant.dart';
 import '../../dao/login_dao.dart';
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
@@ -30,6 +32,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       LoginWithPhoneNumber event, Emitter<LoginState> emit) async {
     try {
       emit(const LoginLoading());
+      
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(LoginFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+      
       var response = await loginDao.login(
           countryCode: event.countryCode, phoneNumber: event.phoneNumber);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
@@ -57,13 +69,26 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
     } catch (error) {
       customLog("The error of login : $error");
-      emit(LoginFailed(message: "Something went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(LoginFailed(message: errorMessage));
     }
   }
 
   Future<void> mapAppVersioncheck(
       AppVersionCheck event, Emitter<LoginState> emit) async {
     try {
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        // Don't block splash screen - allow app to continue
+        // The network overlay will show automatically
+        emit(AppVersionFailed(
+          message: 'No internet connection. Please check your network.',
+        ));
+        return;
+      }
+      
       var response = await loginDao.fetchAppVersions();
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
@@ -81,8 +106,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         emit(AppVersionFailed(message: '"Something Went wrong"'));
       }
     } catch (error) {
-      customLog("The error of resend otp is : $error");
-      emit(AppVersionFailed(message: "Something Went wrong"));
+      customLog("The error of app version check is : $error");
+      // Handle network errors - don't block splash screen
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(AppVersionFailed(message: errorMessage));
     }
   }
 }

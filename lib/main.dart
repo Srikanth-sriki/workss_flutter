@@ -43,6 +43,7 @@ import 'components/global_handle.dart';
 import 'firebase/events.dart';
 import 'firebase/locator.dart';
 import 'firebase/notification.dart';
+import 'widgets/network_connectivity_overlay.dart';
 
 AndroidNotificationChannel channel = const AndroidNotificationChannel(
     'high_importance_channel', // id
@@ -243,16 +244,18 @@ class _MyAppState extends State<MyApp> {
 
     return OverlaySupport.global(
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: context.localizationDelegates,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
-        navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+          navigatorKey: navigatorKey,
         builder: (context, child) {
           SizeConfig().init(context);
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-            child: child!,
+          return NetworkConnectivityOverlay(
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              child: child!,
+            ),
           );
         },
         home: BlocProvider(
@@ -330,8 +333,8 @@ class _MyAppState extends State<MyApp> {
           '/maintenance': (_) => const MaintenanceScreen(),
         },
         scaffoldMessengerKey: rootScaffoldMessengerKey,
-      ),
-    );
+        ),
+      );
   }
 }
 

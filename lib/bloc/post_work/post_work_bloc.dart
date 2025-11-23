@@ -8,6 +8,8 @@ import 'package:works_app/helper/custom_log.dart';
 import '../../core/intercepted_client.dart';
 import '../../dao/home_dao.dart';
 import '../../dao/profile_dao.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 import '../../models/dropDown_modal.dart';
 
 part 'post_work_event.dart';
@@ -53,6 +55,15 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
     try {
       emit(const PostWorkLoading());
 
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(PostWorkFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+
       var response = await homeDao.postWork(
           description: event.description,
           experienceLevel: event.experienceLevel,
@@ -88,7 +99,9 @@ class PostWorkBloc extends Bloc<PostWorkEvent, PostWorkState> {
         emit(PostWorkFailed(message: message));
       }
     } catch (error) {
-      emit(PostWorkFailed(message: "Something Went Wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(PostWorkFailed(message: errorMessage));
     }
   }
 

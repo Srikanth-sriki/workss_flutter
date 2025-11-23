@@ -10,6 +10,8 @@ import 'package:works_app/models/friends/friends_view_modal.dart';
 import 'package:works_app/models/friends/global_search_list_modal.dart';
 
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 
 part 'friends_event.dart';
 part 'friends_state.dart';
@@ -40,6 +42,15 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
         emit(const FriendsListLoading());
       }
 
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(FriendsListFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+
       var response = await friendsDao.fetchFriendsSearchList(
           page: event.page, pageSize: event.pageSize, keyWord: event.keyWord);
 
@@ -48,10 +59,6 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         int maxPageNumber = jsonDecoded["data"]["pagination"]["totalPages"];
         int maxPageSize = jsonDecoded["data"]["pagination"]["pageSize"];
-        // List<FriendsSearchList> friendsSearchList = [];
-        // for (var i in jsonDecoded["data"]["friends"]) {
-        //   friendsSearchList.add(FriendsSearchList.fromJson(i));
-        // }
 
         List<Friend> friendsList = [];
         for (var i in jsonDecoded["data"]["friends"]) {
@@ -77,9 +84,10 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
         customLog(jsonDecoded["message"]);
       }
     } catch (error) {
-      emit(FriendsListFailed(message: "Something went wrong"));
-      customLog('1222222222222222');
-      customLog('jsonDecoded["message"]');
+      customLog('Error in friends list: $error');
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(FriendsListFailed(message: errorMessage));
     }
   }
 
@@ -87,6 +95,16 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
       FetchFriendsSingleView event, Emitter<FriendsState> emit) async {
     try {
       emit(const FetchFriendsViewLoading());
+      
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(const FetchFriendsViewError(
+          'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+      
       var response = await friendsDao.fetchFriendsView(id: event.friendId);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
@@ -101,7 +119,9 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
       }
     } catch (error) {
       customLog("The error is : $error");
-      emit(const FetchFriendsViewError("Something Went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(FetchFriendsViewError(errorMessage));
     }
   }
 

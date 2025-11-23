@@ -30,6 +30,8 @@ import '../../global_helper/helper_function.dart';
 import '../../global_helper/popup.dart';
 import '../../global_helper/reuse_widget.dart';
 import '../../helper/socket_service.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler.dart';
 import '../../models/chat/chat_view_modal.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
 import '../friends/friends_details.dart';
@@ -170,7 +172,19 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     }
   }
 
-  void _fetchData() {
+  Future<void> _fetchData() async {
+    // Check network before fetching
+    final hasConnection = await NetworkHelper.hasInternetConnection();
+    if (!hasConnection) {
+      if (_isMounted) {
+        NetworkErrorHandler.showNetworkErrorSnackBar(
+          context,
+          'No internet connection. Please check your network settings.',
+        );
+      }
+      return;
+    }
+
     chartBloc.add(FetchChartViewEvent(
       page: currentPage,
       pageSize: pageSize,
@@ -186,8 +200,20 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     ));
   }
 
-  void _loadMoreData() {
+  Future<void> _loadMoreData() async {
     if (!isFetchingMore && currentPage < maxPageNumber) {
+      // Check network before loading more
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        if (_isMounted) {
+          NetworkErrorHandler.showNetworkErrorSnackBar(
+            context,
+            'No internet connection. Cannot load more messages.',
+          );
+        }
+        return;
+      }
+
       setState(() => isFetchingMore = true);
       currentPage++;
       _fetchData();
@@ -199,6 +225,22 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       sentAudio = false;
       sentAudioSent = false;
     });
+
+    // Check network before stopping recording (to upload)
+    if (isRecording) {
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        NetworkErrorHandler.showNetworkErrorSnackBar(
+          context,
+          'No internet connection. Cannot send audio message.',
+        );
+        setState(() {
+          isRecording = false;
+        });
+        return;
+      }
+    }
+
     try {
       if (isRecording) {
         // Stop recording with timeout
@@ -411,6 +453,17 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   Future<void> onSendMessage() async {
     if (_sending) return;
+
+    // Check network before sending
+    final hasConnection = await NetworkHelper.hasInternetConnection();
+    if (!hasConnection) {
+      NetworkErrorHandler.showNetworkErrorSnackBar(
+        context,
+        'No internet connection. Please check your network settings.',
+      );
+      return;
+    }
+
     _sending = true;
 
     try {
@@ -462,6 +515,13 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
       ));
       FocusScope.of(context).unfocus();
       _messageController.clear();
+    } catch (e) {
+      if (NetworkHelper.isNetworkError(e)) {
+        NetworkErrorHandler.showNetworkErrorSnackBar(
+          context,
+          NetworkHelper.getNetworkErrorMessage(e),
+        );
+      }
     } finally {
       _sending = false;
     }
@@ -637,6 +697,22 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                     }
                   }
                 });
+
+                // Show network error if applicable
+                if (state.message != null) {
+                  final errorMessage = state.message!;
+                  if (NetworkHelper.isNetworkError(errorMessage) ||
+                      errorMessage.toLowerCase().contains('network') ||
+                      errorMessage.toLowerCase().contains('internet') ||
+                      errorMessage.toLowerCase().contains('connection')) {
+                    NetworkErrorHandler.showNetworkErrorSnackBar(
+                      context,
+                      NetworkHelper.getNetworkErrorMessage(errorMessage),
+                    );
+                  } else {
+                    _showErrorSnackBar(errorMessage);
+                  }
+                }
               } else if (state is ChartSendMessageSuccess) {
                 // Update message state to sent
                 setState(() {
@@ -673,6 +749,36 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                     }
                   }
                 });
+
+                // Show network error if applicable
+                if (state.message != null) {
+                  final errorMessage = state.message!;
+                  if (NetworkHelper.isNetworkError(errorMessage) ||
+                      errorMessage.toLowerCase().contains('network') ||
+                      errorMessage.toLowerCase().contains('internet') ||
+                      errorMessage.toLowerCase().contains('connection')) {
+                    NetworkErrorHandler.showNetworkErrorSnackBar(
+                      context,
+                      NetworkHelper.getNetworkErrorMessage(errorMessage),
+                    );
+                  } else {
+                    _showErrorSnackBar(errorMessage);
+                  }
+                }
+              } else if (state is ChatViewFailed) {
+                // Handle network errors in chat view fetch
+                if (state.message != null) {
+                  final errorMessage = state.message!;
+                  if (NetworkHelper.isNetworkError(errorMessage) ||
+                      errorMessage.toLowerCase().contains('network') ||
+                      errorMessage.toLowerCase().contains('internet') ||
+                      errorMessage.toLowerCase().contains('connection')) {
+                    NetworkErrorHandler.showNetworkErrorSnackBar(
+                      context,
+                      NetworkHelper.getNetworkErrorMessage(errorMessage),
+                    );
+                  }
+                }
               }
             }),
             BlocListener<InitialRegisterBloc, InitialRegisterState>(
@@ -760,10 +866,24 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                     }
                   });
 
-                  showCustomSnackBar(
-                    context: context,
-                    message: state.message,
-                  );
+                  // Show network error if applicable
+                  if (state.message != null) {
+                    final errorMessage = state.message!;
+                    if (NetworkHelper.isNetworkError(errorMessage) ||
+                        errorMessage.toLowerCase().contains('network') ||
+                        errorMessage.toLowerCase().contains('internet') ||
+                        errorMessage.toLowerCase().contains('connection')) {
+                      NetworkErrorHandler.showNetworkErrorSnackBar(
+                        context,
+                        NetworkHelper.getNetworkErrorMessage(errorMessage),
+                      );
+                    } else {
+                      showCustomSnackBar(
+                        context: context,
+                        message: errorMessage,
+                      );
+                    }
+                  }
                 }
               },
             ),
@@ -1916,6 +2036,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   m.updatedAt!
                       .isAtSameMomentAs(chatViewGroupInfo.reciverLastSeen!);
             }
+
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2027,6 +2148,16 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   // Helper method to share current location
   Future<void> _shareCurrentLocation() async {
+    // Check network before sharing location
+    final hasConnection = await NetworkHelper.hasInternetConnection();
+    if (!hasConnection) {
+      NetworkErrorHandler.showNetworkErrorSnackBar(
+        context,
+        'No internet connection. Cannot share location.',
+      );
+      return;
+    }
+
     try {
       final position = await _getCurrentLocation();
       if (position != null) {

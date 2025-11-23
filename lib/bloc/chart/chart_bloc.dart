@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -11,6 +10,8 @@ import 'package:works_app/models/chat/chat_view_modal.dart';
 
 import '../../components/global_handle.dart';
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 import '../../models/chat/blocked_chat_list.dart';
 import '../../models/chat/chart_search_list.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
@@ -145,6 +146,15 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     try {
       emit(const ChartListLoading());
 
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(ChartListFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+
       final response = await friendsDao.fetchChartList();
       customLog("Response Body: ${response.body}");
       final jsonDecoded = jsonDecode(response.body) as Map<String, dynamic>;
@@ -175,7 +185,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (e) {
       customLog("Error: $e");
-      emit( ChartListFailed(message: "Something went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(e);
+      emit(ChartListFailed(message: errorMessage));
     }
   }
 
@@ -219,7 +231,8 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       customLog("Error: $error");
-      emit(RequestedChartListFailed(message: "Something went wrong"));
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(RequestedChartListFailed(message: errorMessage));
     }
   }
 
@@ -244,7 +257,8 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       customLog("The error is : $error");
-      emit(ChartGroupCreateFailed(message: "Something Went wrong"));
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ChartGroupCreateFailed(message: errorMessage));
     }
   }
 
@@ -290,8 +304,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         customLog(jsonDecoded["message"]);
       }
     } catch (error) {
-      emit(InviteMemberFailed(message: "Something went wrong"));
-      customLog('jsonDecoded["message"]');
+      customLog("Error in invite member: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(InviteMemberFailed(message: errorMessage));
     }
   }
 
@@ -300,6 +315,15 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     try {
       if (event.page == 1) {
         emit(const ChatViewLoading());
+      }
+
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(ChatViewFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
       }
 
       var response = await friendsDao.fetchChatView(
@@ -337,14 +361,25 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         customLog(jsonDecoded["message"]);
       }
     } catch (error) {
-      emit(ChatViewFailed(message: "Something went wrong"));
-      customLog('jsonDecoded["message"]');
+      customLog("Error in chat view: $error");
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ChatViewFailed(message: errorMessage));
     }
   }
 
   Future<void> mapChartSendMessageEvent(
       ChartSendMessageEvent event, Emitter<ChartState> emit) async {
     try {
+      // Check network before sending message
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(ChartSendMessageFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+      
       emit(const ChartSendMessageLoading());
       var response = await friendsDao.sendMessageChat(
           chatId: event.chatId,
@@ -365,13 +400,23 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       customLog("The error is : $error");
-      emit(ChartSendMessageFailed(message: "Something Went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ChartSendMessageFailed(message: errorMessage));
     }
   }
 
   Future<void> mapUploadFilesEvent(
       UploadFileEvent event, Emitter<ChartState> emit) async {
     try {
+      // Check network before uploading file
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(UploadFileFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
       emit(const UploadFileLoading());
       var response = await friendsDao.uploadFile(imagePath: event.filePath);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
@@ -388,7 +433,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       customLog("The error of upload image is : $error");
-      emit(UploadFileFailed(message: "Something Went Wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(UploadFileFailed(message: errorMessage));
     }
   }
 
@@ -416,7 +463,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         emit(EditGroupChatProfileFailed(message: message));
       }
     } catch (error) {
-      emit(EditGroupChatProfileFailed(message: "Something went wrong"));
+      customLog("Error in edit group profile: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(EditGroupChatProfileFailed(message: errorMessage));
     }
   }
 
@@ -439,8 +488,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         customLog(jsonDecoded["message"]);
       }
     } catch (error) {
-      emit(ChatViewProfileFailed(message: "Something went wrong"));
-      customLog('jsonDecoded["message"]');
+      customLog("Error in chat view profile: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ChatViewProfileFailed(message: errorMessage));
     }
   }
 
@@ -601,7 +651,8 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       }
     } catch (error) {
       customLog("Error: $error");
-      emit(ArchivedChartListFailed(message: "Something went wrong"));
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ArchivedChartListFailed(message: errorMessage));
     }
   }
 
@@ -797,7 +848,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         emit(GroupBlocChatFailed(message: message));
       }
     } catch (error) {
-      emit(GroupBlocChatFailed(message: "Something went wrong"));
+      customLog("Error in block chat: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(GroupBlocChatFailed(message: errorMessage));
     }
   }
 
@@ -822,7 +875,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         emit(GroupUnBlocChatFailed(message: message));
       }
     } catch (error) {
-      emit(GroupUnBlocChatFailed(message: "Something went wrong"));
+      customLog("Error in unblock chat: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(GroupUnBlocChatFailed(message: errorMessage));
     }
   }
 
@@ -849,7 +904,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         emit(ReportChatFailed(message: message));
       }
     } catch (error) {
-      emit(ReportChatFailed(message: "Something went wrong"));
+      customLog("Error in report chat: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ReportChatFailed(message: errorMessage));
     }
   }
 
@@ -890,8 +947,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
             message: jsonDecoded["message"] ?? 'Error'));
       }
     } catch (error) {
-      emit(ChatBlockedListFalied(message: "Something went wrong"));
-      customLog('jsonDecoded["message"]');
+      customLog("Error in blocked chat list: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(ChatBlockedListFalied(message: errorMessage));
     }
   }
 
@@ -936,8 +994,9 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
         customLog(jsonDecoded["message"]);
       }
     } catch (error) {
-      emit(chartListSearchFailed(message: "Something went wrong"));
-      customLog('jsonDecoded["message"]');
+      customLog("Error in chat search: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(chartListSearchFailed(message: errorMessage));
     }
   }
 

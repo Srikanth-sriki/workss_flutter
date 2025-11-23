@@ -8,6 +8,8 @@ import 'package:meta/meta.dart';
 import '../../dao/friends_dao.dart';
 import '../../dao/home_dao.dart';
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 
 part 'show_interested_event.dart';
 part 'show_interested_state.dart';
@@ -69,6 +71,17 @@ class ShowInterestedBloc
       SaveInterestedWork event, Emitter<ShowInterestedState> emit) async {
     try {
       emit(const WorkInterestedLoading());
+      
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(WorkInterestedFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        event.onError();
+        return;
+      }
+      
       var response = await homeDao.saveInterested(
           workID: event.workID, contact: event.contact);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
@@ -86,7 +99,10 @@ class ShowInterestedBloc
         emit(WorkInterestedFailed(message: message));
       }
     } catch (error) {
-      emit(WorkInterestedFailed(message: "Something went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(WorkInterestedFailed(message: errorMessage));
+      event.onError();
     }
   }
 

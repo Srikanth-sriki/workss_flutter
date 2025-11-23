@@ -12,6 +12,8 @@ import '../../components/local_constant.dart';
 import '../../dao/login_dao.dart';
 import '../../dao/profile_dao.dart';
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 import '../../models/dropDown_modal.dart';
 
 part 'initial_register_event.dart';
@@ -58,6 +60,16 @@ class InitialRegisterBloc
       UploadImageEvent event, Emitter<InitialRegisterState> emit) async {
     try {
       emit(const InitialRegisterLoading());
+      
+      // Check network before uploading image
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(UploadImageFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+      
       var response =
           await loginDao.uploadProfilePic(imagePath: event.imagePath);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);

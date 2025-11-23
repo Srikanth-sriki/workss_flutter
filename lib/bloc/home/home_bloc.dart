@@ -9,6 +9,8 @@ import 'package:works_app/models/home_fetch_model.dart';
 
 import '../../core/intercepted_client.dart';
 import '../../models/work_view_model.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 part 'home_event.dart';
 part 'home_state.dart';
 
@@ -32,6 +34,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(const HomeScreenLoading());
       }
 
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(FetchHomeScreenFailed(
+          message:
+              'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+
       var response = await homeDao.fetchHome(
           page: event.page,
           pageSize: event.pageSize,
@@ -41,9 +53,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           profession: event.profession,
           currentLatitude: event.currentLatitude,
           currentLongitude: event.currentLongitude,
-        experienceLevel: event.experienceLevel,
-        knownLanguages: event.knownLanguages
-      );
+          experienceLevel: event.experienceLevel,
+          knownLanguages: event.knownLanguages);
 
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
 
@@ -74,7 +85,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(FetchHomeScreenFailed(message: jsonDecoded["message"] ?? 'Error'));
       }
     } catch (error) {
-      emit(FetchHomeScreenFailed(message: "Something went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(FetchHomeScreenFailed(message: errorMessage));
     }
   }
 
@@ -82,6 +95,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       FetchWorkSingleView event, Emitter<HomeState> emit) async {
     try {
       emit(const FetchWorkViewLoading());
+
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(const FetchWorkViewError(
+          'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+
       var response = await homeDao.fetchWorkView(workId: event.workId);
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
@@ -97,9 +120,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     } catch (error) {
       customLog("The error is : $error");
-      emit(const FetchWorkViewError("Something Went wrong"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(FetchWorkViewError(errorMessage));
     }
   }
-
-
 }

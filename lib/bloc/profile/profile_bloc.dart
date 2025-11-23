@@ -18,6 +18,8 @@ import '../../components/local_constant.dart';
 import '../../core/intercepted_client.dart';
 import '../../dao/profile_dao.dart';
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 import '../../models/fetch_profile_model.dart';
 import '../../models/professionals_list_model.dart';
 
@@ -90,6 +92,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       FetchProfileEvent event, Emitter<ProfileState> emit) async {
     try {
       emit(const ProfileLoading());
+      
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(FetchProfileFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
+      }
+      
       var response = await profileDao.fetchProfile();
       Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
       customLog(response);
@@ -116,7 +128,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
     } catch (error) {
       customLog("The error is : $error");
-      emit(FetchProfileFailed(message: "Something Went wrong"));
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(FetchProfileFailed(message: errorMessage));
     }
   }
 

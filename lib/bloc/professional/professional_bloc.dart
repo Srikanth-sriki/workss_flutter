@@ -9,6 +9,8 @@ import 'package:works_app/models/professionals_list_model.dart';
 
 import '../../core/intercepted_client.dart';
 import '../../helper/custom_log.dart';
+import '../../helper/network_helper.dart';
+import '../../helper/network_error_handler_global.dart';
 import '../../models/professional_view_model.dart';
 
 part 'professional_event.dart';
@@ -34,6 +36,15 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
     try {
       if (event.page == 1) {
         emit(const ProfessionalLoading());
+      }
+
+      // Check network before making API call
+      final hasConnection = await NetworkHelper.hasInternetConnection();
+      if (!hasConnection) {
+        emit(FetchProfessionalListFailed(
+          message: 'No internet connection. Please check your network and try again.',
+        ));
+        return;
       }
 
       var response = await homeDao.fetchProfessional(
@@ -80,8 +91,9 @@ class ProfessionalBloc extends Bloc<ProfessionalEvent, ProfessionalState> {
             message: jsonDecoded["message"] ?? 'Error fetching data'));
       }
     } catch (error) {
-      emit(
-          FetchProfessionalListFailed(message: "Something went wrong: $error"));
+      // Handle network errors with user-friendly messages
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(FetchProfessionalListFailed(message: errorMessage));
     }
   }
 
