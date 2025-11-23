@@ -833,6 +833,7 @@ class SendMessage extends StatelessWidget {
   final MessageState messageState;
   final bool isUploading;
   final VoidCallback? onRetry;
+  final Widget? customTextWidget;
   const SendMessage(
       {required super.key,
       required this.message,
@@ -846,7 +847,8 @@ class SendMessage extends StatelessWidget {
       required this.imageUrl,
       this.messageState = MessageState.sent,
       this.isUploading = false,
-      this.onRetry});
+      this.onRetry,
+      this.customTextWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -876,16 +878,17 @@ class SendMessage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     if (textShow) ...[
-                      Text(
-                        message,
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 3.25,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                        softWrap: true,
-                      )
+                      customTextWidget ??
+                          Text(
+                            message,
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                            softWrap: true,
+                          )
                     ],
                     if (imageShow) ...[
                       _buildImageWithState(context, imageUrl),
@@ -1219,6 +1222,7 @@ class ReceivedMessage extends StatelessWidget {
   final bool audioShow;
   final Widget? audioWidget;
   final String imageUrl;
+  final Widget? customTextWidget;
 
   const ReceivedMessage({
     super.key,
@@ -1231,6 +1235,7 @@ class ReceivedMessage extends StatelessWidget {
     required this.audioShow,
     required this.imageUrl,
     this.audioWidget,
+    this.customTextWidget,
   });
 
   @override
@@ -1276,16 +1281,17 @@ class ReceivedMessage extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(
                             bottom: SizeConfig.blockHeight * 0.2),
-                        child: Text(
-                          message,
-                          style: TextStyle(
-                            color: COLORS.neutralDark,
-                            fontSize: SizeConfig.blockWidth * 3.25,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: "Poppins",
-                          ),
-                          softWrap: true,
-                        ),
+                        child: customTextWidget ??
+                            Text(
+                              message,
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 3.25,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                              softWrap: true,
+                            ),
                       ),
 
                     if (imageShow)

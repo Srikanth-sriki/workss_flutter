@@ -131,6 +131,7 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString(LocalConstant.accessToken) ?? "";
   Config.accessToken = token;
+  print(Config.accessToken);
   runApp(
     EasyLocalization(
       supportedLocales: const [

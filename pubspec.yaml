@@ -1,5 +1,5 @@
 name: works_app
-description: "A new Flutter project."
+description: 'A new Flutter project.'
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -82,13 +81,7 @@ dependencies:
   fluttertoast: ^8.2.12
   buttons_tabbar: ^1.3.15
   dio: ^5.4.0
-
-
-
-
-
-
-
+  flutter_contacts: ^1.1.7+4
 
 dev_dependencies:
   flutter_test:
@@ -106,7 +99,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -114,96 +106,97 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/images/login/hiring.png
-     - assets/images/login/force_update.png
-     - assets/images/login/maintenace.png
-     - assets/images/login/hiring_select.png
-     - assets/images/login/intro1.png
-     - assets/images/login/intro2.png
-     - assets/images/login/intro3.png
-     - assets/translations/
-     - assets/images/login/profession.png
-     - assets/images/login/profession_select.png
-     - assets/images/login/login_success.png
-     - assets/images/bottom_tab/chart.png
-     - assets/images/bottom_tab/chart_select.png
-     - assets/images/bottom_tab/profile_01.png
-     - assets/images/bottom_tab/profile_select_01.png
-     - assets/images/bottom_tab/profile.png
-     - assets/images/bottom_tab/profile_select.png
-     - assets/images/bottom_tab/reel.png
-     - assets/images/bottom_tab/reel_select.png
-     - assets/images/bottom_tab/add_post.png
-     - assets/images/bottom_tab/add_post_select.png
-     - assets/images/bottom_tab/prop.png
-     - assets/images/bottom_tab/prop_select.png
-     - assets/images/bottom_tab/work.png
-     - assets/images/bottom_tab/work_select.png
-     - assets/images/bottom_tab/prop_01.png
-     - assets/images/bottom_tab/prop_select_01.png
-     - assets/images/bottom_tab/work_01.png
-     - assets/images/bottom_tab/work_select_01.png
-     - assets/images/home/translation.png
-     - assets/images/home/filter.png
-     - assets/images/home/home.png
-     - assets/images/home/app_share.png
-     - assets/images/home/search.png
-     - assets/images/home/notification.png
-     - assets/images/home/gender.png
-     - assets/images/home/speak.png
-     - assets/images/home/work_select.png
-     - assets/images/profile/posted_work.png
-     - assets/images/profile/bookmark.png
-     - assets/images/profile/contact.png
-     - assets/images/profile/like.png
-     - assets/images/profile/question.png
-     - assets/images/profile/share.png
-     - assets/images/profile/settings.png
-     - assets/images/profile/logout.png
-     - assets/images/profile/account_delete.png
-     - assets/images/profile/logout_success.png
-     - assets/images/profile/faq.png
-     - assets/images/profile/prof.png
-     - assets/images/professions/cat1.png
-     - assets/images/professions/cat2.png
-     - assets/images/professions/cat3.png
-     - assets/images/home/phone.png
-     - assets/images/home/share.png
-     - assets/images/login/upload.png
-     - assets/images/home/address-share.png
-     - assets/images/home/post_success.png
-     - assets/images/profile/edit.png
-     - assets/images/profile/delete.png
-     - assets/images/home/like.png
-     - assets/images/professions/bookmarked.png
-     - assets/images/lottie/insight_check.json
-     - assets/images/lottie/error.json
-     - assets/images/lottie/empty.json
-     - assets/images/profile/home_location.png
-     - assets/images/profile/Buildings_location.png
-     - assets/images/profile/other_location.png
-     - assets/images/profile/delete_2d.png
-     - assets/images/profile/success.png
-     - assets/images/home/share-banner.png
-     - assets/images/home/dumy1.png
-     - assets/images/friends/message.png
-     - assets/images/chat/message.png
-     - assets/images/chat/read.png
-     - assets/images/chat/read_done.png
-     - assets/images/chat/add_friend.png
-     - assets/images/chat/chat_create.png
-     - assets/images/profile/clip_bord.png
-     - assets/images/profile/logout_outline.png
-     - assets/images/chat/user_register.png
-     - assets/images/profile/controle.png
-     - assets/images/profile/kyc_pending.png
-     - assets/images/profile/kyc_verifying.png
-     - assets/images/profile/kyc_success.png
-     - assets/images/profile/verify.png
-     - assets/images/profile/camera_icon.png
-     - assets/images/profile/gallery_icon.png
-     - assets/images/home/works_logo.png
-
+    - assets/images/login/hiring.png
+    - assets/images/login/force_update.png
+    - assets/images/login/maintenace.png
+    - assets/images/login/hiring_select.png
+    - assets/images/login/intro1.png
+    - assets/images/login/intro2.png
+    - assets/images/login/intro3.png
+    - assets/translations/
+    - assets/images/login/profession.png
+    - assets/images/login/profession_select.png
+    - assets/images/login/login_success.png
+    - assets/images/bottom_tab/chart.png
+    - assets/images/bottom_tab/chart_select.png
+    - assets/images/bottom_tab/profile_01.png
+    - assets/images/bottom_tab/profile_select_01.png
+    - assets/images/bottom_tab/profile.png
+    - assets/images/bottom_tab/profile_select.png
+    - assets/images/bottom_tab/reel.png
+    - assets/images/bottom_tab/reel_select.png
+    - assets/images/bottom_tab/add_post.png
+    - assets/images/bottom_tab/add_post_select.png
+    - assets/images/bottom_tab/prop.png
+    - assets/images/bottom_tab/prop_select.png
+    - assets/images/bottom_tab/work.png
+    - assets/images/bottom_tab/work_select.png
+    - assets/images/bottom_tab/prop_01.png
+    - assets/images/bottom_tab/prop_select_01.png
+    - assets/images/bottom_tab/work_01.png
+    - assets/images/bottom_tab/work_select_01.png
+    - assets/images/home/translation.png
+    - assets/images/home/filter.png
+    - assets/images/home/home.png
+    - assets/images/home/app_share.png
+    - assets/images/home/search.png
+    - assets/images/home/notification.png
+    - assets/images/home/gender.png
+    - assets/images/home/speak.png
+    - assets/images/home/work_select.png
+    - assets/images/profile/posted_work.png
+    - assets/images/profile/bookmark.png
+    - assets/images/profile/contact.png
+    - assets/images/profile/like.png
+    - assets/images/profile/question.png
+    - assets/images/profile/share.png
+    - assets/images/profile/settings.png
+    - assets/images/profile/logout.png
+    - assets/images/profile/account_delete.png
+    - assets/images/profile/logout_success.png
+    - assets/images/profile/faq.png
+    - assets/images/profile/prof.png
+    - assets/images/professions/cat1.png
+    - assets/images/professions/cat2.png
+    - assets/images/professions/cat3.png
+    - assets/images/home/phone.png
+    - assets/images/home/share.png
+    - assets/images/login/upload.png
+    - assets/images/home/address-share.png
+    - assets/images/home/post_success.png
+    - assets/images/profile/edit.png
+    - assets/images/profile/delete.png
+    - assets/images/home/like.png
+    - assets/images/professions/bookmarked.png
+    - assets/images/lottie/insight_check.json
+    - assets/images/lottie/error.json
+    - assets/images/lottie/empty.json
+    - assets/images/profile/home_location.png
+    - assets/images/profile/Buildings_location.png
+    - assets/images/profile/other_location.png
+    - assets/images/profile/delete_2d.png
+    - assets/images/profile/success.png
+    - assets/images/home/share-banner.png
+    - assets/images/home/dumy1.png
+    - assets/images/friends/message.png
+    - assets/images/chat/message.png
+    - assets/images/chat/read.png
+    - assets/images/chat/read_done.png
+    - assets/images/chat/add_friend.png
+    - assets/images/chat/chat_create.png
+    - assets/images/profile/clip_bord.png
+    - assets/images/profile/logout_outline.png
+    - assets/images/chat/user_register.png
+    - assets/images/profile/controle.png
+    - assets/images/profile/kyc_pending.png
+    - assets/images/profile/kyc_verifying.png
+    - assets/images/profile/kyc_success.png
+    - assets/images/profile/verify.png
+    - assets/images/profile/camera_icon.png
+    - assets/images/profile/gallery_icon.png
+    - assets/images/home/works_logo.png
+    - assets/images/chat/map.png
+    - assets/images/chat/contact.png
 
   #   - images/a_dot_ham.jpeg
 
@@ -219,16 +212,16 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-      - family: Poppins
-        fonts:
-          - asset: assets/fonts/Poppins-Bold.ttf
-            weight: 700
-          - asset: assets/fonts/Poppins-SemiBold.ttf
-            weight: 600
-          - asset: assets/fonts/Poppins-Medium.ttf
-            weight: 500
-          - asset: assets/fonts/Poppins-Regular.ttf
-            weight: 400
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf

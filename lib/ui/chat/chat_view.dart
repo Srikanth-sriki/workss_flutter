@@ -1,14 +1,18 @@
 import 'dart:io';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:works_app/bloc/chart/chart_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/config.dart';
@@ -1911,6 +1915,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                     messageState: message.messageState,
                     isUploading: message.isUploading,
                     onRetry: () => _retryMessage(message),
+                    customTextWidget: _formatMessageWithLinks(message.content!),
                     audioWidget: WaveBubble(
                       audioUrl: message.messageMedia!.isNotEmpty
                           ? message.messageMedia![0].fileUrl!
@@ -1939,6 +1944,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         imageUrl: message.messageMedia!.isNotEmpty
                             ? message.messageMedia![0].fileUrl!
                             : '',
+                        customTextWidget:
+                            _formatMessageWithLinks(message.content!),
                         audioWidget: WaveBubble(
                           audioUrl: message.messageMedia!.isNotEmpty
                               ? message.messageMedia![0].fileUrl!
@@ -1957,154 +1964,565 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     );
   }
 
-  void _showPicker(context, onImageSelected) {
+  // Helper method to get current location
+  Future<Position?> _getCurrentLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showErrorSnackBar("Location services are disabled");
+        return null;
+      }
+
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _showErrorSnackBar("Location permissions are denied");
+          return null;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _showErrorSnackBar("Location permissions are permanently denied");
+        return null;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      return position;
+    } catch (e) {
+      debugPrint("Error getting location: $e");
+      _showErrorSnackBar("Error getting location: $e");
+      return null;
+    }
+  }
+
+  // Helper method to share current location
+  Future<void> _shareCurrentLocation() async {
+    try {
+      final position = await _getCurrentLocation();
+      if (position != null) {
+        final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+
+        final googleMapsUrl =
+            'https://www.google.com/maps?q=${position.latitude},${position.longitude}';
+
+        // Create location message as text with clickable link
+        final locationMessage = Message(
+          id: tempId,
+          chatId: widget.chatId,
+          senderId: Config.id,
+          content: googleMapsUrl,
+          type: 'text',
+          deletedFor: [],
+          messageMedia: [],
+          messageState: MessageState.sending,
+          isUploading: false,
+          tempId: tempId,
+        );
+
+        // Add location message to chat
+        _addMessageWithAnimation(locationMessage);
+
+        // Send location as text message
+        chartBloc.add(ChartSendMessageEvent(
+          chatId: widget.chatId,
+          content: googleMapsUrl,
+          messageType: 'text',
+          fileName: null,
+          fileUrl: null,
+          fileType: null,
+          fileSize: null,
+        ));
+
+        FocusScope.of(context).unfocus();
+      }
+    } catch (e) {
+      debugPrint("Error sharing location: $e");
+      _showErrorSnackBar("Error sharing location: $e");
+    }
+  }
+
+  // Helper method to get contacts
+  Future<void> _getContacts() async {
+    try {
+      // Check contacts permission
+      bool permission = await FlutterContacts.requestPermission();
+      if (!permission) {
+        _showErrorSnackBar("Contacts permission denied");
+        return;
+      }
+
+      // Get contacts
+      List<Contact> contacts = await FlutterContacts.getContacts(
+        withProperties: true,
+        withPhoto: false,
+      );
+
+      // Show contacts picker
+      _showContactsPicker(contacts);
+    } catch (e) {
+      debugPrint("Error getting contacts: $e");
+      _showErrorSnackBar("Error getting contacts: $e");
+    }
+  }
+
+  // Helper method to show contacts picker
+  void _showContactsPicker(List<Contact> contacts) {
+    showModalBottomSheet(
+      backgroundColor: COLORS.white,
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: COLORS.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+              topRight: Radius.circular(SizeConfig.blockWidth * 5),
+            ),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 5,
+                  vertical: SizeConfig.blockHeight,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Select Contact'.tr(),
+                      style: TextStyle(
+                        color: COLORS.primaryTwo,
+                        fontSize: SizeConfig.blockWidth * 4.25,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: COLORS.neutralDark,
+                        size: SizeConfig.blockWidth * 6.5,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: COLORS.neutralDarkTwo),
+
+              // Contacts list
+              Expanded(
+                child: ListView.builder(
+                  itemCount: contacts.length,
+                  itemBuilder: (context, index) {
+                    final contact = contacts[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: COLORS.primary,
+                        child: Text(
+                          contact.displayName.isNotEmpty
+                              ? contact.displayName[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            color: COLORS.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        contact.displayName.isNotEmpty
+                            ? contact.displayName
+                            : 'Unknown',
+                        style: TextStyle(
+                          color: COLORS.neutralDark,
+                          fontSize: SizeConfig.blockWidth * 3.8,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      subtitle: contact.phones.isNotEmpty
+                          ? Text(
+                              contact.phones.first.number,
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 3.3,
+                                fontFamily: "Poppins",
+                              ),
+                            )
+                          : null,
+                      onTap: () {
+                        _shareContact(contact);
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Helper method to share contact
+  void _shareContact(Contact contact) {
+    try {
+      final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+      final phoneNumber =
+          contact.phones.isNotEmpty ? contact.phones.first.number : '';
+
+      // Create contact message
+      final contactMessage = Message(
+        id: tempId,
+        chatId: widget.chatId,
+        senderId: Config.id,
+        content:
+            'Name: ${contact.displayName.isNotEmpty ? contact.displayName : 'Unknown'}\nPhone: ${phoneNumber}',
+        type: 'text',
+        deletedFor: [],
+        messageMedia: [],
+        messageState: MessageState.sending,
+        isUploading: false,
+        tempId: tempId,
+      );
+
+      // Add contact message to chat
+      _addMessageWithAnimation(contactMessage);
+
+      // Send contact as text message
+      chartBloc.add(ChartSendMessageEvent(
+        chatId: widget.chatId,
+        content:
+            'Name: ${contact.displayName.isNotEmpty ? contact.displayName : 'Unknown'}\nPhone: ${phoneNumber}',
+        messageType: 'text',
+        fileName: null,
+        fileUrl: null,
+        fileType: null,
+        fileSize: null,
+      ));
+
+      FocusScope.of(context).unfocus();
+    } catch (e) {
+      debugPrint("Error sharing contact: $e");
+      _showErrorSnackBar("Error sharing contact: $e");
+    }
+  }
+
+  // Helper method to detect and format links in text
+  Widget _formatMessageWithLinks(String text) {
+    // Check if text contains Google Maps link
+    if (text.contains('https://') ||
+        text.contains('http://') ||
+        text.contains('www.')) {
+      return RichText(
+        text: TextSpan(
+          children: [
+            // TextSpan(
+            //   text: text.split('\n')[0], // Location emoji and text
+            //   style: TextStyle(
+            //     color: COLORS.neutralDark,
+            //     fontSize: SizeConfig.blockWidth * 3.8,
+            //     fontWeight: FontWeight.w400,
+            //     fontFamily: "Poppins",
+            //   ),
+            // ),
+            // TextSpan(text: '\n'),
+            TextSpan(
+              text: text, // Google Maps URL
+              style: TextStyle(
+                color: COLORS.primary,
+                fontSize: SizeConfig.blockWidth * 3.5,
+                fontWeight: FontWeight.w500,
+                fontFamily: "Poppins",
+                //decoration: TextDecoration.underline,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () async {
+                  final url = text.split('\n')[1];
+                  final uri = Uri.parse(url);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Check if text contains phone number
+    if (text.contains('Phone:') && text.contains('+')) {
+      final phoneMatch = RegExp(r'\+?[\d\s\-\(\)]+').firstMatch(text);
+      if (phoneMatch != null) {
+        final phoneNumber = phoneMatch.group(0)!.trim();
+        return RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: text.split('\n')[0], // Name
+                style: TextStyle(
+                  color: COLORS.neutralDark,
+                  fontSize: SizeConfig.blockWidth * 3.8,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Poppins",
+                ),
+              ),
+              TextSpan(text: '\n'),
+              TextSpan(
+                text: '$phoneNumber',
+                style: TextStyle(
+                  color: COLORS.primary,
+                  fontSize: SizeConfig.blockWidth * 3.5,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Poppins",
+                  //decoration: TextDecoration.underline,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () async {
+                    final uri = Uri.parse('tel:$phoneNumber');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    }
+                  },
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    // Regular text message
+    return Text(
+      text,
+      style: TextStyle(
+        color: COLORS.neutralDark,
+        fontSize: SizeConfig.blockWidth * 3.8,
+        fontWeight: FontWeight.w400,
+        fontFamily: "Poppins",
+      ),
+    );
+  }
+
+  void _showPicker(BuildContext context, Function(File) onImageSelected) {
     showModalBottomSheet(
       backgroundColor: COLORS.white,
       context: context,
       builder: (BuildContext context) {
         return Container(
-            decoration: BoxDecoration(
-                color: COLORS.white,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(SizeConfig.blockWidth * 5),
-                    topRight: Radius.circular(SizeConfig.blockWidth * 5))),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: SizeConfig.blockHeight),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: SizeConfig.blockWidth * 5,
-                      vertical: SizeConfig.blockHeight),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Select Media'.tr(),
-                        style: TextStyle(
-                          color: COLORS.primaryTwo,
-                          fontSize: SizeConfig.blockWidth * 4.25,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: COLORS.neutralDark,
-                          size: SizeConfig.blockWidth * 6.5,
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
-                  ),
+          decoration: BoxDecoration(
+            color: COLORS.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+              topRight: Radius.circular(SizeConfig.blockWidth * 5),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: SizeConfig.blockHeight),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 4.5,
+                  vertical: SizeConfig.blockHeight * 0.5,
                 ),
-                const Divider(
-                  color: COLORS.neutralDarkTwo,
-                ),
-                SizedBox(
-                  height: SizeConfig.blockHeight * 3,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InkWell(
-                      onTap: () async {
-                        XFile? photo =
-                            await _picker.pickImage(source: ImageSource.camera);
-                        if (photo != null) {
-                          onImageSelected(File(photo.path));
-                        }
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: COLORS.primary,
-                              width: SizeConfig.blockWidth * 0.15),
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3),
-                          color: COLORS.primaryOne.withOpacity(0.5),
-                        ),
-                        width: SizeConfig.blockWidth * 30,
-                        height: SizeConfig.blockWidth * 30,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.photo_camera_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
-                            ),
-                            SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
-                            ),
-                            Text(
-                              'Camera'.tr(),
-                              style: TextStyle(
-                                color: COLORS.neutralDark,
-                                fontSize: SizeConfig.blockWidth * 3.8,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
-                              ),
-                            ),
-                          ],
-                        ),
+                    Text(
+                      'Select Media'.tr(),
+                      style: TextStyle(
+                        color: COLORS.primaryTwo,
+                        fontSize: SizeConfig.blockWidth * 4.25,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
                       ),
                     ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: COLORS.neutralDark,
+                        size: SizeConfig.blockWidth * 4.5,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: COLORS.neutralDarkTwo),
+              SizedBox(height: SizeConfig.blockHeight * 3),
+              Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Camera
                     InkWell(
                       onTap: () async {
-                        XFile? image = await _picker.pickImage(
-                            source: ImageSource.gallery);
-                        print(image);
-                        if (image != null) {
-                          onImageSelected(File(image.path));
-                        }
+                        final XFile? photo =
+                            await _picker.pickImage(source: ImageSource.camera);
+                        if (photo != null) onImageSelected(File(photo.path));
                         Navigator.of(context).pop();
                       },
-                      child: Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: COLORS.primary,
-                              width: SizeConfig.blockWidth * 0.15),
-                          borderRadius:
-                              BorderRadius.circular(SizeConfig.blockWidth * 3),
-                          color: COLORS.primaryOne.withOpacity(0.5),
-                        ),
-                        width: SizeConfig.blockWidth * 30,
-                        height: SizeConfig.blockWidth * 30,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.photo_library_outlined,
-                              color: COLORS.primary,
-                              size: SizeConfig.blockWidth * 6.5,
+                      child: Column(
+                        children: [
+                          Container(
+                            width: SizeConfig.blockWidth * 18,
+                            height: SizeConfig.blockWidth * 18,
+                            decoration: BoxDecoration(
+                              color: COLORS.primaryOne.withOpacity(0.3),
+                              shape: BoxShape.circle,
                             ),
-                            SizedBox(
-                              width: SizeConfig.blockWidth * 1.5,
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              'assets/images/profile/camera_icon.png',
+                              width: SizeConfig.blockWidth * 6.0,
+                              height: SizeConfig.blockWidth * 6.0,
+                              color: COLORS.primary,
                             ),
-                            Text('Gallery'.tr(),
-                                style: TextStyle(
-                                  color: COLORS.neutralDark,
-                                  fontSize: SizeConfig.blockWidth * 3.8,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: "Poppins",
-                                )),
-                          ],
-                        ),
+                          ),
+                          SizedBox(height: SizeConfig.blockHeight * 1.2),
+                          Text(
+                            'Camera'.tr(),
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Gallery
+                    InkWell(
+                      onTap: () async {
+                        final XFile? image = await _picker.pickImage(
+                            source: ImageSource.gallery);
+                        if (image != null) onImageSelected(File(image.path));
+                        Navigator.of(context).pop();
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: SizeConfig.blockWidth * 18,
+                            height: SizeConfig.blockWidth * 18,
+                            decoration: BoxDecoration(
+                              color: COLORS.accent.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              'assets/images/profile/gallery_icon.png',
+                              width: SizeConfig.blockWidth * 6.0,
+                              height: SizeConfig.blockWidth * 6.0,
+                              color: COLORS.accent,
+                            ),
+                          ),
+                          SizedBox(height: SizeConfig.blockHeight * 1.2),
+                          Text(
+                            'Gallery'.tr(),
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Location
+                    InkWell(
+                      onTap: () async {
+                        Navigator.of(context).pop();
+                        await _shareCurrentLocation();
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: SizeConfig.blockWidth * 18,
+                            height: SizeConfig.blockWidth * 18,
+                            decoration: BoxDecoration(
+                              color: COLORS.semanticTwo.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              'assets/images/chat/map.png',
+                              width: SizeConfig.blockWidth * 6.0,
+                              height: SizeConfig.blockWidth * 6.0,
+                            ),
+                          ),
+                          SizedBox(height: SizeConfig.blockHeight * 1.2),
+                          Text(
+                            'Location'.tr(),
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Contact
+                    InkWell(
+                      onTap: () async {
+                        Navigator.of(context).pop();
+                        await _getContacts();
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: SizeConfig.blockWidth * 18,
+                            height: SizeConfig.blockWidth * 18,
+                            decoration: BoxDecoration(
+                              color: COLORS.semanticOne.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              'assets/images/chat/contact.png',
+                              width: SizeConfig.blockWidth * 6.0,
+                              height: SizeConfig.blockWidth * 6.0,
+                            ),
+                          ),
+                          SizedBox(height: SizeConfig.blockHeight * 1.2),
+                          Text(
+                            'Contact'.tr(),
+                            style: TextStyle(
+                              color: COLORS.neutralDark,
+                              fontSize: SizeConfig.blockWidth * 3.25,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: SizeConfig.blockHeight * 3),
-              ],
-            ));
+              ),
+              SizedBox(height: SizeConfig.blockHeight * 8),
+            ],
+          ),
+        );
       },
     );
   }
