@@ -147,22 +147,22 @@ class _ChartFriendsScreenState extends State<ChartFriendsScreen> {
               height: SizeConfig.blockHeight*90,
               child: globalLoadingWidget());
         } else if (state is FriendsAddListSuccess) {
+          if (searchFriendLists.isEmpty) {
+            return SizedBox(
+              width: SizeConfig.blockWidth * 100,
+              height: SizeConfig.blockHeight * 70,
+              child: emptyComponent(errorText: "No People Found"),
+            );
+          }
+          
           return ListView.builder(
             padding: EdgeInsets.symmetric(
               horizontal: SizeConfig.blockWidth * 4.5,
               vertical: SizeConfig.blockHeight,
             ),
-            itemCount: searchFriendLists.length,
+            itemCount: searchFriendLists.length + (isFetchingMore ? 1 : 0),
             controller: _scrollController,
             itemBuilder: (context, index) {
-              if (searchFriendLists.isEmpty) {
-                return SizedBox(
-                  width: SizeConfig.blockWidth * 100,
-                  height: SizeConfig.blockHeight * 70,
-                  child: emptyComponent(errorText: "No Chats Found"),
-                );
-              }
-
               if (index < searchFriendLists.length) {
                 final friend = searchFriendLists[index];
                 return Column(

@@ -55,7 +55,7 @@ PreferredSizeWidget customAppBar({
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/main_screen',
-                    (Route<dynamic> route) => false,
+                (Route<dynamic> route) => false,
               );
             },
             child: Row(
@@ -149,13 +149,14 @@ Widget normalTextField(
     maxLength: maxLength,
     onTap: onTap,
     decoration: textFieldDecoration(
-        hint: hintText,
-        prefix: prefix,
-        suffix: suffix,
-        prefixIcon: prefixIcon,
-        errorMessage: errorMessage,
-        hasError: hasError,
-        suffixIcon: suffixIcon).copyWith(
+            hint: hintText,
+            prefix: prefix,
+            suffix: suffix,
+            prefixIcon: prefixIcon,
+            errorMessage: errorMessage,
+            hasError: hasError,
+            suffixIcon: suffixIcon)
+        .copyWith(
       counterText: '',
     ),
   );
@@ -214,12 +215,13 @@ InputDecoration textFieldDecoration(
       fontSize: SizeConfig.blockWidth * 3.2,
     ),
     prefixIcon: prefix ? prefixIcon : null,
-    suffixIcon: suffix ? suffixIcon : null,errorStyle: TextStyle(
-    color: COLORS.semantic,
-    fontWeight: FontWeight.w400,
-    fontFamily: "Poppins",
-    fontSize: SizeConfig.blockWidth * 3,
-  ),
+    suffixIcon: suffix ? suffixIcon : null,
+    errorStyle: TextStyle(
+      color: COLORS.semantic,
+      fontWeight: FontWeight.w400,
+      fontFamily: "Poppins",
+      fontSize: SizeConfig.blockWidth * 3,
+    ),
   );
 }
 
@@ -419,7 +421,6 @@ Widget _buildButtonContent({
   );
 }
 
-
 void loginUserBottomSheet(BuildContext context) {
   showModalBottomSheet(
     constraints: BoxConstraints(
@@ -438,7 +439,8 @@ void loginUserBottomSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "It looks like you haven't registered yet. \nPlease complete your registration!".tr(),
+              "It looks like you haven't registered yet. \nPlease complete your registration!"
+                  .tr(),
               style: TextStyle(
                 color: COLORS.white,
                 fontSize: SizeConfig.blockWidth * 3.6,
@@ -453,11 +455,10 @@ void loginUserBottomSheet(BuildContext context) {
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                      const SelectUserType())
-                );
+                    context,
+                    MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            const SelectUserType()));
               },
               backgroundColor: COLORS.primary,
               showIcon: false,
@@ -485,8 +486,8 @@ Widget customIconButton(
     bool? prefixIconBool = false,
     bool? image = false,
     Widget? imageChild,
-      double? textFontSize = 3.5,
-      double? verticalSpaceButton = 2,
+    double? textFontSize = 3.5,
+    double? verticalSpaceButton = 2,
     IconData? prefixIcon}) {
   return SizedBox(
     width: width ?? double.infinity,
@@ -495,7 +496,7 @@ Widget customIconButton(
       borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
       rippleColor: Colors.white60,
       child: InkWell(
-        onTap:  onPressed,
+        onTap: onPressed,
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
         child: Container(
           decoration: BoxDecoration(
@@ -624,15 +625,14 @@ Widget bottomTabIcon({required String icon}) {
   );
 }
 
-Widget buildGenderSelection({
-  required List<Map<String, String>> options,
-  required void Function(String?)? onChanged,
-  required String? groupValue,
-  Color? color = COLORS.neutralDark,
-  FontWeight? fontWeight = FontWeight.w500,
-  FontWeight? textFontWeight = FontWeight.w500,
-  String? header = 'select_gender'
-}) {
+Widget buildGenderSelection(
+    {required List<Map<String, String>> options,
+    required void Function(String?)? onChanged,
+    required String? groupValue,
+    Color? color = COLORS.neutralDark,
+    FontWeight? fontWeight = FontWeight.w500,
+    FontWeight? textFontWeight = FontWeight.w500,
+    String? header = 'select_gender'}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -676,7 +676,6 @@ Widget buildGenderSelection({
   );
 }
 
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Color backgroundColor;
@@ -687,17 +686,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool? textCap;
 
-  const CustomAppBar({
-    super.key,
-    required this.title,
-    this.backgroundColor = COLORS.primaryTwo,
-    this.showLeadingIcon = true,
-    this.onBackPress,
-    this.titleColors = COLORS.white,
-    this.borderColor = false,
-    this.actions,
-    this.textCap = true
-  });
+  const CustomAppBar(
+      {super.key,
+      required this.title,
+      this.backgroundColor = COLORS.primaryTwo,
+      this.showLeadingIcon = true,
+      this.onBackPress,
+      this.titleColors = COLORS.white,
+      this.borderColor = false,
+      this.actions,
+      this.textCap = true});
 
   @override
   Widget build(BuildContext context) {
@@ -718,16 +716,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       leading: showLeadingIcon
           ? IconButton(
-        icon: Icon(
-          Icons.arrow_back_ios_new_sharp,
-          color: titleColors,
-          size: SizeConfig.blockWidth * 4.5,
-        ),
-        onPressed: onBackPress ?? () => Navigator.of(context).pop(),
-      )
+              icon: Icon(
+                Icons.arrow_back_ios_new_sharp,
+                color: titleColors,
+                size: SizeConfig.blockWidth * 4.5,
+              ),
+              onPressed: onBackPress ?? () => Navigator.of(context).pop(),
+            )
           : null,
-      title: Text(textCap!        ?
-        capitalizeEachWord(title).tr():title.tr(),
+      title: Text(
+        textCap! ? capitalizeEachWord(title).tr() : title.tr(),
         style: TextStyle(
           color: titleColors,
           fontSize: SizeConfig.blockWidth * 4.25,
@@ -742,8 +740,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => Size.fromHeight(
-    SizeConfig.blockHeight * 8,
-  );
+        SizeConfig.blockHeight * 8,
+      );
 }
 
 Widget buildBioTextField(
@@ -752,13 +750,15 @@ Widget buildBioTextField(
     required String hintText,
     required String? Function(String?) validator,
     required String? Function(String?) onChanged,
-    required bool error, int maxLines =8, Color? color =COLORS.neutralDark,
-      FontWeight? fontWeight = FontWeight. w500,
+    required bool error,
+    int maxLines = 8,
+    Color? color = COLORS.neutralDark,
+    FontWeight? fontWeight = FontWeight.w500,
     required String title}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      registerText(text: title,color: color,fontWeight:fontWeight ),
+      registerText(text: title, color: color, fontWeight: fontWeight),
       normalTextField(
           hintText: hintText,
           controller: controller,
@@ -797,11 +797,10 @@ Widget buildProfessionalCard(
     required bool saved,
     required VoidCallback onTap,
     required String image,
-      required BuildContext context,
-      required String itemID,
-      required bool smartControlEnable,
+    required BuildContext context,
+    required String itemID,
+    required bool smartControlEnable,
     required VoidCallback messageOnTap}) {
-  final tag = image;
   final heroTag = 'pro_${itemID}';
   //final String _heroTag =  'proHero_${image}_${name.hashCode}_${location.hashCode}';
   return TouchRippleEffect(
@@ -829,20 +828,53 @@ Widget buildProfessionalCard(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () => showModernImagePreview(context,image,heroTag: heroTag),
+                      onTap: () => showModernImagePreview(context, image,
+                          heroTag: heroTag),
                       splashColor: COLORS.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 12 / 2),
-                      child: Container(
-                        width: SizeConfig.blockWidth * 12,
-                        height: SizeConfig.blockWidth * 12,
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                                color: COLORS.primary,
-                                width: SizeConfig.blockWidth * 0.25),
-                            image: DecorationImage(
-                                image: NetworkImage(image), fit: BoxFit.cover),
+                      borderRadius:
+                          BorderRadius.circular(SizeConfig.blockWidth * 12 / 2),
+                      child: Hero(
+                        tag: heroTag,
+                        child: Container(
+                          width: SizeConfig.blockWidth * 12,
+                          height: SizeConfig.blockWidth * 12,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: COLORS.primary,
+                                  width: SizeConfig.blockWidth * 0.25),
+                              color: COLORS.neutralDarkTwo,
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(SizeConfig.blockWidth * 6))),
+                          child: ClipRRect(
                             borderRadius: BorderRadius.all(
-                                Radius.circular(SizeConfig.blockWidth * 6))),
+                                Radius.circular(SizeConfig.blockWidth * 6)),
+                            child: Image.network(
+                              image,
+                              fit: BoxFit.contain,
+                              width: SizeConfig.blockWidth * 12,
+                              height: SizeConfig.blockWidth * 12,
+                              loadingBuilder: (c, child, p) => p == null
+                                  ? child
+                                  : Container(
+                                      color: COLORS.neutralDarkTwo,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: COLORS.primary,
+                                        ),
+                                      ),
+                                    ),
+                              errorBuilder: (c, e, s) => Container(
+                                color: COLORS.neutralDarkTwo,
+                                child: Icon(
+                                  Icons.person,
+                                  color: COLORS.neutralDarkOne,
+                                  size: SizeConfig.blockWidth * 6,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(width: SizeConfig.blockWidth * 2),
@@ -851,16 +883,15 @@ Widget buildProfessionalCard(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(
-                          width:SizeConfig.blockWidth*60,
+                          width: SizeConfig.blockWidth * 60,
                           child: Text(
                             capitalizeEachWord(name),
                             style: TextStyle(
-                              color: COLORS.neutralDark,
-                              fontSize: SizeConfig.blockWidth * 3.8,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: "Poppins",
-                              overflow: TextOverflow.ellipsis
-                            ),
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 3.8,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: "Poppins",
+                                overflow: TextOverflow.ellipsis),
                             maxLines: 1,
                           ),
                         ),
@@ -875,16 +906,15 @@ Widget buildProfessionalCard(
                             ),
                             SizedBox(width: SizeConfig.blockWidth * 1),
                             SizedBox(
-                              width:SizeConfig.blockWidth*60,
+                              width: SizeConfig.blockWidth * 60,
                               child: Text(
                                 location,
                                 style: TextStyle(
-                                  color: COLORS.neutralDarkOne,
-                                  fontSize: SizeConfig.blockWidth * 3,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: "Poppins",
-                                    overflow: TextOverflow.ellipsis
-                                ),
+                                    color: COLORS.neutralDarkOne,
+                                    fontSize: SizeConfig.blockWidth * 3,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: "Poppins",
+                                    overflow: TextOverflow.ellipsis),
                                 maxLines: 1,
                               ),
                             ),
@@ -940,10 +970,13 @@ Widget buildProfessionalCard(
                               fontSize: SizeConfig.blockWidth * 4.2,
                               fontWeight: FontWeight.w600,
                               fontFamily: "Poppins",
-                              height: SizeConfig.blockHeight * 0.2),softWrap: true,
+                              height: SizeConfig.blockHeight * 0.2),
+                          softWrap: true,
                         ),
                         Text(
-                          paymentType == 'perday'?'Per Day':capitalizeEachWord(paymentType).tr(),
+                          paymentType == 'perday'
+                              ? 'Per Day'
+                              : capitalizeEachWord(paymentType).tr(),
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
                             fontSize: SizeConfig.blockWidth * 2.8,
@@ -960,7 +993,7 @@ Widget buildProfessionalCard(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if(smartControlEnable == false)...[
+                    if (smartControlEnable == false) ...[
                       Expanded(
                         child: customButton(
                             text: "Message",
@@ -968,21 +1001,18 @@ Widget buildProfessionalCard(
                             backgroundColor: COLORS.primary,
                             showIcon: false,
                             textColor: COLORS.white,
-                            height: SizeConfig.blockHeight*7
-                        ),
+                            height: SizeConfig.blockHeight * 7),
                       )
-                    ]
-                    else...[
+                    ] else ...[
                       Expanded(
                         child: customButton(
                             text: contacted ? 'CONTACTED' : "CONTACT",
                             onPressed: onShowInterest,
                             backgroundColor:
-                            contacted ? COLORS.semanticTwo : COLORS.primary,
+                                contacted ? COLORS.semanticTwo : COLORS.primary,
                             showIcon: false,
                             textColor: COLORS.white,
-                            height: SizeConfig.blockHeight*7
-                        ),
+                            height: SizeConfig.blockHeight * 7),
                       )
                     ],
                     Row(
@@ -1003,7 +1033,8 @@ Widget buildProfessionalCard(
                                 ? SizeConfig.blockHeight * 5.25
                                 : SizeConfig.blockHeight * 4.25,
                             fit: BoxFit.contain,
-                            color: saved ? COLORS.accent : COLORS.neutralDarkOne,
+                            color:
+                                saved ? COLORS.accent : COLORS.neutralDarkOne,
                           ),
                         ),
                         IconActionCard(
@@ -1111,7 +1142,9 @@ Widget buildDynamicRadioSelection({
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.5,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400, // Change weight when selected
+                    fontWeight: isSelected
+                        ? FontWeight.w500
+                        : FontWeight.w400, // Change weight when selected
                     fontFamily: "Poppins",
                   ),
                 ),
@@ -1123,8 +1156,6 @@ Widget buildDynamicRadioSelection({
     ],
   );
 }
-
-
 
 // class IconActionCard extends StatelessWidget {
 //   final IconData? icon;
@@ -1206,7 +1237,8 @@ class IconActionCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
-        splashColor: Colors.white.withOpacity(0.3), // Optional: adjust ripple color
+        splashColor:
+            Colors.white.withOpacity(0.3), // Optional: adjust ripple color
         child: Container(
           width: width ?? SizeConfig.blockWidth * 12,
           height: height ?? SizeConfig.blockWidth * 12,
@@ -1217,18 +1249,17 @@ class IconActionCard extends StatelessWidget {
           ),
           child: iconBool == true
               ? Icon(
-            icon,
-            size: SizeConfig.blockWidth * 5.5,
-          )
+                  icon,
+                  size: SizeConfig.blockWidth * 5.5,
+                )
               : Center(
-            child: imageUrl,
-          ),
+                  child: imageUrl,
+                ),
         ),
       ),
     );
   }
 }
-
 
 Widget showInterestButton({
   required final void Function()? onTapIconOne,
@@ -1309,7 +1340,7 @@ Widget showContactUsButton({
   required String buttonText,
   required bool message,
 }) {
-  return   Row(
+  return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
@@ -1317,7 +1348,11 @@ Widget showContactUsButton({
         child: customButton(
           text: buttonText,
           onPressed: onShowInterest,
-          backgroundColor: message?contacted ? COLORS.semanticTwo : COLORS.primary:COLORS.primary,
+          backgroundColor: message
+              ? contacted
+                  ? COLORS.semanticTwo
+                  : COLORS.primary
+              : COLORS.primary,
           showIcon: false,
           textColor: COLORS.white,
         ),
@@ -1433,8 +1468,6 @@ void showInterestBottomSheet(BuildContext context) {
   );
 }
 
-
-
 class ErrorScreen extends StatelessWidget {
   final VoidCallback onRetry;
   const ErrorScreen({
@@ -1447,19 +1480,16 @@ class ErrorScreen extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment:CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
           Lottie.asset(
             'assets/images/lottie/error.json',
-            width: SizeConfig.blockWidth *
-                60,
+            width: SizeConfig.blockWidth * 60,
             // height: SizeConfig.blockWidth *
             //     40,
-            fit: BoxFit
-                .cover,
+            fit: BoxFit.cover,
           ),
-          SizedBox(height: SizeConfig.blockHeight*2),
+          SizedBox(height: SizeConfig.blockHeight * 2),
           Text(
             'Something went wrong!'.tr(),
             style: TextStyle(
@@ -1467,29 +1497,24 @@ class ErrorScreen extends StatelessWidget {
               fontSize: SizeConfig.blockWidth * 3.6,
               fontWeight: FontWeight.w400,
               fontFamily: "Poppins",
-
-            ),textAlign: TextAlign.center,
+            ),
+            textAlign: TextAlign.center,
           ),
-          SizedBox(height: SizeConfig.blockHeight*4),
+          SizedBox(height: SizeConfig.blockHeight * 4),
           customButton(
             text: 'Retry now'.tr(),
             onPressed: onRetry,
-            backgroundColor:  COLORS.primary,
+            backgroundColor: COLORS.primary,
             showIcon: false,
             width: SizeConfig.blockWidth * 42,
             height: SizeConfig.blockHeight * 8,
             textColor: COLORS.white,
           )
-
         ],
       ),
     );
   }
 }
-
-
-
-
 
 class LiveLocationCard extends StatelessWidget {
   final bool mapLoading;
@@ -1497,13 +1522,12 @@ class LiveLocationCard extends StatelessWidget {
   final Function(bool) onToggleLiveLocation;
   final String header;
 
-  const LiveLocationCard({
-    super.key,
-    required this.mapLoading,
-    required this.isLiveLocationEnabled,
-    required this.onToggleLiveLocation,
-    required this.header
-  });
+  const LiveLocationCard(
+      {super.key,
+      required this.mapLoading,
+      required this.isLiveLocationEnabled,
+      required this.onToggleLiveLocation,
+      required this.header});
 
   @override
   Widget build(BuildContext context) {
@@ -1537,7 +1561,8 @@ class LiveLocationCard extends StatelessWidget {
                 ),
                 SizedBox(width: SizeConfig.blockWidth * 4),
                 Expanded(
-                  child: Text(header,
+                  child: Text(
+                    header,
                     style: TextStyle(
                       color: COLORS.white,
                       fontSize: SizeConfig.blockWidth * 3.25,
@@ -1559,7 +1584,7 @@ class LiveLocationCard extends StatelessWidget {
                     activeColor: COLORS.primary,
                     inactiveThumbColor: COLORS.neutralDarkOne,
                     trackOutlineColor:
-                    const WidgetStatePropertyAll(COLORS.primaryTwo),
+                        const WidgetStatePropertyAll(COLORS.primaryTwo),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
               ],
@@ -1571,7 +1596,6 @@ class LiveLocationCard extends StatelessWidget {
   }
 }
 
-
 Map<String, String> languageCodeToTranslationKey = {
   'hi': 'hindi',
   'kn': 'kannada',
@@ -1581,5 +1605,3 @@ Map<String, String> languageCodeToTranslationKey = {
   'mr': 'marathi',
   'gu': 'gujarati',
 };
-
-

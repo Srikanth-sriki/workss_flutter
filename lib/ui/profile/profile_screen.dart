@@ -141,7 +141,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         horizontal: SizeConfig.blockWidth * 5,
                         vertical: SizeConfig.blockHeight * 4,
                       ),
-                      margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
+                      margin:
+                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
                       child: Row(
                         children: [
                           InkWell(
@@ -153,7 +154,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               );
                             },
                             splashColor: COLORS.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 20 / 2),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 20 / 2),
                             child: Hero(
                               tag: 'profile_pic_${Config.id}',
                               transitionOnUserGestures: true,
@@ -161,16 +163,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: SizeConfig.blockWidth * 20,
                                 height: SizeConfig.blockWidth * 20,
                                 decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    image: NetworkImage(Config.profilePic),
-                                    fit: BoxFit.fill,
-                                  ),
+                                  color: COLORS.neutralDarkTwo,
                                   border: Border.all(
                                     color: COLORS.primary,
                                     width: SizeConfig.blockWidth * 0.15,
                                   ),
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(SizeConfig.blockWidth * 3),
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(SizeConfig.blockWidth * 3),
+                                  ),
+                                  child: Image.network(
+                                    Config.profilePic,
+                                    fit: BoxFit.contain,
+                                    width: SizeConfig.blockWidth * 20,
+                                    height: SizeConfig.blockWidth * 20,
+                                    loadingBuilder: (c, child, p) => p == null
+                                        ? child
+                                        : Container(
+                                            color: COLORS.neutralDarkTwo,
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: COLORS.primary,
+                                              ),
+                                            ),
+                                          ),
+                                    errorBuilder: (c, e, s) => Container(
+                                      color: COLORS.neutralDarkTwo,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: COLORS.neutralDarkOne,
+                                        size: SizeConfig.blockWidth * 10,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -219,20 +248,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => MultiBlocProvider(
                                       providers: [
-                                        BlocProvider(create: (context) => ProfileBloc()),
+                                        BlocProvider(
+                                            create: (context) => ProfileBloc()),
                                         BlocProvider(
                                           create: (context) {
                                             final bloc = InitialRegisterBloc();
                                             bloc.add(const FetchCityEvent());
-                                            bloc.add(const FetchChargeFeesEvent());
-                                            bloc.add(const FetchWorkKnownLanguageProfileEvent());
+                                            bloc.add(
+                                                const FetchChargeFeesEvent());
+                                            bloc.add(
+                                                const FetchWorkKnownLanguageProfileEvent());
                                             return bloc;
                                           },
                                         ),
-                                        BlocProvider(create: (context) => ProfessionalBloc()..add(const FetchCategoryListEvent())),
+                                        BlocProvider(
+                                            create: (context) => ProfessionalBloc()
+                                              ..add(
+                                                  const FetchCategoryListEvent())),
                                       ],
                                       child: EditProfileRegisterForm(
-                                        refreshPageCallback: _refreshPageAfterEdit,
+                                        refreshPageCallback:
+                                            _refreshPageAfterEdit,
                                         profileFetch: profileFetch,
                                       ),
                                     ),
@@ -288,7 +324,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             color: COLORS.semanticTwo,
                             borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(SizeConfig.blockWidth * 4),
+                              bottomLeft:
+                                  Radius.circular(SizeConfig.blockWidth * 4),
                             ),
                           ),
                           child: Row(
@@ -316,7 +353,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 )
               ] else ...[
-                if (loading == true && Config.profileCompleted == false && error == false) ...[
+                if (loading == true &&
+                    Config.profileCompleted == false &&
+                    error == false) ...[
                   Shimmer.fromColors(
                     baseColor: COLORS.primary.withOpacity(0.8),
                     highlightColor: COLORS.primary.withOpacity(0.5),
@@ -325,10 +364,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         horizontal: SizeConfig.blockWidth * 5,
                         vertical: SizeConfig.blockHeight * 4,
                       ),
-                      margin: EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
+                      margin:
+                          EdgeInsets.only(bottom: SizeConfig.blockHeight * 3),
                       decoration: BoxDecoration(
                         color: COLORS.primaryOne.withOpacity(0.25),
-                        borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                       ),
                       child: Row(
                         children: [
@@ -337,7 +378,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             height: SizeConfig.blockWidth * 20,
                             decoration: BoxDecoration(
                               color: COLORS.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 3),
                             ),
                           ),
                           SizedBox(width: SizeConfig.blockWidth * 6),
@@ -363,7 +405,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             height: SizeConfig.blockWidth * 8,
                             decoration: BoxDecoration(
                               color: COLORS.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 2),
                             ),
                           ),
                         ],
@@ -381,7 +424,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         Text(
-                          "It looks like you haven't registered yet. \nPlease complete your registration!".tr(),
+                          "It looks like you haven't registered yet. \nPlease complete your registration!"
+                              .tr(),
                           style: TextStyle(
                             fontSize: SizeConfig.blockWidth * 3.6,
                             fontFamily: 'Poppins',
@@ -401,7 +445,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const SelectUserType()),
+                              MaterialPageRoute(
+                                  builder: (context) => const SelectUserType()),
                             );
                           },
                         )
@@ -414,49 +459,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: ListView(
                   children: [
                     if (Config.profileCompleted) ...[
-                      _buildListItem('assets/images/profile/other_location.png', 'My Addresses', () {
+                      _buildListItem('assets/images/profile/other_location.png',
+                          'My Addresses', () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => MultiBlocProvider(
                               providers: [
-                                BlocProvider(create: (context) => ProfileBloc()..add(const AddressLocationListEvent())),
+                                BlocProvider(
+                                    create: (context) => ProfileBloc()
+                                      ..add(const AddressLocationListEvent())),
                               ],
                               child: LocationListScreen(),
                             ),
                           ),
                         );
                       }),
-                      _buildListItem('assets/images/profile/verify.png', 'KYC Verification', () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MultiBlocProvider(
-                              providers: [BlocProvider(create: (context) => PostWorkBloc())],
-                              child: KYCVerificationScreen(isVerified: profileFetch.kycStatus!),
-                            ),
-                          ),
-                        );
-                      }),
-                      _buildListItem('assets/images/profile/posted_work.png', 'Posted Works', () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MultiBlocProvider(
-                              providers: [BlocProvider(create: (context) => ProfileBloc()..add(const FetchPostedEvent()))],
-                              child: PostedWorkList(),
-                            ),
-                          ),
-                        );
-                      }),
-                      _buildListItem('assets/images/profile/bookmark.png', 'Saved Professionals', () {
+                      _buildListItem('assets/images/profile/verify.png',
+                          'KYC Verification', () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => MultiBlocProvider(
                               providers: [
-                                BlocProvider(create: (context) => ProfileBloc()..add(const FetchSavedProfessionalEvent())),
-                                BlocProvider(create: (context) => ShowInterestedBloc()),
+                                BlocProvider(
+                                    create: (context) => PostWorkBloc())
+                              ],
+                              child: KYCVerificationScreen(
+                                  isVerified: profileFetch.kycStatus!),
+                            ),
+                          ),
+                        );
+                      }),
+                      _buildListItem('assets/images/profile/posted_work.png',
+                          'Posted Works', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                    create: (context) => ProfileBloc()
+                                      ..add(const FetchPostedEvent()))
+                              ],
+                              child: PostedWorkList(),
+                            ),
+                          ),
+                        );
+                      }),
+                      _buildListItem('assets/images/profile/bookmark.png',
+                          'Saved Professionals', () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MultiBlocProvider(
+                              providers: [
+                                BlocProvider(
+                                    create: (context) => ProfileBloc()
+                                      ..add(
+                                          const FetchSavedProfessionalEvent())),
+                                BlocProvider(
+                                    create: (context) => ShowInterestedBloc()),
                                 BlocProvider(create: (context) => ChartBloc()),
                               ],
                               child: const BookMarkListScreen(),
@@ -465,14 +528,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       }),
                       if (Config.userType == 'professional') ...[
-                        _buildListItem('assets/images/profile/like.png', 'Interested Works', () {
+                        _buildListItem('assets/images/profile/like.png',
+                            'Interested Works', () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MultiBlocProvider(
                                 providers: [
-                                  BlocProvider(create: (context) => ProfileBloc()..add(const FetchInterestedWorkEvent())),
-                                  BlocProvider(create: (context) => ShowInterestedBloc()),
+                                  BlocProvider(
+                                      create: (context) => ProfileBloc()
+                                        ..add(
+                                            const FetchInterestedWorkEvent())),
+                                  BlocProvider(
+                                      create: (context) =>
+                                          ShowInterestedBloc()),
                                 ],
                                 child: InterestedWorkList(),
                               ),
@@ -484,38 +553,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     if (Config.profileCompleted == false) ...[
                       SizedBox(height: SizeConfig.blockHeight * 2),
                     ],
-                    _buildListItem('assets/images/profile/share.png', 'Share with Friends', () {
+                    _buildListItem(
+                        'assets/images/profile/share.png', 'Share with Friends',
+                        () {
                       shareAppWithFriend();
                     }),
-                    _buildListItem('assets/images/profile/question.png', 'FAQs', () {
+                    _buildListItem('assets/images/profile/question.png', 'FAQs',
+                        () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => MultiBlocProvider(
-                            providers: [BlocProvider(create: (context) => ProfileBloc()..add(const FetchFaqEvent()))],
+                            providers: [
+                              BlocProvider(
+                                  create: (context) =>
+                                      ProfileBloc()..add(const FetchFaqEvent()))
+                            ],
                             child: FaqScreen(),
                           ),
                         ),
                       );
                     }),
-                    _buildListItem('assets/images/profile/contact.png', 'Help & Support', () {
+                    _buildListItem(
+                        'assets/images/profile/contact.png', 'Help & Support',
+                        () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => MultiBlocProvider(
-                            providers: [BlocProvider(create: (context) => ProfileBloc())],
+                            providers: [
+                              BlocProvider(create: (context) => ProfileBloc())
+                            ],
                             child: ContactUsScreen(),
                           ),
                         ),
                       );
                     }),
-                    _buildListItem('assets/images/profile/settings.png', 'Settings', () {
+                    _buildListItem(
+                        'assets/images/profile/settings.png', 'Settings', () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SettingApp(
                             smartCallControl: profileFetch.smartCallControl!,
-                            smartCallSchedule: profileFetch.smartCallSchedule ?? [],
+                            smartCallSchedule:
+                                profileFetch.smartCallSchedule ?? [],
                           ),
                         ),
                       );
@@ -530,7 +612,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildListItem(String imagePath, String title, void Function()? onTap) {
+  Widget _buildListItem(
+      String imagePath, String title, void Function()? onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -546,7 +629,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: EdgeInsets.all(SizeConfig.blockWidth * 3.5),
               margin: EdgeInsets.only(right: SizeConfig.blockWidth * 1),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 2.5),
                 color: COLORS.primaryOne.withOpacity(0.2),
               ),
               child: Image.asset(

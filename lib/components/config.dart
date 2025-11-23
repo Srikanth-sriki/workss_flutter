@@ -26,10 +26,11 @@ class Config {
   static bool isRegistered = false;
   static String userType = "";
   static String fcmToken = "";
-  static int notificationCount =0;
-  static bool chartCount = false ;
+  static int notificationCount = 0;
+  static bool chartCount = false;
   static ValueNotifier<bool> chatHasNewMessage = ValueNotifier<bool>(false);
-  static ValueNotifier<bool> notificationReceiveMessage = ValueNotifier<bool>(false);
+  static ValueNotifier<bool> notificationReceiveMessage =
+      ValueNotifier<bool>(false);
   static bool fromNotificationTap = false;
 
   static Map<String, String> headers() {

@@ -13,8 +13,8 @@ Widget friendSearchCards(
     required String name,
     required VoidCallback onTapCard,
     required VoidCallback onTapMessage,
-      required BuildContext context,
-      required String itemID,
+    required BuildContext context,
+    required String itemID,
     required VoidCallback onTapIcon}) {
   //final tag = 'avatarTag_$image';
   final tag = 'fri_${itemID}';
@@ -24,7 +24,9 @@ Widget friendSearchCards(
       margin: EdgeInsets.symmetric(
         vertical: SizeConfig.blockHeight * 0.8,
       ),
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4,vertical: SizeConfig.blockWidth * 3),
+      padding: EdgeInsets.symmetric(
+          horizontal: SizeConfig.blockWidth * 4,
+          vertical: SizeConfig.blockWidth * 3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.5),
         color: COLORS.primaryOne.withOpacity(0.1),
@@ -38,21 +40,49 @@ Widget friendSearchCards(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               InkWell(
-                onTap: () => showModernImagePreview(context,image,heroTag: tag),
+                onTap: () =>
+                    showModernImagePreview(context, image, heroTag: tag),
                 splashColor: COLORS.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
+                borderRadius:
+                    BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
                 child: Hero(
                   tag: tag,
                   child: Container(
                     width: SizeConfig.blockWidth * 15,
                     height: SizeConfig.blockWidth * 15,
                     decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(image),
-                          fit: BoxFit.fill,
-                        ),
+                        color: COLORS.neutralDarkTwo,
                         borderRadius: BorderRadius.all(
                             Radius.circular(SizeConfig.blockWidth * 7.5))),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(SizeConfig.blockWidth * 7.5)),
+                      child: Image.network(
+                        image,
+                        fit: BoxFit.contain,
+                        width: SizeConfig.blockWidth * 15,
+                        height: SizeConfig.blockWidth * 15,
+                        loadingBuilder: (c, child, p) => p == null
+                            ? child
+                            : Container(
+                                color: COLORS.neutralDarkTwo,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: COLORS.primary,
+                                  ),
+                                ),
+                              ),
+                        errorBuilder: (c, e, s) => Container(
+                          color: COLORS.neutralDarkTwo,
+                          child: Icon(
+                            Icons.person,
+                            color: COLORS.neutralDarkOne,
+                            size: SizeConfig.blockWidth * 7,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -65,7 +95,8 @@ Widget friendSearchCards(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.25,
                     fontWeight: FontWeight.w500,
-                    fontFamily: "Poppins",overflow: TextOverflow.ellipsis,
+                    fontFamily: "Poppins",
+                    overflow: TextOverflow.ellipsis,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -140,13 +171,14 @@ Widget friendSearchDetailsCards({
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              if(image.isNotEmpty)...[
+              if (image.isNotEmpty) ...[
                 InkWell(
-                  onTap: (){
+                  onTap: () {
                     showModernImagePreview(context, image, heroTag: tag);
                   },
                   splashColor: COLORS.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 14 / 2),
                   child: Container(
                     width: SizeConfig.blockWidth * 14,
                     height: SizeConfig.blockWidth * 14,
@@ -159,14 +191,14 @@ Widget friendSearchDetailsCards({
                             Radius.circular(SizeConfig.blockWidth * 7))),
                   ),
                 )
-              ]
-              else...[
+              ] else ...[
                 Container(
                   width: SizeConfig.blockWidth * 15,
                   height: SizeConfig.blockWidth * 15,
                   decoration: BoxDecoration(
                     color: COLORS.neutralDarkTwo,
-                    borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 7.5),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 7.5),
                   ),
                   child: Icon(
                     isGroup ? Icons.people : Icons.person,
@@ -194,19 +226,19 @@ Widget friendSearchDetailsCards({
                       overflow: TextOverflow.ellipsis,
                       // textAlign: TextAlign.end,
                     ),
-                    if(disc.isNotEmpty)
-                    Text(
-                      disc,
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+                    if (disc.isNotEmpty)
+                      Text(
+                        disc,
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        // textAlign: TextAlign.end,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      // textAlign: TextAlign.end,
-                    ),
                   ],
                 ),
               ),
@@ -224,47 +256,45 @@ Widget friendSearchDetailsCards({
                 verticalSpaceButton: 1.5,
                 showIcon: false)
           ],
-          if(widgetButtonRequired)...[
-            widgetButton!
-          ],
+          if (widgetButtonRequired) ...[widgetButton!],
           if (sendMessageButtonRequired) ...[
-          SizedBox(
-            width: SizeConfig.blockWidth * buttonWidth,
-            height: SizeConfig.blockHeight * 5.6,
-            child: TouchRippleEffect(
-              borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
-              rippleColor: Colors.white60,
-              child: InkWell(
-                onTap: onTapButtonCard,
+            SizedBox(
+              width: SizeConfig.blockWidth * buttonWidth,
+              height: SizeConfig.blockHeight * 5.6,
+              child: TouchRippleEffect(
                 borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
-                child: Container(
-                  width: SizeConfig.blockWidth * buttonWidth,
-
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                      color: COLORS.white,
-                      borderRadius:
-                          BorderRadius.circular(SizeConfig.blockWidth * 2),
-                      border: Border.all(
-                          color: COLORS.neutralDark,
-                          width: SizeConfig.blockWidth * 0.3)),
-                  padding: EdgeInsets.symmetric(
-                    // vertical: SizeConfig.blockHeight,
-                    horizontal: SizeConfig.blockWidth * 4,
-                  ),
-                  child: Text(
-                    'Message'.tr(),
-                    style: TextStyle(
-                      color: COLORS.neutralDark,
-                      fontSize: SizeConfig.blockWidth * 3.2,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: "Poppins",
+                rippleColor: Colors.white60,
+                child: InkWell(
+                  onTap: onTapButtonCard,
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 2),
+                  child: Container(
+                    width: SizeConfig.blockWidth * buttonWidth,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: COLORS.white,
+                        borderRadius:
+                            BorderRadius.circular(SizeConfig.blockWidth * 2),
+                        border: Border.all(
+                            color: COLORS.neutralDark,
+                            width: SizeConfig.blockWidth * 0.3)),
+                    padding: EdgeInsets.symmetric(
+                      // vertical: SizeConfig.blockHeight,
+                      horizontal: SizeConfig.blockWidth * 4,
+                    ),
+                    child: Text(
+                      'Message'.tr(),
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 3.2,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: "Poppins",
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          )
+            )
           ]
         ],
       ),
@@ -272,14 +302,13 @@ Widget friendSearchDetailsCards({
   );
 }
 
-Widget friendChatRemoveSearchDetailsCards({
-  required String image,
-  required String name,
-  required VoidCallback onTapCard,
-  required VoidCallback onTapButton,
-  required String disc,
-  required double? width
-}) {
+Widget friendChatRemoveSearchDetailsCards(
+    {required String image,
+    required String name,
+    required VoidCallback onTapCard,
+    required VoidCallback onTapButton,
+    required String disc,
+    required double? width}) {
   return InkWell(
     onTap: onTapCard,
     child: Container(
@@ -311,15 +340,13 @@ Widget friendChatRemoveSearchDetailsCards({
                     ),
                     image: DecorationImage(
                         image: NetworkImage(
-                          image
-                              .isEmpty
+                          image.isEmpty
                               ? 'https://via.placeholder.com/150'
                               : image,
                         ),
                         fit: BoxFit.cover),
                     borderRadius: BorderRadius.all(
-                        Radius.circular(
-                            SizeConfig.blockWidth * 6))),
+                        Radius.circular(SizeConfig.blockWidth * 6))),
               ),
               SizedBox(width: SizeConfig.blockWidth * 2),
               SizedBox(
@@ -340,19 +367,19 @@ Widget friendChatRemoveSearchDetailsCards({
                       overflow: TextOverflow.ellipsis,
                       // textAlign: TextAlign.end,
                     ),
-                    if(disc.isNotEmpty)
-                    Text(
-                      disc,
-                      style: TextStyle(
-                        color: COLORS.neutralDarkOne,
-                        fontSize: SizeConfig.blockWidth * 3,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: "Poppins",
+                    if (disc.isNotEmpty)
+                      Text(
+                        disc,
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        // textAlign: TextAlign.end,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      // textAlign: TextAlign.end,
-                    ),
                   ],
                 ),
               ),

@@ -58,7 +58,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<ProfessionalBloc, ProfessionalState>(
       listener: (context, state) {
-        if(state is ProfessionalViewSuccess){
+        if (state is ProfessionalViewSuccess) {
           final professional = state.professionalViewModel.professional!;
           setState(() {
             smartControlEnabled = isSmartControlEnabled(
@@ -113,23 +113,59 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 InkWell(
-                                  onTap: () => showModernImagePreview(context, professional.profilePic!,heroTag:  'profView_${professional.id!}'),
+                                  onTap: () => showModernImagePreview(
+                                      context, professional.profilePic!,
+                                      heroTag: 'profView_${professional.id!}'),
                                   splashColor: COLORS.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 12 / 2),
-                                  child: Container(
-                                    width: SizeConfig.blockWidth * 12,
-                                    height: SizeConfig.blockWidth * 12,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: COLORS.primary,
-                                            width: SizeConfig.blockWidth * 0.2),
-                                        image: DecorationImage(
-                                            image: NetworkImage(
-                                                professional.profilePic!),
-                                            fit: BoxFit.cover),
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 12 / 2),
+                                  child: Hero(
+                                    tag: 'profView_${professional.id!}',
+                                    child: Container(
+                                      width: SizeConfig.blockWidth * 12,
+                                      height: SizeConfig.blockWidth * 12,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: COLORS.primary,
+                                              width:
+                                                  SizeConfig.blockWidth * 0.2),
+                                          color: COLORS.neutralDarkTwo,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                  SizeConfig.blockWidth * 6))),
+                                      child: ClipRRect(
                                         borderRadius: BorderRadius.all(
                                             Radius.circular(
-                                                SizeConfig.blockWidth * 6))),
+                                                SizeConfig.blockWidth * 6)),
+                                        child: Image.network(
+                                          professional.profilePic!,
+                                          fit: BoxFit.contain,
+                                          width: SizeConfig.blockWidth * 12,
+                                          height: SizeConfig.blockWidth * 12,
+                                          loadingBuilder: (c, child, p) => p ==
+                                                  null
+                                              ? child
+                                              : Container(
+                                                  color: COLORS.neutralDarkTwo,
+                                                  child: Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: COLORS.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                          errorBuilder: (c, e, s) => Container(
+                                            color: COLORS.neutralDarkTwo,
+                                            child: Icon(
+                                              Icons.person,
+                                              color: COLORS.neutralDarkOne,
+                                              size: SizeConfig.blockWidth * 6,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: SizeConfig.blockWidth * 2),
@@ -296,156 +332,156 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                     color: COLORS.black,
                                     size: SizeConfig.blockWidth * 6.5),
                                 onPressed: () async {
-                                  showDynamicBottomSheet(
-                                      context,
-                                      'OPTIONS',
-                                      [
-                                        BottomSheetItem(
-                                          title: 'Report',
-                                          onTap: () async {
-                                            final result =
-                                                await showMaterialModalBottomSheet(
-                                                    enableDrag: true,
-                                                    expand: false,
-                                                    isDismissible: true,
-                                                    backgroundColor:
-                                                        COLORS.white,
-                                                    closeProgressThreshold: 0,
-                                                    duration: const Duration(
-                                                        seconds: 0),
-                                                    context: context,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.vertical(
-                                                              top: Radius.circular(
-                                                                  SizeConfig
-                                                                          .blockWidth *
-                                                                      6)),
-                                                    ),
-                                                    builder: (context) =>
-                                                        const ReportPostsBottomSheet(
-                                                          message: '',
-                                                        ));
+                                  showDynamicBottomSheet(context, 'OPTIONS', [
+                                    BottomSheetItem(
+                                      title: 'Report',
+                                      onTap: () async {
+                                        final result =
+                                            await showMaterialModalBottomSheet(
+                                                enableDrag: true,
+                                                expand: false,
+                                                isDismissible: true,
+                                                backgroundColor: COLORS.white,
+                                                closeProgressThreshold: 0,
+                                                duration:
+                                                    const Duration(seconds: 0),
+                                                context: context,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.vertical(
+                                                          top: Radius.circular(
+                                                              SizeConfig
+                                                                      .blockWidth *
+                                                                  6)),
+                                                ),
+                                                builder: (context) =>
+                                                    const ReportPostsBottomSheet(
+                                                      message: '',
+                                                    ));
 
-                                            if (result != null) {
-                                              setState(() {
-                                                reportPostBloc.add(
-                                                    ReportProfessionalEvent(
-                                                  reason: result['message']!,
-                                                  userId: professional.id!,
-                                                  onSuccess: (message) {
-                                                    Navigator.pop(context);
-                                                    showCustomSnackBar(
+                                        if (result != null) {
+                                          setState(() {
+                                            reportPostBloc
+                                                .add(ReportProfessionalEvent(
+                                              reason: result['message']!,
+                                              userId: professional.id!,
+                                              onSuccess: (message) {
+                                                Navigator.pop(context);
+                                                showCustomSnackBar(
+                                                    context: context,
+                                                    message: message,
+                                                    backgroundColor:
+                                                        COLORS.neutralDarkOne);
+                                              },
+                                              onError: (message) {
+                                                Navigator.pop(context);
+                                                showCustomSnackBar(
+                                                  context: context,
+                                                  message: message,
+                                                );
+                                              },
+                                            ));
+                                          });
+                                        }
+                                      },
+                                    ),
+                                    BottomSheetItem(
+                                        title: professional.isFriend != null
+                                            ? 'UNFRIEND'.tr()
+                                            : professional.friendRequestSent !=
+                                                    null
+                                                ? 'REQUEST SENT'.tr()
+                                                : 'ADD FRIEND'.tr(),
+                                        onTap: () async {
+                                          if (professional.isFriend != null) {
+                                            showInterestedBloc
+                                                .add(UnfriendsEvent(
+                                                    friendId: professional.id!,
+                                                    onSuccess: (message) {
+                                                      Navigator.pop(context);
+                                                      setState(() {
+                                                        professional.isFriend =
+                                                            null;
+                                                        professional
+                                                                .friendRequestSent =
+                                                            null;
+                                                        widget
+                                                            .refreshPageCallback();
+                                                      });
+                                                      showCustomSnackBar(
+                                                          context: context,
+                                                          message:
+                                                              "Successfully unfriended!",
+                                                          backgroundColor:
+                                                              COLORS
+                                                                  .semanticTwo);
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
                                                         context: context,
                                                         message: message,
-                                                        backgroundColor: COLORS
-                                                            .neutralDarkOne);
-                                                  },
-                                                  onError: (message) {
-                                                    Navigator.pop(context);
-                                                    showCustomSnackBar(
-                                                      context: context,
-                                                      message: message,
-                                                    );
-                                                  },
-                                                ));
-                                              });
-                                            }
-                                          },
-                                        ),
-                                        BottomSheetItem(
-                                            title: professional.isFriend != null ? 'UNFRIEND'.tr() : professional.friendRequestSent != null ? 'REQUEST SENT'.tr() : 'ADD FRIEND'.tr(),
-                                            onTap: () async {
-                                              if (professional.isFriend != null) {
-                                                showInterestedBloc.add(
-                                                    UnfriendsEvent(
-                                                        friendId:
-                                                            professional.id!,
-                                                        onSuccess: (message) {
-                                                          Navigator.pop(context);
-                                                          setState(() {
-                                                            professional
-                                                                    .isFriend =
-                                                                null;
-                                                            professional
-                                                                    .friendRequestSent =
-                                                                null;
-                                                            widget.refreshPageCallback();
-                                                          });
-                                                          showCustomSnackBar(
-                                                              context: context,
-                                                              message:
-                                                                  "Successfully unfriended!",
-                                                              backgroundColor:
-                                                                  COLORS
-                                                                      .semanticTwo);
-                                                        },
-                                                        onError: (message) {
-                                                          showCustomSnackBar(
-                                                            context: context,
-                                                            message: message,
-                                                          );
-                                                        }));
-                                              } else if (professional
-                                                      .friendRequestSent !=
-                                                  null) {
-                                                showInterestedBloc.add(
-                                                    UnSendFriendEvent(
-                                                        userId:
-                                                            professional.id!,
-                                                        onSuccess: (message) {
-                                                          Navigator.pop(context);
-                                                          setState(() {
-                                                            professional.isFriend = null;
-                                                            professional.friendRequestSent = null;
+                                                      );
+                                                    }));
+                                          } else if (professional
+                                                  .friendRequestSent !=
+                                              null) {
+                                            showInterestedBloc
+                                                .add(UnSendFriendEvent(
+                                                    userId: professional.id!,
+                                                    onSuccess: (message) {
+                                                      Navigator.pop(context);
+                                                      setState(() {
+                                                        professional.isFriend =
+                                                            null;
+                                                        professional
+                                                                .friendRequestSent =
+                                                            null;
 
-                                                            widget.refreshPageCallback();
-                                                          });
-                                                          showCustomSnackBar(
-                                                            context: context,
-                                                            message: message,
-                                                            backgroundColor: COLORS.neutralDarkTwo
-                                                          );
-                                                        },
-                                                        onError: (message) {
-                                                          showCustomSnackBar(
-                                                            context: context,
-                                                            message: message,
-                                                          );
-                                                        }));
-                                              } else {
-                                                showInterestedBloc.add(
-                                                    AddFriendEvent(
-                                                        userId:
-                                                            professional.id!,
-                                                        onSuccess: (message) {
-                                                          widget
-                                                              .refreshPageCallback();
-                                                          Navigator.pop(context);
-                                                          setState(() {
-                                                            professional
-                                                                    .friendRequestSent =
-                                                                FriendRequestSent(
-                                                              id: professional
-                                                                  .id,
-                                                            );
-                                                          });
-                                                          showCustomSnackBar(
-                                                              context: context,
-                                                              message: message,
-                                                              backgroundColor: COLORS.neutralDarkTwo
-                                                          );
-                                                        },
-                                                        onError: (message) {
-                                                          showCustomSnackBar(
-                                                            context: context,
-                                                            message: message,
-                                                          );
-                                                        }));
-                                              }
-                                            })
-                                      ]);
+                                                        widget
+                                                            .refreshPageCallback();
+                                                      });
+                                                      showCustomSnackBar(
+                                                          context: context,
+                                                          message: message,
+                                                          backgroundColor: COLORS
+                                                              .neutralDarkTwo);
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    }));
+                                          } else {
+                                            showInterestedBloc
+                                                .add(AddFriendEvent(
+                                                    userId: professional.id!,
+                                                    onSuccess: (message) {
+                                                      widget
+                                                          .refreshPageCallback();
+                                                      Navigator.pop(context);
+                                                      setState(() {
+                                                        professional
+                                                                .friendRequestSent =
+                                                            FriendRequestSent(
+                                                          id: professional.id,
+                                                        );
+                                                      });
+                                                      showCustomSnackBar(
+                                                          context: context,
+                                                          message: message,
+                                                          backgroundColor: COLORS
+                                                              .neutralDarkTwo);
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    }));
+                                          }
+                                        })
+                                  ]);
                                 },
                               ),
                             ]),
@@ -481,8 +517,11 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                               ),
                             ),
                             registerTextCard(
-                                text: professional.professionalSubCategory != null ? getCategoryProfessionCardName(professional.professionalSubCategory) :professional
-                                    .professionType!,
+                                text: professional.professionalSubCategory !=
+                                        null
+                                    ? getCategoryProfessionCardName(
+                                        professional.professionalSubCategory)
+                                    : professional.professionType!,
                                 image: 'assets/images/home/home.png',
                                 color: COLORS.primary,
                                 textColor: COLORS.neutralDark),
@@ -534,7 +573,8 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                     ),
                                     Text(
                                       capitalizeEachWord(
-                                          professional.chargeType!).tr(),
+                                              professional.chargeType!)
+                                          .tr(),
                                       style: TextStyle(
                                         color: COLORS.neutralDarkOne,
                                         fontSize: SizeConfig.blockWidth * 2.8,
@@ -604,7 +644,8 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                   itemBuilder: (context, index) {
                                     var professionalData =
                                         similarProfessionals![index];
-                                    final languages = professionalData?.knownLanguages!
+                                    final languages = professionalData
+                                        ?.knownLanguages!
                                         .map((lang) => lang.tr())
                                         .join(", ");
                                     return Container(
@@ -612,27 +653,34 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                         vertical: SizeConfig.blockWidth * 2,
                                       ),
                                       child: buildProfessionalCard(
-                                          itemID:professionalData.id! ,
+                                          itemID: professionalData.id!,
                                           context: context,
                                           accountVerified:
                                               professionalData!.isVerified!,
                                           image: professionalData!.profilePic!,
                                           name: professionalData!.name!,
-                                          smartControlEnable: isSmartControlEnabled(
+                                          smartControlEnable:
+                                              isSmartControlEnabled(
                                             professionalData.smartCallControl,
                                             professionalData.smartCallSchedule,
                                           ),
-                                          profession:
-                                          professionalData.professionalSubCategory != null ? getCategoryProfessionCardName(professionalData.professionalSubCategory) :professionalData
-                                              .professionType!,
+                                          profession: professionalData
+                                                      .professionalSubCategory !=
+                                                  null
+                                              ? getCategoryProfessionCardName(
+                                                  professionalData
+                                                      .professionalSubCategory)
+                                              : professionalData
+                                                  .professionType!,
                                           location: professionalData.city!,
                                           languages: languages!,
                                           gender: professionalData.gender!,
                                           price: professionalData.charges!,
                                           paymentType:
                                               professionalData.chargeType!,
-                                          contacted: professionalData.isContacted !=
-                                              null,
+                                          contacted:
+                                              professionalData.isContacted !=
+                                                  null,
                                           saved:
                                               professionalData.isSaved != null,
                                           experience: professionalData
@@ -671,7 +719,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                   professionalData.mobile!);
                                             }
                                           },
-                                          messageOnTap: (){
+                                          messageOnTap: () {
                                             chartBloc.add(
                                               StartMessageEvent(
                                                 chatId: professionalData.id!,
@@ -679,15 +727,29 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                      builder: (context) => MultiBlocProvider(
+                                                      builder: (context) =>
+                                                          MultiBlocProvider(
                                                         providers: [
-                                                          BlocProvider(create: (context) => ChartBloc()..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
-                                                          BlocProvider(create: (context) => InitialRegisterBloc()),
-                                                          BlocProvider(create: (context) => ShowInterestedBloc()),
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  ChartBloc()
+                                                                    ..add(FetchChartViewEvent(
+                                                                        page: 1,
+                                                                        pageSize:
+                                                                            10,
+                                                                        chatId:
+                                                                            chatId))),
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  InitialRegisterBloc()),
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  ShowInterestedBloc()),
                                                         ],
                                                         child: ChatViewScreen(
-                                                          refreshPageCallback: (){
-                                                           _refreshPageAfterEdit();
+                                                          refreshPageCallback:
+                                                              () {
+                                                            _refreshPageAfterEdit();
                                                           },
                                                           chatId: chatId,
                                                           isGroup: false,
@@ -697,7 +759,11 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                   );
                                                 },
                                                 onError: (message) {
-                                                  showCustomSnackBar(context: context, message: message, backgroundColor: COLORS.neutralDarkTwo);
+                                                  showCustomSnackBar(
+                                                      context: context,
+                                                      message: message,
+                                                      backgroundColor: COLORS
+                                                          .neutralDarkTwo);
                                                 },
                                               ),
                                             );
@@ -734,7 +800,9 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                                             BlocProvider(
                                                                 create: (context) =>
                                                                     ReportPostBloc()),
-                                                            BlocProvider(create: (context) => ChartBloc())
+                                                            BlocProvider(
+                                                                create: (context) =>
+                                                                    ChartBloc())
                                                           ],
                                                           child:
                                                               ProfessionalViewScreen(
@@ -808,11 +876,13 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                           color: COLORS.neutralDarkTwo,
                           width: SizeConfig.blockWidth * 0.15))),
               child: showContactUsButton(
-                message: smartControlEnabled,
+                  message: smartControlEnabled,
                   contacted: professional.isContacted != null,
                   saved: professional.isSaved != null,
                   buttonText: smartControlEnabled
-                      ? (professional.isContacted != null ? 'CONTACTED' : 'CONTACT')
+                      ? (professional.isContacted != null
+                          ? 'CONTACTED'
+                          : 'CONTACT')
                       : 'Message',
                   onShare: () {
                     shareJobDetails(
@@ -878,8 +948,10 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                                           chatId: chatId,
                                         )),
                                     ),
-                                    BlocProvider(create: (_) => InitialRegisterBloc()),
-                                    BlocProvider(create: (_) => ShowInterestedBloc()),
+                                    BlocProvider(
+                                        create: (_) => InitialRegisterBloc()),
+                                    BlocProvider(
+                                        create: (_) => ShowInterestedBloc()),
                                   ],
                                   child: ChatViewScreen(
                                     refreshPageCallback: _refreshPageAfterEdit,
@@ -923,9 +995,7 @@ class _ProfessionalViewScreenState extends State<ProfessionalViewScreen> {
                         makePhoneCall(professional.mobile!);
                       }
                     }
-                  }
-
-              ),
+                  }),
             ),
           );
         } else if (state is ProfessionalViewError) {

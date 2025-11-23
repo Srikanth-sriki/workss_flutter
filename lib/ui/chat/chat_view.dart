@@ -1854,7 +1854,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   Widget _buildTextInputUI() {
     return Container(
-      height: SizeConfig.blockHeight * 8,
+      constraints: BoxConstraints(
+        minHeight: SizeConfig.blockHeight * 8,
+        maxHeight: SizeConfig.blockHeight * 18, // Max 5 lines approximately
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 3.25),
         color: COLORS.primaryOne.withOpacity(0.35),
@@ -1864,42 +1867,52 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         ),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: TextField(
-              controller: _messageController,
-              style: TextStyle(
-                color: COLORS.neutralDark,
-                fontSize: SizeConfig.blockWidth * 3.25,
-                fontWeight: FontWeight.w400,
-                fontFamily: "Poppins",
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: SizeConfig.blockHeight * 1.5,
+                horizontal: SizeConfig.blockWidth * 3,
               ),
-              cursorColor: COLORS.black,
-              decoration: InputDecoration(
-                fillColor: COLORS.primaryOne.withOpacity(0.05),
-                filled: true,
-                hintText: 'Your message'.tr(),
-                hintStyle: TextStyle(
-                  color: COLORS.neutralDarkOne,
+              child: TextField(
+                controller: _messageController,
+                style: TextStyle(
+                  color: COLORS.neutralDark,
                   fontSize: SizeConfig.blockWidth * 3.25,
                   fontWeight: FontWeight.w400,
                   fontFamily: "Poppins",
                 ),
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(SizeConfig.blockWidth * 3.25),
-                  borderSide: BorderSide.none,
+                cursorColor: COLORS.black,
+                decoration: InputDecoration(
+                  fillColor: Colors.transparent,
+                  filled: false,
+                  hintText: 'Your message'.tr(),
+                  hintStyle: TextStyle(
+                    color: COLORS.neutralDarkOne,
+                    fontSize: SizeConfig.blockWidth * 3.25,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: "Poppins",
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
                 ),
+                maxLines: null,
+                minLines: 1,
+                textInputAction: TextInputAction.newline,
+                onChanged: (text) {
+                  setState(() {}); // Ensure the send button updates correctly
+                },
               ),
-              maxLines: null,
-              minLines: 1,
-              onChanged: (text) {
-                setState(() {}); // Ensure the send button updates correctly
-              },
             ),
           ),
           Padding(
-            padding: EdgeInsets.only(right: SizeConfig.blockWidth * 2.5),
+            padding: EdgeInsets.only(
+              right: SizeConfig.blockWidth * 2.5,
+              // bottom: SizeConfig.blockHeight * 1.5,
+            ),
             child: InkWell(
               onTap: _messageController.text.isEmpty
                   ? _startOrStopRecording

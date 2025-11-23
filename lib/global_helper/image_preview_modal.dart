@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
-void showModernImagePreview(BuildContext context, String url, {required Object heroTag}) {
+void showModernImagePreview(BuildContext context, String url,
+    {required Object heroTag}) {
   Navigator.of(context).push(
     PageRouteBuilder(
       opaque: false,
-      pageBuilder: (_, __, ___) => _ModernImageViewer(url: url, heroTag: heroTag),
+      pageBuilder: (_, __, ___) =>
+          _ModernImageViewer(url: url, heroTag: heroTag),
       transitionsBuilder: (_, anim, __, child) =>
           FadeTransition(opacity: anim, child: child),
     ),
@@ -21,7 +23,8 @@ class _ModernImageViewer extends StatefulWidget {
   State<_ModernImageViewer> createState() => _ModernImageViewerState();
 }
 
-class _ModernImageViewerState extends State<_ModernImageViewer> with SingleTickerProviderStateMixin {
+class _ModernImageViewerState extends State<_ModernImageViewer>
+    with SingleTickerProviderStateMixin {
   double _dragDy = 0.0;
   double _scale = 1.0;
 
@@ -59,12 +62,29 @@ class _ModernImageViewerState extends State<_ModernImageViewer> with SingleTicke
                     child: AnimatedScale(
                       duration: const Duration(milliseconds: 250),
                       scale: _scale,
-                      child: Image.network(
-                        widget.url,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (c, child, p) =>
-                        p == null ? child : const CircularProgressIndicator(),
-                        errorBuilder: (c, e, s) => const Icon(Icons.broken_image, size: 60, color: Colors.white70),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Image.network(
+                            widget.url,
+                            fit: BoxFit.contain,
+                            width: constraints.maxWidth,
+                            height: constraints.maxHeight,
+                            loadingBuilder: (c, child, p) => p == null
+                                ? child
+                                : const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                            errorBuilder: (c, e, s) => const Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                size: 60,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -104,8 +124,6 @@ class _ModernImageViewerState extends State<_ModernImageViewer> with SingleTicke
     );
   }
 }
-
-
 
 void showSimpleImagePreview(BuildContext context, String url) {
   Navigator.of(context).push(
@@ -154,9 +172,6 @@ class _SimpleImageViewerState extends State<_SimpleImageViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final targetWidth = screenWidth * 0.9;
-
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       child: Scaffold(
@@ -170,33 +185,36 @@ class _SimpleImageViewerState extends State<_SimpleImageViewer> {
                   behavior: HitTestBehavior.opaque,
                   onDoubleTapDown: _handleDoubleTapDown,
                   onDoubleTap: () {},
-                  child: InteractiveViewer(
-                    transformationController: _controller,
-                    minScale: 1.0,
-                    maxScale: 4.0,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: targetWidth,
-                      ),
-                      child: Image.network(
-                        widget.url,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (c, child, progress) =>
-                        progress == null
-                            ? child
-                            : const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white70,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return InteractiveViewer(
+                        transformationController: _controller,
+                        minScale: 1.0,
+                        maxScale: 4.0,
+                        child: Image.network(
+                          widget.url,
+                          fit: BoxFit.contain,
+                          width: constraints.maxWidth,
+                          height: constraints.maxHeight,
+                          loadingBuilder: (c, child, progress) =>
+                              progress == null
+                                  ? child
+                                  : const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                          errorBuilder: (c, e, s) => const Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              color: Colors.white70,
+                              size: 60,
+                            ),
                           ),
                         ),
-                        errorBuilder: (c, e, s) => const Icon(
-                          Icons.broken_image,
-                          color: Colors.white70,
-                          size: 60,
-                        ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),

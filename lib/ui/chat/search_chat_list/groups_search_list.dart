@@ -128,12 +128,22 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
         }
       },
       builder: (context, state) {
-        if (state is chartListSearchLoading && currentChartPage == 1 && pageLoaded) {
+        if (state is chartListSearchLoading &&
+            currentChartPage == 1 &&
+            pageLoaded) {
           return SizedBox(
               width: SizeConfig.screenWidth,
-              height: SizeConfig.blockHeight*90,
+              height: SizeConfig.blockHeight * 90,
               child: globalLoadingWidget());
         } else if (state is chartListSearchSuccess) {
+          if (chartSearchList.isEmpty) {
+            return SizedBox(
+              width: SizeConfig.blockWidth * 100,
+              height: SizeConfig.blockHeight * 70,
+              child: emptyComponent(errorText: "No Groups Found"),
+            );
+          }
+
           return ListView.builder(
             controller: _scrollController,
             padding: EdgeInsets.symmetric(
@@ -142,13 +152,6 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
             ),
             itemCount: chartSearchList.length + (isFetchingChartMore ? 1 : 0),
             itemBuilder: (context, index) {
-              if (chartSearchList.isEmpty) {
-                return SizedBox(
-                  width: SizeConfig.blockWidth * 100,
-                  height: SizeConfig.blockHeight * 70,
-                  child: emptyComponent(errorText: "No Chats Found"),
-                );
-              }
               if (index < chartSearchList.length) {
                 final chart = chartSearchList[index];
                 return Column(
@@ -161,11 +164,14 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                       name: chart.name ?? '',
                       disc: chart.description ?? '',
                       bgFriend: true,
-                      added: chart.isRequested != null || chart.isInvited != null,
+                      added:
+                          chart.isRequested != null || chart.isInvited != null,
                       buttonRequired: chart.participantsDetails == null,
-                      sendMessageButtonRequired: chart.participantsDetails != null,
+                      sendMessageButtonRequired:
+                          chart.participantsDetails != null,
                       buttonText2: 'Join Group',
-                      buttonText1: chart.isInvited != null ? 'Invited' : 'Request Sent',
+                      buttonText1:
+                          chart.isInvited != null ? 'Invited' : 'Request Sent',
                       isGroup: true,
                       onTapCard: () {
                         if (chart.participantsDetails != null) {
@@ -174,14 +180,18 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                             MaterialPageRoute(
                               builder: (context) => MultiBlocProvider(
                                 providers: [
-                                  BlocProvider(create: (_) => ChartBloc()
-                                    ..add(FetchChartViewEvent(
-                                      page: 1,
-                                      pageSize: 10,
-                                      chatId: chart.participantsDetails!.chatId!,
-                                    ))),
-                                  BlocProvider(create: (_) => InitialRegisterBloc()),
-                                  BlocProvider(create: (_) => ShowInterestedBloc()),
+                                  BlocProvider(
+                                      create: (_) => ChartBloc()
+                                        ..add(FetchChartViewEvent(
+                                          page: 1,
+                                          pageSize: 10,
+                                          chatId: chart
+                                              .participantsDetails!.chatId!,
+                                        ))),
+                                  BlocProvider(
+                                      create: (_) => InitialRegisterBloc()),
+                                  BlocProvider(
+                                      create: (_) => ShowInterestedBloc()),
                                 ],
                                 child: ChatViewScreen(
                                   refreshPageCallback: _refreshPageAfterEdit,
@@ -192,17 +202,14 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                               ),
                             ),
                           );
-                        }
-                        else {
+                        } else {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      MultiBlocProvider(
+                                  builder: (context) => MultiBlocProvider(
                                           providers: [
                                             BlocProvider(
-                                              create: (context) =>
-                                              ChartBloc()
+                                              create: (context) => ChartBloc()
                                                 ..add(
                                                     FetchChartViewProfileEvent(
                                                         chatId: chart.id!)),
@@ -213,8 +220,9 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                                           ],
                                           child: ChatProfileViewScreen(
                                             refreshPageCallback:
-                                            _refreshPageAfterEdit,
-                                            id: chart.id!, chart: chart,
+                                                _refreshPageAfterEdit,
+                                            id: chart.id!,
+                                            chart: chart,
                                           ))));
                         }
                       },
@@ -225,14 +233,18 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                             MaterialPageRoute(
                               builder: (context) => MultiBlocProvider(
                                 providers: [
-                                  BlocProvider(create: (_) => ChartBloc()
-                                    ..add(FetchChartViewEvent(
-                                      page: 1,
-                                      pageSize: 10,
-                                      chatId: chart.participantsDetails!.chatId!,
-                                    ))),
-                                  BlocProvider(create: (_) => InitialRegisterBloc()),
-                                  BlocProvider(create: (_) => ShowInterestedBloc()),
+                                  BlocProvider(
+                                      create: (_) => ChartBloc()
+                                        ..add(FetchChartViewEvent(
+                                          page: 1,
+                                          pageSize: 10,
+                                          chatId: chart
+                                              .participantsDetails!.chatId!,
+                                        ))),
+                                  BlocProvider(
+                                      create: (_) => InitialRegisterBloc()),
+                                  BlocProvider(
+                                      create: (_) => ShowInterestedBloc()),
                                 ],
                                 child: ChatViewScreen(
                                   refreshPageCallback: _refreshPageAfterEdit,
@@ -243,14 +255,14 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                               ),
                             ),
                           );
-                        }
-                        else if (chart.isInvited != null) {
+                        } else if (chart.isInvited != null) {
                           showInterestedBloc.add(AcceptSendChatEvent(
                             chatId: chart.isInvited!.id!,
                             onSuccess: (message) {
                               setState(() {
                                 chart.isInvited = null;
-                                chart.participantsDetails = IsInvited(chatId: chart.id);
+                                chart.participantsDetails =
+                                    IsInvited(chatId: chart.id);
                               });
                               showCustomSnackBar(
                                 context: context,
@@ -259,7 +271,8 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                               );
                             },
                             onError: (message) {
-                              showCustomSnackBar(context: context, message: message);
+                              showCustomSnackBar(
+                                  context: context, message: message);
                             },
                           ));
                         } else if (chart.isRequested != null) {
@@ -276,7 +289,8 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                               );
                             },
                             onError: (message) {
-                              showCustomSnackBar(context: context, message: message);
+                              showCustomSnackBar(
+                                  context: context, message: message);
                             },
                           ));
                         } else {
@@ -293,7 +307,8 @@ class _GroupChartFriendsScreenState extends State<GroupChartFriendsScreen> {
                               );
                             },
                             onError: (message) {
-                              showCustomSnackBar(context: context, message: message);
+                              showCustomSnackBar(
+                                  context: context, message: message);
                             },
                           ));
                         }
