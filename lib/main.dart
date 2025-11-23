@@ -240,15 +240,15 @@ class _MyAppState extends State<MyApp> {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
+        GlobalKey<ScaffoldMessengerState>();
 
     return OverlaySupport.global(
       child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
-          navigatorKey: navigatorKey,
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        navigatorKey: navigatorKey,
         builder: (context, child) {
           SizeConfig().init(context);
           return NetworkConnectivityOverlay(
@@ -333,8 +333,8 @@ class _MyAppState extends State<MyApp> {
           '/maintenance': (_) => const MaintenanceScreen(),
         },
         scaffoldMessengerKey: rootScaffoldMessengerKey,
-        ),
-      );
+      ),
+    );
   }
 }
 
