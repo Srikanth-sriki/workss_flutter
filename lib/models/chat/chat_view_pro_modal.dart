@@ -122,7 +122,6 @@
 //   };
 // }
 
-
 import 'dart:convert';
 
 ChatViewGroupInfo chatViewGroupInfoFromJson(String str) =>
@@ -141,6 +140,7 @@ class ChatViewGroupInfo {
   List<String> archivedFor;
   List<Participant> participants;
   // ParticipantsDetails? participantsDetails;
+  DateTime? reciverLastSeen;
 
   ChatViewGroupInfo({
     this.id = "",
@@ -151,7 +151,8 @@ class ChatViewGroupInfo {
     this.isGroup = false,
     List<String>? archivedFor,
     List<Participant>? participants,
-    // this.participantsDetails,
+    this.reciverLastSeen,
+    // this.participantsDetails,r
   })  : archivedFor = archivedFor ?? [],
         participants = participants ?? [];
 
@@ -168,26 +169,28 @@ class ChatViewGroupInfo {
             : [],
         participants: json["participants"] != null
             ? List<Participant>.from(
-            json["participants"].map((x) => Participant.fromJson(x)))
+                json["participants"].map((x) => Participant.fromJson(x)))
             : [],
+        reciverLastSeen: json["reciverLastSeen"] != null
+            ? DateTime.parse(json["reciverLastSeen"])
+            : null,
         // participantsDetails: json["participantsDetails"] != null
         //     ? ParticipantsDetails.fromJson(json["participantsDetails"])
         //     : null,
-
       );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "picture": picture,
-    "description": description,
-    "is_group": isGroup,
-    "created_by": createdBy,
-    "archived_for": List<dynamic>.from(archivedFor.map((x) => x)),
-    "participants":
-    List<dynamic>.from(participants.map((x) => x.toJson())),
-    // "participantsDetails": participantsDetails!.toJson(),
-  };
+        "id": id,
+        "name": name,
+        "picture": picture,
+        "description": description,
+        "is_group": isGroup,
+        "created_by": createdBy,
+        "archived_for": List<dynamic>.from(archivedFor.map((x) => x)),
+        "participants": List<dynamic>.from(participants.map((x) => x.toJson())),
+        "reciverLastSeen": reciverLastSeen?.toIso8601String(),
+        // "participantsDetails": participantsDetails!.toJson(),
+      };
 }
 
 class Participant {
@@ -206,20 +209,20 @@ class Participant {
   }) : user = user ?? User();
 
   factory Participant.fromJson(Map<String, dynamic> json) => Participant(
-    id: json["id"] ?? "",
-    chatId: json["chat_id"] ?? "",
-    userId: json["user_id"] ?? "",
-    isAdmin: json["is_admin"] ?? false,
-    user: json["user"] != null ? User.fromJson(json["user"]) : User(),
-  );
+        id: json["id"] ?? "",
+        chatId: json["chat_id"] ?? "",
+        userId: json["user_id"] ?? "",
+        isAdmin: json["is_admin"] ?? false,
+        user: json["user"] != null ? User.fromJson(json["user"]) : User(),
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "chat_id": chatId,
-    "user_id": userId,
-    "is_admin": isAdmin,
-    "user": user.toJson(),
-  };
+        "id": id,
+        "chat_id": chatId,
+        "user_id": userId,
+        "is_admin": isAdmin,
+        "user": user.toJson(),
+      };
 }
 
 class User {
@@ -228,7 +231,7 @@ class User {
   String profilePic;
   String userType;
   String professionType;
-  FriendRequestSent ?isFriend;
+  FriendRequestSent? isFriend;
   FriendRequestSent? friendRequestSent;
 
   User({
@@ -237,32 +240,34 @@ class User {
     this.profilePic = "",
     this.userType = "",
     this.professionType = "",
-     this.isFriend,
-     this.friendRequestSent,
+    this.isFriend,
+    this.friendRequestSent,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json["id"] ?? "",
-    name: json["name"] ?? "",
-    profilePic: json["profile_pic"] ?? "",
-    userType: json["user_type"] ?? "",
-    professionType: json["profession_type"] ?? "",
-    isFriend: json["isFriend"] != null
-        ? FriendRequestSent.fromJson(json["isFriend"]):null,
-    friendRequestSent: json.containsKey('friendRequestSent') && json['friendRequestSent'] != null
-        ?FriendRequestSent.fromJson(json["friendRequestSent"])
-        : null,
-  );
+        id: json["id"] ?? "",
+        name: json["name"] ?? "",
+        profilePic: json["profile_pic"] ?? "",
+        userType: json["user_type"] ?? "",
+        professionType: json["profession_type"] ?? "",
+        isFriend: json["isFriend"] != null
+            ? FriendRequestSent.fromJson(json["isFriend"])
+            : null,
+        friendRequestSent: json.containsKey('friendRequestSent') &&
+                json['friendRequestSent'] != null
+            ? FriendRequestSent.fromJson(json["friendRequestSent"])
+            : null,
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "profile_pic": profilePic,
-    "user_type": userType,
-    "profession_type": professionType,
-    "isFriend": isFriend,
-    "friendRequestSent": friendRequestSent!.toJson(),
-  };
+        "id": id,
+        "name": name,
+        "profile_pic": profilePic,
+        "user_type": userType,
+        "profession_type": professionType,
+        "isFriend": isFriend,
+        "friendRequestSent": friendRequestSent!.toJson(),
+      };
 }
 
 class ParticipantsDetails {
@@ -280,24 +285,23 @@ class ParticipantsDetails {
     required this.user,
   });
 
-  factory ParticipantsDetails.fromJson(Map<String, dynamic> json) => ParticipantsDetails(
-    id: json["id"],
-    chatId: json["chat_id"],
-    userId: json["user_id"],
-    isAdmin: json["is_admin"],
-    user: ParticipantsDetailsUser.fromJson(json["user"]),
-  );
+  factory ParticipantsDetails.fromJson(Map<String, dynamic> json) =>
+      ParticipantsDetails(
+        id: json["id"],
+        chatId: json["chat_id"],
+        userId: json["user_id"],
+        isAdmin: json["is_admin"],
+        user: ParticipantsDetailsUser.fromJson(json["user"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "chat_id": chatId,
-    "user_id": userId,
-    "is_admin": isAdmin,
-    "user": user.toJson(),
-  };
+        "id": id,
+        "chat_id": chatId,
+        "user_id": userId,
+        "is_admin": isAdmin,
+        "user": user.toJson(),
+      };
 }
-
-
 
 class ParticipantsDetailsUser {
   String id;
@@ -314,21 +318,23 @@ class ParticipantsDetailsUser {
     required this.friendRequestSent,
   });
 
-  factory ParticipantsDetailsUser.fromJson(Map<String, dynamic> json) => ParticipantsDetailsUser(
-    id: json["id"],
-    name: json["name"],
-    profilePic: json["profile_pic"],
-    isFriend: FriendRequestSent.fromJson(json["isFriend"]),
-    friendRequestSent: FriendRequestSent.fromJson(json["friendRequestSent"]),
-  );
+  factory ParticipantsDetailsUser.fromJson(Map<String, dynamic> json) =>
+      ParticipantsDetailsUser(
+        id: json["id"],
+        name: json["name"],
+        profilePic: json["profile_pic"],
+        isFriend: FriendRequestSent.fromJson(json["isFriend"]),
+        friendRequestSent:
+            FriendRequestSent.fromJson(json["friendRequestSent"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "name": name,
-    "profile_pic": profilePic,
-    "isFriend": isFriend,
-    "friendRequestSent": friendRequestSent.toJson(),
-  };
+        "id": id,
+        "name": name,
+        "profile_pic": profilePic,
+        "isFriend": isFriend,
+        "friendRequestSent": friendRequestSent.toJson(),
+      };
 }
 
 class FriendRequestSent {
@@ -337,20 +343,21 @@ class FriendRequestSent {
   String? senderId;
 
   FriendRequestSent({
-     this.id,
-     this.userId,
-     this.senderId,
+    this.id,
+    this.userId,
+    this.senderId,
   });
 
-  factory FriendRequestSent.fromJson(Map<String, dynamic> json) => FriendRequestSent(
-    id: json["id"]??"",
-    userId: json["userId"]??"",
-    senderId: json["senderId"]??"",
-  );
+  factory FriendRequestSent.fromJson(Map<String, dynamic> json) =>
+      FriendRequestSent(
+        id: json["id"] ?? "",
+        userId: json["userId"] ?? "",
+        senderId: json["senderId"] ?? "",
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "userId": userId,
-    "senderId": senderId,
-  };
+        "id": id,
+        "userId": userId,
+        "senderId": senderId,
+      };
 }

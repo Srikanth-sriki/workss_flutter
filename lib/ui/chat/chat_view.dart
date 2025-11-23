@@ -1892,6 +1892,30 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   : formatTime(DateTime.now().toString());
             }
 
+            // Check if message is seen by comparing updatedAt with receiverLastSeen
+            bool _isMessageSeen(Message m) {
+              // If message is still sending or failed, it's not seen
+              if (m.messageState == MessageState.sending ||
+                  m.messageState == MessageState.failed) {
+                return false;
+              }
+
+              // If receiverLastSeen is null, message is not seen
+              if (chatViewGroupInfo.reciverLastSeen == null) {
+                return false;
+              }
+
+              // If message updatedAt is null, message is not seen
+              if (m.updatedAt == null) {
+                return false;
+              }
+
+              // Message is seen if updatedAt is less than or equal to receiverLastSeen
+              return m.updatedAt!
+                      .isBefore(chatViewGroupInfo.reciverLastSeen!) ||
+                  m.updatedAt!
+                      .isAtSameMomentAs(chatViewGroupInfo.reciverLastSeen!);
+            }
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1900,7 +1924,7 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                   SendMessage(
                     message: message.content!,
                     key: null,
-                    isSeenByMe: true,
+                    isSeenByMe: _isMessageSeen(message),
                     time: _safeTime(message),
                     audioShow: message.type == 'media' &&
                         message.messageMedia!.isNotEmpty &&
@@ -2221,85 +2245,110 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
   // Helper method to detect and format links in text
   Widget _formatMessageWithLinks(String text) {
-    // Check if text contains Google Maps link
-    if (text.contains('https://') ||
-        text.contains('http://') ||
-        text.contains('www.')) {
+    // Check if text contains phone number (contact format: "Name: ...\nPhone: ...")
+    if (text.contains('Phone:')) {
+      final lines = text.split('\n');
+      String? nameLine;
+      String? phoneLine;
+
+      for (var line in lines) {
+        if (line.trim().startsWith('Name:')) {
+          nameLine = line.trim();
+        } else if (line.trim().startsWith('Phone:')) {
+          phoneLine = line.trim();
+        }
+      }
+
+      if (phoneLine != null) {
+        // Extract phone number after "Phone:"
+        final phoneMatch = RegExp(r'Phone:\s*(.+)').firstMatch(phoneLine);
+        if (phoneMatch != null) {
+          final phoneNumber = phoneMatch.group(1)!.trim();
+          return RichText(
+            text: TextSpan(
+              children: [
+                if (nameLine != null) ...[
+                  TextSpan(
+                    text: nameLine.replaceFirst('Name:', '').trim(),
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.8,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                  TextSpan(text: '\n'),
+                ],
+                TextSpan(
+                  text: phoneNumber,
+                  style: TextStyle(
+                    color: COLORS.primary,
+                    fontSize: SizeConfig.blockWidth * 3.5,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Poppins",
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () async {
+                      // Clean phone number (remove spaces, dashes, etc.)
+                      final cleanPhone =
+                          phoneNumber.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+                      final uri = Uri.parse('tel:$cleanPhone');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        _showErrorSnackBar("Cannot make phone call");
+                      }
+                    },
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
+
+    // Check if text contains URL (location links like Google Maps)
+    final urlRegex = RegExp(
+      r'https?://[^\s]+|www\.[^\s]+',
+      caseSensitive: false,
+    );
+    final urlMatch = urlRegex.firstMatch(text);
+
+    if (urlMatch != null) {
+      final url = urlMatch.group(0)!;
+      // Ensure URL has protocol
+      final fullUrl = url.startsWith('http') ? url : 'https://$url';
+
       return RichText(
         text: TextSpan(
           children: [
-            // TextSpan(
-            //   text: text.split('\n')[0], // Location emoji and text
-            //   style: TextStyle(
-            //     color: COLORS.neutralDark,
-            //     fontSize: SizeConfig.blockWidth * 3.8,
-            //     fontWeight: FontWeight.w400,
-            //     fontFamily: "Poppins",
-            //   ),
-            // ),
-            // TextSpan(text: '\n'),
             TextSpan(
-              text: text, // Google Maps URL
+              text: text,
               style: TextStyle(
                 color: COLORS.primary,
                 fontSize: SizeConfig.blockWidth * 3.5,
                 fontWeight: FontWeight.w500,
                 fontFamily: "Poppins",
-                //decoration: TextDecoration.underline,
               ),
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
-                  final url = text.split('\n')[1];
-                  final uri = Uri.parse(url);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  try {
+                    final uri = Uri.parse(fullUrl);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    } else {
+                      _showErrorSnackBar("Cannot open map");
+                    }
+                  } catch (e) {
+                    debugPrint("Error opening URL: $e");
+                    _showErrorSnackBar("Invalid URL");
                   }
                 },
             ),
           ],
         ),
       );
-    }
-
-    // Check if text contains phone number
-    if (text.contains('Phone:') && text.contains('+')) {
-      final phoneMatch = RegExp(r'\+?[\d\s\-\(\)]+').firstMatch(text);
-      if (phoneMatch != null) {
-        final phoneNumber = phoneMatch.group(0)!.trim();
-        return RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: text.split('\n')[0], // Name
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 3.8,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: "Poppins",
-                ),
-              ),
-              TextSpan(text: '\n'),
-              TextSpan(
-                text: '$phoneNumber',
-                style: TextStyle(
-                  color: COLORS.primary,
-                  fontSize: SizeConfig.blockWidth * 3.5,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: "Poppins",
-                  //decoration: TextDecoration.underline,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () async {
-                    final uri = Uri.parse('tel:$phoneNumber');
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
-                    }
-                  },
-              ),
-            ],
-          ),
-        );
-      }
     }
 
     // Regular text message
