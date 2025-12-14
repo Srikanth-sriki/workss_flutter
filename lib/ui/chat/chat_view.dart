@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,6 +35,8 @@ import '../../helper/network_helper.dart';
 import '../../helper/network_error_handler.dart';
 import '../../models/chat/chat_view_modal.dart';
 import '../../models/chat/chat_view_pro_modal.dart';
+import '../../models/chat/charts_list_modal.dart';
+import '../../models/friends/friends_search_list_modal.dart';
 import '../friends/friends_details.dart';
 import '../profile/notification.dart';
 import 'component.dart';
@@ -90,6 +93,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
   bool sentAudioSent = false;
   late bool isRequestLocal;
   bool _sending = false;
+
+  // Message selection state
+  bool _isSelectionMode = false;
+  Set<String> _selectedMessageIds = {};
 
   @override
   void initState() {
@@ -903,241 +910,475 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                             bottom: BorderSide(
                                 color: COLORS.neutralDarkTwo,
                                 width: SizeConfig.blockHeight * 0.15))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_back_ios,
-                                  color: COLORS.black,
-                                  size: SizeConfig.blockWidth * 4.5),
-                              onPressed: () {
-                                widget.refreshPageCallback();
-                                socket.emit("close_chat", Config.id);
-                                Navigator.pop(context);
-                              },
-                            ),
-                            InkWell(
-                              onTap: () {
-                                if (widget.isGroup) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              MultiBlocProvider(
-                                                  providers: [
-                                                    BlocProvider(
-                                                      create: (context) => ChartBloc()
-                                                        ..add(FetchChartViewProfileEvent(
-                                                            chatId:
-                                                                chatViewGroupInfo
-                                                                    .id!)),
-                                                    ),
-                                                    BlocProvider(
-                                                        create: (context) =>
-                                                            InitialRegisterBloc())
-                                                  ],
-                                                  child: ChatProfileViewScreen(
-                                                    chatViewGroupInfo:
-                                                        chatViewGroupInfo,
-                                                    refreshPageCallback:
-                                                        _refreshPageAfterEdit,
-                                                  ))));
-                                } else {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              MultiBlocProvider(
-                                                providers: [
-                                                  BlocProvider(
-                                                    create: (context) {
-                                                      final bloc =
-                                                          FriendsBloc();
-                                                      bloc.add(
-                                                          FetchFriendsSingleView(
-                                                              friendId:
-                                                                  filteredParticipants[
-                                                                          0]
-                                                                      .userId));
-                                                      return bloc;
-                                                    },
-                                                  ),
-                                                  BlocProvider(
-                                                    create: (context) =>
-                                                        ShowInterestedBloc(),
-                                                  ),
-                                                  BlocProvider(
-                                                      create: (context) =>
-                                                          ReportPostBloc()),
-                                                  BlocProvider(
-                                                      create: (context) =>
-                                                          ShowInterestedBloc()),
-                                                  BlocProvider(
-                                                      create: (context) =>
-                                                          ChartBloc())
-                                                ],
-                                                child: FriendsDetailsScreen(
-                                                  refreshPageCallback:
-                                                      _refreshPageAfterEdit,
-                                                  id: filteredParticipants
-                                                          .isNotEmpty
-                                                      ? filteredParticipants[0]
-                                                          .userId
-                                                      : chatViewGroupInfo
-                                                          .participants[0]
-                                                          .userId,
-                                                ),
-                                              )));
-                                }
-                              },
-                              splashColor: COLORS.white.withOpacity(0.2),
-                              child: Row(
+                    child: _isSelectionMode
+                        ? _buildSelectionAppBar()
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Container(
-                                    width: SizeConfig.blockWidth * 12,
-                                    height: SizeConfig.blockWidth * 12,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: COLORS.primary,
-                                          width: SizeConfig.blockWidth * 0.3,
-                                        ),
-                                        image: (chatViewGroupInfo
-                                                    .picture?.isNotEmpty ??
-                                                false)
-                                            ? DecorationImage(
-                                                image: NetworkImage(
-                                                  chatViewGroupInfo.picture!,
-                                                ),
-                                                fit: BoxFit.cover)
-                                            : null,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(
-                                                SizeConfig.blockWidth * 6))),
+                                  IconButton(
+                                    icon: Icon(Icons.arrow_back_ios,
+                                        color: COLORS.black,
+                                        size: SizeConfig.blockWidth * 4.5),
+                                    onPressed: () {
+                                      widget.refreshPageCallback();
+                                      socket.emit("close_chat", Config.id);
+                                      Navigator.pop(context);
+                                    },
                                   ),
-                                  SizedBox(width: SizeConfig.blockWidth * 2),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        width: SizeConfig.blockWidth * 45,
-                                        child: Text(chatViewGroupInfo.name!,
-                                            style: TextStyle(
-                                              color: COLORS.neutralDark,
-                                              fontSize:
-                                                  SizeConfig.blockWidth * 3.8,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Poppins",
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            maxLines: 1),
-                                      ),
-                                      if (widget.isGroup
-                                          ? (chatViewGroupInfo
-                                                  .description?.isNotEmpty ??
-                                              false)
-                                          : (filteredParticipants.isNotEmpty &&
-                                              filteredParticipants[0]
-                                                  .user
-                                                  .professionType
-                                                  .isNotEmpty))
-                                        SizedBox(
-                                          width: SizeConfig.blockWidth * 45,
-                                          child: Text(
-                                              widget.isGroup
-                                                  ? chatViewGroupInfo
-                                                      .description!
-                                                  : filteredParticipants
-                                                          .isNotEmpty
-                                                      ? filteredParticipants[0]
-                                                          .user
-                                                          .professionType
-                                                      : '',
-                                              style: TextStyle(
-                                                color: COLORS.neutralDarkOne,
-                                                fontSize:
-                                                    SizeConfig.blockWidth *
-                                                        3.25,
-                                                fontWeight: FontWeight.w400,
-                                                fontFamily: "Poppins",
-                                                overflow: TextOverflow.ellipsis,
+                                  InkWell(
+                                    onTap: () {
+                                      if (widget.isGroup) {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MultiBlocProvider(
+                                                        providers: [
+                                                          BlocProvider(
+                                                            create: (context) => ChartBloc()
+                                                              ..add(FetchChartViewProfileEvent(
+                                                                  chatId:
+                                                                      chatViewGroupInfo
+                                                                          .id!)),
+                                                          ),
+                                                          BlocProvider(
+                                                              create: (context) =>
+                                                                  InitialRegisterBloc())
+                                                        ],
+                                                        child:
+                                                            ChatProfileViewScreen(
+                                                          chatViewGroupInfo:
+                                                              chatViewGroupInfo,
+                                                          refreshPageCallback:
+                                                              _refreshPageAfterEdit,
+                                                        ))));
+                                      } else {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MultiBlocProvider(
+                                                      providers: [
+                                                        BlocProvider(
+                                                          create: (context) {
+                                                            final bloc =
+                                                                FriendsBloc();
+                                                            bloc.add(FetchFriendsSingleView(
+                                                                friendId:
+                                                                    filteredParticipants[
+                                                                            0]
+                                                                        .userId));
+                                                            return bloc;
+                                                          },
+                                                        ),
+                                                        BlocProvider(
+                                                          create: (context) =>
+                                                              ShowInterestedBloc(),
+                                                        ),
+                                                        BlocProvider(
+                                                            create: (context) =>
+                                                                ReportPostBloc()),
+                                                        BlocProvider(
+                                                            create: (context) =>
+                                                                ShowInterestedBloc()),
+                                                        BlocProvider(
+                                                            create: (context) =>
+                                                                ChartBloc())
+                                                      ],
+                                                      child:
+                                                          FriendsDetailsScreen(
+                                                        refreshPageCallback:
+                                                            _refreshPageAfterEdit,
+                                                        id: filteredParticipants
+                                                                .isNotEmpty
+                                                            ? filteredParticipants[
+                                                                    0]
+                                                                .userId
+                                                            : chatViewGroupInfo
+                                                                .participants[0]
+                                                                .userId,
+                                                      ),
+                                                    )));
+                                      }
+                                    },
+                                    splashColor: COLORS.white.withOpacity(0.2),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: SizeConfig.blockWidth * 12,
+                                          height: SizeConfig.blockWidth * 12,
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: COLORS.primary,
+                                                width:
+                                                    SizeConfig.blockWidth * 0.3,
                                               ),
-                                              maxLines: 1),
+                                              image: (chatViewGroupInfo.picture
+                                                          ?.isNotEmpty ??
+                                                      false)
+                                                  ? DecorationImage(
+                                                      image: NetworkImage(
+                                                        chatViewGroupInfo
+                                                            .picture!,
+                                                      ),
+                                                      fit: BoxFit.cover)
+                                                  : null,
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(
+                                                      SizeConfig.blockWidth *
+                                                          6))),
                                         ),
-                                    ],
+                                        SizedBox(
+                                            width: SizeConfig.blockWidth * 2),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              width: SizeConfig.blockWidth * 45,
+                                              child: Text(
+                                                  chatViewGroupInfo.name!,
+                                                  style: TextStyle(
+                                                    color: COLORS.neutralDark,
+                                                    fontSize:
+                                                        SizeConfig.blockWidth *
+                                                            3.8,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Poppins",
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  maxLines: 1),
+                                            ),
+                                            if (widget.isGroup
+                                                ? (chatViewGroupInfo.description
+                                                        ?.isNotEmpty ??
+                                                    false)
+                                                : (filteredParticipants
+                                                        .isNotEmpty &&
+                                                    filteredParticipants[0]
+                                                        .user
+                                                        .professionType
+                                                        .isNotEmpty))
+                                              SizedBox(
+                                                width:
+                                                    SizeConfig.blockWidth * 45,
+                                                child: Text(
+                                                    widget.isGroup
+                                                        ? chatViewGroupInfo
+                                                            .description!
+                                                        : filteredParticipants
+                                                                .isNotEmpty
+                                                            ? filteredParticipants[
+                                                                    0]
+                                                                .user
+                                                                .professionType
+                                                            : '',
+                                                    style: TextStyle(
+                                                      color:
+                                                          COLORS.neutralDarkOne,
+                                                      fontSize: SizeConfig
+                                                              .blockWidth *
+                                                          3.25,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontFamily: "Poppins",
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    maxLines: 1),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                        if (!widget.isGroup || isCurrentUserAdmin) ...[
-                          IconButton(
-                            icon: Icon(
-                              Icons.more_vert,
-                              color: COLORS.black,
-                              size: SizeConfig.blockWidth * 6.5,
-                            ),
-                            onPressed: () {
-                              showDynamicBottomSheet(
-                                context,
-                                'Chat Options',
-                                [
-                                  BottomSheetItem(
-                                    title: 'Mute Notification',
-                                    onTap: () => {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  MultiBlocProvider(
-                                                    providers: [
-                                                      BlocProvider(
-                                                        create: (context) =>
-                                                            ProfileBloc()
-                                                              ..add(
-                                                                  const FetchSettingEvent()),
-                                                      ),
-                                                    ],
-                                                    child:
-                                                        const NotificationScreen(),
-                                                  )))
-                                    },
+                              if (!widget.isGroup || isCurrentUserAdmin) ...[
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.more_vert,
+                                    color: COLORS.black,
+                                    size: SizeConfig.blockWidth * 6.5,
                                   ),
-                                  if (widget.isGroup == false &&
-                                      filteredParticipants.isNotEmpty) ...[
-                                    BottomSheetItem(
-                                      title: filteredParticipants[0]
-                                                  .user
-                                                  .isFriend !=
-                                              null
-                                          ? 'Unfriend'.tr()
-                                          : filteredParticipants[0]
+                                  onPressed: () {
+                                    showDynamicBottomSheet(
+                                      context,
+                                      'Chat Options',
+                                      [
+                                        BottomSheetItem(
+                                          title: 'Mute Notification',
+                                          onTap: () => {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MultiBlocProvider(
+                                                          providers: [
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  ProfileBloc()
+                                                                    ..add(
+                                                                        const FetchSettingEvent()),
+                                                            ),
+                                                          ],
+                                                          child:
+                                                              const NotificationScreen(),
+                                                        )))
+                                          },
+                                        ),
+                                        if (widget.isGroup == false &&
+                                            filteredParticipants
+                                                .isNotEmpty) ...[
+                                          BottomSheetItem(
+                                            title: filteredParticipants[0]
+                                                        .user
+                                                        .isFriend !=
+                                                    null
+                                                ? 'Unfriend'.tr()
+                                                : filteredParticipants[0]
+                                                            .user
+                                                            .friendRequestSent !=
+                                                        null
+                                                    ? 'Request Sent'.tr()
+                                                    : 'Add Friend',
+                                            onTap: () => {
+                                              if (filteredParticipants[0]
+                                                      .user
+                                                      .isFriend !=
+                                                  null)
+                                                {
+                                                  showInterestedBloc.add(
+                                                      UnfriendsEvent(
+                                                          friendId:
+                                                              filteredParticipants![
+                                                                      0]
+                                                                  .userId!,
+                                                          onSuccess: (message) {
+                                                            Navigator.pushNamed(
+                                                              context,
+                                                              '/main_screen',
+                                                              arguments: {
+                                                                'selectedIndex':
+                                                                    3
+                                                              },
+                                                            );
+                                                            showCustomSnackBar(
+                                                                context:
+                                                                    context,
+                                                                message:
+                                                                    "Successfully unfriended!",
+                                                                backgroundColor:
+                                                                    COLORS
+                                                                        .semanticTwo);
+                                                            widget
+                                                                .refreshPageCallback();
+                                                          },
+                                                          onError: (message) {
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                            );
+                                                          }))
+                                                }
+                                              else if (filteredParticipants[0]
                                                       .user
                                                       .friendRequestSent !=
-                                                  null
-                                              ? 'Request Sent'.tr()
-                                              : 'Add Friend',
-                                      onTap: () => {
-                                        if (filteredParticipants[0]
-                                                .user
-                                                .isFriend !=
-                                            null)
-                                          {
-                                            showInterestedBloc.add(
-                                                UnfriendsEvent(
-                                                    friendId:
-                                                        filteredParticipants![0]
-                                                            .userId!,
+                                                  null)
+                                                {
+                                                  showInterestedBloc.add(
+                                                      UnSendFriendEvent(
+                                                          userId:
+                                                              filteredParticipants![
+                                                                      0]
+                                                                  .userId!,
+                                                          onSuccess: (message) {
+                                                            setState(() {
+                                                              filteredParticipants[
+                                                                          0]
+                                                                      .user
+                                                                      .isFriend =
+                                                                  null;
+                                                              filteredParticipants[
+                                                                          0]
+                                                                      .user
+                                                                      .friendRequestSent =
+                                                                  null;
+                                                              Navigator
+                                                                  .pushNamed(
+                                                                context,
+                                                                '/main_screen',
+                                                                arguments: {
+                                                                  'selectedIndex':
+                                                                      3
+                                                                },
+                                                              );
+                                                              showCustomSnackBar(
+                                                                  context:
+                                                                      context,
+                                                                  message:
+                                                                      message,
+                                                                  backgroundColor:
+                                                                      COLORS
+                                                                          .semanticTwo);
+                                                              widget
+                                                                  .refreshPageCallback();
+                                                            });
+                                                          },
+                                                          onError: (message) {
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                            );
+                                                          }))
+                                                }
+                                              else
+                                                {
+                                                  showInterestedBloc.add(
+                                                      AddFriendEvent(
+                                                          userId:
+                                                              filteredParticipants![
+                                                                      0]
+                                                                  .userId!,
+                                                          onSuccess: (message) {
+                                                            widget
+                                                                .refreshPageCallback();
+                                                            setState(() {
+                                                              filteredParticipants[
+                                                                          0]
+                                                                      .user
+                                                                      .friendRequestSent =
+                                                                  FriendRequestSent(
+                                                                id: filteredParticipants[
+                                                                        0]
+                                                                    .user
+                                                                    .id,
+                                                              );
+                                                              Navigator
+                                                                  .pushNamed(
+                                                                context,
+                                                                '/main_screen',
+                                                                arguments: {
+                                                                  'selectedIndex':
+                                                                      3
+                                                                },
+                                                              );
+                                                              showCustomSnackBar(
+                                                                  context:
+                                                                      context,
+                                                                  message:
+                                                                      message,
+                                                                  backgroundColor:
+                                                                      COLORS
+                                                                          .semanticTwo);
+                                                              widget
+                                                                  .refreshPageCallback();
+                                                            });
+                                                          },
+                                                          onError: (message) {
+                                                            showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                            );
+                                                          }))
+                                                }
+                                            },
+                                          ),
+                                          BottomSheetItem(
+                                            title: 'Delete Chat',
+                                            onTap: () => {
+                                              showMaterialModalBottomSheet(
+                                                enableDrag: true,
+                                                expand: false,
+                                                isDismissible: true,
+                                                backgroundColor: COLORS.white,
+                                                context: context,
+                                                closeProgressThreshold: 0,
+                                                duration:
+                                                    const Duration(seconds: 0),
+                                                useRootNavigator: true,
+                                                shape:
+                                                    const RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.vertical(
+                                                          top: Radius.circular(
+                                                              20)),
+                                                ),
+                                                builder: (context) =>
+                                                    BlocProvider(
+                                                  create: (context) =>
+                                                      ChartBloc(),
+                                                  child: DeleteGroupModal(
+                                                    buttonText: 'DELETE',
+                                                    header:
+                                                        'Are you sure you want to \n delete the chat?',
+                                                    chatId:
+                                                        chatViewGroupInfo!.id!,
+                                                    isGroup: chatViewGroupInfo!
+                                                        .isGroup,
+                                                  ),
+                                                ),
+                                              ),
+                                            },
+                                          ),
+                                          BottomSheetItem(
+                                            title: 'Report',
+                                            onTap: () async {
+                                              final result =
+                                                  await showMaterialModalBottomSheet(
+                                                      enableDrag: true,
+                                                      expand: false,
+                                                      isDismissible: true,
+                                                      backgroundColor:
+                                                          COLORS.white,
+                                                      closeProgressThreshold: 0,
+                                                      duration: const Duration(
+                                                          seconds: 0),
+                                                      context: context,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.vertical(
+                                                                top: Radius.circular(
+                                                                    SizeConfig
+                                                                            .blockWidth *
+                                                                        6)),
+                                                      ),
+                                                      builder: (context) =>
+                                                          const ReportOrBlockModal(
+                                                            message: '',
+                                                            buttonText:
+                                                                "REPORT",
+                                                            header: 'Report',
+                                                            subText:
+                                                                'Write a reason for report ',
+                                                          ));
+
+                                              if (result != null) {
+                                                setState(() {
+                                                  chartBloc.add(
+                                                      ReportChartGroupEvent(
+                                                    reason: result['message']!,
+                                                    chatId:
+                                                        chatViewGroupInfo.id,
                                                     onSuccess: (message) {
+                                                      showCustomSnackBar(
+                                                          context: context,
+                                                          message: message,
+                                                          backgroundColor: COLORS
+                                                              .neutralDarkOne);
                                                       Navigator.pushNamed(
                                                         context,
                                                         '/main_screen',
@@ -1145,42 +1386,252 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                           'selectedIndex': 3
                                                         },
                                                       );
+                                                    },
+                                                    onError: (message) {
+                                                      Navigator.pop(context);
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    },
+                                                  ));
+                                                });
+                                              }
+                                            },
+                                          ),
+                                          BottomSheetItem(
+                                            title: 'Block',
+                                            onTap: () async {
+                                              final result =
+                                                  await showMaterialModalBottomSheet(
+                                                      enableDrag: true,
+                                                      expand: false,
+                                                      isDismissible: true,
+                                                      backgroundColor:
+                                                          COLORS.white,
+                                                      closeProgressThreshold: 0,
+                                                      duration: const Duration(
+                                                          seconds: 0),
+                                                      context: context,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.vertical(
+                                                                top: Radius.circular(
+                                                                    SizeConfig
+                                                                            .blockWidth *
+                                                                        6)),
+                                                      ),
+                                                      builder: (context) =>
+                                                          const ReportOrBlockModal(
+                                                            message: '',
+                                                            buttonText: "BLOCK",
+                                                            header: 'Block',
+                                                            subText:
+                                                                'Write a reason for block ',
+                                                          ));
+
+                                              if (result != null) {
+                                                setState(() {
+                                                  chartBloc
+                                                      .add(BlocChartGroupEvent(
+                                                    reason: result['message']!,
+                                                    chatId:
+                                                        chatViewGroupInfo.id,
+                                                    onSuccess: (message) {
                                                       showCustomSnackBar(
                                                           context: context,
-                                                          message:
-                                                              "Successfully unfriended!",
-                                                          backgroundColor:
-                                                              COLORS
-                                                                  .semanticTwo);
-                                                      widget
-                                                          .refreshPageCallback();
+                                                          message: message,
+                                                          backgroundColor: COLORS
+                                                              .neutralDarkOne);
+                                                      Navigator.pushNamed(
+                                                        context,
+                                                        '/main_screen',
+                                                        arguments: {
+                                                          'selectedIndex': 3
+                                                        },
+                                                      );
                                                     },
                                                     onError: (message) {
+                                                      Navigator.pop(context);
                                                       showCustomSnackBar(
                                                         context: context,
                                                         message: message,
                                                       );
-                                                    }))
-                                          }
-                                        else if (filteredParticipants[0]
-                                                .user
-                                                .friendRequestSent !=
-                                            null)
-                                          {
-                                            showInterestedBloc.add(
-                                                UnSendFriendEvent(
-                                                    userId:
-                                                        filteredParticipants![0]
-                                                            .userId!,
-                                                    onSuccess: (message) {
-                                                      setState(() {
-                                                        filteredParticipants[0]
-                                                            .user
-                                                            .isFriend = null;
-                                                        filteredParticipants[0]
-                                                                .user
-                                                                .friendRequestSent =
-                                                            null;
+                                                    },
+                                                  ));
+                                                });
+                                              }
+                                            },
+                                          )
+                                        ],
+                                        // if (widget.isGroup && filteredParticipants[0].isAdmin) ...[
+                                        //   BottomSheetItem(
+                                        //     title: 'Invite Friends',
+                                        //     onTap: () => {
+                                        //       Navigator.push(
+                                        //           context,
+                                        //           MaterialPageRoute(
+                                        //               builder: (context) =>
+                                        //                   MultiBlocProvider(
+                                        //                     providers: [
+                                        //                       BlocProvider(
+                                        //                         create: (context) => ChartBloc()
+                                        //                           ..add(InviteMemberChartEvent(
+                                        //                               page: 1,
+                                        //                               pageSize: 10,
+                                        //                               groupId:
+                                        //                                   chatViewGroupInfo
+                                        //                                       .id!,
+                                        //                               keyWord: '')),
+                                        //                       ),
+                                        //                     ],
+                                        //                     child: InviteFriendsList(
+                                        //                       groupId:
+                                        //                           chatViewGroupInfo.id!,
+                                        //                     ),
+                                        //                   )))
+                                        //     },
+                                        //   ),
+                                        //   BottomSheetItem(
+                                        //     title: 'Remove People',
+                                        //     onTap: () => {
+                                        //       Navigator.push(
+                                        //           context,
+                                        //           MaterialPageRoute(
+                                        //               builder: (context) =>
+                                        //                   MultiBlocProvider(
+                                        //                     providers: [
+                                        //                       BlocProvider(
+                                        //                         create: (context) => ChartBloc()
+                                        //                           ..add(FetchChartViewProfileEvent(
+                                        //                               chatId:
+                                        //                                   chatViewGroupInfo
+                                        //                                       .id!)),
+                                        //                       ),
+                                        //                     ],
+                                        //                     child: RemoveFriendsChat(
+                                        //                         chatViewGroupInfo:
+                                        //                             chatViewGroupInfo),
+                                        //                   )))
+                                        //     },
+                                        //   ),
+                                        //   BottomSheetItem(
+                                        //       title: 'Share Joining Link',
+                                        //       onTap: () => {}),
+                                        //   if (chatViewGroupInfo.createdBy ==
+                                        //       Config.id) ...[
+                                        //     BottomSheetItem(
+                                        //       title: 'Delete Group',
+                                        //       onTap: () => {
+                                        //         showMaterialModalBottomSheet(
+                                        //           enableDrag: true,
+                                        //           expand: false,
+                                        //           isDismissible: true,
+                                        //           backgroundColor: COLORS.white,
+                                        //           context: context,
+                                        //           closeProgressThreshold: 0,
+                                        //           duration: const Duration(seconds: 0),
+                                        //           useRootNavigator: true,
+                                        //           shape: const RoundedRectangleBorder(
+                                        //             borderRadius: BorderRadius.vertical(
+                                        //                 top: Radius.circular(20)),
+                                        //           ),
+                                        //           builder: (context) => BlocProvider(
+                                        //             create: (context) => ChartBloc(),
+                                        //             child: DeleteGroupModal(
+                                        //               buttonText: 'DELETE',
+                                        //               header:
+                                        //                   'Are you sure you want to \n delete the group?',
+                                        //               chatId: chatViewGroupInfo!.id!,
+                                        //             ),
+                                        //           ),
+                                        //         ),
+                                        //       },
+                                        //     )
+                                        //   ],
+                                        //   BottomSheetItem(
+                                        //     title: 'Leave Group',
+                                        //     onTap: () => {
+                                        //       if (chatViewGroupInfo.createdBy ==
+                                        //           Config.id)
+                                        //         {
+                                        //           showMaterialModalBottomSheet(
+                                        //             enableDrag: true,
+                                        //             expand: false,
+                                        //             isDismissible: true,
+                                        //             backgroundColor: COLORS.white,
+                                        //             context: context,
+                                        //             closeProgressThreshold: 0,
+                                        //             duration:
+                                        //                 const Duration(seconds: 0),
+                                        //             useRootNavigator: true,
+                                        //             shape: const RoundedRectangleBorder(
+                                        //               borderRadius:
+                                        //                   BorderRadius.vertical(
+                                        //                       top: Radius.circular(20)),
+                                        //             ),
+                                        //             builder: (context) =>
+                                        //                 MarkasAdminModal(
+                                        //               members: chatViewGroupInfo
+                                        //                   .participants!,
+                                        //             ),
+                                        //           ),
+                                        //         }
+                                        //       else
+                                        //         {
+                                        //           chartBloc.add(LeaveGroupChatEvent(
+                                        //               chatId: widget.chatId,
+                                        //               onSuccess: (message) {
+                                        //                 showCustomSnackBar(
+                                        //                     context: context,
+                                        //                     message: message,
+                                        //                     backgroundColor:
+                                        //                         COLORS.neutralDarkTwo);
+                                        //                 Navigator.pushNamed(
+                                        //                   context,
+                                        //                   '/main_screen',
+                                        //                   arguments: {
+                                        //                     'selectedIndex': 3
+                                        //                   },
+                                        //                 );
+                                        //               },
+                                        //               onError: (message) {
+                                        //                 showCustomSnackBar(
+                                        //                   context: context,
+                                        //                   message: message,
+                                        //                 );
+                                        //               }))
+                                        //         }
+                                        //     },
+                                        //   ),
+                                        // ],
+
+                                        // BottomSheetItem(
+                                        //     title: 'Share Joining Link',
+                                        //     onTap: () => {}),
+
+                                        if (widget.isGroup == true &&
+                                            isCurrentUserAdmin) ...[
+                                          BottomSheetItem(
+                                            title: 'Clear Chat',
+                                            onTap: () => {
+                                              showCustomAlertDialog(
+                                                context: context,
+                                                title: 'Are you Sure?',
+                                                message:
+                                                    'Do you want to clear chat',
+                                                positiveButtonText: 'YES',
+                                                negativeButtonText: 'NO',
+                                                onPositivePressed: () {
+                                                  chartBloc.add(ClearChatEvent(
+                                                      chatId: widget.chatId,
+                                                      onSuccess: (message) {
+                                                        showCustomSnackBar(
+                                                            context: context,
+                                                            message: message,
+                                                            backgroundColor: COLORS
+                                                                .neutralDarkTwo);
                                                         Navigator.pushNamed(
                                                           context,
                                                           '/main_screen',
@@ -1188,482 +1639,99 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                                             'selectedIndex': 3
                                                           },
                                                         );
+                                                      },
+                                                      onError: (message) {
                                                         showCustomSnackBar(
-                                                            context: context,
-                                                            message: message,
-                                                            backgroundColor:
-                                                                COLORS
-                                                                    .semanticTwo);
-                                                        widget
-                                                            .refreshPageCallback();
-                                                      });
-                                                    },
-                                                    onError: (message) {
-                                                      showCustomSnackBar(
-                                                        context: context,
-                                                        message: message,
-                                                      );
-                                                    }))
-                                          }
-                                        else
-                                          {
-                                            showInterestedBloc.add(
-                                                AddFriendEvent(
-                                                    userId:
-                                                        filteredParticipants![0]
-                                                            .userId!,
-                                                    onSuccess: (message) {
-                                                      widget
-                                                          .refreshPageCallback();
-                                                      setState(() {
-                                                        filteredParticipants[0]
-                                                                .user
-                                                                .friendRequestSent =
-                                                            FriendRequestSent(
-                                                          id: filteredParticipants[
-                                                                  0]
-                                                              .user
-                                                              .id,
+                                                          context: context,
+                                                          message: message,
                                                         );
-                                                        Navigator.pushNamed(
-                                                          context,
-                                                          '/main_screen',
-                                                          arguments: {
-                                                            'selectedIndex': 3
-                                                          },
-                                                        );
-                                                        showCustomSnackBar(
-                                                            context: context,
-                                                            message: message,
-                                                            backgroundColor:
-                                                                COLORS
-                                                                    .semanticTwo);
-                                                        widget
-                                                            .refreshPageCallback();
-                                                      });
-                                                    },
-                                                    onError: (message) {
-                                                      showCustomSnackBar(
-                                                        context: context,
-                                                        message: message,
-                                                      );
-                                                    }))
-                                          }
-                                      },
-                                    ),
-                                    BottomSheetItem(
-                                      title: 'Delete Chat',
-                                      onTap: () => {
-                                        showMaterialModalBottomSheet(
-                                          enableDrag: true,
-                                          expand: false,
-                                          isDismissible: true,
-                                          backgroundColor: COLORS.white,
-                                          context: context,
-                                          closeProgressThreshold: 0,
-                                          duration: const Duration(seconds: 0),
-                                          useRootNavigator: true,
-                                          shape: const RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.vertical(
-                                                top: Radius.circular(20)),
-                                          ),
-                                          builder: (context) => BlocProvider(
-                                            create: (context) => ChartBloc(),
-                                            child: DeleteGroupModal(
-                                              buttonText: 'DELETE',
-                                              header:
-                                                  'Are you sure you want to \n delete the chat?',
-                                              chatId: chatViewGroupInfo!.id!,
-                                              isGroup:
-                                                  chatViewGroupInfo!.isGroup,
-                                            ),
-                                          ),
-                                        ),
-                                      },
-                                    ),
-                                    BottomSheetItem(
-                                      title: 'Report',
-                                      onTap: () async {
-                                        final result =
-                                            await showMaterialModalBottomSheet(
-                                                enableDrag: true,
-                                                expand: false,
-                                                isDismissible: true,
-                                                backgroundColor: COLORS.white,
-                                                closeProgressThreshold: 0,
-                                                duration:
-                                                    const Duration(seconds: 0),
-                                                context: context,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.vertical(
-                                                          top: Radius.circular(
-                                                              SizeConfig
-                                                                      .blockWidth *
-                                                                  6)),
-                                                ),
-                                                builder: (context) =>
-                                                    const ReportOrBlockModal(
-                                                      message: '',
-                                                      buttonText: "REPORT",
-                                                      header: 'Report',
-                                                      subText:
-                                                          'Write a reason for report ',
-                                                    ));
-
-                                        if (result != null) {
-                                          setState(() {
-                                            chartBloc.add(ReportChartGroupEvent(
-                                              reason: result['message']!,
-                                              chatId: chatViewGroupInfo.id,
-                                              onSuccess: (message) {
-                                                showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                    backgroundColor:
-                                                        COLORS.neutralDarkOne);
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/main_screen',
-                                                  arguments: {
-                                                    'selectedIndex': 3
-                                                  },
-                                                );
-                                              },
-                                              onError: (message) {
-                                                Navigator.pop(context);
-                                                showCustomSnackBar(
-                                                  context: context,
-                                                  message: message,
-                                                );
-                                              },
-                                            ));
-                                          });
-                                        }
-                                      },
-                                    ),
-                                    BottomSheetItem(
-                                      title: 'Block',
-                                      onTap: () async {
-                                        final result =
-                                            await showMaterialModalBottomSheet(
-                                                enableDrag: true,
-                                                expand: false,
-                                                isDismissible: true,
-                                                backgroundColor: COLORS.white,
-                                                closeProgressThreshold: 0,
-                                                duration:
-                                                    const Duration(seconds: 0),
-                                                context: context,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.vertical(
-                                                          top: Radius.circular(
-                                                              SizeConfig
-                                                                      .blockWidth *
-                                                                  6)),
-                                                ),
-                                                builder: (context) =>
-                                                    const ReportOrBlockModal(
-                                                      message: '',
-                                                      buttonText: "BLOCK",
-                                                      header: 'Block',
-                                                      subText:
-                                                          'Write a reason for block ',
-                                                    ));
-
-                                        if (result != null) {
-                                          setState(() {
-                                            chartBloc.add(BlocChartGroupEvent(
-                                              reason: result['message']!,
-                                              chatId: chatViewGroupInfo.id,
-                                              onSuccess: (message) {
-                                                showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                    backgroundColor:
-                                                        COLORS.neutralDarkOne);
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/main_screen',
-                                                  arguments: {
-                                                    'selectedIndex': 3
-                                                  },
-                                                );
-                                              },
-                                              onError: (message) {
-                                                Navigator.pop(context);
-                                                showCustomSnackBar(
-                                                  context: context,
-                                                  message: message,
-                                                );
-                                              },
-                                            ));
-                                          });
-                                        }
-                                      },
-                                    )
-                                  ],
-                                  // if (widget.isGroup && filteredParticipants[0].isAdmin) ...[
-                                  //   BottomSheetItem(
-                                  //     title: 'Invite Friends',
-                                  //     onTap: () => {
-                                  //       Navigator.push(
-                                  //           context,
-                                  //           MaterialPageRoute(
-                                  //               builder: (context) =>
-                                  //                   MultiBlocProvider(
-                                  //                     providers: [
-                                  //                       BlocProvider(
-                                  //                         create: (context) => ChartBloc()
-                                  //                           ..add(InviteMemberChartEvent(
-                                  //                               page: 1,
-                                  //                               pageSize: 10,
-                                  //                               groupId:
-                                  //                                   chatViewGroupInfo
-                                  //                                       .id!,
-                                  //                               keyWord: '')),
-                                  //                       ),
-                                  //                     ],
-                                  //                     child: InviteFriendsList(
-                                  //                       groupId:
-                                  //                           chatViewGroupInfo.id!,
-                                  //                     ),
-                                  //                   )))
-                                  //     },
-                                  //   ),
-                                  //   BottomSheetItem(
-                                  //     title: 'Remove People',
-                                  //     onTap: () => {
-                                  //       Navigator.push(
-                                  //           context,
-                                  //           MaterialPageRoute(
-                                  //               builder: (context) =>
-                                  //                   MultiBlocProvider(
-                                  //                     providers: [
-                                  //                       BlocProvider(
-                                  //                         create: (context) => ChartBloc()
-                                  //                           ..add(FetchChartViewProfileEvent(
-                                  //                               chatId:
-                                  //                                   chatViewGroupInfo
-                                  //                                       .id!)),
-                                  //                       ),
-                                  //                     ],
-                                  //                     child: RemoveFriendsChat(
-                                  //                         chatViewGroupInfo:
-                                  //                             chatViewGroupInfo),
-                                  //                   )))
-                                  //     },
-                                  //   ),
-                                  //   BottomSheetItem(
-                                  //       title: 'Share Joining Link',
-                                  //       onTap: () => {}),
-                                  //   if (chatViewGroupInfo.createdBy ==
-                                  //       Config.id) ...[
-                                  //     BottomSheetItem(
-                                  //       title: 'Delete Group',
-                                  //       onTap: () => {
-                                  //         showMaterialModalBottomSheet(
-                                  //           enableDrag: true,
-                                  //           expand: false,
-                                  //           isDismissible: true,
-                                  //           backgroundColor: COLORS.white,
-                                  //           context: context,
-                                  //           closeProgressThreshold: 0,
-                                  //           duration: const Duration(seconds: 0),
-                                  //           useRootNavigator: true,
-                                  //           shape: const RoundedRectangleBorder(
-                                  //             borderRadius: BorderRadius.vertical(
-                                  //                 top: Radius.circular(20)),
-                                  //           ),
-                                  //           builder: (context) => BlocProvider(
-                                  //             create: (context) => ChartBloc(),
-                                  //             child: DeleteGroupModal(
-                                  //               buttonText: 'DELETE',
-                                  //               header:
-                                  //                   'Are you sure you want to \n delete the group?',
-                                  //               chatId: chatViewGroupInfo!.id!,
-                                  //             ),
-                                  //           ),
-                                  //         ),
-                                  //       },
-                                  //     )
-                                  //   ],
-                                  //   BottomSheetItem(
-                                  //     title: 'Leave Group',
-                                  //     onTap: () => {
-                                  //       if (chatViewGroupInfo.createdBy ==
-                                  //           Config.id)
-                                  //         {
-                                  //           showMaterialModalBottomSheet(
-                                  //             enableDrag: true,
-                                  //             expand: false,
-                                  //             isDismissible: true,
-                                  //             backgroundColor: COLORS.white,
-                                  //             context: context,
-                                  //             closeProgressThreshold: 0,
-                                  //             duration:
-                                  //                 const Duration(seconds: 0),
-                                  //             useRootNavigator: true,
-                                  //             shape: const RoundedRectangleBorder(
-                                  //               borderRadius:
-                                  //                   BorderRadius.vertical(
-                                  //                       top: Radius.circular(20)),
-                                  //             ),
-                                  //             builder: (context) =>
-                                  //                 MarkasAdminModal(
-                                  //               members: chatViewGroupInfo
-                                  //                   .participants!,
-                                  //             ),
-                                  //           ),
-                                  //         }
-                                  //       else
-                                  //         {
-                                  //           chartBloc.add(LeaveGroupChatEvent(
-                                  //               chatId: widget.chatId,
-                                  //               onSuccess: (message) {
-                                  //                 showCustomSnackBar(
-                                  //                     context: context,
-                                  //                     message: message,
-                                  //                     backgroundColor:
-                                  //                         COLORS.neutralDarkTwo);
-                                  //                 Navigator.pushNamed(
-                                  //                   context,
-                                  //                   '/main_screen',
-                                  //                   arguments: {
-                                  //                     'selectedIndex': 3
-                                  //                   },
-                                  //                 );
-                                  //               },
-                                  //               onError: (message) {
-                                  //                 showCustomSnackBar(
-                                  //                   context: context,
-                                  //                   message: message,
-                                  //                 );
-                                  //               }))
-                                  //         }
-                                  //     },
-                                  //   ),
-                                  // ],
-
-                                  // BottomSheetItem(
-                                  //     title: 'Share Joining Link',
-                                  //     onTap: () => {}),
-
-                                  if (widget.isGroup == true &&
-                                      isCurrentUserAdmin) ...[
-                                    BottomSheetItem(
-                                      title: 'Clear Chat',
-                                      onTap: () => {
-                                        showCustomAlertDialog(
-                                          context: context,
-                                          title: 'Are you Sure?',
-                                          message: 'Do you want to clear chat',
-                                          positiveButtonText: 'YES',
-                                          negativeButtonText: 'NO',
-                                          onPositivePressed: () {
-                                            chartBloc.add(ClearChatEvent(
-                                                chatId: widget.chatId,
-                                                onSuccess: (message) {
-                                                  showCustomSnackBar(
-                                                      context: context,
-                                                      message: message,
-                                                      backgroundColor: COLORS
-                                                          .neutralDarkTwo);
-                                                  Navigator.pushNamed(
-                                                    context,
-                                                    '/main_screen',
-                                                    arguments: {
-                                                      'selectedIndex': 3
-                                                    },
-                                                  );
+                                                      }));
                                                 },
-                                                onError: (message) {
-                                                  showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                  );
-                                                }));
-                                          },
-                                          onNegativePressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        )
-                                      },
-                                    ),
-                                    if (chatViewGroupInfo.archivedFor!
-                                        .contains(Config.id)) ...[
-                                      BottomSheetItem(
-                                        title: 'UnArchive',
-                                        onTap: () => {
-                                          chartBloc.add(UnArchiveChatEvent(
-                                              chatId: widget.chatId,
-                                              onSuccess: (message) {
-                                                showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                    backgroundColor:
-                                                        COLORS.neutralDarkTwo);
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/main_screen',
-                                                  arguments: {
-                                                    'selectedIndex': 3
-                                                  },
-                                                );
+                                                onNegativePressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              )
+                                            },
+                                          ),
+                                          if (chatViewGroupInfo.archivedFor!
+                                              .contains(Config.id)) ...[
+                                            BottomSheetItem(
+                                              title: 'UnArchive',
+                                              onTap: () => {
+                                                chartBloc
+                                                    .add(UnArchiveChatEvent(
+                                                        chatId: widget.chatId,
+                                                        onSuccess: (message) {
+                                                          showCustomSnackBar(
+                                                              context: context,
+                                                              message: message,
+                                                              backgroundColor:
+                                                                  COLORS
+                                                                      .neutralDarkTwo);
+                                                          Navigator.pushNamed(
+                                                            context,
+                                                            '/main_screen',
+                                                            arguments: {
+                                                              'selectedIndex': 3
+                                                            },
+                                                          );
+                                                        },
+                                                        onError: (message) {
+                                                          showCustomSnackBar(
+                                                            context: context,
+                                                            message: message,
+                                                          );
+                                                        }))
                                               },
-                                              onError: (message) {
-                                                showCustomSnackBar(
-                                                  context: context,
-                                                  message: message,
-                                                );
-                                              }))
-                                        },
-                                      )
-                                    ] else ...[
-                                      BottomSheetItem(
-                                        title: 'Archive',
-                                        onTap: () => {
-                                          chartBloc.add(ArchiveChatEvent(
-                                              chatId: widget.chatId,
-                                              onSuccess: (message) {
-                                                showCustomSnackBar(
-                                                    context: context,
-                                                    message: message,
-                                                    backgroundColor:
-                                                        COLORS.neutralDarkTwo);
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  '/main_screen',
-                                                  arguments: {
-                                                    'selectedIndex': 3
-                                                  },
-                                                );
+                                            )
+                                          ] else ...[
+                                            BottomSheetItem(
+                                              title: 'Archive',
+                                              onTap: () => {
+                                                chartBloc.add(ArchiveChatEvent(
+                                                    chatId: widget.chatId,
+                                                    onSuccess: (message) {
+                                                      showCustomSnackBar(
+                                                          context: context,
+                                                          message: message,
+                                                          backgroundColor: COLORS
+                                                              .neutralDarkTwo);
+                                                      Navigator.pushNamed(
+                                                        context,
+                                                        '/main_screen',
+                                                        arguments: {
+                                                          'selectedIndex': 3
+                                                        },
+                                                      );
+                                                    },
+                                                    onError: (message) {
+                                                      showCustomSnackBar(
+                                                        context: context,
+                                                        message: message,
+                                                      );
+                                                    }))
                                               },
-                                              onError: (message) {
-                                                showCustomSnackBar(
-                                                  context: context,
-                                                  message: message,
-                                                );
-                                              }))
-                                        },
-                                      )
-                                    ]
-                                  ],
-                                ],
-                              );
-                            },
-                          )
-                        ]
-                      ],
-                    ),
+                                            )
+                                          ]
+                                        ],
+                                      ],
+                                    );
+                                  },
+                                )
+                              ]
+                            ],
+                          ),
                   ),
                   Expanded(
                     child: Padding(
                         padding: EdgeInsets.only(
                           top: SizeConfig.blockHeight * 0.5,
-                          right: SizeConfig.blockWidth * 1.5,
-                          left: SizeConfig.blockWidth * 1.5,
+                          right: _isSelectionMode
+                              ? SizeConfig.blockWidth * 1.5
+                              : SizeConfig.blockWidth * 1.5,
+                          left: _isSelectionMode
+                              ? SizeConfig.blockWidth * 1.5
+                              : SizeConfig.blockWidth * 1.5,
                         ),
                         child: ListView.builder(
                             controller: _scrollController,
@@ -2050,75 +2118,304 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                       .isAtSameMomentAs(chatViewGroupInfo.reciverLastSeen!);
             }
 
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (message.senderId == Config.id) ...[
-                  SendMessage(
-                    message: message.content!,
-                    key: null,
-                    isSeenByMe: _isMessageSeen(message),
-                    time: _safeTime(message),
-                    audioShow: message.type == 'media' &&
-                        message.messageMedia!.isNotEmpty &&
-                        message.messageMedia![0].fileType == "audio",
-                    textShow: message.type == 'text',
-                    imageShow: message.type == 'media' &&
-                        message.messageMedia!.isNotEmpty &&
-                        message.messageMedia![0].fileType == "image",
-                    imageUrl: message.messageMedia!.isNotEmpty
-                        ? message.messageMedia![0].fileUrl!
-                        : '',
-                    messageState: message.messageState,
-                    isUploading: message.isUploading,
-                    onRetry: () => _retryMessage(message),
-                    customTextWidget: _formatMessageWithLinks(message.content!),
-                    audioWidget: WaveBubble(
-                      audioUrl: message.messageMedia!.isNotEmpty
-                          ? message.messageMedia![0].fileUrl!
-                          : '',
-                      isSender: true,
-                      downloaded: sentAudio,
-                      messageState: message.messageState,
-                      isUploading: message.isUploading,
-                      onRetry: () => _retryMessage(message),
+            final isSelected = _selectedMessageIds.contains(message.id);
+
+            return GestureDetector(
+              onLongPress: () {
+                if (!_isSelectionMode) {
+                  setState(() {
+                    _isSelectionMode = true;
+                    _selectedMessageIds.add(message.id);
+                  });
+                }
+              },
+              onTap: () {
+                if (_isSelectionMode) {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedMessageIds.remove(message.id);
+                    } else {
+                      _selectedMessageIds.add(message.id);
+                    }
+                    if (_selectedMessageIds.isEmpty) {
+                      _isSelectionMode = false;
+                    }
+                  });
+                }
+              },
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ClipRect(
+                    child: Container(
+                      width: constraints.maxWidth,
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      decoration: _isSelectionMode && isSelected
+                          ? BoxDecoration(
+                              color: COLORS.primary.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 2),
+                            )
+                          : null,
+                      margin: _isSelectionMode && isSelected
+                          ? EdgeInsets.symmetric(
+                              vertical: SizeConfig.blockHeight * 0.5,
+                            )
+                          : EdgeInsets.zero,
+                      child: message.senderId == Config.id
+                          ? SendMessage(
+                              message: message.content!,
+                              key: null,
+                              isSeenByMe: _isMessageSeen(message),
+                              time: _safeTime(message),
+                              audioShow: message.type == 'media' &&
+                                  message.messageMedia!.isNotEmpty &&
+                                  message.messageMedia![0].fileType == "audio",
+                              textShow: message.type == 'text',
+                              imageShow: message.type == 'media' &&
+                                  message.messageMedia!.isNotEmpty &&
+                                  message.messageMedia![0].fileType == "image",
+                              imageUrl: message.messageMedia!.isNotEmpty
+                                  ? message.messageMedia![0].fileUrl!
+                                  : '',
+                              messageState: message.messageState,
+                              isUploading: message.isUploading,
+                              onRetry: () => _retryMessage(message),
+                              customTextWidget:
+                                  _formatMessageWithLinks(message.content!),
+                              audioWidget: WaveBubble(
+                                audioUrl: message.messageMedia!.isNotEmpty
+                                    ? message.messageMedia![0].fileUrl!
+                                    : '',
+                                isSender: true,
+                                downloaded: sentAudio,
+                                messageState: message.messageState,
+                                isUploading: message.isUploading,
+                                onRetry: () => _retryMessage(message),
+                              ),
+                            )
+                          : (message.sender != null
+                              ? ReceivedMessage(
+                                  message: message.content!,
+                                  key: null,
+                                  isSeenByMe: true,
+                                  time:
+                                      formatTime(message.updatedAt!.toString()),
+                                  audioShow: message.type == 'media' &&
+                                      message.messageMedia!.isNotEmpty &&
+                                      message.messageMedia![0].fileType ==
+                                          "audio",
+                                  textShow: message.type == 'text',
+                                  imageShow: message.type == 'media' &&
+                                      message.messageMedia!.isNotEmpty &&
+                                      message.messageMedia![0].fileType ==
+                                          "image",
+                                  imageUrl: message.messageMedia!.isNotEmpty
+                                      ? message.messageMedia![0].fileUrl!
+                                      : '',
+                                  customTextWidget:
+                                      _formatMessageWithLinks(message.content!),
+                                  audioWidget: WaveBubble(
+                                    audioUrl: message.messageMedia!.isNotEmpty
+                                        ? message.messageMedia![0].fileUrl!
+                                        : '',
+                                    isSender: true,
+                                  ),
+                                  sendName: widget.isGroup == true
+                                      ? message.sender!.name!
+                                      : "")
+                              : const SizedBox.shrink()),
                     ),
-                  )
-                ] else ...[
-                  if (message.sender != null) ...[
-                    ReceivedMessage(
-                        message: message.content!,
-                        key: null,
-                        isSeenByMe: true,
-                        time: formatTime(message.updatedAt!.toString()),
-                        audioShow: message.type == 'media' &&
-                            message.messageMedia!.isNotEmpty &&
-                            message.messageMedia![0].fileType == "audio",
-                        textShow: message.type == 'text',
-                        imageShow: message.type == 'media' &&
-                            message.messageMedia!.isNotEmpty &&
-                            message.messageMedia![0].fileType == "image",
-                        imageUrl: message.messageMedia!.isNotEmpty
-                            ? message.messageMedia![0].fileUrl!
-                            : '',
-                        customTextWidget:
-                            _formatMessageWithLinks(message.content!),
-                        audioWidget: WaveBubble(
-                          audioUrl: message.messageMedia!.isNotEmpty
-                              ? message.messageMedia![0].fileUrl!
-                              : '',
-                          isSender: true,
-                        ),
-                        sendName:
-                            widget.isGroup == true ? message.sender!.name! : "")
-                  ]
-                ],
-              ],
+                  );
+                },
+              ),
             );
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildSelectionAppBar() {
+    return Container(
+      color: COLORS.white,
+      padding: EdgeInsets.only(
+        // top: MediaQuery.of(context).padding.top,
+        bottom: SizeConfig.blockHeight * 0.1,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new_sharp,
+                  color: COLORS.neutralDark,
+                  size: SizeConfig.blockWidth * 4.5,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isSelectionMode = false;
+                    _selectedMessageIds.clear();
+                  });
+                },
+              ),
+              SizedBox(width: SizeConfig.blockWidth * 1),
+              Text(
+                'Selected ${_selectedMessageIds.length}',
+                style: TextStyle(
+                  color: COLORS.primary,
+                  fontSize: SizeConfig.blockWidth * 3.8,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: "Poppins",
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Copy button (only for text messages)
+              // Copy button: Only show if ALL selected messages are text messages
+              if (_hasOnlyTextMessages())
+                IconButton(
+                  icon: Image.asset(
+                    'assets/images/chat/copy.png',
+                    width: SizeConfig.blockWidth * 4.5,
+                    height: SizeConfig.blockWidth * 4.5,
+                    fit: BoxFit.fill,
+                  ),
+                  onPressed: _copySelectedMessages,
+                  padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+                  constraints: BoxConstraints(),
+                ),
+              // Forward button
+              IconButton(
+                icon: Image.asset(
+                  'assets/images/chat/forward.png',
+                  width: SizeConfig.blockWidth * 4.5,
+                  height: SizeConfig.blockWidth * 4.5,
+                  fit: BoxFit.fill,
+                ),
+                onPressed: _forwardSelectedMessages,
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+                constraints: BoxConstraints(),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _hasOnlyTextMessages() {
+    // Only return true if ALL selected messages are text messages
+    // If any selected message is media (audio/image), return false
+    if (_selectedMessageIds.isEmpty) return false;
+
+    bool hasAtLeastOneText = false;
+
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id)) {
+          // If any selected message is media (not text), return false
+          if (message.type != 'text') {
+            return false;
+          }
+          // Check if text message has valid content
+          if (message.content != null && message.content!.isNotEmpty) {
+            hasAtLeastOneText = true;
+          } else {
+            // Empty or null text message, don't allow copy
+            return false;
+          }
+        }
+      }
+    }
+
+    return hasAtLeastOneText; // All selected messages are text with content
+  }
+
+  void _copySelectedMessages() {
+    // Only copy text messages, ignore media messages
+    final textMessages = <String>[];
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id) &&
+            message.type == 'text' &&
+            message.content != null &&
+            message.content!.isNotEmpty) {
+          textMessages.add(message.content!);
+        }
+      }
+    }
+
+    if (textMessages.isNotEmpty) {
+      final textToCopy = textMessages.join('\n');
+      Clipboard.setData(ClipboardData(text: textToCopy));
+      showCustomSnackBar(
+        context: context,
+        message: 'Message${textMessages.length > 1 ? 's' : ''} copied',
+        backgroundColor: COLORS.semanticTwo,
+      );
+      setState(() {
+        _isSelectionMode = false;
+        _selectedMessageIds.clear();
+      });
+    } else {
+      // This shouldn't happen if button visibility is correct, but add safeguard
+      showCustomSnackBar(
+        context: context,
+        message: 'No text messages to copy',
+        backgroundColor: COLORS.neutralDarkOne,
+      );
+    }
+  }
+
+  void _forwardSelectedMessages() {
+    if (_selectedMessageIds.isEmpty) return;
+
+    // Get selected messages
+    final selectedMessages = <Message>[];
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id)) {
+          selectedMessages.add(message);
+        }
+      }
+    }
+
+    if (selectedMessages.isEmpty) return;
+
+    // Navigate to chat selection screen for forwarding
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => FriendsBloc()
+                ..add(
+                    FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: '')),
+            ),
+            BlocProvider(
+              create: (context) => ChartBloc()..add(const ChartListEvent()),
+            ),
+          ],
+          child: _ForwardChatSelectionScreen(
+            messagesToForward: selectedMessages,
+            onForwardComplete: () {
+              setState(() {
+                _isSelectionMode = false;
+                _selectedMessageIds.clear();
+              });
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -2718,5 +3015,384 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
         );
       },
     );
+  }
+}
+
+// Forward Chat Selection Screen
+class _ForwardChatSelectionScreen extends StatefulWidget {
+  final List<Message> messagesToForward;
+  final VoidCallback onForwardComplete;
+
+  const _ForwardChatSelectionScreen({
+    required this.messagesToForward,
+    required this.onForwardComplete,
+  });
+
+  @override
+  State<_ForwardChatSelectionScreen> createState() =>
+      _ForwardChatSelectionScreenState();
+}
+
+class _ForwardChatSelectionScreenState
+    extends State<_ForwardChatSelectionScreen> {
+  late FriendsBloc friendsBloc;
+  late ChartBloc chartBloc;
+  List<Friend> _friends = [];
+  List<ChatList> _chats = [];
+  Set<String> _selectedChatIds = {};
+  Map<String, String> _friendIdToChatId =
+      {}; // Map userId to chatId for existing chats
+
+  @override
+  void initState() {
+    super.initState();
+    friendsBloc = BlocProvider.of<FriendsBloc>(context);
+    chartBloc = BlocProvider.of<ChartBloc>(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: COLORS.white,
+      appBar: AppBar(
+        title: Text(
+          'Forward to',
+          style: TextStyle(
+            color: COLORS.white,
+            fontSize: SizeConfig.blockWidth * 4.5,
+            fontWeight: FontWeight.w500,
+            fontFamily: "Poppins",
+          ),
+        ),
+        backgroundColor: COLORS.primary,
+        iconTheme: IconThemeData(color: COLORS.white),
+        actions: [
+          if (_selectedChatIds.isNotEmpty)
+            Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 2),
+              child: Center(
+                child: TextButton(
+                  onPressed: _forwardMessages,
+                  child: Text(
+                    'Forward',
+                    style: TextStyle(
+                      color: COLORS.white,
+                      fontSize: SizeConfig.blockWidth * 4,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Search bar (WhatsApp style)
+          Container(
+            color: COLORS.primary,
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.blockWidth * 4,
+              vertical: SizeConfig.blockHeight * 1,
+            ),
+            child: Container(
+              height: SizeConfig.blockHeight * 6,
+              decoration: BoxDecoration(
+                color: COLORS.white,
+                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search contacts',
+                  hintStyle: TextStyle(
+                    color: COLORS.neutralDarkOne,
+                    fontSize: SizeConfig.blockWidth * 3.5,
+                    fontFamily: "Poppins",
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: COLORS.neutralDarkOne,
+                    size: SizeConfig.blockWidth * 5,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.blockWidth * 3,
+                    vertical: SizeConfig.blockHeight * 1.5,
+                  ),
+                ),
+                style: TextStyle(
+                  color: COLORS.neutralDark,
+                  fontSize: SizeConfig.blockWidth * 3.8,
+                  fontFamily: "Poppins",
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: MultiBlocListener(
+              listeners: [
+                BlocListener<FriendsBloc, FriendsState>(
+                  listener: (context, state) {
+                    if (state is FriendsListSuccess) {
+                      setState(() {
+                        _friends = state.friendsSearchList;
+                      });
+                    }
+                  },
+                ),
+                BlocListener<ChartBloc, ChartState>(
+                  listener: (context, state) {
+                    if (state is ChartListSuccess) {
+                      setState(() {
+                        _chats = state.chatList;
+                        // Build map of friend userId to chatId for existing individual chats
+                        _friendIdToChatId.clear();
+                        for (var chat in _chats) {
+                          if (chat.isGroup == false &&
+                              chat.chatId != null &&
+                              chat.chatId!.isNotEmpty) {
+                            // For individual chats, we need to match by checking if friend's userId matches
+                            // This will be used when forwarding to check if chat already exists
+                          }
+                        }
+                      });
+                    } else if (state is StartMessageChatFailed) {
+                      // Error handled in callback
+                    }
+                  },
+                ),
+              ],
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  // Friends section
+                  ..._friends.map((friend) {
+                    final friendData = friend.friends;
+                    if (friendData.id.isEmpty) return const SizedBox.shrink();
+                    final userId = friendData.id; // This is userId, not chatId
+                    final isSelected = _selectedChatIds.contains(userId);
+                    return ListTile(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5,
+                        vertical: SizeConfig.blockHeight * 0.5,
+                      ),
+                      leading: CircleAvatar(
+                        radius: SizeConfig.blockWidth * 7,
+                        backgroundImage: friendData.profilePic.isNotEmpty
+                            ? NetworkImage(friendData.profilePic)
+                            : null,
+                        backgroundColor: COLORS.neutralDarkTwo,
+                        child: friendData.profilePic.isEmpty
+                            ? Icon(Icons.person,
+                                color: COLORS.neutralDarkOne,
+                                size: SizeConfig.blockWidth * 6)
+                            : null,
+                      ),
+                      title: Text(
+                        friendData.name,
+                        style: TextStyle(
+                          color: COLORS.neutralDark,
+                          fontSize: SizeConfig.blockWidth * 4,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      trailing: Checkbox(
+                        value: isSelected,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == true) {
+                              _selectedChatIds.add(userId);
+                            } else {
+                              _selectedChatIds.remove(userId);
+                            }
+                          });
+                        },
+                        activeColor: COLORS.primary,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedChatIds.remove(userId);
+                          } else {
+                            _selectedChatIds.add(userId);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                  // Groups section
+                  ..._chats.where((chat) => chat.isGroup == true).map((chat) {
+                    final chatId = chat.chatId ?? '';
+                    if (chatId.isEmpty) return const SizedBox.shrink();
+                    final isSelected = _selectedChatIds.contains(chatId);
+                    return ListTile(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.blockWidth * 4.5,
+                        vertical: SizeConfig.blockHeight * 0.5,
+                      ),
+                      leading: CircleAvatar(
+                        radius: SizeConfig.blockWidth * 7,
+                        backgroundImage: (chat.picture?.isNotEmpty ?? false)
+                            ? NetworkImage(chat.picture!)
+                            : null,
+                        backgroundColor: COLORS.neutralDarkTwo,
+                        child: (chat.picture?.isEmpty ?? true)
+                            ? Icon(Icons.group,
+                                color: COLORS.neutralDarkOne,
+                                size: SizeConfig.blockWidth * 6)
+                            : null,
+                      ),
+                      title: Text(
+                        chat.name ?? 'Group',
+                        style: TextStyle(
+                          color: COLORS.neutralDark,
+                          fontSize: SizeConfig.blockWidth * 4,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      trailing: Checkbox(
+                        value: isSelected,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == true) {
+                              _selectedChatIds.add(chatId);
+                            } else {
+                              _selectedChatIds.remove(chatId);
+                            }
+                          });
+                        },
+                        activeColor: COLORS.primary,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedChatIds.remove(chatId);
+                          } else {
+                            _selectedChatIds.add(chatId);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _forwardMessages() {
+    if (_selectedChatIds.isEmpty) return;
+
+    // Separate friends (userId) from groups/existing chats (chatId)
+    final friendUserIds = <String>[];
+    final existingChatIds = <String>[];
+
+    // Get all existing chatIds from _chats
+    final existingChatIdsSet = _chats
+        .where((chat) => chat.chatId != null && chat.chatId!.isNotEmpty)
+        .map((chat) => chat.chatId!)
+        .toSet();
+
+    for (var selectedId in _selectedChatIds) {
+      if (existingChatIdsSet.contains(selectedId)) {
+        // It's an existing chat (group or individual)
+        existingChatIds.add(selectedId);
+      } else {
+        // It's a friend userId, need to create chat first
+        friendUserIds.add(selectedId);
+      }
+    }
+
+    // Forward to existing chats immediately
+    for (var chatId in existingChatIds) {
+      _forwardToChatId(chatId);
+    }
+
+    // For friends, create chat first, then forward (handled in listener)
+    if (friendUserIds.isNotEmpty) {
+      // Create chats for friends one by one
+      _createChatAndForward(friendUserIds, 0);
+    } else {
+      // All were existing chats, show success message
+      showCustomSnackBar(
+        context: context,
+        message:
+            'Message${widget.messagesToForward.length > 1 ? 's' : ''} forwarded',
+        backgroundColor: COLORS.semanticTwo,
+      );
+      Navigator.pop(context);
+      widget.onForwardComplete();
+    }
+  }
+
+  void _createChatAndForward(List<String> userIds, int index) {
+    if (index >= userIds.length) {
+      // All chats created, show success message
+      showCustomSnackBar(
+        context: context,
+        message:
+            'Message${widget.messagesToForward.length > 1 ? 's' : ''} forwarded',
+        backgroundColor: COLORS.semanticTwo,
+      );
+      Navigator.pop(context);
+      widget.onForwardComplete();
+      return;
+    }
+
+    final userId = userIds[index];
+    // Create chat for this friend
+    chartBloc.add(StartMessageEvent(
+      chatId: userId, // This is actually userId for StartMessageEvent
+      onSuccess: (chatId) {
+        // Forward messages to the created chat
+        _forwardToChatId(chatId);
+        // Create next chat
+        _createChatAndForward(userIds, index + 1);
+      },
+      onError: (message) {
+        showCustomSnackBar(
+          context: context,
+          message: 'Failed to create chat: $message',
+          backgroundColor: COLORS.neutralDarkOne,
+        );
+        // Continue with next friend even if this one failed
+        _createChatAndForward(userIds, index + 1);
+      },
+    ));
+  }
+
+  void _forwardToChatId(String chatId) {
+    // Forward all messages to the given chatId
+    for (var message in widget.messagesToForward) {
+      if (message.type == 'text') {
+        chartBloc.add(ChartSendMessageEvent(
+          chatId: chatId,
+          content: message.content,
+          messageType: 'text',
+          fileName: null,
+          fileUrl: null,
+          fileType: null,
+          fileSize: null,
+        ));
+      } else if (message.type == 'media' && message.messageMedia.isNotEmpty) {
+        final media = message.messageMedia[0];
+        chartBloc.add(ChartSendMessageEvent(
+          chatId: chatId,
+          content: 'media',
+          messageType: 'media',
+          fileName: media.fileName,
+          fileUrl: media.fileUrl,
+          fileType: media.fileType,
+          fileSize: media.fileSize,
+        ));
+      }
+    }
   }
 }

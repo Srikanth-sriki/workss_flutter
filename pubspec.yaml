@@ -198,6 +198,10 @@ flutter:
     - assets/images/home/works_logo.png
     - assets/images/chat/map.png
     - assets/images/chat/contact.png
+    - assets/images/chat/forward.png
+    - assets/images/chat/copy.png
+    - assets/images/chat/edit.png
+    - assets/images/chat/delete.png
 
   #   - images/a_dot_ham.jpeg
 

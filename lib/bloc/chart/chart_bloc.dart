@@ -393,6 +393,7 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String message = jsonDecoded["message"];
         emit(ChartSendMessageSuccess(message: message));
+         customLog("The success reason: $message");
       } else {
         String message = jsonDecoded["message"];
         customLog("The failure reason: $message");

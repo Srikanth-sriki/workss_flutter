@@ -550,7 +550,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                               ),
                             ),
                             SizedBox(
-                              height: SizeConfig.blockHeight * 14.5,
+                              height: SizeConfig.blockHeight * 15,
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: min(_friends.length, 8),
