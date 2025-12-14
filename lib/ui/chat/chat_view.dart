@@ -3400,7 +3400,8 @@ class _ForwardChatSelectionScreenState
                                         color: COLORS.neutralDarkOne,
                                         width: SizeConfig.blockWidth * 0.4,
                                         style: BorderStyle.solid,
-                                        strokeAlign: BorderSide.strokeAlignCenter,
+                                        strokeAlign:
+                                            BorderSide.strokeAlignCenter,
                                       ),
                                     ),
                                   ],
@@ -3515,7 +3516,8 @@ class _ForwardChatSelectionScreenState
                                         color: COLORS.neutralDarkOne,
                                         width: SizeConfig.blockWidth * 0.4,
                                         style: BorderStyle.solid,
-                                        strokeAlign: BorderSide.strokeAlignCenter,
+                                        strokeAlign:
+                                            BorderSide.strokeAlignCenter,
                                       ),
                                     ),
                                   ],
