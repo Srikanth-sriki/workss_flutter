@@ -34,27 +34,23 @@ class _NetworkConnectivityOverlayState
   Future<void> _checkInitialConnection() async {
     setState(() => _isChecking = true);
 
-    // Always do a direct internet check for reliability
+    // Primary check: Use NetworkHelper which has better error handling
     bool hasInternet = false;
     try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 3));
-      hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-      debugPrint("Direct internet check result: $hasInternet");
-    } catch (e) {
-      debugPrint("Direct internet check failed: $e");
-      hasInternet = false;
-    }
-
-    // Also check using NetworkHelper for additional validation
-    try {
-      final helperResult = await NetworkHelper.hasInternetConnection();
-      debugPrint("NetworkHelper check result: $helperResult");
-      // Use the more conservative result (if either says no, show as disconnected)
-      hasInternet = hasInternet && helperResult;
+      hasInternet = await NetworkHelper.hasInternetConnection();
+      debugPrint("NetworkHelper check result: $hasInternet");
     } catch (e) {
       debugPrint("NetworkHelper check error: $e");
-      // If helper fails, rely on direct check result
+      // If NetworkHelper fails, try direct check as fallback
+      try {
+        final result = await InternetAddress.lookup('8.8.8.8')
+            .timeout(const Duration(seconds: 5));
+        hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+        debugPrint("Fallback DNS check result: $hasInternet");
+      } catch (e2) {
+        debugPrint("Fallback DNS check failed: $e2");
+        hasInternet = false;
+      }
     }
 
     if (mounted) {
@@ -75,23 +71,19 @@ class _NetworkConnectivityOverlayState
             // Debounce: Wait a bit before checking to avoid rapid changes
             await Future.delayed(Duration(milliseconds: 500));
 
-            // Always do direct check for reliability
+            // Primary check: Use NetworkHelper
             bool hasInternet = false;
             try {
-              final result = await InternetAddress.lookup('google.com')
-                  .timeout(const Duration(seconds: 2));
-              hasInternet =
-                  result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+              hasInternet = await NetworkHelper.hasInternetConnection();
             } catch (e) {
-              hasInternet = false;
-            }
-
-            // Also check using NetworkHelper
-            try {
-              final helperResult = await NetworkHelper.hasInternetConnection();
-              hasInternet = hasInternet && helperResult; // Both must be true
-            } catch (e) {
-              // If helper fails, rely on direct check
+              // If NetworkHelper fails, try direct check as fallback
+              try {
+                final result = await InternetAddress.lookup('8.8.8.8')
+                    .timeout(const Duration(seconds: 5));
+                hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+              } catch (e2) {
+                hasInternet = false;
+              }
             }
 
             debugPrint("Network status changed: $hasInternet");
@@ -120,12 +112,10 @@ class _NetworkConnectivityOverlayState
     }
   }
 
-  /// Check connection directly using internet lookup
+  /// Check connection directly using NetworkHelper
   Future<void> _checkConnectionDirectly() async {
     try {
-      final result = await InternetAddress.lookup('google.com')
-          .timeout(const Duration(seconds: 2));
-      final hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+      final hasInternet = await NetworkHelper.hasInternetConnection();
       if (mounted) {
         setState(() {
           _isConnected = hasInternet;
@@ -133,10 +123,22 @@ class _NetworkConnectivityOverlayState
       }
     } catch (e) {
       debugPrint("Direct connection check failed: $e");
-      if (mounted) {
-        setState(() {
-          _isConnected = false; // Show as disconnected
-        });
+      // Try fallback DNS check
+      try {
+        final result = await InternetAddress.lookup('8.8.8.8')
+            .timeout(const Duration(seconds: 5));
+        final hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+        if (mounted) {
+          setState(() {
+            _isConnected = hasInternet;
+          });
+        }
+      } catch (e2) {
+        if (mounted) {
+          setState(() {
+            _isConnected = false; // Show as disconnected
+          });
+        }
       }
     }
   }
@@ -240,24 +242,19 @@ class _NetworkConnectivityOverlayState
                         setState(() => _isChecking = true);
                         await Future.delayed(Duration(milliseconds: 500));
 
-                        // Use same reliable check as initial connection
+                        // Use NetworkHelper as primary check
                         bool hasInternet = false;
                         try {
-                          final result =
-                              await InternetAddress.lookup('google.com')
-                                  .timeout(const Duration(seconds: 3));
-                          hasInternet = result.isNotEmpty &&
-                              result[0].rawAddress.isNotEmpty;
+                          hasInternet = await NetworkHelper.hasInternetConnection();
                         } catch (e) {
-                          hasInternet = false;
-                        }
-
-                        try {
-                          final helperResult =
-                              await NetworkHelper.hasInternetConnection();
-                          hasInternet = hasInternet && helperResult;
-                        } catch (e) {
-                          // Rely on direct check result
+                          // If NetworkHelper fails, try direct check as fallback
+                          try {
+                            final result = await InternetAddress.lookup('8.8.8.8')
+                                .timeout(const Duration(seconds: 5));
+                            hasInternet = result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+                          } catch (e2) {
+                            hasInternet = false;
+                          }
                         }
 
                         if (mounted) {

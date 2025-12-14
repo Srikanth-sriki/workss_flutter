@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
@@ -3039,15 +3040,56 @@ class _ForwardChatSelectionScreenState
   late ChartBloc chartBloc;
   List<Friend> _friends = [];
   List<ChatList> _chats = [];
+  List<Friend> _filteredFriends = [];
+  List<ChatList> _filteredChats = [];
   Set<String> _selectedChatIds = {};
   Map<String, String> _friendIdToChatId =
       {}; // Map userId to chatId for existing chats
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  String _searchKeyword = '';
 
   @override
   void initState() {
     super.initState();
     friendsBloc = BlocProvider.of<FriendsBloc>(context);
     chartBloc = BlocProvider.of<ChartBloc>(context);
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _searchKeyword = _searchController.text.toLowerCase().trim();
+        _filterResults();
+      });
+    });
+  }
+
+  void _filterResults() {
+    if (_searchKeyword.isEmpty) {
+      _filteredFriends = _friends;
+      _filteredChats = _chats.where((chat) => chat.isGroup == true).toList();
+    } else {
+      _filteredFriends = _friends.where((friend) {
+        final name = friend.friends.name.toLowerCase();
+        return name.contains(_searchKeyword);
+      }).toList();
+
+      _filteredChats = _chats.where((chat) {
+        if (chat.isGroup != true) return false;
+        final name = (chat.name ?? '').toLowerCase();
+        return name.contains(_searchKeyword);
+      }).toList();
+    }
   }
 
   @override
@@ -3056,7 +3098,7 @@ class _ForwardChatSelectionScreenState
       backgroundColor: COLORS.white,
       appBar: AppBar(
         title: Text(
-          'Forward to',
+          'Forward to...',
           style: TextStyle(
             color: COLORS.white,
             fontSize: SizeConfig.blockWidth * 4.5,
@@ -3079,7 +3121,7 @@ class _ForwardChatSelectionScreenState
                     style: TextStyle(
                       color: COLORS.white,
                       fontSize: SizeConfig.blockWidth * 4,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       fontFamily: "Poppins",
                     ),
                   ),
@@ -3090,45 +3132,70 @@ class _ForwardChatSelectionScreenState
       ),
       body: Column(
         children: [
-          // Search bar (WhatsApp style)
-          Container(
-            color: COLORS.primary,
-            padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.blockWidth * 4,
-              vertical: SizeConfig.blockHeight * 1,
-            ),
-            child: Container(
-              height: SizeConfig.blockHeight * 6,
-              decoration: BoxDecoration(
-                color: COLORS.white,
-                borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2),
+          Padding(
+            padding: EdgeInsets.only(
+                left: SizeConfig.blockWidth * 4.5,
+                top: SizeConfig.blockHeight * 1,
+                right: SizeConfig.blockWidth * 4.5,
+                bottom: SizeConfig.blockHeight * 0.5),
+            child: TextField(
+              controller: _searchController,
+              style: TextStyle(
+                color: COLORS.neutralDarkOne,
+                fontSize: SizeConfig.blockWidth * 3.25,
+                fontWeight: FontWeight.w400,
+                fontFamily: "Poppins",
               ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search contacts',
-                  hintStyle: TextStyle(
-                    color: COLORS.neutralDarkOne,
-                    fontSize: SizeConfig.blockWidth * 3.5,
-                    fontFamily: "Poppins",
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: COLORS.neutralDarkOne,
-                    size: SizeConfig.blockWidth * 5,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.blockWidth * 3,
-                    vertical: SizeConfig.blockHeight * 1.5,
-                  ),
-                ),
-                style: TextStyle(
-                  color: COLORS.neutralDark,
-                  fontSize: SizeConfig.blockWidth * 3.8,
+              cursorColor: COLORS.black,
+              decoration: InputDecoration(
+                fillColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                focusColor: COLORS.neutralDarkTwo.withOpacity(0.6),
+                filled: true,
+                hintText: 'Search by name'.tr(),
+                hintStyle: TextStyle(
+                  color: COLORS.neutralDarkOne,
+                  fontSize: SizeConfig.blockWidth * 3.25,
+                  fontWeight: FontWeight.w400,
                   fontFamily: "Poppins",
                 ),
+                prefixIcon: Padding(
+                  padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                  child: Image.asset(
+                    'assets/images/home/search.png',
+                    width: SizeConfig.blockWidth * 3.5,
+                    height: SizeConfig.blockWidth * 3.5,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                  borderSide: BorderSide(
+                      color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      width: SizeConfig.blockWidth * 0.1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                  borderSide: BorderSide(
+                      color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      width: SizeConfig.blockWidth * 0.1),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 3.25),
+                  borderSide: BorderSide(
+                      color: COLORS.neutralDarkTwo.withOpacity(0.6),
+                      width: SizeConfig.blockWidth * 0.1),
+                ),
               ),
+              onChanged: (value) {
+                setState(() {}); // Trigger rebuild to show/hide clear button
+              },
             ),
+          ),
+          const Divider(
+            color: COLORS.neutralDarkTwo,
           ),
           Expanded(
             child: MultiBlocListener(
@@ -3138,6 +3205,7 @@ class _ForwardChatSelectionScreenState
                     if (state is FriendsListSuccess) {
                       setState(() {
                         _friends = state.friendsSearchList;
+                        _filterResults();
                       });
                     }
                   },
@@ -3157,6 +3225,7 @@ class _ForwardChatSelectionScreenState
                             // This will be used when forwarding to check if chat already exists
                           }
                         }
+                        _filterResults();
                       });
                     } else if (state is StartMessageChatFailed) {
                       // Error handled in callback
@@ -3164,122 +3233,299 @@ class _ForwardChatSelectionScreenState
                   },
                 ),
               ],
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  // Friends section
-                  ..._friends.map((friend) {
-                    final friendData = friend.friends;
-                    if (friendData.id.isEmpty) return const SizedBox.shrink();
-                    final userId = friendData.id; // This is userId, not chatId
-                    final isSelected = _selectedChatIds.contains(userId);
-                    return ListTile(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: SizeConfig.blockWidth * 4.5,
-                        vertical: SizeConfig.blockHeight * 0.5,
-                      ),
-                      leading: CircleAvatar(
-                        radius: SizeConfig.blockWidth * 7,
-                        backgroundImage: friendData.profilePic.isNotEmpty
-                            ? NetworkImage(friendData.profilePic)
-                            : null,
-                        backgroundColor: COLORS.neutralDarkTwo,
-                        child: friendData.profilePic.isEmpty
-                            ? Icon(Icons.person,
+              child: _filteredFriends.isEmpty &&
+                      _filteredChats.isEmpty &&
+                      _searchKeyword.isNotEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(SizeConfig.blockWidth * 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: SizeConfig.blockWidth * 15,
+                              color: COLORS.neutralDarkOne,
+                            ),
+                            SizedBox(height: SizeConfig.blockHeight * 2),
+                            Text(
+                              'No results found',
+                              style: TextStyle(
                                 color: COLORS.neutralDarkOne,
-                                size: SizeConfig.blockWidth * 6)
-                            : null,
-                      ),
-                      title: Text(
-                        friendData.name,
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 4,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
+                                fontSize: SizeConfig.blockWidth * 4,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      trailing: Checkbox(
-                        value: isSelected,
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == true) {
-                              _selectedChatIds.add(userId);
-                            } else {
-                              _selectedChatIds.remove(userId);
-                            }
-                          });
-                        },
-                        activeColor: COLORS.primary,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            _selectedChatIds.remove(userId);
-                          } else {
-                            _selectedChatIds.add(userId);
-                          }
-                        });
-                      },
-                    );
-                  }),
-                  // Groups section
-                  ..._chats.where((chat) => chat.isGroup == true).map((chat) {
-                    final chatId = chat.chatId ?? '';
-                    if (chatId.isEmpty) return const SizedBox.shrink();
-                    final isSelected = _selectedChatIds.contains(chatId);
-                    return ListTile(
-                      contentPadding: EdgeInsets.symmetric(
+                    )
+                  : ListView(
+                      padding: EdgeInsets.symmetric(
                         horizontal: SizeConfig.blockWidth * 4.5,
-                        vertical: SizeConfig.blockHeight * 0.5,
+                        vertical: SizeConfig.blockHeight * 1,
                       ),
-                      leading: CircleAvatar(
-                        radius: SizeConfig.blockWidth * 7,
-                        backgroundImage: (chat.picture?.isNotEmpty ?? false)
-                            ? NetworkImage(chat.picture!)
-                            : null,
-                        backgroundColor: COLORS.neutralDarkTwo,
-                        child: (chat.picture?.isEmpty ?? true)
-                            ? Icon(Icons.group,
-                                color: COLORS.neutralDarkOne,
-                                size: SizeConfig.blockWidth * 6)
-                            : null,
-                      ),
-                      title: Text(
-                        chat.name ?? 'Group',
-                        style: TextStyle(
-                          color: COLORS.neutralDark,
-                          fontSize: SizeConfig.blockWidth * 4,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: "Poppins",
-                        ),
-                      ),
-                      trailing: Checkbox(
-                        value: isSelected,
-                        onChanged: (value) {
-                          setState(() {
-                            if (value == true) {
-                              _selectedChatIds.add(chatId);
-                            } else {
-                              _selectedChatIds.remove(chatId);
-                            }
-                          });
-                        },
-                        activeColor: COLORS.primary,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            _selectedChatIds.remove(chatId);
-                          } else {
-                            _selectedChatIds.add(chatId);
-                          }
-                        });
-                      },
-                    );
-                  }),
-                ],
-              ),
+                      children: [
+                        // Friends section
+                        if (_filteredFriends.isNotEmpty) ...[
+                          if (_searchKeyword.isEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                bottom: SizeConfig.blockHeight * 1,
+                                top: SizeConfig.blockHeight * 0.5,
+                              ),
+                              child: Text(
+                                'Chats'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 3.5,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ),
+                          ..._filteredFriends.map((friend) {
+                            final friendData = friend.friends;
+                            if (friendData.id.isEmpty)
+                              return const SizedBox.shrink();
+                            final userId =
+                                friendData.id; // This is userId, not chatId
+                            final isSelected =
+                                _selectedChatIds.contains(userId);
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  if (isSelected) {
+                                    _selectedChatIds.remove(userId);
+                                  } else {
+                                    _selectedChatIds.add(userId);
+                                  }
+                                });
+                              },
+                              splashColor: COLORS.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 3.5),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 4,
+                                  vertical: SizeConfig.blockHeight * 1.5,
+                                ),
+                                margin: EdgeInsets.only(
+                                    bottom: SizeConfig.blockHeight * 1),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 3.5),
+                                  color: COLORS.primaryOne.withOpacity(0.1),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: SizeConfig.blockWidth * 14,
+                                      height: SizeConfig.blockWidth * 14,
+                                      decoration: BoxDecoration(
+                                        image: friendData.profilePic.isNotEmpty
+                                            ? DecorationImage(
+                                                image: NetworkImage(
+                                                    friendData.profilePic),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null,
+                                        color: friendData.profilePic.isEmpty
+                                            ? COLORS.neutralDarkTwo
+                                            : null,
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 7),
+                                      ),
+                                      child: friendData.profilePic.isEmpty
+                                          ? Icon(
+                                              Icons.person,
+                                              color: COLORS.neutralDarkOne,
+                                              size: SizeConfig.blockWidth * 7,
+                                            )
+                                          : null,
+                                    ),
+                                    SizedBox(width: SizeConfig.blockWidth * 3),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            friendData.name,
+                                            style: TextStyle(
+                                              color: COLORS.neutralDark,
+                                              fontSize:
+                                                  SizeConfig.blockWidth * 3.8,
+                                              fontWeight: FontWeight.w400,
+                                              fontFamily: "Poppins",
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          if (friendData
+                                              .professionType.isNotEmpty) ...[
+                                            SizedBox(
+                                                height: SizeConfig.blockHeight *
+                                                    0.3),
+                                            Text(
+                                              friendData.professionType,
+                                              style: TextStyle(
+                                                color: COLORS.neutralDarkOne,
+                                                fontSize:
+                                                    SizeConfig.blockWidth * 3.2,
+                                                fontWeight: FontWeight.w400,
+                                                fontFamily: "Poppins",
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                    Checkbox(
+                                      value: isSelected,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          if (value == true) {
+                                            _selectedChatIds.add(userId);
+                                          } else {
+                                            _selectedChatIds.remove(userId);
+                                          }
+                                        });
+                                      },
+                                      activeColor: COLORS.primary,
+                                      side: BorderSide(
+                                        color: COLORS.neutralDarkOne,
+                                        width: SizeConfig.blockWidth * 0.4,
+                                        style: BorderStyle.solid,
+                                        strokeAlign: BorderSide.strokeAlignCenter,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                        // Groups section
+                        if (_filteredChats.isNotEmpty) ...[
+                          if (_searchKeyword.isEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                bottom: SizeConfig.blockHeight * 1,
+                                top: SizeConfig.blockHeight * 1,
+                              ),
+                              child: Text(
+                                'Groups'.tr(),
+                                style: TextStyle(
+                                  color: COLORS.neutralDarkOne,
+                                  fontSize: SizeConfig.blockWidth * 3.5,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: "Poppins",
+                                ),
+                              ),
+                            ),
+                          ..._filteredChats.map((chat) {
+                            final chatId = chat.chatId ?? '';
+                            if (chatId.isEmpty) return const SizedBox.shrink();
+                            final isSelected =
+                                _selectedChatIds.contains(chatId);
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  if (isSelected) {
+                                    _selectedChatIds.remove(chatId);
+                                  } else {
+                                    _selectedChatIds.add(chatId);
+                                  }
+                                });
+                              },
+                              splashColor: COLORS.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 3.5),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 4,
+                                  vertical: SizeConfig.blockHeight * 1.5,
+                                ),
+                                margin: EdgeInsets.only(
+                                    bottom: SizeConfig.blockHeight * 1),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      SizeConfig.blockWidth * 3.5),
+                                  color: COLORS.primaryOne.withOpacity(0.1),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: SizeConfig.blockWidth * 14,
+                                      height: SizeConfig.blockWidth * 14,
+                                      decoration: BoxDecoration(
+                                        image: (chat.picture?.isNotEmpty ??
+                                                false)
+                                            ? DecorationImage(
+                                                image:
+                                                    NetworkImage(chat.picture!),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null,
+                                        color: (chat.picture?.isEmpty ?? true)
+                                            ? COLORS.neutralDarkTwo
+                                            : null,
+                                        borderRadius: BorderRadius.circular(
+                                            SizeConfig.blockWidth * 7),
+                                      ),
+                                      child: (chat.picture?.isEmpty ?? true)
+                                          ? Icon(
+                                              Icons.group,
+                                              color: COLORS.neutralDarkOne,
+                                              size: SizeConfig.blockWidth * 7,
+                                            )
+                                          : null,
+                                    ),
+                                    SizedBox(width: SizeConfig.blockWidth * 3),
+                                    Expanded(
+                                      child: Text(
+                                        chat.name ?? 'Group',
+                                        style: TextStyle(
+                                          color: COLORS.neutralDark,
+                                          fontSize: SizeConfig.blockWidth * 3.8,
+                                          fontWeight: FontWeight.w400,
+                                          fontFamily: "Poppins",
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Checkbox(
+                                      value: isSelected,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          if (value == true) {
+                                            _selectedChatIds.add(chatId);
+                                          } else {
+                                            _selectedChatIds.remove(chatId);
+                                          }
+                                        });
+                                      },
+                                      activeColor: COLORS.primary,
+                                      side: BorderSide(
+                                        color: COLORS.neutralDarkOne,
+                                        width: SizeConfig.blockWidth * 0.4,
+                                        style: BorderStyle.solid,
+                                        strokeAlign: BorderSide.strokeAlignCenter,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      ],
+                    ),
             ),
           ),
         ],

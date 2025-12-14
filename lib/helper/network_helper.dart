@@ -19,10 +19,27 @@ class NetworkHelper {
       }
 
       // Check if we can actually reach the internet
+      // Try multiple methods for better reliability
       try {
-        final result = await InternetAddress.lookup('google.com')
-            .timeout(const Duration(seconds: 5));
-        return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+        // First try: DNS lookup to Google DNS (more reliable than domain lookup)
+        try {
+          final result = await InternetAddress.lookup('8.8.8.8')
+              .timeout(const Duration(seconds: 5));
+          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+            return true;
+          }
+        } catch (e) {
+          // If DNS lookup fails, continue to domain lookup
+        }
+        
+        // Fallback: Try domain lookup
+        try {
+          final result = await InternetAddress.lookup('google.com')
+              .timeout(const Duration(seconds: 5));
+          return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+        } catch (e2) {
+          return false;
+        }
       } catch (e) {
         return false;
       }
@@ -31,9 +48,27 @@ class NetworkHelper {
       debugPrint("Error checking connectivity: $e");
       // If plugin is not available, try direct internet check
       try {
-        final result = await InternetAddress.lookup('google.com')
-            .timeout(const Duration(seconds: 3));
-        return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+        // Try Google DNS first (more reliable)
+        try {
+          final result = await InternetAddress.lookup('8.8.8.8')
+              .timeout(const Duration(seconds: 5));
+          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+            return true;
+          }
+        } catch (e) {
+          // Fallback to domain lookup
+        }
+        
+        // Fallback: Try domain lookup
+        try {
+          final result = await InternetAddress.lookup('google.com')
+              .timeout(const Duration(seconds: 5));
+          return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+        } catch (e2) {
+          debugPrint("Direct internet check also failed: $e2");
+          // Default to true to avoid blocking the app if plugin is not available
+          return true;
+        }
       } catch (e2) {
         debugPrint("Direct internet check also failed: $e2");
         // Default to true to avoid blocking the app if plugin is not available
