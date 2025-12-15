@@ -45,7 +45,10 @@ class Message {
   Sender? sender;
   MessageState messageState;
   bool isUploading;
-  String? tempId; // For tracking messages before server response
+  String? tempId; 
+  bool? is_edited;
+  bool?deleted_for_all;
+
 
   Message({
     required this.id,
@@ -62,6 +65,8 @@ class Message {
     this.messageState = MessageState.sent,
     this.isUploading = false,
     this.tempId,
+    this.is_edited,
+    this.deleted_for_all,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
@@ -92,6 +97,8 @@ class Message {
         ),
         isUploading: json["isUploading"] ?? false,
         tempId: json["tempId"],
+        is_edited: json["is_edited"],
+        deleted_for_all: json["deleted_for_all"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -109,6 +116,8 @@ class Message {
         "messageState": messageState.toString().split('.').last,
         "isUploading": isUploading,
         "tempId": tempId,
+        "is_edited": is_edited,
+        "deleted_for_all": deleted_for_all,
       };
 }
 

@@ -592,3 +592,43 @@ class RejectInvitePublicChatRequestSuccess extends ChartState {
   @override
   List<Object> get props => [message];
 }
+
+class EditMessageLoading extends ChartState {
+  const EditMessageLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class EditMessageSuccess extends ChartState {
+  String message;
+  EditMessageSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class EditMessageFailed extends ChartState {
+  String message;
+  EditMessageFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class DeleteMessageLoading extends ChartState {
+  const DeleteMessageLoading();
+  @override
+  List<Object> get props => [];
+}
+
+class DeleteMessageSuccess extends ChartState {
+  String message;
+  DeleteMessageSuccess({required this.message});
+  @override
+  List<Object> get props => [message];
+}
+
+class DeleteMessageFailed extends ChartState {
+  String message;
+  DeleteMessageFailed({required this.message});
+  @override
+  List<Object> get props => [message];
+}

@@ -834,6 +834,8 @@ class SendMessage extends StatelessWidget {
   final bool isUploading;
   final VoidCallback? onRetry;
   final Widget? customTextWidget;
+  final bool isEdited;
+  final bool isDeleted;
   const SendMessage(
       {required super.key,
       required this.message,
@@ -848,7 +850,9 @@ class SendMessage extends StatelessWidget {
       this.messageState = MessageState.sent,
       this.isUploading = false,
       this.onRetry,
-      this.customTextWidget});
+      this.customTextWidget,
+      this.isEdited = false,
+      this.isDeleted = false});
 
   @override
   Widget build(BuildContext context) {
@@ -877,32 +881,60 @@ class SendMessage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if (textShow) ...[
-                      customTextWidget ??
-                          Text(
-                            message,
-                            style: TextStyle(
-                              color: COLORS.neutralDark,
-                              fontSize: SizeConfig.blockWidth * 3.25,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: "Poppins",
-                            ),
-                            softWrap: true,
-                          )
-                    ],
-                    if (imageShow) ...[
-                      _buildImageWithState(context, imageUrl),
-                      SizedBox(
-                        height: SizeConfig.blockHeight,
+                    // Show deleted message text for all message types
+                    if (isDeleted) ...[
+                      Text(
+                        'This message was deleted',
+                        style: TextStyle(
+                          color: COLORS.neutralDarkOne,
+                          fontSize: SizeConfig.blockWidth * 3.25,
+                          fontStyle: FontStyle.italic,
+                          fontFamily: "Poppins",
+                        ),
                       )
+                    ] else ...[
+                      if (textShow) ...[
+                        customTextWidget ??
+                            Text(
+                              message,
+                              style: TextStyle(
+                                color: COLORS.neutralDark,
+                                fontSize: SizeConfig.blockWidth * 3.25,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                              ),
+                              softWrap: true,
+                            )
+                      ],
+                      if (imageShow) ...[
+                        _buildImageWithState(context, imageUrl),
+                        SizedBox(
+                          height: SizeConfig.blockHeight,
+                        )
+                      ],
+                      if (audioShow && audioWidget != null) ...[audioWidget!],
                     ],
-                    if (audioShow && audioWidget != null) ...[audioWidget!],
                     SizedBox(
-                      width: SizeConfig.blockWidth * 20,
+                      width: SizeConfig.blockWidth * 30,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          if (isEdited)
+                            Text(
+                              'edited'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 2.6,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          if (isEdited)
+                            SizedBox(
+                              width: SizeConfig.blockWidth * 1,
+                            ),
                           Text(
                             time.toUpperCase(),
                             style: TextStyle(
@@ -1223,6 +1255,8 @@ class ReceivedMessage extends StatelessWidget {
   final Widget? audioWidget;
   final String imageUrl;
   final Widget? customTextWidget;
+  final bool isEdited;
+  final bool isDeleted;
 
   const ReceivedMessage({
     super.key,
@@ -1236,6 +1270,8 @@ class ReceivedMessage extends StatelessWidget {
     required this.imageUrl,
     this.audioWidget,
     this.customTextWidget,
+    this.isEdited = false,
+    this.isDeleted = false,
   });
 
   @override
@@ -1276,48 +1312,65 @@ class ReceivedMessage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Message Text
-                    if (textShow)
+                    // Show deleted message text for all message types
+                    if (isDeleted) ...[
                       Padding(
                         padding: EdgeInsets.only(
                             bottom: SizeConfig.blockHeight * 0.2),
-                        child: customTextWidget ??
-                            Text(
-                              message,
-                              style: TextStyle(
-                                color: COLORS.neutralDark,
-                                fontSize: SizeConfig.blockWidth * 3.25,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: "Poppins",
+                        child: Text(
+                          'This message was deleted',
+                          style: TextStyle(
+                            color: COLORS.neutralDarkOne,
+                            fontSize: SizeConfig.blockWidth * 3.25,
+                            fontStyle: FontStyle.italic,
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                      )
+                    ] else ...[
+                      // Message Text
+                      if (textShow)
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: SizeConfig.blockHeight * 0.2),
+                          child: customTextWidget ??
+                              Text(
+                                message,
+                                style: TextStyle(
+                                  color: COLORS.neutralDark,
+                                  fontSize: SizeConfig.blockWidth * 3.25,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: "Poppins",
+                                ),
+                                softWrap: true,
                               ),
-                              softWrap: true,
-                            ),
-                      ),
+                        ),
 
-                    if (imageShow)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4.0),
-                        child: GestureDetector(
-                          onTap: () => _showImageDialog(context, imageUrl),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                SizeConfig.blockWidth * 3),
-                            child: Image.network(
-                              imageUrl,
-                              width: SizeConfig.blockWidth * 40,
-                              height: SizeConfig.blockWidth * 40,
-                              fit: BoxFit.cover,
+                      if (imageShow)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: GestureDetector(
+                            onTap: () => _showImageDialog(context, imageUrl),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                  SizeConfig.blockWidth * 3),
+                              child: Image.network(
+                                imageUrl,
+                                width: SizeConfig.blockWidth * 40,
+                                height: SizeConfig.blockWidth * 40,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                    if (audioShow && audioWidget != null)
-                      Padding(
-                        padding: EdgeInsets.only(
-                            bottom: SizeConfig.blockHeight * 0.2),
-                        child: audioWidget!,
-                      ),
+                      if (audioShow && audioWidget != null)
+                        Padding(
+                          padding: EdgeInsets.only(
+                              bottom: SizeConfig.blockHeight * 0.2),
+                          child: audioWidget!,
+                        ),
+                    ],
 
                     Padding(
                       padding: EdgeInsets.only(top: SizeConfig.blockWidth * 2),
@@ -1337,6 +1390,19 @@ class ReceivedMessage extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: SizeConfig.blockWidth * 4),
+                          if (isEdited)
+                            Text(
+                              'edited'.tr(),
+                              style: TextStyle(
+                                color: COLORS.neutralDarkOne,
+                                fontSize: SizeConfig.blockWidth * 2.6,
+                                fontWeight: FontWeight.w400,
+                                fontFamily: "Poppins",
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          if (isEdited)
+                            SizedBox(width: SizeConfig.blockWidth * 1),
                           Text(
                             time.toUpperCase(),
                             style: TextStyle(

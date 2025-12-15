@@ -139,6 +139,14 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     on<RejectChatPublicGroupEvent>((event, emit) async {
       await mapRejectInvitePublicChatRequestChatEvent(event, emit);
     });
+
+    on<EditMessageEvent>((event, emit) async {
+      await mapEditMessageEvent(event, emit);
+    });
+
+    on<DeleteMessageEvent>((event, emit) async {
+      await mapDeleteMessageEvent(event, emit);
+    });
   }
 
   Future<void> mapCharListEvent(
@@ -1130,5 +1138,57 @@ class ChartBloc extends Bloc<ChartEvent, ChartState> {
     }
   }
 
+  Future<void> mapEditMessageEvent(
+      EditMessageEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const EditMessageLoading());
+      var response = await friendsDao.editMessage(
+        messageId: event.messageId,
+        content: event.content,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(EditMessageSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(EditMessageFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("Error in edit message: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(EditMessageFailed(message: errorMessage));
+      event.onError(errorMessage);
+    }
+  }
+
+  Future<void> mapDeleteMessageEvent(
+      DeleteMessageEvent event, Emitter<ChartState> emit) async {
+    try {
+      emit(const DeleteMessageLoading());
+      var response = await friendsDao.deleteMessageForAll(
+        messageId: event.messageId,
+      );
+      Map<String, dynamic> jsonDecoded = jsonDecode(response.body);
+      if (response.statusCode == 200 && jsonDecoded['status'] == true) {
+        String message = jsonDecoded["message"];
+        emit(DeleteMessageSuccess(message: message));
+        event.onSuccess(message);
+      } else {
+        String message = jsonDecoded["message"];
+        customLog("The failure reason: $message");
+        emit(DeleteMessageFailed(message: message));
+        event.onError(message);
+      }
+    } catch (error) {
+      customLog("Error in delete message: $error");
+      final errorMessage = GlobalNetworkErrorHandler.handleError(error);
+      emit(DeleteMessageFailed(message: errorMessage));
+      event.onError(errorMessage);
+    }
+  }
 
 }

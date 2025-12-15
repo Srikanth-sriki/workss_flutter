@@ -43,9 +43,12 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
             width: SizeConfig.blockWidth * 30,
             fit: BoxFit.contain,
           ),
-          SizedBox(height: SizeConfig.blockHeight*2,),
+          SizedBox(
+            height: SizeConfig.blockHeight * 2,
+          ),
           Text(
-            "Are you sure you want to log out? Your session will end, and you'll need to log in again to continue.".tr(),
+            "Are you sure you want to log out? Your session will end, and you'll need to log in again to continue."
+                .tr(),
             style: TextStyle(
               color: COLORS.neutralDarkOne,
               fontSize: SizeConfig.blockWidth * 3.5,
@@ -77,12 +80,13 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
                 ),
                 customButton(
                   text: 'LOGOUT'.tr(),
-                  onPressed: () async{
-                   // Navigator.of(context).pop();
+                  onPressed: () async {
+                    // Navigator.of(context).pop();
                     // if (_formKey.currentState!.validate()) {
                     //   _submitButton();
                     // }
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
                     await prefs.remove(LocalConstant.accessToken);
                     await prefs.remove(LocalConstant.userId);
                     await prefs.remove(LocalConstant.profileCompleted);
@@ -90,7 +94,8 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
                     await prefs.remove(LocalConstant.name);
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const LogoutSuccess()),
+                      MaterialPageRoute(
+                          builder: (context) => const LogoutSuccess()),
                     );
                   },
                   backgroundColor: COLORS.semantic,

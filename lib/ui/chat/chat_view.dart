@@ -2123,6 +2123,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
 
             return GestureDetector(
               onLongPress: () {
+                // Don't allow selection of deleted messages
+                if (message.deleted_for_all == true) return;
+
                 if (!_isSelectionMode) {
                   setState(() {
                     _isSelectionMode = true;
@@ -2131,6 +2134,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                 }
               },
               onTap: () {
+                // Don't allow selection of deleted messages
+                if (message.deleted_for_all == true) return;
+
                 if (_isSelectionMode) {
                   setState(() {
                     if (isSelected) {
@@ -2183,8 +2189,9 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                               messageState: message.messageState,
                               isUploading: message.isUploading,
                               onRetry: () => _retryMessage(message),
-                              customTextWidget:
-                                  _formatMessageWithLinks(message.content!),
+                              customTextWidget: message.deleted_for_all == true
+                                  ? null
+                                  : _formatMessageWithLinks(message.content!),
                               audioWidget: WaveBubble(
                                 audioUrl: message.messageMedia!.isNotEmpty
                                     ? message.messageMedia![0].fileUrl!
@@ -2195,6 +2202,8 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                 isUploading: message.isUploading,
                                 onRetry: () => _retryMessage(message),
                               ),
+                              isEdited: message.is_edited == true,
+                              isDeleted: message.deleted_for_all == true,
                             )
                           : (message.sender != null
                               ? ReceivedMessage(
@@ -2216,7 +2225,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                       ? message.messageMedia![0].fileUrl!
                                       : '',
                                   customTextWidget:
-                                      _formatMessageWithLinks(message.content!),
+                                      message.deleted_for_all == true
+                                          ? null
+                                          : _formatMessageWithLinks(
+                                              message.content!),
                                   audioWidget: WaveBubble(
                                     audioUrl: message.messageMedia!.isNotEmpty
                                         ? message.messageMedia![0].fileUrl!
@@ -2225,7 +2237,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                                   ),
                                   sendName: widget.isGroup == true
                                       ? message.sender!.name!
-                                      : "")
+                                      : "",
+                                  isEdited: message.is_edited == true,
+                                  isDeleted: message.deleted_for_all == true,
+                                )
                               : const SizedBox.shrink()),
                     ),
                   );
@@ -2290,6 +2305,32 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                     fit: BoxFit.fill,
                   ),
                   onPressed: _copySelectedMessages,
+                  padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+                  constraints: BoxConstraints(),
+                ),
+              // Edit button: Only show if exactly one text message is selected and it's sent by current user
+              if (_canEditSelectedMessage())
+                IconButton(
+                  icon: Image.asset(
+                    'assets/images/chat/edit.png',
+                    width: SizeConfig.blockWidth * 4.5,
+                    height: SizeConfig.blockWidth * 4.5,
+                    fit: BoxFit.fill,
+                  ),
+                  onPressed: _editSelectedMessage,
+                  padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
+                  constraints: BoxConstraints(),
+                ),
+              // Delete button: Only show if selected messages are sent by current user
+              if (_canDeleteSelectedMessages())
+                IconButton(
+                  icon: Image.asset(
+                    'assets/images/chat/delete.png',
+                    width: SizeConfig.blockWidth * 4.5,
+                    height: SizeConfig.blockWidth * 4.5,
+                    fit: BoxFit.fill,
+                  ),
+                  onPressed: _deleteSelectedMessages,
                   padding: EdgeInsets.all(SizeConfig.blockWidth * 2),
                   constraints: BoxConstraints(),
                 ),
@@ -2376,6 +2417,388 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
     }
   }
 
+  bool _canEditSelectedMessage() {
+    // Can edit if exactly one text message is selected and it's sent by current user
+    // and it's within 5 minutes of sending
+    if (_selectedMessageIds.length != 1) return false;
+
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id)) {
+          // Check if message is sent by current user and is text
+          if (message.senderId != Config.id ||
+              message.type != 'text' ||
+              message.content == null ||
+              message.content!.isEmpty ||
+              message.deleted_for_all == true) {
+            return false;
+          }
+
+          // Check if message is within 5 minutes of creation
+          if (message.createdAt != null) {
+            final now = DateTime.now();
+            final messageTime = message.createdAt!;
+            final difference = now.difference(messageTime);
+            if (difference.inMinutes > 5) {
+              return false; // More than 5 minutes old
+            }
+          } else {
+            return false; // No creation time, can't edit
+          }
+
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool _canDeleteSelectedMessages() {
+    // Can delete if all selected messages are sent by current user
+    // and all are within 5 minutes of sending
+    if (_selectedMessageIds.isEmpty) return false;
+
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id)) {
+          if (message.senderId != Config.id) {
+            return false; // Found a message not sent by current user
+          }
+
+          // Check if message is within 5 minutes of creation
+          if (message.createdAt != null) {
+            final now = DateTime.now();
+            final messageTime = message.createdAt!;
+            final difference = now.difference(messageTime);
+            if (difference.inMinutes > 5) {
+              return false; // More than 5 minutes old
+            }
+          } else {
+            return false; // No creation time, can't delete
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  void _editSelectedMessage() {
+    if (_selectedMessageIds.length != 1) return;
+
+    // Find the selected message
+    Message? selectedMessage;
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id)) {
+          selectedMessage = message;
+          break;
+        }
+      }
+      if (selectedMessage != null) break;
+    }
+
+    if (selectedMessage == null ||
+        selectedMessage.senderId != Config.id ||
+        selectedMessage.type != 'text' ||
+        selectedMessage.content == null ||
+        selectedMessage.content!.isEmpty ||
+        selectedMessage.deleted_for_all == true) {
+      return;
+    }
+
+    // Check if message is within 5 minutes
+    if (selectedMessage.createdAt != null) {
+      final now = DateTime.now();
+      final messageTime = selectedMessage.createdAt!;
+      final difference = now.difference(messageTime);
+      if (difference.inMinutes > 5) {
+        showCustomSnackBar(
+          context: context,
+          message: 'You can only edit messages within 5 minutes of sending',
+          backgroundColor: COLORS.neutralDarkOne,
+        );
+        return;
+      }
+    } else {
+      showCustomSnackBar(
+        context: context,
+        message: 'Cannot edit this message',
+        backgroundColor: COLORS.neutralDarkOne,
+      );
+      return;
+    }
+
+    // Show edit dialog (WhatsApp-style bottom sheet)
+    final TextEditingController editController =
+        TextEditingController(text: selectedMessage.content);
+
+    showMaterialModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      enableDrag: true,
+      isDismissible: true,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: COLORS.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(SizeConfig.blockWidth * 5),
+            topRight: Radius.circular(SizeConfig.blockWidth * 5),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: EdgeInsets.only(top: SizeConfig.blockHeight * 1),
+                width: SizeConfig.blockWidth * 12,
+                height: SizeConfig.blockHeight * 0.5,
+                decoration: BoxDecoration(
+                  color: COLORS.neutralDarkTwo,
+                  borderRadius:
+                      BorderRadius.circular(SizeConfig.blockWidth * 2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: EdgeInsets.only(
+                  left: SizeConfig.blockWidth * 5,
+                  right: SizeConfig.blockWidth * 5,
+                  top: SizeConfig.blockHeight * 1,
+                  bottom: SizeConfig.blockHeight * 2,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Edit Message',
+                      style: TextStyle(
+                        color: COLORS.neutralDark,
+                        fontSize: SizeConfig.blockWidth * 4.5,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: COLORS.neutralDark,
+                        size: SizeConfig.blockWidth * 6,
+                      ),
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Divider(
+                  color: COLORS.neutralDarkTwo,
+                  height: SizeConfig.blockHeight * 0.15),
+              // Text field
+              Padding(
+                padding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: COLORS.primaryOne.withOpacity(0.1),
+                    borderRadius:
+                        BorderRadius.circular(SizeConfig.blockWidth * 3),
+                    border: Border.all(
+                      color: COLORS.neutralDarkTwo.withOpacity(0.3),
+                      width: SizeConfig.blockWidth * 0.1,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: editController,
+                    autofocus: true,
+                    maxLines: 6,
+                    minLines: 4,
+                    textInputAction: TextInputAction.newline,
+                    style: TextStyle(
+                      color: COLORS.neutralDark,
+                      fontSize: SizeConfig.blockWidth * 3.8,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: "Poppins",
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Update your message...',
+                      hintStyle: TextStyle(
+                        color: COLORS.neutralDarkOne,
+                        fontSize: SizeConfig.blockWidth * 3.25,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: "Poppins",
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(SizeConfig.blockWidth * 4),
+                    ),
+                  ),
+                ),
+              ),
+              // Action buttons
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.blockWidth * 5,
+                  vertical: SizeConfig.blockHeight * 1.5,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    customButton(
+                      text: 'Cancel',
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        Navigator.of(context).pop();
+                      },
+                      backgroundColor: COLORS.neutralDarkTwo,
+                      textColor: COLORS.neutralDark,
+                      showIcon: false,
+                      width: SizeConfig.blockWidth * 42,
+                      height: SizeConfig.blockHeight * 8,
+                    ),
+                    SizedBox(width: SizeConfig.blockWidth * 2),
+                    customButton(
+                      text: 'Save',
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        FocusScope.of(context).unfocus();
+                        chartBloc.add(EditMessageEvent(
+                          messageId: selectedMessage!.id,
+                          content: editController.text,
+                          onSuccess: (message) {
+                            _fetchData();
+                          },
+                          onError: (message) {
+                            showCustomSnackBar(
+                              context: context,
+                              message: message,
+                            );
+                          },
+                        ));
+                        _fetchData();
+                        setState(() {
+                          _selectedMessageIds.clear();
+                          _isSelectionMode = false;
+                        });
+                      },
+                      backgroundColor: COLORS.primary,
+                      textColor: COLORS.white,
+                      showIcon: false,
+                      width: SizeConfig.blockWidth * 42,
+                      height: SizeConfig.blockHeight * 8,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _deleteSelectedMessages() {
+    if (_selectedMessageIds.isEmpty) return;
+
+    // Check if all messages are within 5 minutes
+    final now = DateTime.now();
+    for (var chatDate in chatView) {
+      for (var message in chatDate.messages) {
+        if (_selectedMessageIds.contains(message.id)) {
+          if (message.createdAt != null) {
+            final messageTime = message.createdAt!;
+            final difference = now.difference(messageTime);
+            if (difference.inMinutes > 5) {
+              showCustomSnackBar(
+                context: context,
+                message:
+                    'You can only delete messages within 5 minutes of sending',
+                backgroundColor: COLORS.neutralDarkOne,
+              );
+              return;
+            }
+          } else {
+            showCustomSnackBar(
+              context: context,
+              message: 'Cannot delete this message',
+              backgroundColor: COLORS.neutralDarkOne,
+            );
+            return;
+          }
+        }
+      }
+    }
+
+    // Confirm deletion
+    showCustomAlertDialog(
+      context: context,
+      title: 'Delete Message${_selectedMessageIds.length > 1 ? 's' : ''}',
+      message:
+          'Are you sure you want to delete ${_selectedMessageIds.length > 1 ? 'these messages' : 'this message'}? This action cannot be undone.',
+      positiveButtonText: 'Delete',
+      negativeButtonText: 'Cancel',
+      onPositivePressed: () {
+        Navigator.of(context).pop();
+        _performDeleteMessages();
+      },
+      onNegativePressed: () => Navigator.of(context).pop(),
+    );
+  }
+
+  void _performDeleteMessages() {
+    if (_selectedMessageIds.isEmpty) return;
+
+    final messageIdsToDelete = List<String>.from(_selectedMessageIds);
+    int deletedCount = 0;
+    int failedCount = 0;
+
+    void checkCompletion() {
+      if (deletedCount + failedCount >= messageIdsToDelete.length) {
+        FocusScope.of(context).unfocus();
+        setState(() {
+          _isSelectionMode = false;
+          _selectedMessageIds.clear();
+        });
+        _fetchData(); // Refresh to show deleted messages
+
+        if (failedCount == 0) {
+          // Success - no need to show message
+        } else if (deletedCount > 0) {
+          showCustomSnackBar(
+            context: context,
+            message:
+                '$deletedCount message${deletedCount > 1 ? 's' : ''} deleted, $failedCount failed',
+            backgroundColor: COLORS.neutralDarkOne,
+          );
+        } else {
+          showCustomSnackBar(
+            context: context,
+            message:
+                'Failed to delete message${messageIdsToDelete.length > 1 ? 's' : ''}',
+            backgroundColor: COLORS.neutralDarkOne,
+          );
+        }
+      }
+    }
+
+    // Delete each message
+    for (var messageId in messageIdsToDelete) {
+      chartBloc.add(DeleteMessageEvent(
+        messageId: messageId,
+        onSuccess: (message) {
+          deletedCount++;
+          checkCompletion();
+        },
+        onError: (errorMessage) {
+          failedCount++;
+          checkCompletion();
+        },
+      ));
+    }
+  }
+
   void _forwardSelectedMessages() {
     if (_selectedMessageIds.isEmpty) return;
 
@@ -2409,9 +2832,25 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
           child: _ForwardChatSelectionScreen(
             messagesToForward: selectedMessages,
             onForwardComplete: () {
+              FocusScope.of(context).unfocus();
               setState(() {
                 _isSelectionMode = false;
                 _selectedMessageIds.clear();
+              });
+              // Background refresh to update chat view with forwarded messages
+              // Calculate delay based on number of messages and if they contain media
+              final messageCount = selectedMessages.length;
+              final hasMedia = selectedMessages.any((m) => m.type == 'media');
+              final estimatedDelay = hasMedia
+                  ? Duration(milliseconds: 1200 + (messageCount * 400))
+                  : (messageCount > 1
+                      ? Duration(milliseconds: 800 + (messageCount * 200))
+                      : Duration(milliseconds: 600));
+
+              Future.delayed(estimatedDelay, () {
+                if (_isMounted) {
+                  _fetchData();
+                }
               });
             },
           ),
@@ -2579,7 +3018,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         color: COLORS.neutralDark,
                         size: SizeConfig.blockWidth * 6.5,
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        Navigator.of(context).pop();
+                      },
                     ),
                   ],
                 ),
@@ -2845,7 +3287,10 @@ class _ChatViewScreenState extends State<ChatViewScreen> {
                         color: COLORS.neutralDark,
                         size: SizeConfig.blockWidth * 4.5,
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        Navigator.of(context).pop();
+                      },
                     ),
                   ],
                 ),

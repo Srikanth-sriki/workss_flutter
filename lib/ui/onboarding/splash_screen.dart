@@ -391,7 +391,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? newUser = prefs.getBool(LocalConstant.initialLanguage);
+    bool? newUser = prefs.getBool(LocalConstant.initialLanguage) ?? false;
+    print("newUser in splash: $newUser");
 
     if (newUser == true) {
       Navigator.of(context).pushReplacement(

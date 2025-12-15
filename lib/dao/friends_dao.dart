@@ -23,14 +23,14 @@ class FriendsDao {
     return response;
   }
 
-  Future fetchAddFriendsChatSearchList({
-    required int page,
-    required int pageSize,
-    required String keyWord,
-    required String gender,
-    required String city
-  }) async {
-    var url = '${Config.url}/user/friend/search?search=$keyWord&page=$page&page_size=$pageSize&gender=$gender&city=$city';
+  Future fetchAddFriendsChatSearchList(
+      {required int page,
+      required int pageSize,
+      required String keyWord,
+      required String gender,
+      required String city}) async {
+    var url =
+        '${Config.url}/user/friend/search?search=$keyWord&page=$page&page_size=$pageSize&gender=$gender&city=$city';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -169,7 +169,7 @@ class FriendsDao {
       "name": name,
       "description": description,
       "invitedUsers": invitedUsers,
-      "type":type
+      "type": type
     };
     final response = await http.post(
       Uri.parse(url),
@@ -373,9 +373,7 @@ class FriendsDao {
   Future archiveChatRequest({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/archive';
     final response = await http.post(
       Uri.parse(url),
@@ -389,9 +387,7 @@ class FriendsDao {
   Future leaveChatRequest({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/leave-group';
     final response = await http.post(
       Uri.parse(url),
@@ -405,9 +401,7 @@ class FriendsDao {
   Future acceptInviteGroup({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "id": chatId
-    };
+    Map<String, dynamic> body = {"id": chatId};
     var url = '${Config.url}/user/chat/accept-invite';
     final response = await http.post(
       Uri.parse(url),
@@ -421,9 +415,7 @@ class FriendsDao {
   Future rejectInviteGroup({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "id": chatId
-    };
+    Map<String, dynamic> body = {"id": chatId};
     var url = '${Config.url}/user/chat/reject-invite';
     final response = await http.post(
       Uri.parse(url),
@@ -437,9 +429,7 @@ class FriendsDao {
   Future sendChatMessage({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "userId": chatId
-    };
+    Map<String, dynamic> body = {"userId": chatId};
     var url = '${Config.url}/user/chat/start-chat';
     final response = await http.post(
       Uri.parse(url),
@@ -450,13 +440,10 @@ class FriendsDao {
     return response;
   }
 
-
   Future deleteGroupChart({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/delete-group';
     final response = await http.post(
       Uri.parse(url),
@@ -467,13 +454,10 @@ class FriendsDao {
     return response;
   }
 
-
   Future cancelInviteGroupChart({
     required String id,
   }) async {
-    Map<String, dynamic> body = {
-      "id": id
-    };
+    Map<String, dynamic> body = {"id": id};
     var url = '${Config.url}/user/chat/cancel-invite';
     final response = await http.post(
       Uri.parse(url),
@@ -506,9 +490,7 @@ class FriendsDao {
   Future unArchiveChatRequest({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/unarchive';
     final response = await http.post(
       Uri.parse(url),
@@ -519,13 +501,10 @@ class FriendsDao {
     return response;
   }
 
-
   Future unSendFriendRequest({
     required String userId,
   }) async {
-    Map<String, dynamic> body = {
-      "userId": userId
-    };
+    Map<String, dynamic> body = {"userId": userId};
     var url = '${Config.url}/user/friend/unsend-request';
     final response = await http.post(
       Uri.parse(url),
@@ -536,7 +515,8 @@ class FriendsDao {
     return response;
   }
 
-  Future blockGroupChat({required String reason, required String chatId}) async {
+  Future blockGroupChat(
+      {required String reason, required String chatId}) async {
     var url = '${Config.url}/user/chat/block';
     Map<String, dynamic> body = {"chat_id": chatId, "reason": reason};
     final response = await http.post(
@@ -549,7 +529,8 @@ class FriendsDao {
     return response;
   }
 
-  Future reportGroupChat({required String reason, required String chatId}) async {
+  Future reportGroupChat(
+      {required String reason, required String chatId}) async {
     var url = '${Config.url}/user/chat/report';
     Map<String, dynamic> body = {"chat_id": chatId, "reason": reason};
     final response = await http.post(
@@ -561,7 +542,6 @@ class FriendsDao {
     customLog('Response body:${response.body.toString()}');
     return response;
   }
-
 
   Future unReportGroupChat({required String chatId}) async {
     var url = '${Config.url}/user/chat/un-block';
@@ -575,7 +555,6 @@ class FriendsDao {
     customLog('Response body:${response.body.toString()}');
     return response;
   }
-
 
   Future blockedUserListChat() async {
     var url = '${Config.url}/user/chat/blocked-list';
@@ -592,7 +571,8 @@ class FriendsDao {
     required int pageSize,
     required String keyWord,
   }) async {
-    var url = '${Config.url}/user/chat/search-groups?search=$keyWord&page=$page&page_size=$pageSize';
+    var url =
+        '${Config.url}/user/chat/search-groups?search=$keyWord&page=$page&page_size=$pageSize';
     final response = await http.get(
       Uri.parse(url),
       headers: Config.authHeaders(),
@@ -604,9 +584,7 @@ class FriendsDao {
   Future sendJoinChartGroup({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/send-join-request';
     final response = await http.post(
       Uri.parse(url),
@@ -620,9 +598,7 @@ class FriendsDao {
   Future cancelJoinRequestGroup({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/cancel-join-request';
     final response = await http.post(
       Uri.parse(url),
@@ -633,13 +609,10 @@ class FriendsDao {
     return response;
   }
 
-
   Future deleteChart({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chatId": chatId
-    };
+    Map<String, dynamic> body = {"chatId": chatId};
     var url = '${Config.url}/user/chat/delete';
     final response = await http.post(
       Uri.parse(url),
@@ -653,9 +626,7 @@ class FriendsDao {
   Future approveChartRequest({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chat_id": chatId
-    };
+    Map<String, dynamic> body = {"chat_id": chatId};
     var url = '${Config.url}/user/chat/approve-request';
     final response = await http.post(
       Uri.parse(url),
@@ -669,9 +640,7 @@ class FriendsDao {
   Future rejectChartRequest({
     required String chatId,
   }) async {
-    Map<String, dynamic> body = {
-      "chat_id": chatId
-    };
+    Map<String, dynamic> body = {"chat_id": chatId};
     var url = '${Config.url}/user/chat/reject-request';
     final response = await http.post(
       Uri.parse(url),
@@ -682,13 +651,10 @@ class FriendsDao {
     return response;
   }
 
-
   Future acceptInvitePublicGroupRequest({
     required String requestId,
   }) async {
-    Map<String, dynamic> body = {
-      "requestId": requestId
-    };
+    Map<String, dynamic> body = {"requestId": requestId};
     var url = '${Config.url}/user/chat/accept-join-request';
     final response = await http.post(
       Uri.parse(url),
@@ -702,9 +668,7 @@ class FriendsDao {
   Future rejectInvitePublicGroupRequest({
     required String requestId,
   }) async {
-    Map<String, dynamic> body = {
-      "requestId": requestId
-    };
+    Map<String, dynamic> body = {"requestId": requestId};
     var url = '${Config.url}/user/chat/reject-join-request';
     final response = await http.post(
       Uri.parse(url),
@@ -715,5 +679,39 @@ class FriendsDao {
     return response;
   }
 
+  Future editMessage({
+    required String messageId,
+    required String content,
+  }) async {
+    Map<String, dynamic> body = {
+      "messageId": messageId,
+      "content": content,
+    };
+    var url = '${Config.url}/user/chat/edit-message';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
 
+  Future deleteMessageForAll({
+    required String messageId,
+  }) async {
+    Map<String, dynamic> body = {
+      "messageId": messageId,
+    };
+    var url = '${Config.url}/user/chat/delete-for-all';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: Config.authHeaders(),
+      body: jsonEncode(body),
+    );
+    customLog("Response Status Code : ${response.statusCode}");
+    customLog(body);
+    return response;
+  }
 }

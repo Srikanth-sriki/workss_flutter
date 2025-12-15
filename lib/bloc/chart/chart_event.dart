@@ -1,5 +1,7 @@
 part of 'chart_bloc.dart';
 
+typedef CallbackWithMessage = void Function(String message);
+
 @immutable
 sealed class ChartEvent extends Equatable {
   const ChartEvent();
@@ -25,17 +27,15 @@ class ChartGroupCreateEvent extends ChartEvent {
   String description;
   List<String> invitedUsers;
   String type;
-  ChartGroupCreateEvent({
-    required this.picture,
-    required this.name,
-    required this.description,
-    required this.invitedUsers,
-    required this.type
-  });
+  ChartGroupCreateEvent(
+      {required this.picture,
+      required this.name,
+      required this.description,
+      required this.invitedUsers,
+      required this.type});
   @override
-  List<Object> get props => [picture, name, description, invitedUsers,type];
+  List<Object> get props => [picture, name, description, invitedUsers, type];
 }
-
 
 class ChartGroupEditEvent extends ChartEvent {
   String picture;
@@ -51,7 +51,6 @@ class ChartGroupEditEvent extends ChartEvent {
   @override
   List<Object> get props => [picture, name, description, id];
 }
-
 
 class InviteMemberChartEvent extends ChartEvent {
   int page;
@@ -72,13 +71,10 @@ class FetchChartViewEvent extends ChartEvent {
   int page;
   int pageSize;
   String chatId;
-  FetchChartViewEvent({
-    required this.page,
-    required this.pageSize,
-    required this.chatId
-  });
+  FetchChartViewEvent(
+      {required this.page, required this.pageSize, required this.chatId});
   @override
-  List<Object> get props => [page, pageSize,chatId];
+  List<Object> get props => [page, pageSize, chatId];
 }
 
 class ChartSendMessageEvent extends ChartEvent {
@@ -93,15 +89,17 @@ class ChartSendMessageEvent extends ChartEvent {
     required this.chatId,
     required this.content,
     required this.messageType,
-     this.fileName,
-     this.fileUrl,
-     this.fileType,
-     this.fileSize,
+    this.fileName,
+    this.fileUrl,
+    this.fileType,
+    this.fileSize,
   });
   @override
-  List<Object> get props => [chatId,
-    content,
-    messageType,];
+  List<Object> get props => [
+        chatId,
+        content,
+        messageType,
+      ];
 }
 
 class UploadFileEvent extends ChartEvent {
@@ -118,16 +116,17 @@ class EditGroupChatProfileEvent extends ChartEvent {
   String description;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  EditGroupChatProfileEvent({
-    required this.name,
-    required this.picture,
-    required this.chatId,
-    required this.description,required this.onSuccess,required this.onError
-  });
+  EditGroupChatProfileEvent(
+      {required this.name,
+      required this.picture,
+      required this.chatId,
+      required this.description,
+      required this.onSuccess,
+      required this.onError});
   @override
-  List<Object> get props => [name,chatId,picture,description,onError,onSuccess];
+  List<Object> get props =>
+      [name, chatId, picture, description, onError, onSuccess];
 }
-
 
 class FetchChartViewProfileEvent extends ChartEvent {
   String chatId;
@@ -143,63 +142,63 @@ class SendInviteMemberEvent extends ChartEvent {
   List<String> invitedUsers;
   CallbackWithMessage? onSuccess;
   CallbackWithMessage? onError;
-  SendInviteMemberEvent({
-    required this.chatId,
-    required this.invitedUsers,
-     this.onSuccess, this.onError
-  });
+  SendInviteMemberEvent(
+      {required this.chatId,
+      required this.invitedUsers,
+      this.onSuccess,
+      this.onError});
   @override
-  List<Object> get props => [chatId,invitedUsers,];
+  List<Object> get props => [
+        chatId,
+        invitedUsers,
+      ];
 }
+
 class SendRemoveMemberEvent extends ChartEvent {
   String chatId;
   List<String> removeMember;
   CallbackWithMessage? onSuccess;
   CallbackWithMessage? onError;
-  SendRemoveMemberEvent({
-    required this.chatId,
-    required this.removeMember,
-     this.onSuccess, this.onError
-  });
+  SendRemoveMemberEvent(
+      {required this.chatId,
+      required this.removeMember,
+      this.onSuccess,
+      this.onError});
   @override
-  List<Object> get props => [chatId,removeMember,];
+  List<Object> get props => [
+        chatId,
+        removeMember,
+      ];
 }
-
 
 class ClearChatEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  ClearChatEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  ClearChatEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class ArchiveChatEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  ArchiveChatEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  ArchiveChatEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class LeaveGroupChatEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  LeaveGroupChatEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  LeaveGroupChatEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class ArchivedChartListEvent extends ChartEvent {
@@ -212,60 +211,50 @@ class AcceptChatEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  AcceptChatEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  AcceptChatEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class RejectGroupChatEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  RejectGroupChatEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  RejectGroupChatEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class StartMessageEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  StartMessageEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  StartMessageEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class DeleteGroupEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  DeleteGroupEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  DeleteGroupEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class CancelInviteChatEvent extends ChartEvent {
   String id;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  CancelInviteChatEvent({
-    required this.id,
-    required this.onSuccess,required this.onError
-  });
+  CancelInviteChatEvent(
+      {required this.id, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [id,onError,onSuccess];
+  List<Object> get props => [id, onError, onSuccess];
 }
 
 class MarkAsAdminEvent extends ChartEvent {
@@ -274,29 +263,26 @@ class MarkAsAdminEvent extends ChartEvent {
   CallbackWithMessage? onSuccess;
   CallbackWithMessage? onError;
 
-  MarkAsAdminEvent({
-    required this.chatId,
-    required this.users,
-    this.onSuccess, this.onError
-  });
+  MarkAsAdminEvent(
+      {required this.chatId,
+      required this.users,
+      this.onSuccess,
+      this.onError});
 
   @override
   List<Object> get props => [chatId, users];
 }
-
 
 class UnArchiveChatEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
 
-  UnArchiveChatEvent({
-    required this.chatId,
-    required this.onSuccess, required this.onError
-  });
+  UnArchiveChatEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
 
   @override
-  List<Object> get props => [chatId,onError,onSuccess ];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class BlocChartGroupEvent extends ChartEvent {
@@ -305,9 +291,12 @@ class BlocChartGroupEvent extends ChartEvent {
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
   BlocChartGroupEvent(
-      {required this.onSuccess, required this.onError, required this.reason,required this.chatId});
+      {required this.onSuccess,
+      required this.onError,
+      required this.reason,
+      required this.chatId});
   @override
-  List<Object> get props => [onSuccess, onError, reason,chatId];
+  List<Object> get props => [onSuccess, onError, reason, chatId];
 }
 
 class ReportChartGroupEvent extends ChartEvent {
@@ -316,9 +305,12 @@ class ReportChartGroupEvent extends ChartEvent {
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
   ReportChartGroupEvent(
-      {required this.onSuccess, required this.onError, required this.reason,required this.chatId});
+      {required this.onSuccess,
+      required this.onError,
+      required this.reason,
+      required this.chatId});
   @override
-  List<Object> get props => [onSuccess, onError, reason,chatId];
+  List<Object> get props => [onSuccess, onError, reason, chatId];
 }
 
 class UnBlocChartGroupEvent extends ChartEvent {
@@ -326,9 +318,9 @@ class UnBlocChartGroupEvent extends ChartEvent {
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
   UnBlocChartGroupEvent(
-      {required this.onSuccess, required this.onError,required this.chatId});
+      {required this.onSuccess, required this.onError, required this.chatId});
   @override
-  List<Object> get props => [onSuccess, onError,chatId];
+  List<Object> get props => [onSuccess, onError, chatId];
 }
 
 class BlockedChatList extends ChartEvent {
@@ -354,59 +346,80 @@ class DeleteChartEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  DeleteChartEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  DeleteChartEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class ApproveChartRequestEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  ApproveChartRequestEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  ApproveChartRequestEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
 
 class RejectChartRequestEvent extends ChartEvent {
   String chatId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  RejectChartRequestEvent({
-    required this.chatId,
-    required this.onSuccess,required this.onError
-  });
+  RejectChartRequestEvent(
+      {required this.chatId, required this.onSuccess, required this.onError});
   @override
-  List<Object> get props => [chatId,onError,onSuccess];
+  List<Object> get props => [chatId, onError, onSuccess];
 }
-
 
 class AcceptChatPublicGroupEvent extends ChartEvent {
   String requiredId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  AcceptChatPublicGroupEvent({
-    required this.requiredId,
-    required this.onSuccess,required this.onError
-  });
+  AcceptChatPublicGroupEvent(
+      {required this.requiredId,
+      required this.onSuccess,
+      required this.onError});
   @override
-  List<Object> get props => [requiredId,onError,onSuccess];
+  List<Object> get props => [requiredId, onError, onSuccess];
 }
 
 class RejectChatPublicGroupEvent extends ChartEvent {
   String requiredId;
   CallbackWithMessage onSuccess;
   CallbackWithMessage onError;
-  RejectChatPublicGroupEvent({
-    required this.requiredId,
-    required this.onSuccess,required this.onError
+  RejectChatPublicGroupEvent(
+      {required this.requiredId,
+      required this.onSuccess,
+      required this.onError});
+  @override
+  List<Object> get props => [requiredId, onError, onSuccess];
+}
+
+class EditMessageEvent extends ChartEvent {
+  String messageId;
+  String content;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  EditMessageEvent({
+    required this.messageId,
+    required this.content,
+    required this.onSuccess,
+    required this.onError,
   });
   @override
-  List<Object> get props => [requiredId,onError,onSuccess];
+  List<Object> get props => [messageId, content, onSuccess, onError];
+}
+
+class DeleteMessageEvent extends ChartEvent {
+  String messageId;
+  CallbackWithMessage onSuccess;
+  CallbackWithMessage onError;
+  DeleteMessageEvent({
+    required this.messageId,
+    required this.onSuccess,
+    required this.onError,
+  });
+  @override
+  List<Object> get props => [messageId, onSuccess, onError];
 }
