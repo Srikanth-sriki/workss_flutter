@@ -7,12 +7,12 @@ class Config {
   // static String socketUrl = "https://43.204.94.146";
 
 //Production
-  static String url = "https://api.workss.co.in/api";
-  static String socketUrl = "https://api.workss.co.in";
+  // static String url = "https://api.workss.co.in/api";
+  // static String socketUrl = "https://api.workss.co.in";
 
   //Development
-  // static String url = "https://dev.api.workss.co.in/api";
-  // static String socketUrl = "https://dev.api.workss.co.in";
+  static String url = "https://dev.api.workss.co.in/api";
+  static String socketUrl = "https://dev.api.workss.co.in";
 
   static String accessToken = '';
   static String id = '';

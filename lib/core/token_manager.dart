@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'storage_service.dart';
 
 import '../components/config.dart';
 import '../components/local_constant.dart';
@@ -30,9 +30,8 @@ class TokenManager {
 
   /// Load tokens once during app startup.
   Future<void> loadFromStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    _accessToken = prefs.getString(LocalConstant.accessToken);
-    _refreshToken = prefs.getString(LocalConstant.refreshToken);
+    _accessToken = StorageService.getString(LocalConstant.accessToken);
+    _refreshToken = StorageService.getString(LocalConstant.refreshToken);
 
     // Keep legacy Config in sync for any old code paths.
     Config.accessToken = _accessToken ?? '';
@@ -40,15 +39,13 @@ class TokenManager {
 
   Future<String?> getAccessToken() async {
     if (_accessToken != null) return _accessToken;
-    final prefs = await SharedPreferences.getInstance();
-    _accessToken = prefs.getString(LocalConstant.accessToken);
+    _accessToken = StorageService.getString(LocalConstant.accessToken);
     return _accessToken;
   }
 
   Future<String?> getRefreshToken() async {
     if (_refreshToken != null) return _refreshToken;
-    final prefs = await SharedPreferences.getInstance();
-    _refreshToken = prefs.getString(LocalConstant.refreshToken);
+    _refreshToken = StorageService.getString(LocalConstant.refreshToken);
     return _refreshToken;
   }
 
@@ -57,15 +54,13 @@ class TokenManager {
     required String accessToken,
     String? refreshToken,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-
     _accessToken = accessToken;
-    await prefs.setString(LocalConstant.accessToken, accessToken);
+    await StorageService.setString(LocalConstant.accessToken, accessToken);
     Config.accessToken = accessToken;
 
     if (refreshToken != null && refreshToken.isNotEmpty) {
       _refreshToken = refreshToken;
-      await prefs.setString(LocalConstant.refreshToken, refreshToken);
+      await StorageService.setString(LocalConstant.refreshToken, refreshToken);
     }
   }
 
@@ -75,13 +70,12 @@ class TokenManager {
     _isLoggingOut = true;
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(LocalConstant.accessToken);
-      await prefs.remove(LocalConstant.refreshToken);
-      await prefs.remove(LocalConstant.userId);
-      await prefs.remove(LocalConstant.profileCompleted);
-      await prefs.remove(LocalConstant.phoneNumber);
-      await prefs.remove(LocalConstant.name);
+      await StorageService.remove(LocalConstant.accessToken);
+      await StorageService.remove(LocalConstant.refreshToken);
+      await StorageService.remove(LocalConstant.userId);
+      await StorageService.remove(LocalConstant.profileCompleted);
+      await StorageService.remove(LocalConstant.phoneNumber);
+      await StorageService.remove(LocalConstant.name);
 
       _accessToken = null;
       _refreshToken = null;

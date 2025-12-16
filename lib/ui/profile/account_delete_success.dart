@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/storage_service.dart';
 import 'package:works_app/main.dart';
 import '../../bloc/authentication/authentication_bloc.dart';
 import '../../bloc/login/login_bloc.dart';
@@ -124,8 +124,7 @@ class _AccountDeleteSuccessState extends State<AccountDeleteSuccess> with Single
                 child: customButton(
                   text: 'CREATE ACCOUNT'.tr(),
                   onPressed: ()async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.clear();
+                    await StorageService.clear();
                     if (!context.mounted) return;
                     Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
                       MaterialPageRoute(

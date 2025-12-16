@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import 'package:works_app/models/app_version_modal.dart';
 
 import '../../components/config.dart';
@@ -50,8 +50,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       if (response.statusCode == 200 && jsonDecoded['status'] == true) {
         String otpToken = jsonDecoded["data"]["otp_token"];
 
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString(LocalConstant.phoneNumber, event.phoneNumber);
+        await StorageService.setString(LocalConstant.phoneNumber, event.phoneNumber);
         Config.phoneNumber = event.phoneNumber;
 
         emit(LoginSuccess(

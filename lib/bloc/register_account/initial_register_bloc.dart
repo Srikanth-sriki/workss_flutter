@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import 'package:works_app/models/pincode_list_modal.dart';
 import 'package:works_app/ui/onboarding/register_form.dart';
 import '../../components/config.dart';
@@ -151,9 +151,8 @@ class InitialRegisterBloc
 
         Config.profileCompleted = profileCompleted;
         Config.userType = userType;
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(LocalConstant.profileCompleted, profileCompleted);
-        await prefs.setString(LocalConstant.userType, userType);
+        await StorageService.setBool(LocalConstant.profileCompleted, profileCompleted);
+        await StorageService.setString(LocalConstant.userType, userType);
         emit(InitialRegisterSuccess(message: message));
       } else if (jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];

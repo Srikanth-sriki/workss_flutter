@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';

@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import '../core/storage_service.dart';
 
 class LocalConstant {
   static String phoneNumber = "phoneNumber";
@@ -16,6 +16,5 @@ class LocalConstant {
 }
 
 storeToLocalStorage(dynamic key, dynamic value) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString(key, value);
+  await StorageService.setString(key, value);
 }

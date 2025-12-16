@@ -309,6 +309,7 @@ import '../../helper/network_helper.dart';
 import '../../main.dart';
 import '../../models/app_version_modal.dart';
 import '../onboarding/language_selection.dart';
+import '../../core/storage_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -390,8 +391,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? newUser = prefs.getBool(LocalConstant.initialLanguage) ?? false;
+    bool? newUser = await StorageService.getBool(LocalConstant.initialLanguage) ?? false;
     print("newUser in splash: $newUser");
 
     if (newUser == true) {

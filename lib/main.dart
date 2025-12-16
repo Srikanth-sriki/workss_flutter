@@ -15,7 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:works_app/core/storage_service.dart';
 import 'package:works_app/bloc/professional/professional_bloc.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/local_constant.dart';
@@ -129,8 +129,11 @@ Future<void> main() async {
   // LatLng initialLocation = await fetchInitialLocation();
 
   HttpOverrides.global = MyHttpOverrides();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String token = prefs.getString(LocalConstant.accessToken) ?? "";
+  
+  // Initialize Hive storage
+  await StorageService.init();
+  
+  String token = StorageService.getString(LocalConstant.accessToken) ?? "";
   Config.accessToken = token;
   print(Config.accessToken);
   runApp(

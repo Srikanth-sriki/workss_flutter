@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import 'package:works_app/components/local_constant.dart';
 import 'package:works_app/ui/onboarding/phone_number.dart';
 import '../../bloc/login/login_bloc.dart';
@@ -80,8 +80,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                   if (_currentIndex != 2) ...[
                     TextButton(
                       onPressed: () async{
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool(LocalConstant.intoChecked, true);
+                        await StorageService.setBool(LocalConstant.intoChecked, true);
                         Navigator.pop(context);
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (BuildContext context) => BlocProvider(
@@ -114,8 +113,7 @@ class _IntroSliderScreenState extends State<IntroSliderScreen> {
                     text: _currentIndex == 2 ? 'Login'.tr() : 'Next'.tr(),
                     onPressed: () async{
                       if (_currentIndex == 2) {
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool(LocalConstant.intoChecked, true);
+                        await StorageService.setBool(LocalConstant.intoChecked, true);
                         Navigator.pop(context);
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (BuildContext context) => BlocProvider(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/storage_service.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -85,13 +85,11 @@ class _LogoutBottomSheetState extends State<LogoutBottomSheet> {
                     // if (_formKey.currentState!.validate()) {
                     //   _submitButton();
                     // }
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    await prefs.remove(LocalConstant.accessToken);
-                    await prefs.remove(LocalConstant.userId);
-                    await prefs.remove(LocalConstant.profileCompleted);
-                    await prefs.remove(LocalConstant.phoneNumber);
-                    await prefs.remove(LocalConstant.name);
+                    await StorageService.remove(LocalConstant.accessToken);
+                    await StorageService.remove(LocalConstant.userId);
+                    await StorageService.remove(LocalConstant.profileCompleted);
+                    await StorageService.remove(LocalConstant.phoneNumber);
+                    await StorageService.remove(LocalConstant.name);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

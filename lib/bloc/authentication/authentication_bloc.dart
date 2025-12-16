@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'dart:io';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import 'package:works_app/ui/profile/logout_success.dart';
 
 import '../../components/config.dart';
@@ -45,14 +45,13 @@ class AuthenticationBloc
     try {
       emit(const AuthenticationLoading());
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString(LocalConstant.accessToken) ?? "";
-      String userId = prefs.getString(LocalConstant.userId) ?? "";
-      String phoneNumber = prefs.getString(LocalConstant.phoneNumber) ?? "";
-      String userType = prefs.getString(LocalConstant.userType) ?? "";
-      String name = prefs.getString(LocalConstant.name) ?? "";
-      bool profileCompleted = prefs.getBool(LocalConstant.profileCompleted) ?? false;
-      String localLang = prefs.getString(LocalConstant.localLanguageSelected) ?? "en";
+      String token = StorageService.getString(LocalConstant.accessToken) ?? "";
+      String userId = StorageService.getString(LocalConstant.userId) ?? "";
+      String phoneNumber = StorageService.getString(LocalConstant.phoneNumber) ?? "";
+      String userType = StorageService.getString(LocalConstant.userType) ?? "";
+      String name = StorageService.getString(LocalConstant.name) ?? "";
+      bool profileCompleted = StorageService.getBool(LocalConstant.profileCompleted) ?? false;
+      String localLang = StorageService.getString(LocalConstant.localLanguageSelected) ?? "en";
 
       Config.accessToken = token;
       Config.id = userId;
@@ -85,12 +84,11 @@ class AuthenticationBloc
   Future<void> mapAuthenticationLogout(
       AuthenticationLogoutEvent event, Emitter<AuthenticationState> emit) async {
     // Get values from local storage and remove them
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove(LocalConstant.accessToken);
-    await prefs.remove(LocalConstant.userId);
-    await prefs.remove(LocalConstant.profileCompleted);
-    await prefs.remove(LocalConstant.phoneNumber);
-    await prefs.remove(LocalConstant.name);
+    await StorageService.remove(LocalConstant.accessToken);
+    await StorageService.remove(LocalConstant.userId);
+    await StorageService.remove(LocalConstant.profileCompleted);
+    await StorageService.remove(LocalConstant.phoneNumber);
+    await StorageService.remove(LocalConstant.name);
 
     print("--------------------logout--------------------");
 

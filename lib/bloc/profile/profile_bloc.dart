@@ -6,7 +6,7 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import 'package:works_app/models/address_location_list.dart';
 import 'package:works_app/models/faq_model.dart';
 import 'package:works_app/models/fetch_posted_view.dart';
@@ -115,9 +115,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         Config.isRegistered =  jsonDecoded['data']['is_registered'] ??false;
         Config.userType =jsonDecoded['data']['user_type'] ??"";
         customLog(Config.phoneNumber);
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString(LocalConstant.phoneNumber, Config.phoneNumber);
-        await prefs.setString(LocalConstant.name, Config.name);
+        await StorageService.setString(LocalConstant.phoneNumber, Config.phoneNumber);
+        await StorageService.setString(LocalConstant.name, Config.name);
         ProfileFetch profileFetch;
         profileFetch = ProfileFetch.fromJson(jsonDecoded["data"]);
         emit(FetchProfileSuccess(profileFetch: profileFetch));
@@ -286,8 +285,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         bool profileCompleted = true;
 
         Config.profileCompleted = profileCompleted;
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-
         Config.phoneNumber = jsonDecoded["data"]["mobile"] ?? "";
         Config.name = jsonDecoded["data"]["name"] ?? "";
         Config.profilePic= jsonDecoded['data']['profile_pic'] ??"";
@@ -295,9 +292,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         Config.isRegistered =  jsonDecoded['data']['is_registered'] ??false;
         Config.userType =jsonDecoded['data']['user_type'] ??"";
         customLog(Config.phoneNumber);
-        await prefs.setString(LocalConstant.phoneNumber, Config.phoneNumber);
-        await prefs.setString(LocalConstant.name, Config.name);
-        await prefs.setBool(LocalConstant.profileCompleted, profileCompleted);
+        await StorageService.setString(LocalConstant.phoneNumber, Config.phoneNumber);
+        await StorageService.setString(LocalConstant.name, Config.name);
+        await StorageService.setBool(LocalConstant.profileCompleted, profileCompleted);
         emit(EditProfileSuccess(message: message));
       } else if (jsonDecoded['status'] == false) {
         String message = jsonDecoded["message"];

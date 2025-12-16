@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import '../../components/config.dart';
 import '../../components/global_handle.dart';
 import '../../components/local_constant.dart';
@@ -43,11 +43,10 @@ class LoginOtpBloc extends Bloc<LoginOtpEvent, LoginOtpState> {
         bool profileCompleted = jsonDecoded["data"]["userData"]["is_registered"];
         String userType = jsonDecoded["data"]["userData"]["user_type"]??"";
 
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString(LocalConstant.accessToken, accessToken);
-        await prefs.setString(LocalConstant.userId, userId);
-        await prefs.setBool(LocalConstant.profileCompleted, profileCompleted);
-        await prefs.setString(LocalConstant.userType, userType);
+        await StorageService.setString(LocalConstant.accessToken, accessToken);
+        await StorageService.setString(LocalConstant.userId, userId);
+        await StorageService.setBool(LocalConstant.profileCompleted, profileCompleted);
+        await StorageService.setString(LocalConstant.userType, userType);
 
         ///Update Config
         Config.accessToken = accessToken;

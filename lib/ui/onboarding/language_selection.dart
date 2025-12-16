@@ -152,7 +152,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/storage_service.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/config.dart';
 import 'package:works_app/components/local_constant.dart';
@@ -182,8 +182,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   }
 
   Future<void> _loadSavedLocale() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? localeCode = prefs.getString('selected_locale');
+    String? localeCode = StorageService.getString('selected_locale');
     if (localeCode != null) {
       List<String> localeParts = localeCode.split('_');
       if (localeParts.length == 2) {
@@ -207,10 +206,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
   Future<void> updateLanguage() async {
     if (selectedLocale != null) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      await prefs.setString(LocalConstant.localLanguageSelected, selectedLocale!.languageCode);
-      await prefs.setString('selected_locale',
+      await StorageService.setString(LocalConstant.localLanguageSelected, selectedLocale!.languageCode);
+      await StorageService.setString('selected_locale',
           '${selectedLocale!.languageCode}_${selectedLocale!.countryCode}');
 
       context.setLocale(selectedLocale!);
@@ -219,8 +216,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       });
 
       if(widget.routeType == 'intro'){
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setBool(LocalConstant.initialLanguage, true);
+        await StorageService.setBool(LocalConstant.initialLanguage, true);
         Navigator.push(
           context,
           MaterialPageRoute(

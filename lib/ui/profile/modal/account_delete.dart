@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/storage_service.dart';
 import 'package:works_app/bloc/profile/profile_bloc.dart';
 import 'package:works_app/components/colors.dart';
 import 'package:works_app/components/size_config.dart';
@@ -52,13 +52,12 @@ class _AccountDeleteBottomSheetState extends State<AccountDeleteBottomSheet> {
         // if (mounted && Navigator.of(context).canPop()) {
         //   Navigator.of(context).pop();
         // }
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove(LocalConstant.accessToken);
-        await prefs.remove(LocalConstant.userId);
-        await prefs.remove(LocalConstant.profileCompleted);
-        await prefs.remove(LocalConstant.phoneNumber);
-        await prefs.remove(LocalConstant.name);
-        await prefs.setBool(LocalConstant.initialLanguage, false);
+        await StorageService.remove(LocalConstant.accessToken);
+        await StorageService.remove(LocalConstant.userId);
+        await StorageService.remove(LocalConstant.profileCompleted);
+        await StorageService.remove(LocalConstant.phoneNumber);
+        await StorageService.remove(LocalConstant.name);
+        await StorageService.setBool(LocalConstant.initialLanguage, false);
         if (!mounted) return;
         Navigator.of(context, rootNavigator: true).pushReplacement(
           MaterialPageRoute(builder: (_) => const AccountDeleteSuccess()),
