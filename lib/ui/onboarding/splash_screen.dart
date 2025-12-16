@@ -391,8 +391,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    bool? newUser = await StorageService.getBool(LocalConstant.initialLanguage) ?? false;
-    print("newUser in splash: $newUser");
+    bool? newUser =
+        await StorageService.getBool(LocalConstant.initialLanguage) ?? false;
 
     if (newUser == true) {
       Navigator.of(context).pushReplacement(
