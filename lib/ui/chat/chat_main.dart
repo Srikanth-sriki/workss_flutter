@@ -38,7 +38,6 @@ import '../profile/notification.dart';
 import 'addFriends.dart';
 import 'blocked_chat_list.dart';
 
-
 class ChatMainScreen extends StatefulWidget {
   const ChatMainScreen({super.key, required this.chatFocus});
 
@@ -67,8 +66,8 @@ class _ChatMainScreenState extends State<ChatMainScreen>
   final ScrollController _scrollController = ScrollController();
 
   // first load gate + background indicator
-  bool _hasLoadedOnce = false;   // ✅ controls the big spinner only once
-  bool _bgLoading = false;       // slim top bar for background refresh
+  bool _hasLoadedOnce = false; // ✅ controls the big spinner only once
+  bool _bgLoading = false; // slim top bar for background refresh
 
   // socket
   late io.Socket socket;
@@ -143,7 +142,6 @@ class _ChatMainScreenState extends State<ChatMainScreen>
     }
   }
 
-
   // ========== SOCKET ==========
 
   void _connectToSocket() {
@@ -158,7 +156,8 @@ class _ChatMainScreenState extends State<ChatMainScreen>
       debugPrint('[socket] reconnect: $attempt');
       socket.emit('join', {'userId': Config.id});
     });
-    socket.on('disconnect', (reason) => debugPrint('[socket] disconnected: $reason'));
+    socket.on(
+        'disconnect', (reason) => debugPrint('[socket] disconnected: $reason'));
 
     socket.on('new_message', (data) {
       if (!_mounted) return;
@@ -342,15 +341,16 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                           ),
                       ),
                     ],
-                    child:  NotificationListScreen(refreshPageCallback: (){
-                      _fetchData(background: true);
-                    },),
+                    child: NotificationListScreen(
+                      refreshPageCallback: () {
+                        _fetchData(background: true);
+                      },
+                    ),
                   ),
                 ),
               );
             },
-            borderRadius:
-            BorderRadius.circular(SizeConfig.blockWidth * 2.5),
+            borderRadius: BorderRadius.circular(SizeConfig.blockWidth * 2.5),
             child: Stack(
               children: [
                 Image.asset(
@@ -364,19 +364,19 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                   builder: (context, hasNewMessage, _) {
                     return hasNewMessage
                         ? Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Container(
-                        width: SizeConfig.blockWidth * 3,
-                        height: SizeConfig.blockWidth * 3,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              width: SizeConfig.blockWidth * 3,
+                              height: SizeConfig.blockWidth * 3,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          )
                         : const SizedBox
-                        .shrink(); // Return empty widget if false
+                            .shrink(); // Return empty widget if false
                   },
                 ),
               ],
@@ -485,12 +485,13 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                       child: InkWell(
                         splashColor: Colors.white.withOpacity(0.1),
                         borderRadius:
-                        BorderRadius.circular(SizeConfig.blockWidth * 3.5),
+                            BorderRadius.circular(SizeConfig.blockWidth * 3.5),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ChatListSearch(chatList: _allChats),
+                              builder: (_) =>
+                                  ChatListSearch(chatList: _allChats),
                             ),
                           );
                         },
@@ -500,8 +501,8 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                             horizontal: SizeConfig.blockWidth * 4.5,
                           ),
                           decoration: BoxDecoration(
-                            borderRadius:
-                            BorderRadius.circular(SizeConfig.blockWidth * 3),
+                            borderRadius: BorderRadius.circular(
+                                SizeConfig.blockWidth * 3),
                             color: COLORS.neutralDarkTwo.withOpacity(0.6),
                           ),
                           child: Row(
@@ -545,7 +546,8 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                               ),
                               child: addFriendText(
                                 textOne: 'Friends',
-                                textTwo: '${'View All'.tr()}(${_friends.length})',
+                                textTwo:
+                                    '${'View All'.tr()}(${_friends.length})',
                                 onTap: _openFriendsViewAll,
                               ),
                             ),
@@ -554,15 +556,20 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: min(_friends.length, 8),
-                                padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 4.5),
-                                separatorBuilder: (_, __) => SizedBox(width: SizeConfig.blockWidth * 4), // exact inter-card gap
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.blockWidth * 4.5),
+                                separatorBuilder: (_, __) => SizedBox(
+                                    width: SizeConfig.blockWidth *
+                                        4), // exact inter-card gap
                                 itemBuilder: (context, index) {
                                   final f = _friends[index].friends;
-                                  return f.id.isNotEmpty?friendViewCard(
-                                    image: f!.profilePic,
-                                    name: f!.name,
-                                    onTap: () => _startDirectChat(f.id),
-                                  ):null;
+                                  return f.id.isNotEmpty
+                                      ? friendViewCard(
+                                          image: f!.profilePic,
+                                          name: f!.name,
+                                          onTap: () => _startDirectChat(f.id),
+                                        )
+                                      : null;
                                 },
                               ),
                             ),
@@ -570,7 +577,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
 
                           // CHATS
                           if (!_hasLoadedOnce)
-                          // ✅ full-screen loader ONLY on first time
+                            // ✅ full-screen loader ONLY on first time
                             SizedBox(
                               height: SizeConfig.blockHeight * 60,
                               child: Center(
@@ -629,31 +636,39 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                                     itemCount: list.length,
                                     shrinkWrap: true,
                                     physics:
-                                    const NeverScrollableScrollPhysics(),
+                                        const NeverScrollableScrollPhysics(),
                                     itemBuilder: (context, index) {
                                       final chat = list[index];
                                       final o = _overlay[chat.chatId];
 
-                                      final preview =
-                                          o?.latestPreview ?? chat.latestMessage?.content ?? "";
+                                      final preview = o?.latestPreview ??
+                                          chat.latestMessage?.content ??
+                                          "";
                                       final ts =
                                           o?.updatedAt ?? chat.updatedAt!;
 
                                       // ✅ safe unread cast (fixes Object + int)
                                       final baseUnread = int.tryParse(
-                                        chat.unreadCount?.toString() ?? '0',
-                                      ) ?? 0;
-                                      final unread = baseUnread + (o?.unreadDelta ?? 0);
+                                            chat.unreadCount?.toString() ?? '0',
+                                          ) ??
+                                          0;
+                                      final unread =
+                                          baseUnread + (o?.unreadDelta ?? 0);
 
-                                      final picture = o?.pictureOverride ?? chat.picture!;
-                                      final name = o?.nameOverride ?? chat.name!;
-                                      final tag = 'avatar_${chat.chatId}_$index';
+                                      final picture =
+                                          o?.pictureOverride ?? chat.picture!;
+                                      final name =
+                                          o?.nameOverride ?? chat.name!;
+                                      final tag =
+                                          'avatar_${chat.chatId}_$index';
 
                                       return GestureDetector(
-                                        onLongPress: () =>{
-                                          if(chat.isGroup! == false){
-                                            _confirmDelete(chat.chatId!,chat.isGroup!),
-                                          }
+                                        onLongPress: () => {
+                                          if (chat.isGroup! == false)
+                                            {
+                                              _confirmDelete(
+                                                  chat.chatId!, chat.isGroup!),
+                                            }
                                         },
                                         child: chartSearchCards(
                                           image: picture,
@@ -663,8 +678,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                                           count: unread.toString(),
                                           isGroup: chat.isGroup!,
                                           date: formatChatDate(ts),
-                                            context: context,
+                                          context: context,
                                           heroTag: tag,
+                                          deletedForAll: chat.latestMessage?.deletedforall,
                                         ),
                                       );
                                     },
@@ -723,8 +739,10 @@ class _ChatMainScreenState extends State<ChatMainScreen>
       MaterialPageRoute(
         builder: (context) => MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => FriendsBloc()
-              ..add(FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (_) => FriendsBloc()
+                  ..add(FetchFriendsListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(create: (_) => ReportPostBloc()),
             BlocProvider(create: (_) => ChartBloc()),
             BlocProvider(create: (_) => ShowInterestedBloc()),
@@ -749,8 +767,10 @@ class _ChatMainScreenState extends State<ChatMainScreen>
           MaterialPageRoute(
             builder: (_) => MultiBlocProvider(
               providers: [
-                BlocProvider(create: (_) => ChartBloc()
-                  ..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chatId))),
+                BlocProvider(
+                    create: (_) => ChartBloc()
+                      ..add(FetchChartViewEvent(
+                          page: 1, pageSize: 10, chatId: chatId))),
                 BlocProvider(create: (_) => InitialRegisterBloc()),
                 BlocProvider(create: (_) => ShowInterestedBloc()),
               ],
@@ -792,8 +812,10 @@ class _ChatMainScreenState extends State<ChatMainScreen>
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => ChartBloc()
-              ..add(FetchChartViewEvent(page: 1, pageSize: 10, chatId: chat.chatId!))),
+            BlocProvider(
+                create: (_) => ChartBloc()
+                  ..add(FetchChartViewEvent(
+                      page: 1, pageSize: 10, chatId: chat.chatId!))),
             BlocProvider(create: (_) => InitialRegisterBloc()),
             BlocProvider(create: (_) => ShowInterestedBloc()),
           ],
@@ -835,8 +857,7 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               showCustomSnackBar(context: context, message: message);
             },
           ));
-        }
-        else{
+        } else {
           chartBloc.add(DeleteChartEvent(
             chatId: chatId,
             onSuccess: (message) {
@@ -853,7 +874,6 @@ class _ChatMainScreenState extends State<ChatMainScreen>
             },
           ));
         }
-
       },
       onNegativePressed: () => Navigator.of(context).pop(),
     );
@@ -865,11 +885,15 @@ class _ChatMainScreenState extends State<ChatMainScreen>
       MaterialPageRoute(
         builder: (_) => MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => FriendsBloc()
-              ..add(FetchFriendsAddListEvent(page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (_) => FriendsBloc()
+                  ..add(FetchFriendsAddListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
             BlocProvider(create: (_) => ShowInterestedBloc()),
-            BlocProvider(create: (_) => ChartBloc()
-              ..add(FetchChartSearchListEvent(page: 1, pageSize: 10, keyWord: ''))),
+            BlocProvider(
+                create: (_) => ChartBloc()
+                  ..add(FetchChartSearchListEvent(
+                      page: 1, pageSize: 10, keyWord: ''))),
           ],
           child: AddFriendsScreen(
             header: 'Add Friend',
@@ -907,8 +931,10 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                   providers: [
                     BlocProvider(create: (_) => ChartBloc()),
                     BlocProvider(create: (_) => InitialRegisterBloc()),
-                    BlocProvider(create: (_) => FriendsBloc()
-                      ..add(FetchFriendsListEvent(page: 1, pageSize: 10, keyWord: ''))),
+                    BlocProvider(
+                        create: (_) => FriendsBloc()
+                          ..add(FetchFriendsListEvent(
+                              page: 1, pageSize: 10, keyWord: ''))),
                   ],
                   child: const CreateGroupScreen(),
                 ),
@@ -925,8 +951,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => ChartBloc()
-                      ..add(const ArchivedChartListEvent())),
+                    BlocProvider(
+                        create: (_) =>
+                            ChartBloc()..add(const ArchivedChartListEvent())),
                   ],
                   child: const ArchivedChatsScreen(),
                 ),
@@ -943,8 +970,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => ProfileBloc()
-                      ..add(const FetchSettingEvent())),
+                    BlocProvider(
+                        create: (_) =>
+                            ProfileBloc()..add(const FetchSettingEvent())),
                   ],
                   child: const NotificationScreen(),
                 ),
@@ -968,8 +996,9 @@ class _ChatMainScreenState extends State<ChatMainScreen>
               MaterialPageRoute(
                 builder: (_) => MultiBlocProvider(
                   providers: [
-                    BlocProvider(create: (_) => ChartBloc()
-                      ..add(const BlockedChatList())),
+                    BlocProvider(
+                        create: (_) =>
+                            ChartBloc()..add(const BlockedChatList())),
                   ],
                   child: BlockedChatsScreen(
                     refreshPageCallback: () {
@@ -989,12 +1018,14 @@ class _ChatMainScreenState extends State<ChatMainScreen>
   Widget _registerGate(BuildContext context) {
     return Scaffold(
       backgroundColor: COLORS.white,
-      appBar: AppBar(toolbarHeight: 0, backgroundColor: COLORS.white, elevation: 0),
+      appBar:
+          AppBar(toolbarHeight: 0, backgroundColor: COLORS.white, elevation: 0),
       body: SafeArea(
         child: SizedBox(
           width: SizeConfig.screenWidth,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 6),
+            padding:
+                EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 6),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1017,7 +1048,8 @@ class _ChatMainScreenState extends State<ChatMainScreen>
                 ),
                 SizedBox(height: SizeConfig.blockHeight * 1.5),
                 Text(
-                  'Register now to unlock full access and personalized features.'.tr(),
+                  'Register now to unlock full access and personalized features.'
+                      .tr(),
                   style: TextStyle(
                     color: COLORS.neutralDark,
                     fontSize: SizeConfig.blockWidth * 3.6,

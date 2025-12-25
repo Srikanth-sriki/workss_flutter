@@ -55,7 +55,6 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
             });
           } else if (state is ArchivedChartListSuccess) {
             setState(() {
-
               isChatListLoading = false;
               isError = false;
               chatList = state.chatList;
@@ -87,47 +86,48 @@ class _ArchivedChatsScreenState extends State<ArchivedChatsScreen> {
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {
                           return chartSearchCards(
-                              image: chatList[index].picture!,
-                              name: chatList[index].name!,
-                              onTapCard: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MultiBlocProvider(
-                                              providers: [
-                                                BlocProvider(
-                                                  create: (context) => ChartBloc()
-                                                    ..add(FetchChartViewEvent(
-                                                        page: 1,
-                                                        pageSize: 10,
-                                                        chatId: chatList[index]
-                                                            .chatId!)),
-                                                ),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        InitialRegisterBloc()),
-                                                BlocProvider(
-                                                    create: (context) =>
-                                                        ShowInterestedBloc()),
-
-                                              ],
-                                              child: ChatViewScreen(
-                                                refreshPageCallback:
-                                                    _refreshPageAfterEdit,
-                                                chatId: chatList[index].chatId!,
-                                                isGroup: chatList[index].isGroup!,
-                                                isRequest: false,
+                            image: chatList[index].picture!,
+                            name: chatList[index].name!,
+                            onTapCard: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                            providers: [
+                                              BlocProvider(
+                                                create: (context) => ChartBloc()
+                                                  ..add(FetchChartViewEvent(
+                                                      page: 1,
+                                                      pageSize: 10,
+                                                      chatId: chatList[index]
+                                                          .chatId!)),
                                               ),
-                                            )));
-                              },
-                              message: chatList[index].latestMessage != null
-                                  ? chatList[index].latestMessage!.content!
-                                  : "",
-                              count: chatList[index].unreadCount!,
-                              isGroup: chatList[index].isGroup!,
-                              date: formatChatDate(chatList[index].updatedAt!),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      InitialRegisterBloc()),
+                                              BlocProvider(
+                                                  create: (context) =>
+                                                      ShowInterestedBloc()),
+                                            ],
+                                            child: ChatViewScreen(
+                                              refreshPageCallback:
+                                                  _refreshPageAfterEdit,
+                                              chatId: chatList[index].chatId!,
+                                              isGroup: chatList[index].isGroup!,
+                                              isRequest: false,
+                                            ),
+                                          )));
+                            },
+                            message: chatList[index].latestMessage != null
+                                ? chatList[index].latestMessage!.content!
+                                : "",
+                            count: chatList[index].unreadCount!,
+                            isGroup: chatList[index].isGroup!,
+                            date: formatChatDate(chatList[index].updatedAt!),
                             context: context,
                             heroTag: 'avatar_${chatList[index].chatId}_$index',
+                            deletedForAll:
+                                chatList[index].latestMessage?.deletedforall,
                           );
                         }),
                   ),

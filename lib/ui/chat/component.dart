@@ -22,6 +22,7 @@ Widget chartSearchCards({
   required bool isGroup,
   required BuildContext context,
   required Object heroTag,
+  bool? deletedForAll,
 }) {
   return Material(
     color: Colors.transparent,
@@ -126,16 +127,21 @@ Widget chartSearchCards({
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (message.isNotEmpty)
+                    if (message.isNotEmpty || deletedForAll == true)
                       SizedBox(
                         width: SizeConfig.blockWidth * 40,
                         child: Text(
-                          capitalizeFirstLetter(message),
+                          deletedForAll == true
+                              ? "This message was deleted"
+                              : capitalizeFirstLetter(message),
                           style: TextStyle(
                             color: COLORS.neutralDarkOne,
                             fontSize: SizeConfig.blockWidth * 3,
                             fontWeight: FontWeight.w500,
                             fontFamily: "Poppins",
+                            fontStyle: deletedForAll == true
+                                ? FontStyle.italic
+                                : FontStyle.normal,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

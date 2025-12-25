@@ -1,2 +1,0 @@
-C:/Users/Vikas/AndroidStudioProjects/works/android/app/.cxx/Debug/6q4j3225/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/Vikas/AndroidStudioProjects/works/android/app/.cxx/Debug/6q4j3225/armeabi-v7a/CMakeFiles/rebuild_cache.dir

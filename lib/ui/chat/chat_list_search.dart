@@ -175,6 +175,7 @@ class _ChatListSearchState extends State<ChatListSearch> {
                               date: formatChatDate(chatList[index].updatedAt!),
                               context: context,
                             heroTag: 'avatar_${chatList[index].chatId}_$index',
+                            deletedForAll: chatList[index].latestMessage?.deletedforall,
                           );
                         }),
                   ),

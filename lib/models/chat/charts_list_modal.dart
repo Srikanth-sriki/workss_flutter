@@ -16,6 +16,7 @@ class ChatList {
   bool?isRequest;
   String?requestedBy;
 
+
   ChatList({
      this.name,
      this.picture,
@@ -25,7 +26,7 @@ class ChatList {
      this.unreadCount,
      this.updatedAt,
     this.isRequest,
-    this.requestedBy
+    this.requestedBy,
   });
 
   factory ChatList.fromJson(Map<String, dynamic> json) => ChatList(
@@ -37,7 +38,7 @@ class ChatList {
     unreadCount: json["unread_count"].toString()??"",
     updatedAt: json["updatedAt"] != null ? DateTime.tryParse(json["updatedAt"]) : null,
     isRequest: json.containsKey("isRequest")?json["isRequest"]??false:false,
-      requestedBy:json.containsKey("requestedBy")?json["requestedBy"]:""
+      requestedBy:json.containsKey("requestedBy")?json["requestedBy"]:"",
   );
 
   Map<String, dynamic> toJson() => {
@@ -49,7 +50,7 @@ class ChatList {
     "unread_count": unreadCount,
     "updatedAt": updatedAt?.toIso8601String(),
     "isRequest":isRequest,
-    "requestedBy":requestedBy
+    "requestedBy":requestedBy,
   };
 }
 
@@ -59,6 +60,8 @@ class LatestMessage {
   DateTime? createdAt;
   String? type;
   Sender? sender;
+  bool?deletedforall;
+  bool?isEdited;
 
   LatestMessage({
      this.id,
@@ -66,6 +69,8 @@ class LatestMessage {
      this.createdAt,
      this.type,
      this.sender,
+     this.deletedforall,
+     this.isEdited,
   });
 
   factory LatestMessage.fromJson(Map<String, dynamic> json) => LatestMessage(
@@ -74,6 +79,8 @@ class LatestMessage {
     createdAt: DateTime.parse(json["createdAt"]),
     type: json["type"]??"",
     sender: json.containsKey("sender")?Sender.fromJson(json["sender"]):null,
+    deletedforall: json.containsKey("deleted_for_all")?json["deleted_for_all"]??false:false,
+    isEdited: json.containsKey("is_edited")?json["is_edited"]??false:false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -82,6 +89,8 @@ class LatestMessage {
     "createdAt": createdAt?.toIso8601String(),
     "type": type,
     "sender": sender?.toJson(),
+    "deleted_for_all":deletedforall,
+    "is_edited":isEdited,
   };
 }
 

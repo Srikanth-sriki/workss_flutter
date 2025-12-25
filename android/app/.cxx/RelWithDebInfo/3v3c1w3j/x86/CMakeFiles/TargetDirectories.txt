@@ -1,2 +1,0 @@
-/Users/kalyanimotors/workSafeProjects/development/workss_flutter/android/app/.cxx/RelWithDebInfo/3v3c1w3j/x86/CMakeFiles/edit_cache.dir
-/Users/kalyanimotors/workSafeProjects/development/workss_flutter/android/app/.cxx/RelWithDebInfo/3v3c1w3j/x86/CMakeFiles/rebuild_cache.dir
